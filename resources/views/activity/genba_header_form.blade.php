@@ -150,7 +150,7 @@
                         <div class="grid grid-cols-3 gap-4 items-center">
                             <label class="text-sm text-slate-600">Auditor <span class="text-red-500">*</span></label>
                             <div class="col-span-2">
-                                <input type="text" id="formAuditor" name="auditor" required readonly
+                                <input type="text" id="formAuditor" name="auditor" required
                                     value="{{ Auth::user()->full_name ?? '' }}"
                                     class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none bg-slate-50">
                             </div>
@@ -200,19 +200,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Konfirmasi Hapus</h3>
-                <p class="text-slate-500">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Confirm Delete</h3>
+                <p class="text-slate-500">Are you sure you want to delete this data? This action cannot be undone.</p>
             </div>
 
             <!-- Footer -->
             <div class="flex gap-3 p-6 pt-0">
                 <button type="button" id="btnCancelDelete"
                     class="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
-                    Tidak
+                    No
                 </button>
                 <button type="button" id="btnConfirmDelete"
                     class="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors">
-                    Ya, Hapus
+                    Yes, Delete
                 </button>
             </div>
         </div>

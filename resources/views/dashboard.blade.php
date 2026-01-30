@@ -186,6 +186,8 @@
                 </table>
             </div>
         </div>
+        <!-- Data Count Component -->
+        <x-data-table tableId="findingsTable" />
 
 
 
