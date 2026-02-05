@@ -342,7 +342,7 @@
                     ...response.data_total_overdue
                 ];
                 const maxValue = Math.max(...allValues, 0);
-                const suggestedMax = maxValue + 2;
+                const suggestedMax = maxValue + 1;
 
                 deptChart = new Chart(ctx, {
                     type: 'bar',
