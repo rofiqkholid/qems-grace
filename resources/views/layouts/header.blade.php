@@ -19,7 +19,7 @@
                 <!-- Search -->
                 <div class="hidden sm:flex items-center">
                     <div class="relative">
-                        <input type="text" placeholder="Search..." class="w-64 pl-10 pr-4 py-2 text-sm bg-slate-100 border-0 rounded-[15px] focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 outline-none">
+                        <input type="text" id="globalSearchInput" placeholder="Search DocNum..." class="w-64 pl-10 pr-4 py-2 text-sm bg-slate-100 border-0 rounded-[15px] focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 outline-none">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -94,6 +94,19 @@
             document.addEventListener('click', function(e) {
                 if (!userDropdown.contains(e.target) && !userMenuButton.contains(e.target)) {
                     userDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Global Search Handler
+        const globalSearchInput = document.getElementById('globalSearchInput');
+        if (globalSearchInput) {
+            globalSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const docNum = this.value.trim();
+                    if (docNum) {
+                        window.location.href = "{{ route('genba.search_doc') }}?doc_num=" + encodeURIComponent(docNum);
+                    }
                 }
             });
         }

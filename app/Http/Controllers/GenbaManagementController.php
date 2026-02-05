@@ -999,6 +999,41 @@ class GenbaManagementController extends Controller
         return json_encode($data);
     }
 
+    public function search_doc(Request $request)
+    {
+        $doc_num = $request->input('doc_num');
+
+        if (empty($doc_num)) {
+            return redirect()->back()->with('error', 'Please enter a valid document number.');
+        }
+
+        // Try to parse DocNum (format: ddMMyy-SysID)
+        // Example: 280126-790 -> SysID is 790
+        $parts = explode('-', $doc_num);
+
+        if (count($parts) < 2) {
+            // Try to search by exact SysID if input is just a number
+            $sys_id = $doc_num;
+        } else {
+            // Take the last part as SysID
+            $sys_id = end($parts);
+        }
+
+        // Check if finding exists
+        $exists = DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
+            ->where('SysID', $sys_id)
+            ->exists();
+
+        if ($exists) {
+            // Encrypt SysID to match the format expected by preview: encryptedString_sequence
+            $encrypted = str_replace('=', '-', Crypt::encryptString($sys_id));
+            $previewId = $encrypted . '_1'; // Appending dummy sequence '_1' as used in other parts
+            return redirect()->route('genba.preview', $previewId);
+        } else {
+            return redirect()->back()->with('error', 'Document not found.');
+        }
+    }
+
     public function save_action_plan(Request $request)
     {
         $str_req = explode("_", $request->trc_unix_id);

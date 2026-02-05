@@ -26,7 +26,7 @@
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search findings..."
+                            <input type="text" id="searchInput" placeholder="Search Findings and DocNum..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         </div>
@@ -63,9 +63,9 @@
                     <div class="min-w-[150px]">
                         @php
                         $statusOptions = [
-                        ['id' => 'OPEN', 'name' => 'Status Open'],
-                        ['id' => 'NEED_VERIF', 'name' => 'Status Need Verif'],
-                        ['id' => 'CLOSE', 'name' => 'Status Close']
+                        ['id' => 'OPEN', 'name' => 'Open'],
+                        ['id' => 'NEED_VERIF', 'name' => 'Need Verif'],
+                        ['id' => 'CLOSE', 'name' => 'Close']
                         ];
                         @endphp
                         <x-searchable-select

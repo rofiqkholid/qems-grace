@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/genba/mng_activity', [GenbaManagementController::class, 'mng_activity'])->name('genba.mng_activity');
     Route::get('/genba/preview/{id}', [GenbaManagementController::class, 'preview'])->name('genba.preview');
     Route::post('/genba/save_action_plan', [GenbaManagementController::class, 'save_action_plan'])->name('genba.save_action_plan');
+    Route::get('/genba/search-doc', [GenbaManagementController::class, 'search_doc'])->name('genba.search_doc');
 
     // Execution Genba Routes
     Route::post('/execution_genba/table', [ExecutionGenbaController::class, 'table'])->name('execution_genba.table');
