@@ -248,12 +248,73 @@
                                             </div>
 
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                <x-searchable-select
-                                                    id="type_{{ $itemId }}"
-                                                    name="type"
-                                                    label="Related"
-                                                    :initialOptions="$finding_types"
-                                                    required="true" />
+                                                <div class="grid grid-cols-3 gap-4 items-center">
+                                                    <label class="text-sm text-slate-600">Related <span class="text-red-500">*</span></label>
+                                                    <div class="col-span-2 relative" x-data="{
+                                                        open: false,
+                                                        search: '',
+                                                        selectedName: '',
+                                                        selectedId: '',
+                                                        items: {{ json_encode($finding_types) }},
+                                                        
+                                                        init() {
+                                                            this.items = this.items.map(opt => (typeof opt === 'object' ? opt : { id: opt, name: opt }));
+                                                        },
+
+                                                        closeDropdown() {
+                                                            this.open = false;
+                                                            this.search = this.selectedName || '';
+                                                        },
+
+                                                        toggle() {
+                                                            if (this.open) {
+                                                                this.closeDropdown();
+                                                            } else {
+                                                                this.open = true;
+                                                            }
+                                                        },
+
+                                                        select(item) {
+                                                            this.selectedName = item.name;
+                                                            this.selectedId = item.id;
+                                                            this.search = item.name;
+                                                            this.open = false;
+                                                            $('#type_{{ $itemId }}').val(item.id);
+                                                            document.getElementById('type_{{ $itemId }}').dispatchEvent(new Event('change'));
+                                                        }
+                                                    }">
+                                                        <input type="hidden" id="type_{{ $itemId }}" name="type" required>
+
+                                                        <div class="relative">
+                                                            <input type="text" x-model="search" @click="toggle" @click.outside="closeDropdown()"
+                                                                placeholder="Select Related..."
+                                                                class="w-full px-4 py-[9px] border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700">
+                                                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                                                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                                            </div>
+                                                        </div>
+
+                                                        <div x-show="open"
+                                                            x-transition:enter="transition ease-out duration-100"
+                                                            x-transition:enter-start="opacity-0 scale-95"
+                                                            x-transition:enter-end="opacity-100 scale-100"
+                                                            class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+
+                                                            <template x-if="items.length === 0">
+                                                                <div class="px-4 py-3 text-sm text-slate-500 text-center">No options found</div>
+                                                            </template>
+
+                                                            <template x-for="item in items" :key="item.id">
+                                                                <div x-show="!search || search === selectedName || item.name.toLowerCase().includes(search.toLowerCase())"
+                                                                    @click="select(item)"
+                                                                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50"
+                                                                    :class="selectedId === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700'">
+                                                                    <span x-text="item.name"></span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
@@ -646,7 +707,7 @@
                 const typeValue = document.getElementById(`type_${itemId}`).value;
 
                 if (!typeValue) {
-                    showToast('Finding Type is required', 'error');
+                    showToast('Finding Related is required', 'error');
                     this.isLoading = false;
                     return;
                 }
