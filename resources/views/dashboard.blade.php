@@ -335,6 +335,15 @@
                     deptChart.destroy();
                 }
 
+                // Calculate max value for y-axis scaling
+                const allValues = [
+                    ...response.data_total_open,
+                    ...response.data_total_close,
+                    ...response.data_total_overdue
+                ];
+                const maxValue = Math.max(...allValues, 0);
+                const suggestedMax = maxValue + 2;
+
                 deptChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -399,6 +408,7 @@
                             },
                             y: {
                                 beginAtZero: true,
+                                max: suggestedMax, // Dynamic max value
                                 grid: {
                                     borderDash: [2, 2]
                                 },

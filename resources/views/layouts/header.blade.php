@@ -4,7 +4,7 @@
 </div>
 
 <!-- Header -->
-<header class="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200">
+<header class="sticky top-0 z-30 bg-white border-b border-slate-200">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Left: Mobile menu button & Search -->
