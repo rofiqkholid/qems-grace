@@ -15,7 +15,7 @@
         <!-- Page Title -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
-            <p class="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+            <p class="text-slate-500 mt-1">Monitor audit findings and performance in real-time.</p>
         </div>
 
         <!-- Stats Cards -->

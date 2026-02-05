@@ -49,7 +49,7 @@ $isClosed = $genba->status === 'Close';
 
                 <!-- Type -->
                 <div class="flex flex-col gap-2">
-                    <label class="text-slate-700 font-medium text-sm">Type</label>
+                    <label class="text-slate-700 font-medium text-sm">Related</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
                         {{ $genba->type ?? '-' }}
                     </div>
