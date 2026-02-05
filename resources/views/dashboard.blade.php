@@ -19,7 +19,7 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
             <!-- Card 0: All Findings -->
             <div class="bg-white rounded-2xl p-4 border border-gray-200">
                 <div class="flex items-center gap-4">
@@ -97,7 +97,7 @@
         </div>
 
         <!-- Department Chart Section -->
-        <div class="bg-white rounded-2xl p-5 border border-gray-200 mb-8">
+        <div class="bg-white p-5 border border-gray-200 mb-8">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <div>
                     <h3 class="text-lg font-bold text-slate-800">Department Performance</h3>

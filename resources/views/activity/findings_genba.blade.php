@@ -58,6 +58,24 @@
 
 
 
+
+                    <!-- Status Filter -->
+                    <div class="min-w-[150px]">
+                        @php
+                        $statusOptions = [
+                        ['id' => 'OPEN', 'name' => 'Status Open'],
+                        ['id' => 'NEED_VERIF', 'name' => 'Status Need Verif'],
+                        ['id' => 'CLOSE', 'name' => 'Status Close']
+                        ];
+                        @endphp
+                        <x-searchable-select
+                            name="status"
+                            id="statusFilter"
+                            label="Status"
+                            :initialOptions="$statusOptions"
+                            hideLabel="true" />
+                    </div>
+
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
@@ -205,6 +223,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.status = $('#statusFilter').val();
                 }
             },
             columns: [{
@@ -301,7 +320,7 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #statusFilter').on('change', function() {
             table.ajax.reload();
         });
 
@@ -315,6 +334,7 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            $('#statusFilter').val('');
             table.ajax.reload();
         });
 

@@ -44,7 +44,7 @@ class GenbaManagement extends Model
         return $allDepartments;
     }
 
-    public static function get_genba_mng_activity_list($search, $date_from = null, $date_to = null, $auditor = null, $dept = null)
+    public static function get_genba_mng_activity_list($search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -100,6 +100,22 @@ class GenbaManagement extends Model
 
         if (!empty($dept)) {
             $result->where('a.asign_to_dept', $dept);
+        }
+
+        if (!empty($status)) {
+            if ($status == 'OPEN') {
+                $result->where(function ($q) {
+                    $q->whereNull('a.execution_comment')->orWhere('a.execution_comment', '');
+                });
+            } elseif ($status == 'NEED_VERIF') {
+                $result->whereNotNull('a.execution_comment')->where('a.execution_comment', '!=', '')
+                    ->whereNotNull('a.execution_path')->where('a.execution_path', '!=', '')
+                    ->where(function ($q) {
+                        $q->whereNull('a.verification_result')->orWhere('a.verification_result', '');
+                    });
+            } elseif ($status == 'CLOSE') {
+                $result->whereNotNull('a.verification_result')->where('a.verification_result', '!=', '');
+            }
         }
 
         return $result;
