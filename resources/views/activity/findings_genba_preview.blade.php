@@ -94,6 +94,9 @@ $isClosed = $genba->status === 'Close';
                 </div>
             </div>
 
+            <!-- Preventive Action -->
+
+
             <!-- Finding Image -->
             @if($genba->Path)
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
@@ -147,6 +150,19 @@ $isClosed = $genba->status === 'Close';
                         rows="5"
                         @if($isClosed) disabled @endif
                         placeholder="Enter action plan...">{{ $genba->execution_comment }}</textarea>
+                </div>
+            </div>
+
+            <!-- Preventive Action -->
+            <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
+                <label class="text-slate-700 font-medium text-sm sm:pt-3">Preventive Action</label>
+                <div class="w-full">
+                    <textarea
+                        id="preventiveActionText"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none text-sm disabled:bg-slate-100 disabled:text-slate-500"
+                        rows="3"
+                        @if($isClosed) disabled @endif
+                        placeholder="Enter preventive action...">{{ $genba->preventive_action ?? '' }}</textarea>
                 </div>
             </div>
 
@@ -448,6 +464,7 @@ $isClosed = $genba->status === 'Close';
     function saveData() {
         const trcUnixId = document.getElementById('trc_unix_id').value;
         const actionPlan = document.getElementById('actionPlanText').value;
+        const preventiveAction = document.getElementById('preventiveActionText').value;
 
         // Validation
         if (!actionPlan.trim()) {
@@ -470,6 +487,7 @@ $isClosed = $genba->status === 'Close';
                 body: JSON.stringify({
                     trc_unix_id: trcUnixId,
                     action_plan: actionPlan,
+                    preventive_action: preventiveAction,
                     dataphoto: newImages, // Array of new base64 strings
                     existing_photos: existingImages // Array of preserved paths
                 })

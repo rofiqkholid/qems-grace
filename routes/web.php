@@ -76,4 +76,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/execution_genba/table', [ExecutionGenbaController::class, 'table'])->name('execution_genba.table');
     Route::post('/execution_genba/approve', [ExecutionGenbaController::class, 'approve'])->name('execution_genba.approve');
     Route::post('/execution_genba/rollback', [ExecutionGenbaController::class, 'rollback'])->name('execution_genba.rollback');
+
+    // Fallback for 404 inside auth middleware
+    Route::fallback(function () {
+        return response()->view('errors.404', [], 404);
+    });
 });

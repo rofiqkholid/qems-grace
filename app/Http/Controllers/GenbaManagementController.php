@@ -197,7 +197,10 @@ class GenbaManagementController extends Controller
                     'a.asign_to_dept',
                     'a.type',
                     'a.area_detail',
+                    'a.area_detail',
                     'a.corrective_action',
+                    'a.preventive_action',
+                    'a.evidence',
                     'a.evidence',
                     'a.status',
                     'a.due_date',
@@ -1011,6 +1014,8 @@ class GenbaManagementController extends Controller
         // Now frontend sends EVERYTHING that should be kept.
 
         $execution_comment = $request->input('action_plan');
+        $execution_comment = $request->input('action_plan');
+        $preventive_action = $request->input('preventive_action');
         $photoPaths = [];
         $dataphoto = $request->input('dataphoto', []);
 
@@ -1064,7 +1069,9 @@ class GenbaManagementController extends Controller
             ->where('SysID', $sysID)
             ->update([
                 'execution_path' => $photoPathsString,
+                'execution_path' => $photoPathsString,
                 'execution_comment' => $execution_comment,
+                'preventive_action' => $preventive_action,
                 'evidence' => $evidence,
                 'corrective_action' => $corrective_action,
                 'complete_date' => Carbon::now(),

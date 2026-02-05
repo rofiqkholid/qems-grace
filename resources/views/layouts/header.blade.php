@@ -35,12 +35,12 @@
                 <div class="relative" x-data="{ open: false }">
                     <div class="flex items-center gap-3">
                         <div class="hidden sm:block text-right">
-                            <p class="text-sm font-medium text-slate-700">{{ Auth::user()->full_name ?? Auth::user()->username }}</p>
-                            <p class="text-xs text-slate-500">{{ Auth::user()->call_name ?? 'User' }}</p>
+                            <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
+                            <p class="text-xs text-slate-500">{{ Auth::user()?->call_name ?? 'User' }}</p>
                         </div>
                         <div class="relative group">
                             <button type="button" id="user-menu-button" class="relative focus:outline-none">
-                                @if(Auth::user()->avatar)
+                                @if(Auth::user()?->avatar)
                                 <img src="{{ asset('image/' . Auth::user()->avatar) }}" alt="Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white">
                                 @else
                                 <img src="{{ asset('image/blank.png') }}" alt="Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white">
@@ -51,8 +51,8 @@
                             <!-- Dropdown Menu -->
                             <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl border border-slate-200 py-2 z-50">
                                 <div class="px-4 py-2 border-b border-slate-100">
-                                    <p class="text-sm font-medium text-slate-700">{{ Auth::user()->full_name ?? Auth::user()->username }}</p>
-                                    <p class="text-xs text-slate-500">{{ Auth::user()->email }}</p>
+                                    <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
+                                    <p class="text-xs text-slate-500">{{ Auth::user()?->email ?? '' }}</p>
                                 </div>
                                 <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                                     <i class="fa-solid fa-user w-4"></i>
