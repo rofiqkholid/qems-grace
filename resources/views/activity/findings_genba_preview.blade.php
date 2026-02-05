@@ -32,43 +32,41 @@ $isClosed = $genba->status === 'Close';
                     </div>
                 </div>
 
+                <!-- Due Date -->
                 <div class="flex flex-col gap-2">
-                    <label class="text-slate-700 font-medium text-sm">Station / Mech. Num</label>
+                    <label class="text-slate-700 font-medium text-sm">Due Date</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->Area_Checked }}
+                        {{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2 col-span-2">
+                <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Document Number</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 font-mono text-sm">
                         {{ $genba->DocNum }}
                     </div>
                 </div>
 
-                <!-- Auditor (spanning full width) -->
-                <div class="flex flex-col gap-2 col-span-2">
+                <!-- Type -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-slate-700 font-medium text-sm">Type</label>
+                    <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
+                        {{ $genba->type ?? '-' }}
+                    </div>
+                </div>
+
+                <!-- Auditor -->
+                <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Auditor</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
                         {{ $genba->Auditor ?? '-' }}
                     </div>
                 </div>
 
-                <!-- Type -->
-                @if($genba->type)
                 <div class="flex flex-col gap-2">
-                    <label class="text-slate-700 font-medium text-sm">Type</label>
+                    <label class="text-slate-700 font-medium text-sm">Station / Mech. Num</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->type }}
-                    </div>
-                </div>
-                @endif
-
-                <!-- Due Date -->
-                <div class="flex flex-col gap-2 @if(!$genba->type) col-span-2 @endif">
-                    <label class="text-slate-700 font-medium text-sm">Due Date</label>
-                    <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}
+                        {{ $genba->Area_Checked }}
                     </div>
                 </div>
 
