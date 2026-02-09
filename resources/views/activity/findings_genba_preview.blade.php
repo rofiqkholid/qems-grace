@@ -167,7 +167,9 @@ $isClosed = $genba->status === 'Close';
             <!-- Execution Evidence Upload -->
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
                 <label class="text-slate-700 font-medium text-sm sm:pt-3">Evidence</label>
+                
                 <div class="w-full space-y-3">
+                    
                     @if(!$isClosed)
                     <div class="flex gap-2 flex-wrap">
                         <label class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
@@ -188,6 +190,10 @@ $isClosed = $genba->status === 'Close';
                             Capture
                         </button>
                     </div>
+                    <p class="text-xs text-red-600 mt-2">
+                        * Harap mengirimkan foto perbaikan yang mewakili temuan secara detail dan jelas! <br>
+                        <span class="italic">* Please provide improvement photos that represent the findings in detail and clearly!</span>
+                    </p>
                     @endif
 
                     <!-- Camera Preview Container -->

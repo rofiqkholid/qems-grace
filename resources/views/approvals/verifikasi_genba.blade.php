@@ -74,6 +74,7 @@
                             <th class="w-[4%] text-center">No</th>
                             <th class="w-[8%]">DocNum</th>
                             <th class="w-[10%]">Genba Date</th>
+                            <th class="w-[15%]">Area Detail</th>
                             <th class="w-[5%]">Pict</th>
                             <th class="w-[9%]">Asign to Dept</th>
                             <th class="w-[12%]">Auditor</th>
@@ -241,6 +242,13 @@
                     className: 'text-slate-700',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'area_detail',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + (data || '-') + '</span>';
                     }
                 },
                 {
