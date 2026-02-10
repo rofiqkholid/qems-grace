@@ -3,7 +3,7 @@
     <div class="h-full px-3 py-6 overflow-y-auto overflow-x-hidden bg-white border-r border-slate-200">
         <!-- Logo -->
         <a href="{{ url('/') }}" class="flex items-center justify-center mb-8 px-2 h-12">
-            <img src="{{ asset('image/epicor-logo.png') }}" alt="Epicor Logo" class="h-10 w-auto object-contain">
+            <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-10 w-auto object-contain">
         </a>
 
         <!-- Navigation -->
