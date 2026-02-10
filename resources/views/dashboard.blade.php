@@ -108,7 +108,7 @@
                         class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
                 </div>
             </div>
-            <div class="relative h-96 w-full">
+            <div class="relative h-80 w-full">
                 <canvas id="deptChart"></canvas>
             </div>
             <div class="overflow-x-auto p-6">
