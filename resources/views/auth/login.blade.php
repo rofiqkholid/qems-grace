@@ -8,9 +8,9 @@
         <!-- Login Card -->
         <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <!-- Header -->
-            <div class="bg-white px-8 py-8 text-center border-b border-slate-100">
+            <div class="bg-white px-3 py-3 text-center border-b border-slate-100">
                 <div class="flex justify-center">
-                    <img src="{{ asset('image/sai_logo.jpg') }}" alt="SAI Logo" class="h-16 w-auto">
+                    <img src="{{ asset('image/sai_logo.jpg') }}" alt="SAI Logo" class="h-[180px] w-auto">
                 </div>
             </div>
 
