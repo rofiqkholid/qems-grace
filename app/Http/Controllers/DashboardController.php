@@ -246,7 +246,6 @@ class DashboardController extends Controller
             'TMF',
             'SLS',
             'FA',
-            'TMC',
             'NPC',
             'PPIC',
             'DPC',

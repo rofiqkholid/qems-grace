@@ -140,14 +140,14 @@ $isClosed = $genba->status === 'Close';
 
             <!-- Execution Comment -->
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
-                <label class="text-slate-700 font-medium text-sm sm:pt-3">Action Plan</label>
+                <label class="text-slate-700 font-medium text-sm sm:pt-3">Corrective Action</label>
                 <div class="w-full">
                     <textarea
                         id="actionPlanText"
                         class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none text-sm disabled:bg-slate-100 disabled:text-slate-500"
                         rows="5"
                         @if($isClosed) disabled @endif
-                        placeholder="Enter action plan...">{{ $genba->execution_comment }}</textarea>
+                        placeholder="Enter corrective action...">{{ $genba->execution_comment }}</textarea>
                 </div>
             </div>
 
@@ -472,7 +472,7 @@ $isClosed = $genba->status === 'Close';
 
         // Validation
         if (!actionPlan.trim()) {
-            showToast('Action Plan harus diisi', 'error');
+            showToast('Corrective Action harus diisi', 'error');
             return;
         }
 

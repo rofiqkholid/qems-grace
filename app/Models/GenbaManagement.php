@@ -19,7 +19,6 @@ class GenbaManagement extends Model
             'TMF',
             'SLS',
             'FA',
-            'TMC',
             'NPC',
             'PPIC',
             'DPC',
