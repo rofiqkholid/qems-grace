@@ -10,7 +10,7 @@
             <!-- Header -->
             <div class="bg-white px-8 py-8 text-center border-b border-slate-100">
                 <div class="flex justify-center">
-                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-16 w-auto">
+                    <img src="{{ asset('image/sai_logo.jpg') }}" alt="SAI Logo" class="h-16 w-auto">
                 </div>
             </div>
 
