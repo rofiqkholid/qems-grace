@@ -274,9 +274,8 @@ class DashboardController extends Controller
             ->select(
                 'g.asign_to_dept',
                 DB::raw("
-                SUM(CASE WHEN (g.corrective_action IS NULL AND g.evidence IS NULL
-                         AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE))
-                         OR g.result IN (2, 3)
+                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
+                         AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
                          THEN 1 ELSE 0 END) AS TotalOpen
             "),
                 DB::raw("
