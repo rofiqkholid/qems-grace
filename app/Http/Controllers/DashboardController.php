@@ -277,7 +277,7 @@ class DashboardController extends Controller
                 SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
                          AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
                          THEN 1 
-                         WHEN g.verification_result IN (2, 3)
+                         WHEN g.result IN (2, 3)
                          THEN 1 ELSE 0 END) AS TotalOpen
             "),
                 DB::raw("
