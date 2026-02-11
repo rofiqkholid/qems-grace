@@ -276,8 +276,6 @@ class DashboardController extends Controller
                 DB::raw("
                 SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
                          AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
-                         THEN 1 
-                         WHEN g.result IN (2, 3)
                          THEN 1 ELSE 0 END) AS TotalOpen
             "),
                 DB::raw("
@@ -288,6 +286,10 @@ class DashboardController extends Controller
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)
                     ->orWhereNull('b.IsDelete');
+            })
+            ->where(function ($q) {
+                $q->where('g.result', '!=', 1)
+                    ->orWhereNull('g.result');
             })
             ->whereYear('g.created_at', $year)
             ->whereMonth('g.created_at', $month)
