@@ -19,100 +19,70 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
-            <!-- Card 0: All Findings -->
-            <div class="bg-white rounded-2xl p-4 border border-gray-200">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium">All Findings</p>
-                        <h3 class="text-2xl font-bold text-slate-800" id="val_allFindings">...</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 1: Findings Open -->
-            <div class="bg-white rounded-2xl p-4 border border-gray-200">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium">Findings Open</p>
-                        <h3 class="text-2xl font-bold text-slate-800" id="val_findingsOpen">...</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 2: Need Approve -->
-            <div class="bg-white rounded-2xl p-4 border border-gray-200">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium">Need Approve</p>
-                        <h3 class="text-2xl font-bold text-slate-800" id="val_needApprove">...</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Due Date (Overdue) -->
-            <div class="bg-white rounded-2xl p-4 border border-gray-200">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium">Due Date</p>
-                        <h3 class="text-2xl font-bold text-slate-800" id="val_dueDateCount">...</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4: Closed -->
-            <div class="bg-white rounded-2xl p-4 border border-gray-200">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium">Closed</p>
-                        <h3 class="text-2xl font-bold text-slate-800" id="val_findingsClose">...</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Pie Chart Section -->
         <!-- Department Chart Section -->
-        <div class="bg-white p-5 border border-gray-200 mb-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800">Department Performance</h3>
-                    <p class="text-slate-500 text-sm">Findings status per department</p>
+        <!-- Department Chart & Overview Section -->
+        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <!-- Left Column: Chart & Table (80%) -->
+                <div class="lg:col-span-4 border-r border-gray-100 pr-0 lg:pr-8">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Department Performance</h3>
+                            <p class="text-slate-500 text-sm">Findings status per department</p>
+                        </div>
+                        <div>
+                            <input type="month" id="chartFilterDate" value="{{ date('Y-m') }}"
+                                class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
+                        </div>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="deptChart"></canvas>
+                    </div>
                 </div>
-                <div>
-                    <input type="month" id="chartFilterDate" value="{{ date('Y-m') }}"
-                        class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
+
+                <!-- Right Column: Findings Overview (20%) -->
+                <div class="lg:col-span-1 pt-4 lg:pt-0">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6">Overview</h3>
+                    <div class="relative h-64 w-full flex justify-center mb-6">
+                        <canvas id="statsPieChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
+                                <span class="font-semibold text-slate-700">Open</span>
+                            </div>
+                            <span id="val_findingsOpen" class="font-bold text-slate-800 text-base">...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#008FFB] shadow-sm shadow-blue-200"></span>
+                                <span class="font-semibold text-slate-700">Need Approve</span>
+                            </div>
+                            <span id="val_needApprove" class="font-bold text-slate-800 text-base">...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#FEB019] shadow-sm shadow-amber-200"></span>
+                                <span class="font-semibold text-slate-700">Overdue</span>
+                            </div>
+                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-base">...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#00E396] shadow-sm shadow-green-200"></span>
+                                <span class="font-semibold text-slate-700">Closed</span>
+                            </div>
+                            <span id="val_findingsClose" class="font-bold text-slate-800 text-base">...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="relative h-80 w-full">
-                <canvas id="deptChart"></canvas>
-            </div>
-            <div class="overflow-x-auto p-6">
-                <div class="flex flex-wrap items-center gap-3 mb-5 border-t border-slate-200 pt-5">
+
+            <!-- Full Width Findings Table -->
+            <div class="overflow-x-auto mt-8 border-t border-slate-200 pt-8">
+                <div class="flex flex-wrap items-center gap-3 mb-5">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
                         <div class="relative">
@@ -144,10 +114,6 @@
                             valueField="name"
                             hideLabel="true" />
                     </div>
-
-
-
-
 
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
@@ -185,9 +151,8 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-        <!-- Data Count Component -->
-        <x-data-table tableId="findingsTable" />
+            <!-- Data Count Component -->
+            <x-data-table tableId="findingsTable" />
 
 
 
@@ -303,15 +268,49 @@
             type: "GET",
             dataType: "json",
             success: function(response) {
-                $('#val_allFindings').text(new Intl.NumberFormat().format(response.allFindings));
+                // Update text values
                 $('#val_findingsOpen').text(new Intl.NumberFormat().format(response.findingsOpen));
                 $('#val_needApprove').text(new Intl.NumberFormat().format(response.needApprove));
                 $('#val_dueDateCount').text(new Intl.NumberFormat().format(response.dueDateCount));
                 $('#val_findingsClose').text(new Intl.NumberFormat().format(response.findingsClose));
+
+                // Initialize Pie Chart
+                const ctx = document.getElementById('statsPieChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Open', 'Need Approve', 'Overdue', 'Closed'],
+                        datasets: [{
+                            data: [
+                                response.findingsOpen,
+                                response.needApprove,
+                                response.dueDateCount,
+                                response.findingsClose
+                            ],
+                            backgroundColor: [
+                                '#FF4560', // Red
+                                '#008FFB', // Blue
+                                '#FEB019', // Orange
+                                '#00E396' // Green
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false // Use custom legend below
+                            }
+                        }
+                    }
+                });
             },
             error: function(xhr, status, error) {
                 console.error(error);
-                $('#val_allFindings').text('Error');
                 $('#val_findingsOpen').text('Error');
                 $('#val_needApprove').text('Error');
                 $('#val_dueDateCount').text('Error');
