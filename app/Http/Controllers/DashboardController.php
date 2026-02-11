@@ -304,7 +304,7 @@ class DashboardController extends Controller
             ->select(
                 'g.asign_to_dept',
                 DB::raw("
-                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence AND g.verification_result IS NULL
+                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL AND g.verification_result IS NULL
                          AND CAST(g.due_date AS DATE) < CAST(GETDATE() AS DATE)
                          THEN 1 ELSE 0 END) AS TotalOverdue
             ")
