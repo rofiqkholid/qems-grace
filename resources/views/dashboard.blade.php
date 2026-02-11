@@ -160,7 +160,7 @@
                     <thead>
                         <tr>
                             <th class="w-[3%] text-center">No</th>
-                            <th class="w-[6%]">DocNum</th>
+                            <th class="w-[8%]">DocNum</th>
                             <th class="w-[5%]">Picture</th>
                             <th class="w-[12%]">Genba Date</th>
                             <th class="w-[12%]">Area Checked</th>
@@ -521,7 +521,7 @@
                         const execComment = encodeURIComponent(row.execution_comment || '');
                         const pathAfter = (row.execution_path || '');
 
-                        return `<button class="w-9 h-9 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" 
+                        return `<button class="w-9 h-9 flex items-center justify-center text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" 
                                 onclick="viewGenbaImages('${data}', '${pathAfter}', '${findings}', '${execComment}')" title="View Image">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>

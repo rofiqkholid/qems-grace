@@ -135,7 +135,7 @@ class DashboardController extends Controller
                     $pathAfter = $post->execution_path;
 
                     $button = '<div class="flex items-center justify-center gap-2">
-                                <button type="button" title="View Photos" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" 
+                                <button type="button" title="View Photos" class="w-10 h-10 flex items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" 
                                     onclick="viewGenbaImages(\'' . $pathBefore . '\', \'' . $pathAfter . '\', \'' . $findingsEnc . '\', \'' . $commentEnc . '\')">
                                     <span class="flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -149,7 +149,7 @@ class DashboardController extends Controller
                 } else {
                     // NOT CLOSED -> Show Link/Preview Icon (Existing Logic)
                     $button = '<div class="flex items-center justify-center gap-2">
-                                <button type="button" title="Preview" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_form_view_doc_' . $no . '" onclick="document_preview(' . $sys_id . ',' . $no . ')">
+                                <button type="button" title="Preview" class="w-10 h-10 flex items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_form_view_doc_' . $no . '" onclick="document_preview(' . $sys_id . ',' . $no . ')">
                                     <span id="svg_form_view_doc_' . $no . '" class="flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
