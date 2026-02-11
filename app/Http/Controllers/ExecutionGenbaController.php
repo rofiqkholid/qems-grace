@@ -54,9 +54,11 @@ class ExecutionGenbaController extends Controller
         $postsQuery->addSelect(DB::raw("(CASE 
             WHEN (a.execution_comment IS NULL OR a.execution_comment = '') THEN 'Need Action Plan' 
             WHEN (a.execution_path IS NULL OR a.execution_path = '') THEN 'Need Evidence' 
+            WHEN (a.execution_path IS NULL OR a.execution_path = '') THEN 'Need Evidence' 
             WHEN (a.verification_result IS NULL OR a.verification_result = '') THEN 'Proccess Verification' 
             ELSE 'Close' 
         END) as status_computed"));
+        $postsQuery->addSelect('a.verif_img');
 
         $posts = $postsQuery->offset($start)
             ->limit($limit)
@@ -78,9 +80,10 @@ class ExecutionGenbaController extends Controller
 
                 // Action Buttons - customized for Execution/Approval
                 if ($verification_result == 1) {
+                    $verifImg = $post->verif_img ? $post->verif_img : '';
                     // Rollback Button
                     $button = '<div class="flex items-center justify-center gap-2">
-                                <button type="button" title="Rollback" class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" onclick="rollbackGenba(' . $sys_id . ')">
+                                <button type="button" title="Rollback" class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" onclick="rollbackGenba(' . $sys_id . ', \'' . $verifImg . '\')">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                                         <path d="M3 3v5h5"></path>
@@ -140,7 +143,9 @@ class ExecutionGenbaController extends Controller
                 $nestedData['action'] = $button;
                 $nestedData['auditor'] = $post->Auditor;
                 $nestedData['execution_comment'] = $post->execution_comment;
+                $nestedData['execution_comment'] = $post->execution_comment;
                 $nestedData['area_detail'] = $post->area_detail;
+                $nestedData['verif_img'] = $post->verif_img;
 
                 $data[] = $nestedData;
             }
@@ -170,10 +175,23 @@ class ExecutionGenbaController extends Controller
             $encrypted_id = str_replace("-", "=", $encrypted_id);
             $decrypted_id = Crypt::decryptString($encrypted_id);
 
+            // Handle File Upload
+            $fileName = null;
+            $dbPath = null;
+            if ($request->hasFile('verif_img')) {
+                $file = $request->file('verif_img');
+                $fileName = time() . '_' . $decrypted_id . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('verif-photo/photos'), $fileName);
+                $dbPath = 'photos/' . $fileName;
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Verification photo is required!']);
+            }
+
             DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
                 ->where('SysID', $decrypted_id)
                 ->update([
                     'verification_result' => 1,
+                    'verif_img' => $dbPath,
                     'updated_at' => Carbon::now()
                 ]);
 
@@ -199,11 +217,26 @@ class ExecutionGenbaController extends Controller
             $encrypted_id = str_replace("-", "=", $encrypted_id);
             $decrypted_id = Crypt::decryptString($encrypted_id);
 
+            // Get existing image to delete
+            $existing = DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
+                ->where('SysID', $decrypted_id)
+                ->select('verif_img')
+                ->first();
+
+            if ($existing && $existing->verif_img) {
+                // Now verif_img includes 'photos/', so we look in 'verif-photo/'
+                $filePath = public_path('verif-photo/' . $existing->verif_img);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
             // Update the record: Set verification_result to NULL
             DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
                 ->where('SysID', $decrypted_id)
                 ->update([
                     'verification_result' => null,
+                    'verif_img' => null,
                     'updated_at' => Carbon::now()
                 ]);
 
