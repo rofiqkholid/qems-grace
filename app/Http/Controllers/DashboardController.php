@@ -314,6 +314,10 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', '!=', 1)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where(function ($q) {
+                $q->where('g.result', '!=', 1)
+                    ->orWhereNull('g.result');
+            })
             ->whereNotNull('g.asign_to_dept')
             ->groupBy('g.asign_to_dept')
             ->get()
