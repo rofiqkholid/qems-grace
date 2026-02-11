@@ -255,12 +255,11 @@ class DashboardController extends Controller
             'MTC'
         ];
 
-        // 1. Ambil department dari DB (Filter Deleted juga agar konsisten)
         $deptFromDb = DB::connection('sqlsrv')
-            ->table('GenbaProcAuditDtl as g') // Alias g
-            ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID') // Join tabel header
+            ->table('GenbaProcAuditDtl as g')
+            ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->distinct()
-            ->whereNotNull('g.asign_to_dept') // g.asign_to_dept
+            ->whereNotNull('g.asign_to_dept')
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)
                     ->orWhereNull('b.IsDelete');
@@ -270,14 +269,13 @@ class DashboardController extends Controller
 
         $allDepartments = array_unique(array_merge($departments, $deptFromDb));
 
-        // 2. Query Open & Close (Filter Deleted)
         $results = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
                 DB::raw("
-                SUM(CASE WHEN g.verification_result IS NULL
+                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
                          AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
                          THEN 1 ELSE 0 END) AS TotalOpen
             "),
@@ -286,7 +284,6 @@ class DashboardController extends Controller
                          THEN 1 ELSE 0 END) AS TotalClose
             ")
             )
-            // Filter Data Delete
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)
                     ->orWhereNull('b.IsDelete');
@@ -298,10 +295,9 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('asign_to_dept');
 
-        // 3. Query Overdue (Tambahkan Join & Filter Deleted)
         $overdueResults = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
-            ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID') // Join ditambahkan
+            ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
                 DB::raw("

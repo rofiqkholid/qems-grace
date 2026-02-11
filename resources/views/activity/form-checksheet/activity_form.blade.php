@@ -666,7 +666,6 @@
 
                 images.forEach(img => {
                     const src = img.src;
-                    // Only add base64 images (newly captured/uploaded), not existing /storage/ images
                     if (src.startsWith('data:image')) {
                         dataphoto.push(src);
                     } else if (src.includes('/findings-photo/')) {
@@ -688,19 +687,14 @@
                 const activityId = document.getElementById('activity_id').value;
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // Get assign_to_dept value from searchable-select
-                // The hidden input has the same ID as the component
                 const hiddenInput = document.getElementById(`asign_to_dept_${itemId}`);
                 let asignToDept = '';
                 let asignToDeptName = '';
                 if (hiddenInput) {
                     asignToDept = hiddenInput.value;
-                    // Get the display text from the text input (sibling of hidden input)
                     const textInput = hiddenInput.nextElementSibling?.querySelector('input[type="text"]');
                     if (textInput) asignToDeptName = textInput.value;
                 }
-
-                // Get area_detail value
                 const areaDetailInput = document.getElementById(`area_detail_${itemId}`);
                 const detailArea = areaDetailInput ? areaDetailInput.value : '';
 
