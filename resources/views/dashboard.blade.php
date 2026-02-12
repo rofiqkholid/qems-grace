@@ -36,7 +36,7 @@
                                 class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
                         </div>
                     </div>
-                    <div class="relative h-80 w-full">
+                    <div class="relative h-[390px] w-full">
                         <canvas id="deptChart"></canvas>
                     </div>
                 </div>
@@ -48,33 +48,33 @@
                         <canvas id="statsPieChart"></canvas>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
-                                <span class="font-semibold text-slate-700">Open</span>
+                                <span class="w-3 h-3 rounded-full bg-[#FEB019] shadow-sm shadow-amber-200"></span>
+                                <span class="font-semibold text-slate-700 text-xs">Open</span>
                             </div>
-                            <span id="val_findingsOpen" class="font-bold text-slate-800 text-base">...</span>
+                            <span id="val_findingsOpen" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
                             <div class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full bg-[#008FFB] shadow-sm shadow-blue-200"></span>
-                                <span class="font-semibold text-slate-700">Need Approve</span>
+                                <span class="font-semibold text-slate-700 text-xs">Need Approve</span>
                             </div>
-                            <span id="val_needApprove" class="font-bold text-slate-800 text-base">...</span>
+                            <span id="val_needApprove" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-100">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FEB019] shadow-sm shadow-amber-200"></span>
-                                <span class="font-semibold text-slate-700">Overdue</span>
+                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
+                                <span class="font-semibold text-slate-700 text-xs">Overdue</span>
                             </div>
-                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-base">...</span>
+                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full bg-[#00E396] shadow-sm shadow-green-200"></span>
-                                <span class="font-semibold text-slate-700">Closed</span>
+                                <span class="font-semibold text-slate-700 text-xs">Closed</span>
                             </div>
-                            <span id="val_findingsClose" class="font-bold text-slate-800 text-base">...</span>
+                            <span id="val_findingsClose" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                     </div>
                 </div>
@@ -288,10 +288,10 @@
                                 response.findingsClose
                             ],
                             backgroundColor: [
-                                '#FF4560', // Red
-                                '#008FFB', // Blue
-                                '#FEB019', // Orange
-                                '#00E396' // Green
+                                '#FEB019', 
+                                '#008FFB', 
+                                '#FF4560', 
+                                '#00E396' 
                             ],
                             borderWidth: 0,
                             hoverOffset: 4

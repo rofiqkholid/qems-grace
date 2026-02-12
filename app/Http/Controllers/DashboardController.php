@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
+use App\Models\GenbaManagement;
+use Carbon\Carbon;
+
 
 class DashboardController extends Controller
 {
@@ -21,6 +25,11 @@ class DashboardController extends Controller
             ->where(function ($q) {
                 $q->whereNull('a.corrective_action')->orWhere('a.corrective_action', '0');
             })
+            ->where(function ($q) {
+                $q->where('a.result', '!=', 1)
+                    ->orWhereNull('a.result');
+            })
+            ->whereDate('a.due_date', '>=', today())
             ->count();
 
         // 2. Need Approve: evidence = '1' AND status = '1' AND verification_result IS NULL, IsDelete = 0
@@ -33,6 +42,10 @@ class DashboardController extends Controller
             ->where(function ($q) {
                 $q->whereNull('a.verification_result')->orWhere('a.verification_result', '0');
             })
+            ->where(function ($q) {
+                $q->where('a.result', '!=', 1)
+                    ->orWhereNull('a.result');
+            })
             ->count();
 
         // 3. Due Date (Overdue): due_date < today AND (evidence is null/0 OR corrective_action is null/0)
@@ -40,13 +53,20 @@ class DashboardController extends Controller
             ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
             ->where('b.IsDelete', 0)
             ->whereNotNull('a.findings')
-            ->whereDate('a.due_date', '<', now())
+            ->whereDate('a.due_date', '<', today())
             ->where(function ($q) {
                 $q->where(function ($sub) {
-                    $sub->whereNull('a.evidence')->orWhere('a.evidence', '0');
-                })->orWhere(function ($sub) {
-                    $sub->whereNull('a.corrective_action')->orWhere('a.corrective_action', '0');
-                });
+                    $sub->whereNull('a.evidence')
+                        ->orWhere('a.evidence', 0);
+                })
+                    ->where(function ($sub) {
+                        $sub->whereNull('a.corrective_action')
+                            ->orWhere('a.corrective_action', 0);
+                    });
+            })
+            ->where(function ($q) {
+                $q->where('a.result', '!=', 1)
+                    ->orWhereNull('a.result');
             })
             ->count();
 
@@ -58,6 +78,10 @@ class DashboardController extends Controller
             ->where('a.evidence', '1')
             ->where('a.corrective_action', '1')
             ->where('a.verification_result', '1')
+            ->where(function ($q) {
+                $q->where('a.result', '!=', 1)
+                    ->orWhereNull('a.result');
+            })
             ->count();
 
         // 5. All Findings: findings is not null, IsDelete = 0
@@ -94,7 +118,7 @@ class DashboardController extends Controller
             8 => 'a.SysID'
         );
 
-        $totalData = \App\Models\GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
@@ -102,18 +126,18 @@ class DashboardController extends Controller
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
         if (empty($search)) {
-            $posts = \App\Models\GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
         } else {
-            $posts = \App\Models\GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
-            $totalFiltered = \App\Models\GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
         }
 
         $data = array();
@@ -121,7 +145,7 @@ class DashboardController extends Controller
             $no = $start;
             foreach ($posts as $post) {
                 $no++;
-                $trc_id = \Illuminate\Support\Facades\Crypt::encryptString($post->SysID);
+                $trc_id = Crypt::encryptString($post->SysID);
                 $sys_id = "'" . str_replace("=", "-", $trc_id) . '_' . $no . "'";
 
                 $verification_result = $post->verification_result;
@@ -161,7 +185,7 @@ class DashboardController extends Controller
                            </div>';
                 }
 
-                $date = \Carbon\Carbon::parse($post->Date)->format('d M Y');
+                $date = Carbon::parse($post->Date)->format('d M Y');
                 $corrective_action = $post->corrective_action;
                 $execution_comment = $post->execution_comment;
                 $verification_result = $post->verification_result;
@@ -268,20 +292,13 @@ class DashboardController extends Controller
 
         $allDepartments = array_unique(array_merge($departments, $deptFromDb));
 
-        $results = DB::connection('sqlsrv')
+
+        $closedResults = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
-                DB::raw("
-                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
-                         AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
-                         THEN 1 ELSE 0 END) AS TotalOpen
-            "),
-                DB::raw("
-                SUM(CASE WHEN g.verification_result = 1
-                         THEN 1 ELSE 0 END) AS TotalClose
-            ")
+                DB::raw("SUM(CASE WHEN g.verification_result = 1 THEN 1 ELSE 0 END) AS TotalClose")
             )
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)
@@ -291,6 +308,7 @@ class DashboardController extends Controller
                 $q->where('g.result', '!=', 1)
                     ->orWhereNull('g.result');
             })
+            // Filter Waktu AKTIF disini
             ->whereYear('g.created_at', $year)
             ->whereMonth('g.created_at', $month)
             ->whereNotNull('g.asign_to_dept')
@@ -298,18 +316,25 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('asign_to_dept');
 
-        $overdueResults = DB::connection('sqlsrv')
+        // 4. Query Khusus OPEN & OVERDUE (TANPA Filter Bulan/Tahun)
+        $openOverdueResults = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
+                // Logic OPEN: Belum fix, Belum verify, Due Date masih aman
                 DB::raw("
-                SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL AND g.verification_result IS NULL
-                         AND CAST(g.due_date AS DATE) < CAST(GETDATE() AS DATE)
-                         THEN 1 ELSE 0 END) AS TotalOverdue
+            SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
+                     AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
+                     THEN 1 ELSE 0 END) AS TotalOpen
+            "),
+                // Logic OVERDUE: Belum fix, Belum verify, Due Date sudah lewat
+                DB::raw("
+            SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL AND g.verification_result IS NULL
+                     AND CAST(g.due_date AS DATE) < CAST(GETDATE() AS DATE)
+                     THEN 1 ELSE 0 END) AS TotalOverdue
             ")
             )
-            // Filter Data Delete
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)
                     ->orWhereNull('b.IsDelete');
@@ -325,9 +350,13 @@ class DashboardController extends Controller
 
         $data = [];
         foreach ($allDepartments as $dept) {
-            $open = $results[$dept]->TotalOpen ?? 0;
-            $close = $results[$dept]->TotalClose ?? 0;
-            $overdue = $overdueResults[$dept]->TotalOverdue ?? 0;
+            $close = $closedResults[$dept]->TotalClose ?? 0;
+
+            $open = $openOverdueResults[$dept]->TotalOpen ?? 0;
+            $overdue = $openOverdueResults[$dept]->TotalOverdue ?? 0;
+
+            if ($open == 0 && $close == 0 && $overdue == 0) {
+            }
 
             $deptName = $dept;
             if ($deptName === 'TS') $deptName = 'Mtc';
@@ -340,6 +369,7 @@ class DashboardController extends Controller
             ];
         }
 
+        // 6. Sorting (Berdasarkan Close terbanyak, opsional)
         usort($data, function ($a, $b) {
             return $b['close'] <=> $a['close'];
         });
