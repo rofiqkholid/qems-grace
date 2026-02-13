@@ -90,91 +90,110 @@
             <div class="mb-6">
                 <div class="flex items-center gap-3">
                     <button type="button" onclick="hideCreateForm()"
-                        class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-900 transition-all duration-200">
+                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm">
                         <i class="fa-solid fa-arrow-left text-sm"></i>
                     </button>
-                    <h1 class="text-2xl font-bold text-slate-800">Genba Form</h1>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Genba Form</h1>
+                        <p class="text-slate-500 text-sm">Create or edit genba audit details</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Form Card -->
-            <div class="bg-white rounded-lg border border-slate-200 p-8">
-                <h2 class="text-xl font-bold text-slate-800 mb-8">Genba Header</h2>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-lg font-bold text-slate-800">Header Information</h2>
+                    <p class="text-slate-500 text-sm mt-1">Please fill in the required audit information below.</p>
+                </div>
 
-                <form id="createGenbaForm" action="{{ route('genba.header.add') }}" method="POST">
-                    @csrf
-                    <input type="hidden" id="formTrcUnixId" name="trc_unix_id">
-                    <div class="max-w-2xl pl-20 space-y-6">
-                        <!-- Date -->
-                        <div class="grid grid-cols-3 gap-4 items-center">
-                            <label class="text-sm text-slate-600">Date <span class="text-red-500">*</span></label>
-                            <div class="col-span-2">
+                <div class="p-8">
+                    <form id="createGenbaForm" action="{{ route('genba.header.add') }}" method="POST">
+                        @csrf
+                        <input type="hidden" id="formTrcUnixId" name="trc_unix_id">
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+                            <!-- Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Date <span class="text-red-500">*</span></label>
                                 <input type="date" id="formDate" name="date" required
-                                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
                             </div>
-                        </div>
 
-                        <!-- Process -->
-                        <x-searchable-select
-                            name="process"
-                            id="formProcess"
-                            label="Process"
-                            required="true"
-                            optionsEvent="update-process-options"
-                            updateEvent="update-process-value"
-                            changeEvent="process-changed"
-                            dependencyParam="process" />
-
-                        <!-- Line Checked -->
-                        <x-searchable-select
-                            name="line_checked"
-                            id="formLineChecked"
-                            label="Line Checked"
-                            required="true"
-                            apiUrl="{{ route('genba.header.area') }}"
-                            dependencyEvent="process-changed"
-                            dependencyParam="process"
-                            valueField="name"
-                            updateEvent="update-line-value" />
-
-                        <!-- Station / Mech. Num -->
-                        <div class="grid grid-cols-3 gap-4 items-center">
-                            <label class="text-sm text-slate-600">Station / Mech. Num</label>
-                            <div class="col-span-2">
-                                <input type="text" id="formStation" name="station" placeholder="Enter station"
-                                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
+                            <!-- Process -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Process <span class="text-red-500">*</span></label>
+                                <x-searchable-select
+                                    name="process"
+                                    id="formProcess"
+                                    label="Process"
+                                    required="true"
+                                    optionsEvent="update-process-options"
+                                    updateEvent="update-process-value"
+                                    changeEvent="process-changed"
+                                    dependencyParam="process"
+                                    hideLabel="true" />
                             </div>
-                        </div>
 
-                        <!-- Auditor -->
-                        <div class="grid grid-cols-3 gap-4 items-center">
-                            <label class="text-sm text-slate-600">Auditor <span class="text-red-500">*</span></label>
-                            <div class="col-span-2">
+                            <!-- Line Checked -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Line Checked <span class="text-red-500">*</span></label>
+                                <x-searchable-select
+                                    name="line_checked"
+                                    id="formLineChecked"
+                                    label="Line Checked"
+                                    required="true"
+                                    apiUrl="{{ route('genba.header.area') }}"
+                                    dependencyEvent="process-changed"
+                                    dependencyParam="process"
+                                    valueField="name"
+                                    updateEvent="update-line-value"
+                                    hideLabel="true" />
+                            </div>
+
+                            <!-- Category -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Category <span class="text-red-500">*</span></label>
+                                <x-searchable-select
+                                    name="category"
+                                    id="formCategory"
+                                    label="Category"
+                                    required="true"
+                                    apiUrl="{{ route('genba.header.category') }}"
+                                    updateEvent="update-category-value"
+                                    hideLabel="true" />
+                            </div>
+
+                            <!-- Station / Mech. Num -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Station / Mech. Num</label>
+                                <input type="text" id="formStation" name="station" placeholder="E.g. ST-01 or MC-123"
+                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
+                            </div>
+
+                            <!-- Auditor -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Auditor <span class="text-red-500">*</span></label>
                                 <input type="text" id="formAuditor" name="auditor" required
                                     value="{{ Auth::user()->full_name ?? '' }}"
-                                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none bg-slate-50">
+                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 text-sm outline-none">
                             </div>
                         </div>
 
-                        <!-- Category -->
-                        <x-searchable-select
-                            name="category"
-                            id="formCategory"
-                            label="Category"
-                            required="true"
-                            apiUrl="{{ route('genba.header.category') }}"
-                            updateEvent="update-category-value" />
-
-                        <!-- Submit Button -->
-                        <div class="flex justify-end pt-6">
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-3 pt-8 mt-8 border-t border-slate-100">
+                            <button type="button" onclick="hideCreateForm()"
+                                class="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all shadow-sm">
+                                Cancel
+                            </button>
                             <button type="submit"
-                                class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium transition-colors">
+                                class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-all shadow-sm hover:shadow-md active:scale-95">
+                                <span>Next Step</span>
                                 <i class="fa-solid fa-arrow-right text-sm"></i>
-                                Next
                             </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
