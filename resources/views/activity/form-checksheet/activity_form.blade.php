@@ -199,33 +199,37 @@
                                                 <i class="fas fa-image text-blue-500"></i> Finding Captured
                                             </h4>
 
-                                            <!-- Video Preview -->
-                                            <div x-show="cameraActive" class="relative rounded-lg overflow-hidden bg-black aspect-video mb-4">
-                                                <video id="video_{{ $itemId }}" class="w-full h-full object-cover"></video>
-                                                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-                                                    <button @click="capturePhoto({{ $itemId }})" class="bg-white text-blue-600 rounded-full p-3 hover:scale-110 transition-transform">
-                                                        <i class="fas fa-camera text-2xl"></i>
-                                                    </button>
-                                                    <button @click="stopCamera({{ $itemId }})" class="bg-white/20 text-white rounded-full p-3 hover:bg-white/30 transition-colors">
-                                                        <i class="fas fa-times text-xl"></i>
-                                                    </button>
+                                            <div class="grid grid-cols-2 gap-3" x-data>
+                                                <!-- Native Camera Trigger -->
+                                                <div class="relative group">
+                                                    <input type="file"
+                                                        id="cameraInput_{{ $itemId }}"
+                                                        accept="image/*"
+                                                        capture="environment"
+                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        @change="handleFileUpload($event, {{ $itemId }})">
+                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
+                                                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                            <i class="fas fa-camera"></i>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-blue-600">Take Photo</span>
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <button x-show="!cameraActive" @click="startCamera({{ $itemId }})" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all group">
-                                                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                        <i class="fas fa-camera"></i>
+                                                <!-- Gallery Upload Trigger -->
+                                                <div class="relative group">
+                                                    <input type="file"
+                                                        id="uploadInput_{{ $itemId }}"
+                                                        multiple
+                                                        accept="image/*"
+                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        @change="handleFileUpload($event, {{ $itemId }})">
+                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
+                                                        <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                            <i class="fas fa-images"></i>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-slate-600">From Gallery</span>
                                                     </div>
-                                                    <span class="text-sm font-medium text-blue-600">Take Photo</span>
-                                                </button>
-
-                                                <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg hover:bg-slate-50 transition-all relative">
-                                                    <input type="file" id="uploadImage_{{ $itemId }}" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" @change="handleFileUpload($event, {{ $itemId }})">
-                                                    <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <span class="text-sm font-medium text-slate-600">Upload Files</span>
                                                 </div>
                                             </div>
 
@@ -451,7 +455,7 @@
             openModal(itemId, scopeId, findingIndex = 1) {
                 this.activeModal = itemId;
                 this.activeFindingIndex = findingIndex; // Set active index
-                this.cameraActive = false;
+                // this.cameraActive = false; // logic removed
                 document.body.style.overflow = 'hidden';
 
                 // Clear previous form data to avoid flickering old data
@@ -571,58 +575,12 @@
             },
 
             closeModal() {
-                if (this.cameraActive) {
-                    this.stopCamera(this.activeModal);
-                }
                 this.activeModal = null;
                 document.body.style.overflow = '';
             },
 
-            // Camera Logic
-            async startCamera(itemId) {
-                this.cameraActive = true;
-                try {
-                    const video = document.getElementById(`video_${itemId}`);
-                    this.stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: "environment"
-                        }
-                    });
-                    video.srcObject = this.stream;
-                    video.play();
-                } catch (err) {
-                    console.error("Camera Error:", err);
-                    alert("Could not access camera");
-                    this.cameraActive = false;
-                }
-            },
-
-            stopCamera(itemId) {
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                }
-                this.cameraActive = false;
-            },
-
-            capturePhoto(itemId) {
-                const container = document.getElementById(`preview_container_${itemId}`);
-                const currentCount = container.querySelectorAll('img').length;
-
-                if (currentCount >= 5) {
-                    showToast('Max 5 photos allowed', 'error');
-                    return;
-                }
-
-                const video = document.getElementById(`video_${itemId}`);
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-
-                const imgUrl = canvas.toDataURL('image/png');
-                this.addThumbnail(itemId, imgUrl);
-                this.stopCamera(itemId);
-            },
+            // Removed custom camera logic (startCamera, stopCamera, capturePhoto) relying on getUserMedia
+            // Now using native file inputs with capture="environment"
 
             handleFileUpload(event, itemId) {
                 const container = document.getElementById(`preview_container_${itemId}`);
