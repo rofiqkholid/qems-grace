@@ -121,13 +121,13 @@
                 <table id="findingsTable" class="qms-table w-full">
                     <thead>
                         <tr>
-                            <th class="w-[3%] text-center">No</th>
+                            <th class="w-[3%] text-center hidden lg:table-cell">No</th>
                             <th class="w-[8%]">DocNum</th>
                             <th class="w-[5%]">Picture</th>
                             <th class="w-[12%]">Genba Date</th>
-                            <th class="w-[12%]">Area Checked</th>
-                            <th class="w-[8%]">Dept</th>
-                            <th class="w-[15%]">Auditor</th>
+                            <th class="w-[12%] hidden lg:table-cell">Area Checked</th>
+                            <th class="w-[8%] hidden lg:table-cell">Dept</th>
+                            <th class="w-[15%] hidden lg:table-cell">Auditor</th>
                             <th class="w-[18%]">
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span>Status</span>
@@ -420,7 +420,7 @@
                                 delay: context => {
                                     let delay = 0;
                                     if (context.type === 'data' && context.mode === 'default' && !delayed) {
-                                        delay = context.dataIndex * 0 + 500; // Simultaneous 500ms delay on start
+                                        delay = context.dataIndex * 0 + 100; // Simultaneous 500ms delay on start
                                     }
                                     return delay;
                                 },
@@ -542,7 +542,7 @@
             columns: [{
                     data: 'no',
                     orderable: false,
-                    className: 'text-center font-base text-slate-700',
+                    className: 'text-center font-base text-slate-700 hidden lg:table-cell',
                     render: function(data, type, row) {
                         return data;
                     }
@@ -581,20 +581,21 @@
                 },
                 {
                     data: 'area_checked',
-                    className: 'text-slate-700',
+                    className: 'text-slate-700 hidden lg:table-cell',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + data + '</span>';
                     }
                 },
                 {
                     data: 'dept',
+                    className: 'hidden lg:table-cell',
                     render: function(data, type, row) {
                         return '<div class="text-sm text-slate-600">' + (data || '') + '</div>';
                     }
                 },
                 {
                     data: 'auditor',
-                    className: 'text-slate-700',
+                    className: 'text-slate-700 hidden lg:table-cell',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + (data || '') + '</span>';
                     }
