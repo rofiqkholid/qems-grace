@@ -18,10 +18,6 @@
             <p class="text-slate-500 mt-1">Monitor audit findings and performance in real-time.</p>
         </div>
 
-        <!-- Stats Cards -->
-        <!-- Pie Chart Section -->
-        <!-- Department Chart Section -->
-        <!-- Department Chart & Overview Section -->
         <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
