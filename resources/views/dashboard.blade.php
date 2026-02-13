@@ -11,7 +11,7 @@
     @include('layouts.header')
 
     <!-- Page Content -->
-    <main class="flex-1 p-6">
+    <main class="flex-1 p-4 lg:p-6">
         <!-- Page Title -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
@@ -21,7 +21,7 @@
         <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
-                <div class="lg:col-span-4 border-r border-gray-100 pr-0 lg:pr-8">
+                <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                         <div>
                             <h3 class="text-lg font-bold text-slate-800">Department Performance</h3>
@@ -38,7 +38,7 @@
                 </div>
 
                 <!-- Right Column: Findings Overview (20%) -->
-                <div class="lg:col-span-1 pt-4 lg:pt-0">
+                <div class="lg:col-span-1 pt-8 lg:pt-0">
                     <h3 class="text-lg font-bold text-slate-800 mb-6">Overview</h3>
                     <div class="relative h-64 w-full flex justify-center mb-6">
                         <canvas id="statsPieChart"></canvas>
@@ -78,9 +78,9 @@
 
             <!-- Full Width Findings Table -->
             <div class="overflow-x-auto mt-8 border-t border-slate-200 pt-8">
-                <div class="flex flex-wrap items-center gap-3 mb-5">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-5">
                     <!-- Search -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="w-full lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search findings..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
@@ -89,19 +89,19 @@
                     </div>
 
                     <!-- Date From -->
-                    <div>
+                    <div class="w-full lg:w-auto">
                         <input type="date" id="dateFrom"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Date To -->
-                    <div>
+                    <div class="w-full lg:w-auto">
                         <input type="date" id="dateTo"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Department Filer -->
-                    <div class="min-w-[200px]">
+                    <div class="w-full lg:w-auto min-w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
@@ -113,7 +113,7 @@
 
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
+                        class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
                         <i class="fa-solid fa-rotate-right text-sm"></i>
                         Reset
                     </button>
