@@ -255,7 +255,7 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
     // Fetch Data
     $(document).ready(function() {
@@ -284,10 +284,10 @@
                                 response.findingsClose
                             ],
                             backgroundColor: [
-                                '#FEB019', 
-                                '#008FFB', 
-                                '#FF4560', 
-                                '#00E396' 
+                                '#FEB019',
+                                '#008FFB',
+                                '#FF4560',
+                                '#00E396'
                             ],
                             borderWidth: 0,
                             hoverOffset: 4
@@ -297,6 +297,26 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         cutout: '70%',
+                        animations: {
+                            animateScale: {
+                                type: 'number',
+                                easing: 'easeOutQuart',
+                                duration: 2000,
+                                delay: 500,
+                                from: 0,
+                                to: 1,
+                                loop: false
+                            },
+                            animateRotate: {
+                                type: 'number',
+                                easing: 'easeOutQuart',
+                                duration: 2000,
+                                delay: 500,
+                                from: 0,
+                                to: 360, // Full rotation
+                                loop: false
+                            }
+                        },
                         plugins: {
                             legend: {
                                 display: false // Use custom legend below
@@ -338,6 +358,8 @@
                 ];
                 const maxValue = Math.max(...allValues, 0);
                 const suggestedMax = maxValue + 1;
+
+                let delayed;
 
                 deptChart = new Chart(ctx, {
                     type: 'bar',
@@ -391,6 +413,27 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animations: {
+                            y: {
+                                duration: 1000,
+                                easing: 'easeOutQuart',
+                                delay: context => {
+                                    let delay = 0;
+                                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                        delay = context.dataIndex * 0 + 500; // Simultaneous 500ms delay on start
+                                    }
+                                    return delay;
+                                },
+                                from: (context) => {
+                                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                        const scale = context.chart.scales.y;
+                                        if (scale) return scale.getPixelForValue(0);
+                                    }
+                                    return undefined; // Default behavior for updates (hide/show)
+                                },
+                                loop: false
+                            }
+                        },
                         interaction: {
                             intersect: false,
                             mode: 'index',
@@ -437,6 +480,12 @@
                         }
                     }
                 });
+
+                // Mark initial animation as done
+                // We use a timeout to roughly match the animation duration
+                setTimeout(() => {
+                    delayed = true;
+                }, 1500);
             },
             error: function(xhr) {
                 console.error("Failed to load chart data:", xhr);
