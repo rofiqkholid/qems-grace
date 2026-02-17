@@ -11,10 +11,6 @@ use Carbon\Carbon;
 
 class ExecutionGenbaController extends Controller
 {
-    public function index()
-    {
-        return view('execution_genba.index');
-    }
 
     public function table(Request $request)
     {
@@ -55,7 +51,9 @@ class ExecutionGenbaController extends Controller
             WHEN (a.execution_comment IS NULL OR a.execution_comment = '') THEN 'Need Action Plan' 
             WHEN (a.execution_path IS NULL OR a.execution_path = '') THEN 'Need Evidence' 
             WHEN (a.execution_path IS NULL OR a.execution_path = '') THEN 'Need Evidence' 
+            WHEN (a.verification_result = 2) THEN 'Rejected'
             WHEN (a.verification_result IS NULL OR a.verification_result = '') THEN 'Proccess Verification' 
+            WHEN (a.verification_result = 1) THEN 'Close' 
             ELSE 'Close' 
         END) as status_computed"));
         $postsQuery->addSelect('a.verif_img');
@@ -79,7 +77,7 @@ class ExecutionGenbaController extends Controller
                 $date = Carbon::parse($post->Date)->format('d M Y');
 
                 // Action Buttons - customized for Execution/Approval
-                if ($verification_result == 1) {
+                if ($verification_result == 1 || $verification_result == 2) {
                     $verifImg = $post->verif_img ? $post->verif_img : '';
                     // Rollback Button
                     $button = '<div class="flex items-center justify-center gap-2">
@@ -104,6 +102,7 @@ class ExecutionGenbaController extends Controller
                 // Stepper Logic
                 $line = '<div class="w-8 h-0.5 bg-gray-200"></div>';
                 $activeLine = '<div class="w-8 h-0.5 bg-blue-200"></div>';
+                $rejectedLine = '<div class="w-8 h-0.5 bg-red-100"></div>';
 
                 // Helper for progress circles
                 $renderCircle = function ($isActive) {
@@ -115,6 +114,14 @@ class ExecutionGenbaController extends Controller
                            </div>'
                         : '<div class="w-10 h-10 rounded-full border border-slate-200 bg-white shadow-sm"></div>';
                 };
+                $renderRejectedCircle = function () {
+                    return '<div class="w-10 h-10 rounded-full bg-red-50 border border-red-200 flex items-center justify-center text-red-500 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                           </div>';
+                };
 
                 if ($execution_comment == '' || $execution_comment == null) {
                     // Need Action Plan
@@ -125,6 +132,9 @@ class ExecutionGenbaController extends Controller
                 } else if ($verification_result == '' || $verification_result == null) {
                     // Process Verification
                     $steps = $renderCircle(true) . $activeLine . $renderCircle(true) . $line . $renderCircle(false);
+                } else if ($verification_result == 2) {
+                    // Rejected
+                    $steps = $renderCircle(true) . $activeLine . $renderCircle(true) . $rejectedLine . $renderRejectedCircle();
                 } else {
                     // Closed
                     $steps = $renderCircle(true) . $activeLine . $renderCircle(true) . $activeLine . $renderCircle(true);
@@ -160,10 +170,19 @@ class ExecutionGenbaController extends Controller
 
         return response()->json($json_data);
     }
+
     public function approve(Request $request)
     {
         try {
             $id = $request->id;
+            $verificationResult = $request->input('verification_result', 1);
+            if ($verificationResult === '' || $verificationResult === null) {
+                $verificationResult = 1;
+            }
+            $verificationResult = (int) $verificationResult;
+            if (!in_array($verificationResult, [1, 2], true)) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid verification result.']);
+            }
             // ... (decryption logic same as before, simplified for this snippet)
             $parts = explode('_', $id);
             if (count($parts) > 1 && is_numeric(end($parts))) {
@@ -190,12 +209,13 @@ class ExecutionGenbaController extends Controller
             DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
                 ->where('SysID', $decrypted_id)
                 ->update([
-                    'verification_result' => 1,
+                    'verification_result' => $verificationResult,
                     'verif_img' => $dbPath,
                     'updated_at' => Carbon::now()
                 ]);
 
-            return response()->json(['status' => 'success', 'message' => 'Approved successfully']);
+            $successMessage = $verificationResult === 2 ? 'Rejected successfully' : 'Approved successfully';
+            return response()->json(['status' => 'success', 'message' => $successMessage]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
         }

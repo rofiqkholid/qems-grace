@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GenbaManagementController;
 use App\Http\Controllers\ExecutionGenbaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SummaryGenbaController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -41,9 +42,11 @@ Route::middleware(['auth'])->group(function () {
         return view('activity.findings_genba');
     })->name('genba_mng_management');
 
-    Route::get('/execution_genba', function () {
+    Route::get('/verifikasi_genba', function () {
         return view('approvals.verifikasi_genba');
     })->name('verifikasi_genba');
+
+    Route::get('/spv_verification', [SummaryGenbaController::class, 'index'])->name('spv_verification');
 
     // Dashboard Routes
     Route::get('/dashboard/data_cards', [DashboardController::class, 'data_cards'])->name('dashboard.data_cards');
@@ -75,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Execution Genba Routes
     Route::post('/execution_genba/table', [ExecutionGenbaController::class, 'table'])->name('execution_genba.table');
+    Route::post('/spv_verification/table', [SummaryGenbaController::class, 'table'])->name('spv_verification.table');
     Route::post('/execution_genba/approve', [ExecutionGenbaController::class, 'approve'])->name('execution_genba.approve');
     Route::post('/execution_genba/rollback', [ExecutionGenbaController::class, 'rollback'])->name('execution_genba.rollback');
 

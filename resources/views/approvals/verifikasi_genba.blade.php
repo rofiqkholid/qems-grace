@@ -500,8 +500,8 @@
 
         // Update Modal UI for Approval
         const modal = document.getElementById('confirmationModal');
-        modal.querySelector('#modalTitle').innerText = 'Approve Finding?';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to approve this finding?<br>This action cannot be undone.';
+        modal.querySelector('#modalTitle').innerText = 'Verification Decision?';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify this finding?<br>This action cannot be undone.';
 
         // Icon
         const iconContainer = modal.querySelector('#modalIcon');
@@ -516,6 +516,15 @@
         const confirmBtn = document.getElementById('confirmBtn');
         confirmBtn.className = 'px-5 py-2.5 bg-emerald-50 text-emerald-600 font-medium rounded-xl hover:bg-emerald-700 hover:text-white transition-colors border border-emerald-200';
         confirmBtn.innerText = 'Yes, Approve';
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('hidden');
+
+        // Reject Button (Red)
+        const rejectBtn = document.getElementById('rejectBtn');
+        rejectBtn.className = 'px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200';
+        rejectBtn.innerText = 'Yes, Reject';
+        rejectBtn.disabled = false;
+        rejectBtn.classList.remove('hidden');
 
         modal.classList.remove('hidden');
     }
@@ -571,6 +580,13 @@
         const confirmBtn = document.getElementById('confirmBtn');
         confirmBtn.className = 'px-5 py-2.5 bg-amber-50 text-amber-600 font-medium rounded-xl hover:bg-amber-700 hover:text-white transition-colors border border-amber-200';
         confirmBtn.innerText = 'Yes, Rollback';
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('hidden');
+
+        // Hide reject button for rollback flow
+        const rejectBtn = document.getElementById('rejectBtn');
+        rejectBtn.classList.add('hidden');
+        rejectBtn.disabled = false;
 
         modal.classList.remove('hidden');
     }
@@ -588,6 +604,13 @@
             rollbackViewer.destroy();
             rollbackViewer = null;
         }
+
+        // Reset action buttons to default state
+        const confirmBtn = document.getElementById('confirmBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
+        confirmBtn.disabled = false;
+        rejectBtn.disabled = false;
+        rejectBtn.classList.add('hidden');
     }
 
     let selectedVerificationFile = null;
@@ -652,16 +675,22 @@
         }
     }
 
-    function submitConfirmation() {
+    function submitConfirmation(verificationResult = 1) {
         const id = document.getElementById('confirmationId').value;
         const confirmBtn = document.getElementById('confirmBtn');
-        const originalText = confirmBtn.innerText;
+        const rejectBtn = document.getElementById('rejectBtn');
+        const originalConfirmText = confirmBtn.innerText;
+        const originalRejectText = rejectBtn.innerText;
+        const normalizedVerificationResult = verificationResult == 2 ? 2 : 1;
+        let activeBtn = confirmBtn;
 
         let url = '';
         if (currentAction === 'approve') {
             url = "{{ route('execution_genba.approve') }}";
+            activeBtn = normalizedVerificationResult === 2 ? rejectBtn : confirmBtn;
         } else if (currentAction === 'rollback') {
             url = "{{ route('execution_genba.rollback') }}";
+            activeBtn = confirmBtn;
         }
 
         // Create FormData
@@ -673,14 +702,16 @@
             if (selectedVerificationFile) {
                 formData.append('verif_img', selectedVerificationFile);
             } else {
-                alert('Please take a photo or upload an image for verification.');
+                showToast('Please take a photo or upload an image for verification.', 'warning');
                 return;
             }
+            formData.append('verification_result', normalizedVerificationResult);
         }
 
         // Show loading state
         confirmBtn.disabled = true;
-        confirmBtn.innerText = 'Processing...';
+        rejectBtn.disabled = true;
+        activeBtn.innerText = 'Processing...';
 
         $.ajax({
             url: url,
@@ -703,7 +734,9 @@
             },
             complete: function() {
                 confirmBtn.disabled = false;
-                confirmBtn.innerText = originalText;
+                rejectBtn.disabled = false;
+                confirmBtn.innerText = originalConfirmText;
+                rejectBtn.innerText = originalRejectText;
             }
         });
     }
@@ -776,13 +809,17 @@
             <input type="hidden" id="confirmationId">
 
             <div class="flex gap-3 justify-center">
-                <button onclick="closeConfirmationModal()"
+                <button type="button" onclick="closeConfirmationModal()"
                     class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors">
                     Cancel
                 </button>
-                <button id="confirmBtn" onclick="submitConfirmation()"
+                <button type="button" id="rejectBtn" onclick="submitConfirmation(2)"
+                    class="hidden px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200">
+                    Yes, Reject
+                </button>
+                <button type="button" id="confirmBtn" onclick="submitConfirmation(1)"
                     class="px-5 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors">
-                    Yes
+                    Yes, Approve
                 </button>
             </div>
         </div>
