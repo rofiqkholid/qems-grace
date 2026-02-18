@@ -8,6 +8,8 @@
 
     <title>@yield('title', config('app.name', 'QMS'))</title>
 
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/sai_logo.jpg') }}">
+
     <!-- Google Fonts - Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

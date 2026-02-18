@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
         return view('approvals.verifikasi_genba');
     })->name('verifikasi_genba');
 
-    Route::get('/spv_verification', [SummaryGenbaController::class, 'index'])->name('spv_verification');
+    Route::get('/spv_verification', [SummaryGenbaController::class, 'index'])->name('summary_verif');
 
     // Dashboard Routes
     Route::get('/dashboard/data_cards', [DashboardController::class, 'data_cards'])->name('dashboard.data_cards');

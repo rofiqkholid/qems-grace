@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer(['dashboard', 'activity.findings_genba', 'approvals.verifikasi_genba', 'summary.spv_verification'], function ($view) {
+        View::composer(['dashboard', 'activity.findings_genba', 'approvals.verifikasi_genba', 'summary.summary_verif'], function ($view) {
             $view->with('departments', GenbaManagement::get_all_departments());
         });
     }
