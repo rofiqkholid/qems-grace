@@ -59,6 +59,40 @@
             </div>
             @endif
             @endforeach
+            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001')
+            <div class="menu-item">
+                <button type="button" onclick="toggleMenu('data-master')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
+                    <i class="fa-solid fa-database w-5 flex-shrink-0 text-center text-slate-700"></i>
+                    <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Data Master</span>
+                    <i class="fa-solid fa-chevron-down text-xs opacity-0 group-hover:opacity-100 transition-all duration-300" id="arrow-data-master"></i>
+                </button>
+
+                <div class="hidden group-hover:block">
+                    <div class="hidden pl-2 mt-1 space-y-1" id="data-master">
+                        <a href="{{ url('data-master/line-checked') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Line Checked</span>
+                        </a>
+                        <a href="{{ url('data-master/category') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Category</span>
+                        </a>
+                        <a href="{{ url('data-master/process') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Process</span>
+                        </a>
+                        <a href="{{ url('data-master/department') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Departement</span>
+                        </a>
+                        <a href="{{ url('data-master/check-item') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Check Item</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
         </nav>
     </div>
 </aside>

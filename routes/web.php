@@ -6,6 +6,7 @@ use App\Http\Controllers\GenbaManagementController;
 use App\Http\Controllers\ExecutionGenbaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SummaryGenbaController;
+use App\Http\Controllers\MasterController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -81,6 +82,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/spv_verification/table', [SummaryGenbaController::class, 'table'])->name('spv_verification.table');
     Route::post('/execution_genba/approve', [ExecutionGenbaController::class, 'approve'])->name('execution_genba.approve');
     Route::post('/execution_genba/rollback', [ExecutionGenbaController::class, 'rollback'])->name('execution_genba.rollback');
+
+    // Data Master Routes
+    Route::prefix('data-master')->group(function () {
+        Route::get('/line-checked', [MasterController::class, 'line_checked'])->name('master.line_checked');
+        Route::get('/category', [MasterController::class, 'category'])->name('master.category');
+        Route::get('/process', [MasterController::class, 'process'])->name('master.process');
+        Route::get('/department', [MasterController::class, 'department'])->name('master.department');
+        Route::get('/check-item', [MasterController::class, 'check_item'])->name('master.check_item');
+    });
 
     // Fallback for 404 inside auth middleware
     Route::fallback(function () {
