@@ -138,8 +138,9 @@ class GenbaManagementController extends Controller
                 $nestedData['DocNum'] = $post->DocNum;
                 $nestedData['date'] = $date;
 
-                $nestedData['area_checked'] = $post->Area_Checked;
                 $nestedData['path'] = $post->Path;
+                $nestedData['area_checked'] = $post->Area_Checked;
+                $nestedData['dept'] = $post->asign_to_dept;
                 $nestedData['findings'] = $post->findings;
                 $nestedData['due_date'] = $post->due_date;
                 $nestedData['execution_comment'] = $post->execution_comment;
