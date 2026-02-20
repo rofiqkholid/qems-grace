@@ -86,10 +86,29 @@ Route::middleware(['auth'])->group(function () {
     // Data Master Routes
     Route::prefix('data-master')->group(function () {
         Route::get('/line-checked', [MasterController::class, 'line_checked'])->name('master.line_checked');
+        Route::post('/line-checked/table', [MasterController::class, 'line_checked_table'])->name('master.line_checked.table');
+        Route::post('/line-checked/store', [MasterController::class, 'store_line_checked'])->name('master.line_checked.store');
+        Route::post('/line-checked/update', [MasterController::class, 'update_line_checked'])->name('master.line_checked.update');
+        Route::post('/line-checked/delete', [MasterController::class, 'delete_line_checked'])->name('master.line_checked.delete');
+
         Route::get('/category', [MasterController::class, 'category'])->name('master.category');
-        Route::get('/process', [MasterController::class, 'process'])->name('master.process');
+        Route::post('/category/table', [MasterController::class, 'category_table'])->name('master.category.table');
+        Route::post('/category/store', [MasterController::class, 'store_category'])->name('master.category.store');
+        Route::post('/category/update', [MasterController::class, 'update_category'])->name('master.category.update');
+        Route::post('/category/delete', [MasterController::class, 'delete_category'])->name('master.category.delete');
+
         Route::get('/department', [MasterController::class, 'department'])->name('master.department');
+        Route::post('/department/table', [MasterController::class, 'department_table'])->name('master.department.table');
+        Route::post('/department/store', [MasterController::class, 'store_department'])->name('master.department.store');
+        Route::post('/department/update', [MasterController::class, 'update_department'])->name('master.department.update');
+        Route::post('/department/delete', [MasterController::class, 'delete_department'])->name('master.department.delete');
+        Route::post('/department/delete', [MasterController::class, 'delete_department'])->name('master.department.delete');
+
         Route::get('/check-item', [MasterController::class, 'check_item'])->name('master.check_item');
+        Route::post('/check-item/table', [MasterController::class, 'check_item_table'])->name('master.check_item.table');
+        Route::post('/check-item/store', [MasterController::class, 'store_check_item'])->name('master.check_item.store');
+        Route::post('/check-item/update', [MasterController::class, 'update_check_item'])->name('master.check_item.update');
+        Route::post('/check-item/delete', [MasterController::class, 'delete_check_item'])->name('master.check_item.delete');
     });
 
     // Fallback for 404 inside auth middleware

@@ -77,10 +77,7 @@
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                             <span class="text-sm whitespace-nowrap">Category</span>
                         </a>
-                        <a href="{{ url('data-master/process') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Process</span>
-                        </a>
+
                         <a href="{{ url('data-master/department') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                             <span class="text-sm whitespace-nowrap">Departement</span>
