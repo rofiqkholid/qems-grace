@@ -70,10 +70,55 @@ $isClosed = $genba->status === 'Close';
                     </div>
                 </div>
 
-                <!-- Status (spanning full width) -->
-                <div class="flex flex-col gap-2 col-span-2">
+                <!-- Department -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-slate-700 font-medium text-sm">Department</label>
+
+                    <!-- Department Display (Match Auditor Style) -->
+                    <div id="dept-display-container" class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm flex items-center justify-between h-[46px]">
+                        <span id="dept-display-text" class="truncate">
+                            {{ $genba->asign_to_dept ?? '-' }}
+                        </span>
+
+                        @if(!$isClosed)
+                        <button type="button" onclick="toggleDeptEdit()" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-blue-600 hover:bg-white transition-all ml-2" title="Edit Department">
+                            <i class="fa-solid fa-pencil text-xs"></i>
+                        </button>
+                        @endif
+                    </div>
+
+                    <!-- Department Edit (Hidden) -->
+                    <div id="dept-edit-container" class="hidden flex items-center gap-2 w-full h-[46px]">
+                        <div class="flex-1 h-full">
+                            @php
+                            $deptOptions = collect($departments)->map(function($d) {
+                            return ['id' => $d->id, 'name' => $d->id];
+                            })->values()->all();
+                            @endphp
+                            <x-searchable-select
+                                name="dept"
+                                id="dept-select"
+                                label="Department"
+                                :initialOptions="$deptOptions"
+                                :hideLabel="true"
+                                valueField="id"
+                                updateEvent="set-dept-value" />
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button type="button" onclick="saveDept()" class="mb-1 w-10 h-[42px] flex items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-all" title="Save">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </button>
+                            <button type="button" onclick="toggleDeptEdit()" class="mb-1 w-10 h-[42px] flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all" title="Cancel">
+                                <i class="fa-solid fa-times text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Status</label>
-                    <div>
+                    <div class="flex items-center h-[46px]">
                         <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium border {{ $genba->statusBadgeClass }}">
                             {{ $genba->status }}
                         </span>
@@ -167,9 +212,9 @@ $isClosed = $genba->status === 'Close';
             <!-- Execution Evidence Upload -->
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
                 <label class="text-slate-700 font-medium text-sm sm:pt-3">Evidence</label>
-                
+
                 <div class="w-full space-y-3">
-                    
+
                     @if(!$isClosed)
                     <div class="flex gap-2 flex-wrap">
                         <label class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
@@ -295,9 +340,29 @@ $isClosed = $genba->status === 'Close';
         }
 
         // Initialize existingImages array
-        const initialPaths = <?php echo json_encode($genba->execution_path); ?>;
         if (initialPaths) {
             existingImages = initialPaths.split(',').map(p => p.trim());
+        }
+
+        // Set initial department if exists
+        const currentDept = "{{ $genba->asign_to_dept }}";
+        const currentDeptName = "{{ $genba->asign_to_dept_name }}";
+        const allDepts = JSON.parse('@json($departments, JSON_HEX_APOS)');
+
+        if (currentDept) {
+            // Find name in master list to ensure consistency
+            // For this specific case, we want to show the ID (Key1) as the name
+            const displayName = currentDept;
+
+            // Delay slightly to ensure Alpine is ready
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('set-dept-value', {
+                    detail: {
+                        id: currentDept,
+                        name: displayName
+                    }
+                }));
+            }, 100);
         }
     });
 
@@ -326,6 +391,66 @@ $isClosed = $genba->status === 'Close';
         });
 
         event.target.value = ''; // Allow re-selecting same file
+    }
+
+    // Toggle Department Edit
+    function toggleDeptEdit() {
+        const displayContainer = document.getElementById('dept-display-container');
+        const editContainer = document.getElementById('dept-edit-container');
+
+        if (displayContainer.classList.contains('hidden')) {
+            displayContainer.classList.remove('hidden');
+            editContainer.classList.add('hidden');
+        } else {
+            displayContainer.classList.add('hidden');
+            editContainer.classList.remove('hidden');
+        }
+    }
+
+    // Save Department
+    function saveDept() {
+        const trcUnixId = document.getElementById('trc_unix_id').value;
+        // Searchable select component updates the hidden input with the id provided
+        const selectedDept = document.getElementById('dept-select').value;
+
+        if (!selectedDept) {
+            showToast('Please select a department', 'warning');
+            return;
+        }
+
+        // Show loading state appropriately if desired, for now just simple fetch
+
+        fetch("{{ route('genba.update_department') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    trc_unix_id: trcUnixId,
+                    dept: selectedDept
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showToast(data.message, 'success');
+
+                    // Update display text
+                    const displayText = document.getElementById('dept-display-text');
+                    displayText.textContent = selectedDept;
+                    displayText.classList.remove('hidden'); // Ensure visible if it was empty before
+
+                    // Toggle back
+                    toggleDeptEdit();
+                } else {
+                    showToast(data.message || 'Failed to update department', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error updating department:', err);
+                showToast('An error occurred while updating', 'error');
+            });
     }
 
     // Open camera stream (kept mostly same, just check limit)

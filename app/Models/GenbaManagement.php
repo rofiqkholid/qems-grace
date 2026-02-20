@@ -12,24 +12,14 @@ class GenbaManagement extends Model
 
     public static function get_all_departments()
     {
-        $departments = [
-            'PUR',
-            'HRGA',
-            'QC',
-            'TMF',
-            'SLS',
-            'FA',
-            'NPC',
-            'PPIC',
-            'DPC',
-            'ICT',
-            'STP',
-            'ASSY',
-            'MTC'
-        ];
+        // 1. Fetch from Master Department (Just Codes)
+        $masterDepts = DB::table('GenbaDept')
+            ->orderBy('Key1')
+            ->pluck('Key1')
+            ->toArray();
 
-        // Fetch distinct departments from DB to ensure we don't miss any dynamic ones
-        $deptFromDb = DB::connection('sqlsrv')
+        // 2. Fetch distinct used in transaction (legacy support)
+        $usedDepts = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl')
             ->select('asign_to_dept')
             ->distinct()
@@ -37,10 +27,24 @@ class GenbaManagement extends Model
             ->pluck('asign_to_dept')
             ->toArray();
 
-        $allDepartments = array_unique(array_merge($departments, $deptFromDb));
+        $allDepartments = array_unique(array_merge($masterDepts, $usedDepts));
         sort($allDepartments);
 
         return $allDepartments;
+    }
+
+    public static function get_master_departments()
+    {
+        // Fetch from Master Department with Name
+        return DB::table('GenbaDept')
+            ->select('Key1 as id', 'Desc as name')
+            ->orderBy('Key1')
+            ->get()
+            ->map(function ($item) {
+                return (object) ['id' => $item->id, 'name' => $item->name];
+            })
+            ->values()
+            ->all();
     }
 
     public static function get_genba_mng_activity_list($search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null)
@@ -58,6 +62,7 @@ class GenbaManagement extends Model
                 'a.Path',
                 'a.asign_to',
                 'a.asign_to_dept',
+                'a.asign_to_dept_name',
                 'a.type',
                 'a.area_detail',
                 'a.corrective_action',

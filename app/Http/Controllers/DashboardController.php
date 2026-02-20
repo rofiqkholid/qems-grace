@@ -298,7 +298,7 @@ class DashboardController extends Controller
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
-                DB::raw("SUM(CASE WHEN g.verification_result = 1 THEN 1 ELSE 0 END) AS TotalClose")
+                DB::raw("SUM(CASE WHEN (g.verification_result = '1' OR g.verification_result = 1) THEN 1 ELSE 0 END) AS TotalClose")
             )
             ->where(function ($q) {
                 $q->where('b.IsDelete', '!=', 1)

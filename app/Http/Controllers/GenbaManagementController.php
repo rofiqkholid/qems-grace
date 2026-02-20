@@ -202,6 +202,7 @@ class GenbaManagementController extends Controller
                     'a.Path',
                     'a.asign_to',
                     'a.asign_to_dept',
+                    'a.asign_to_dept_name',
                     'a.type',
                     'a.area_detail',
                     'a.area_detail',
@@ -244,9 +245,37 @@ class GenbaManagementController extends Controller
             // Add trc_unix_id for save action
             $genba->trc_unix_id = $id;
 
-            return view('activity.findings_genba_preview', compact('genba'));
+            $departments = GenbaManagement::get_master_departments();
+
+            return view('activity.findings_genba_preview', compact('genba', 'departments'));
         } catch (\Exception $e) {
             abort(404, 'Data tidak valid: ' . $e->getMessage());
+        }
+    }
+
+    public function update_department(Request $request)
+    {
+        try {
+            $id = $request->input('trc_unix_id');
+            $deptCode = $request->input('dept');
+
+            $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $id)[0]));
+
+            // Get updated department name
+            $deptInfo = DB::table('GenbaDept')->where('Key1', $deptCode)->first();
+            $deptName = $deptInfo ? $deptInfo->Desc : $deptCode;
+
+            DB::connection('sqlsrv')
+                ->table('GenbaProcAuditDtl')
+                ->where('SysID', $sysId)
+                ->update([
+                    'asign_to_dept' => $deptCode,
+                    'asign_to_dept_name' => $deptName
+                ]);
+
+            return response()->json(['code' => 200, 'message' => 'Department updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['code' => 500, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
 
@@ -817,7 +846,7 @@ class GenbaManagementController extends Controller
 
         $detail_area = $request->input('detail_area');
         $due_date = $request->input('due_date');
-        $type = $request->input('type');
+        $findingType = $request->input('type');
 
         if (!$due_date) {
             $check_date = GenbaManagement::check_date_activity($id_activity);
@@ -929,7 +958,7 @@ class GenbaManagementController extends Controller
                 'result' => $result,
                 'user_id' => $my_id,
                 'due_date' => $due_date,
-                'type' => $type,
+                'type' => $findingType,
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now()
             ]);
@@ -967,7 +996,7 @@ class GenbaManagementController extends Controller
                     'asign_to_dept_name' => $asign_to_dept_name,
                     'area_detail' => $detail_area,
                     'due_date' => $due_date,
-                    'type' => $type,
+                    'type' => $findingType,
                     'updated_at' => \Carbon\Carbon::now()
                 ]);
             $updates = true;
