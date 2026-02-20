@@ -80,7 +80,7 @@ $isClosed = $genba->status === 'Close';
                             {{ $genba->asign_to_dept ?? '-' }}
                         </span>
 
-                        @if(!$isClosed)
+                        @if(!$isClosed && $canEditDept)
                         <button type="button" onclick="toggleDeptEdit()" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-blue-600 hover:bg-white transition-all ml-2" title="Edit Department">
                             <i class="fa-solid fa-pencil text-xs"></i>
                         </button>

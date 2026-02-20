@@ -247,7 +247,14 @@ class GenbaManagementController extends Controller
 
             $departments = GenbaManagement::get_master_departments();
 
-            return view('activity.findings_genba_preview', compact('genba', 'departments'));
+            $canEditDept = false;
+            // Security: Restrict department editing to specific users
+            $allowedUsers = ['270723-001', '260422-001', '121020-002'];
+            if (in_array(optional(Auth::user())->username, $allowedUsers)) {
+                $canEditDept = true;
+            }
+
+            return view('activity.findings_genba_preview', compact('genba', 'departments', 'canEditDept'));
         } catch (\Exception $e) {
             abort(404, 'Data tidak valid: ' . $e->getMessage());
         }
@@ -255,6 +262,12 @@ class GenbaManagementController extends Controller
 
     public function update_department(Request $request)
     {
+        // Security: Restrict department editing to specific users
+        $allowedUsers = ['270723-001', '260422-001', '121020-002'];
+        if (!in_array(optional(Auth::user())->username, $allowedUsers)) {
+            return response()->json(['code' => 403, 'message' => 'Unauthorized']);
+        }
+
         try {
             $id = $request->input('trc_unix_id');
             $deptCode = $request->input('dept');
