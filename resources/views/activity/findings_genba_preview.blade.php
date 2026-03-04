@@ -597,12 +597,12 @@ $isClosed = $genba->status === 'Close';
 
         // Validation
         if (!actionPlan.trim()) {
-            showToast('Corrective Action harus diisi', 'error');
+            showToast('Corrective Action is required', 'error');
             return;
         }
 
         if (!preventiveAction.trim()) {
-            showToast('Preventive Action harus diisi', 'error');
+            showToast('Preventive Action is required', 'error');
             return;
         }
 
