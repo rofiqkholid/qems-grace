@@ -11,8 +11,13 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function data_cards()
+    public function data_cards(Request $request)
     {
+        $yearMonth = $request->input('yearMonth', date('Y-m'));
+        [$year, $month] = explode('-', $yearMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+
         // 1. Findings Open: evidence IS NULL AND status IS NULL, IsDelete = 0
         $findingsOpen = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
             ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
@@ -82,6 +87,8 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
+            ->whereYear('a.created_at', $year)
+            ->whereMonth('a.created_at', $month)
             ->count();
 
         // 5. All Findings: findings is not null, IsDelete = 0

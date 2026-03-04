@@ -257,10 +257,14 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-    // Fetch Data
-    $(document).ready(function() {
+    let statsPieChart = null;
+
+    function loadDataCards(yearMonth) {
         $.ajax({
             url: "{{ route('dashboard.data_cards') }}",
+            data: {
+                yearMonth: yearMonth
+            },
             type: "GET",
             dataType: "json",
             success: function(response) {
@@ -270,60 +274,66 @@
                 $('#val_dueDateCount').text(new Intl.NumberFormat().format(response.dueDateCount));
                 $('#val_findingsClose').text(new Intl.NumberFormat().format(response.findingsClose));
 
-                // Initialize Pie Chart
-                const ctx = document.getElementById('statsPieChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Open', 'Need Approve', 'Overdue', 'Closed'],
-                        datasets: [{
-                            data: [
-                                response.findingsOpen,
-                                response.needApprove,
-                                response.dueDateCount,
-                                response.findingsClose
-                            ],
-                            backgroundColor: [
-                                '#FEB019',
-                                '#008FFB',
-                                '#FF4560',
-                                '#00E396'
-                            ],
-                            borderWidth: 0,
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        animations: {
-                            animateScale: {
-                                type: 'number',
-                                easing: 'easeOutQuart',
-                                duration: 2000,
-                                delay: 500,
-                                from: 0,
-                                to: 1,
-                                loop: false
-                            },
-                            animateRotate: {
-                                type: 'number',
-                                easing: 'easeOutQuart',
-                                duration: 2000,
-                                delay: 500,
-                                from: 0,
-                                to: 360, // Full rotation
-                                loop: false
-                            }
+                const pieData = [
+                    response.findingsOpen,
+                    response.needApprove,
+                    response.dueDateCount,
+                    response.findingsClose
+                ];
+
+                if (statsPieChart) {
+                    statsPieChart.data.datasets[0].data = pieData;
+                    statsPieChart.update();
+                } else {
+                    const ctx = document.getElementById('statsPieChart').getContext('2d');
+                    statsPieChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Open', 'Need Approve', 'Overdue', 'Closed'],
+                            datasets: [{
+                                data: pieData,
+                                backgroundColor: [
+                                    '#FEB019',
+                                    '#008FFB',
+                                    '#FF4560',
+                                    '#00E396'
+                                ],
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
                         },
-                        plugins: {
-                            legend: {
-                                display: false // Use custom legend below
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            animations: {
+                                animateScale: {
+                                    type: 'number',
+                                    easing: 'easeOutQuart',
+                                    duration: 2000,
+                                    delay: 500,
+                                    from: 0,
+                                    to: 1,
+                                    loop: false
+                                },
+                                animateRotate: {
+                                    type: 'number',
+                                    easing: 'easeOutQuart',
+                                    duration: 2000,
+                                    delay: 500,
+                                    from: 0,
+                                    to: 360, // Full rotation
+                                    loop: false
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false // Use custom legend below
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             },
             error: function(xhr, status, error) {
                 console.error(error);
@@ -333,7 +343,7 @@
                 $('#val_findingsClose').text('Error');
             }
         });
-    });
+    }
 
     // --- Department Chart Logic ---
     let deptChart = null;
@@ -497,9 +507,11 @@
     $(document).ready(function() {
         const initialDate = $('#chartFilterDate').val();
         loadDeptChart(initialDate);
+        loadDataCards(initialDate);
 
         $('#chartFilterDate').change(function() {
             loadDeptChart($(this).val());
+            loadDataCards($(this).val());
         });
     });
 
