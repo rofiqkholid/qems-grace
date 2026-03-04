@@ -640,6 +640,8 @@ class GenbaManagementController extends Controller
                         'c.result as Hasil',
                         'c.Path'
                     )
+                    ->orderBy('b.Category', 'asc')
+                    ->orderBy('b.scope_id', 'asc')
                     ->orderBy('b.sortOrder', 'asc')
                     ->get()
                     ->unique('check_item_id');
