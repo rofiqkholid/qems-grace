@@ -17,6 +17,7 @@ class DashboardController extends Controller
         [$year, $month] = explode('-', $yearMonth);
         $year = (int) $year;
         $month = (int) $month;
+        $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
 
         // 1. Findings Open: evidence IS NULL AND status IS NULL, IsDelete = 0
         $findingsOpen = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
@@ -35,8 +36,7 @@ class DashboardController extends Controller
                     ->orWhereNull('a.result');
             })
             ->whereDate('a.due_date', '>=', today())
-            ->whereYear('a.created_at', $year)
-            ->whereMonth('a.created_at', $month)
+            ->where('a.created_at', '<=', $endOfMonth)
             ->count();
 
         // 2. Need Approve: evidence = '1' AND status = '1' AND verification_result IS NULL, IsDelete = 0
@@ -53,8 +53,7 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
-            ->whereYear('a.created_at', $year)
-            ->whereMonth('a.created_at', $month)
+            ->where('a.created_at', '<=', $endOfMonth)
             ->count();
 
         // 3. Due Date (Overdue): due_date < today AND (evidence is null/0 OR corrective_action is null/0)
@@ -77,8 +76,7 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
-            ->whereYear('a.created_at', $year)
-            ->whereMonth('a.created_at', $month)
+            ->where('a.created_at', '<=', $endOfMonth)
             ->count();
 
         // 4. Closed: evidence='1' AND corrective_action='1' AND verification_result='1'
@@ -102,8 +100,7 @@ class DashboardController extends Controller
             ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
             ->where('b.IsDelete', 0)
             ->whereNotNull('a.findings')
-            ->whereYear('a.created_at', $year)
-            ->whereMonth('a.created_at', $month)
+            ->where('a.created_at', '<=', $endOfMonth)
             ->count();
 
         return response()->json([
@@ -277,6 +274,7 @@ class DashboardController extends Controller
         [$year, $month] = explode('-', $yearMonth);
         $year = (int) $year;
         $month = (int) $month;
+        $endOfMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
 
         $departments = [
             'PUR',
@@ -358,8 +356,7 @@ class DashboardController extends Controller
                 $q->where('g.result', '!=', 1)
                     ->orWhereNull('g.result');
             })
-            ->whereYear('g.created_at', $year)
-            ->whereMonth('g.created_at', $month)
+            ->where('g.created_at', '<=', $endOfMonth)
             ->whereNotNull('g.asign_to_dept')
             ->groupBy('g.asign_to_dept')
             ->get()
