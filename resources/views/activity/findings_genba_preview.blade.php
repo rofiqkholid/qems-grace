@@ -302,6 +302,7 @@ $isClosed = $genba->status === 'Close';
 
 @push('scripts')
 <script>
+    const initialPaths = "{{ $genba->execution_path ?? '' }}";
     let stream = null;
     let newImages = [];
     let existingImages = []; // Array of existing paths
