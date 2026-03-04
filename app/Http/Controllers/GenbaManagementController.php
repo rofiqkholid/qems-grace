@@ -636,9 +636,11 @@ class GenbaManagementController extends Controller
                         'b.Photos as foto',
                         'b.Check_item',
                         'b.Check_item_eng',
+                        'b.sortOrder',
                         'c.result as Hasil',
                         'c.Path'
                     )
+                    ->orderBy('b.sortOrder', 'asc')
                     ->get()
                     ->unique('check_item_id');
 
@@ -651,7 +653,8 @@ class GenbaManagementController extends Controller
                         'check_item_eng' => $item->Check_item_eng,
                         'foto' => $item->foto,
                         'result' => $item->Hasil,
-                        'photo' => $item->Path
+                        'photo' => $item->Path,
+                        'sortOrder' => $item->sortOrder ?? $item->check_item_id
                     ];
                 }
 
