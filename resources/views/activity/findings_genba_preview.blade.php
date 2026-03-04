@@ -185,7 +185,7 @@ $isClosed = $genba->status === 'Close';
 
             <!-- Execution Comment -->
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
-                <label class="text-slate-700 font-medium text-sm sm:pt-3">Corrective Action</label>
+                <label class="text-slate-700 font-medium text-sm sm:pt-3">Corrective Action <span class="text-red-500">*</span></label>
                 <div class="w-full">
                     <textarea
                         id="actionPlanText"
@@ -198,7 +198,7 @@ $isClosed = $genba->status === 'Close';
 
             <!-- Preventive Action -->
             <div class="flex flex-col sm:grid sm:grid-cols-[180px_1fr] gap-2 sm:gap-4 items-start mb-6">
-                <label class="text-slate-700 font-medium text-sm sm:pt-3">Preventive Action</label>
+                <label class="text-slate-700 font-medium text-sm sm:pt-3">Preventive Action <span class="text-red-500">*</span></label>
                 <div class="w-full">
                     <textarea
                         id="preventiveActionText"
@@ -598,6 +598,11 @@ $isClosed = $genba->status === 'Close';
         // Validation
         if (!actionPlan.trim()) {
             showToast('Corrective Action harus diisi', 'error');
+            return;
+        }
+
+        if (!preventiveAction.trim()) {
+            showToast('Preventive Action harus diisi', 'error');
             return;
         }
 
