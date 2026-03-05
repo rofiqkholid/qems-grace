@@ -163,7 +163,6 @@ class AuthController extends Controller
     public function check_robot_login($username, $password)
     {
         $auth_epicor = self::auth_epicor($username, $password);
-        // dd($auth_epicor);
         $fullname  = $auth_epicor['fullname'];
         $email = $auth_epicor['email'];
         $security_mgr = $auth_epicor['security_mgr'];
@@ -281,9 +280,7 @@ class AuthController extends Controller
                 'verify' => false,
             ]);
 
-            // Mendapatkan body dari respons dan decode dari JSON ke array
             $responseBody = json_decode($response->getBody()->getContents(), true);
-            // Mengisi data dari respons
             $data['code'] = $responseBody['code'];
             $data['status'] = $responseBody['status'];
             $data['fullname'] = $responseBody['name'];
