@@ -10,4 +10,8 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    public static function get_host_api()
+    {
+        return 'https://localhost:8000/EPIAPI/';
+    }
 }
