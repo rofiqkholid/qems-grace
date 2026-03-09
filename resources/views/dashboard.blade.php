@@ -382,6 +382,11 @@
                                 backgroundColor: '#f59e0b', // amber-500 (Yellow)
                             },
                             {
+                                label: 'Need Approve',
+                                data: response.data_total_need_approve,
+                                backgroundColor: '#008FFB', // blue-500 (matching pie)
+                            },
+                            {
                                 label: 'Close',
                                 data: response.data_total_close,
                                 backgroundColor: '#22c55e', // green-500
@@ -390,11 +395,6 @@
                                 label: 'Overdue',
                                 data: response.data_total_overdue,
                                 backgroundColor: '#ef4444', // red-500
-                            },
-                            {
-                                label: 'Need Approve',
-                                data: response.data_total_need_approve,
-                                backgroundColor: '#008FFB', // blue-500 (matching pie)
                             }
                         ]
                     },
