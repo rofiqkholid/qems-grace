@@ -119,6 +119,10 @@ class GenbaManagement extends Model
                     });
             } elseif ($status == 'CLOSE') {
                 $result->whereNotNull('a.verification_result')->where('a.verification_result', '!=', '');
+            } elseif ($status == 'OVERDUE') {
+                $result->where(function ($q) {
+                    $q->whereNull('a.verification_result')->orWhere('a.verification_result', '');
+                })->where('a.due_date', '<', Carbon::now());
             }
         }
 

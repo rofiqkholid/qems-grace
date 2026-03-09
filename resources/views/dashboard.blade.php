@@ -108,6 +108,7 @@
                             label="Department"
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
+                            updateEvent="updateDeptFilter"
                             hideLabel="true" />
                     </div>
 
@@ -347,6 +348,7 @@
 
     // --- Department Chart Logic ---
     let deptChart = null;
+    let currentStatusFilter = ''; // Initial status filter
 
     function loadDeptChart(yearMonth) {
         $.ajax({
@@ -448,6 +450,40 @@
                                     return undefined; // Default behavior for updates (hide/show)
                                 },
                                 loop: false
+                            }
+                        },
+                        onClick: (e) => {
+                            const points = deptChart.getElementsAtEventForMode(e, 'nearest', {
+                                intersect: true
+                            }, true);
+
+                            if (points.length) {
+                                const firstPoint = points[0];
+                                const label = deptChart.data.labels[firstPoint.index];
+                                const datasetLabel = deptChart.data.datasets[firstPoint.datasetIndex].label;
+
+                                // 1. Update Department Filter
+                                window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                                    detail: {
+                                        id: label,
+                                        name: label
+                                    }
+                                }));
+
+                                // 2. Set Status Filter
+                                // Map display label to backend code
+                                let statusCode = '';
+                                if (datasetLabel === 'Open') statusCode = 'OPEN';
+                                else if (datasetLabel === 'Need Verif') statusCode = 'NEED_VERIF';
+                                else if (datasetLabel === 'Close') statusCode = 'CLOSE';
+                                else if (datasetLabel === 'Overdue') statusCode = 'OVERDUE';
+
+                                currentStatusFilter = statusCode;
+
+                                // 3. Reload Table
+                                if (typeof table !== 'undefined') {
+                                    table.ajax.reload();
+                                }
                             }
                         },
                         interaction: {
@@ -558,6 +594,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.status = currentStatusFilter;
                 }
             },
             columns: [{
@@ -660,6 +697,14 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            currentStatusFilter = '';
+            // Reset searchable select UI
+            window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
             table.ajax.reload();
         });
 

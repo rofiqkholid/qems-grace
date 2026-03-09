@@ -118,6 +118,7 @@ class DashboardController extends Controller
         $date_to = $request->date_to;
         $auditor = $request->auditor;
         $dept = $request->dept;
+        $status_filter = $request->status;
         $columns = array(
             0 => 'a.SysID',
             1 => 'DocNum',
@@ -130,7 +131,7 @@ class DashboardController extends Controller
             8 => 'a.SysID'
         );
 
-        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
@@ -138,18 +139,18 @@ class DashboardController extends Controller
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
         if (empty($search)) {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
         } else {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
-            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)->count();
         }
 
         $data = array();
