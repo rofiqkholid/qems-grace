@@ -377,10 +377,6 @@ class DashboardController extends Controller
             $overdue = $openOverdueResults[$dept]->TotalOverdue ?? 0;
             $needApprove = $openOverdueResults[$dept]->TotalNeedApprove ?? 0;
 
-            if ($open == 0 && $close == 0 && $overdue == 0 && $needApprove == 0) {
-                continue;
-            }
-
             $deptName = $dept;
             if ($deptName === 'TS') $deptName = 'Mtc';
 
