@@ -457,7 +457,10 @@
                         scales: {
                             x: {
                                 grid: {
-                                    display: false
+                                    display: true,
+                                    drawOnChartArea: true,
+                                    drawTicks: false,
+                                    color: 'rgba(203, 213, 225, 0.4)', // slate-300 with opacity
                                 }
                             },
                             y: {
