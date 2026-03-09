@@ -54,16 +54,9 @@
                         <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
                             <div class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full bg-[#008FFB] shadow-sm shadow-blue-200"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Need Approve</span>
+                                <span class="font-semibold text-slate-700 text-xs text-nowrap">Need Verif</span>
                             </div>
                             <span id="val_needApprove" class="font-bold text-slate-800 text-xs">...</span>
-                        </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
-                            <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Overdue</span>
-                            </div>
-                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
@@ -71,6 +64,13 @@
                                 <span class="font-semibold text-slate-700 text-xs">Closed</span>
                             </div>
                             <span id="val_findingsClose" class="font-bold text-slate-800 text-xs">...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
+                                <span class="font-semibold text-slate-700 text-xs">Overdue</span>
+                            </div>
+                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                     </div>
                 </div>
@@ -277,8 +277,8 @@
                 const pieData = [
                     response.findingsOpen,
                     response.needApprove,
-                    response.dueDateCount,
-                    response.findingsClose
+                    response.findingsClose,
+                    response.dueDateCount
                 ];
 
                 if (statsPieChart) {
@@ -289,14 +289,14 @@
                     statsPieChart = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Open', 'Need Approve', 'Overdue', 'Closed'],
+                            labels: ['Open', 'Need Verif', 'Closed', 'Overdue'],
                             datasets: [{
                                 data: pieData,
                                 backgroundColor: [
                                     '#FEB019',
                                     '#008FFB',
-                                    '#FF4560',
-                                    '#00E396'
+                                    '#00E396',
+                                    '#FF4560'
                                 ],
                                 borderWidth: 0,
                                 hoverOffset: 4
@@ -382,7 +382,7 @@
                                 backgroundColor: '#f59e0b', // amber-500 (Yellow)
                             },
                             {
-                                label: 'Need Approve',
+                                label: 'Need Verif',
                                 data: response.data_total_need_approve,
                                 backgroundColor: '#008FFB', // blue-500 (matching pie)
                             },
