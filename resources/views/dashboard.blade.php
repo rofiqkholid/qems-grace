@@ -549,15 +549,34 @@
         });
     }
 
+    function updateDateInputs(yearMonth) {
+        if (!yearMonth) return;
+        const [year, month] = yearMonth.split('-');
+        const startDate = `${year}-${month}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+        
+        $('#dateFrom').val(startDate);
+        $('#dateTo').val(endDate);
+
+        // Trigger reload if table exists
+        if (table) {
+            table.ajax.reload();
+        }
+    }
+
     // Initialize Chart
     $(document).ready(function() {
         const initialDate = $('#chartFilterDate').val();
         loadDeptChart(initialDate);
         loadDataCards(initialDate);
+        updateDateInputs(initialDate);
 
         $('#chartFilterDate').change(function() {
-            loadDeptChart($(this).val());
-            loadDataCards($(this).val());
+            const val = $(this).val();
+            loadDeptChart(val);
+            loadDataCards(val);
+            updateDateInputs(val);
         });
     });
 
