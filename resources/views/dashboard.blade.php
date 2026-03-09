@@ -348,6 +348,7 @@
 
     // --- Department Chart Logic ---
     let deptChart = null;
+    let table = null; // Global table variable
     let currentStatusFilter = ''; // Initial status filter
 
     function loadDeptChart(yearMonth) {
@@ -481,7 +482,7 @@
                                 currentStatusFilter = statusCode;
 
                                 // 3. Reload Table
-                                if (typeof table !== 'undefined') {
+                                if (table) {
                                     table.ajax.reload();
                                 }
                             }
@@ -582,7 +583,7 @@
     // --- Findings Table Logic (Ported) ---
 
     $(document).ready(function() {
-        var table = $('#findingsTable').DataTable({
+        table = $('#findingsTable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
