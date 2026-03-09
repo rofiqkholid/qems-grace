@@ -364,7 +364,8 @@
                 const allValues = [
                     ...response.data_total_open,
                     ...response.data_total_close,
-                    ...response.data_total_overdue
+                    ...response.data_total_overdue,
+                    ...response.data_total_need_approve
                 ];
                 const maxValue = Math.max(...allValues, 0);
                 const suggestedMax = maxValue + 1;
@@ -389,6 +390,11 @@
                                 label: 'Overdue',
                                 data: response.data_total_overdue,
                                 backgroundColor: '#ef4444', // red-500
+                            },
+                            {
+                                label: 'Need Approve',
+                                data: response.data_total_need_approve,
+                                backgroundColor: '#008FFB', // blue-500 (matching pie)
                             }
                         ]
                     },
