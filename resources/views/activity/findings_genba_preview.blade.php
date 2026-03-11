@@ -36,7 +36,7 @@ $isClosed = $genba->status === 'Close';
                 <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Due Date</label>
                     @php
-                    $isOverdue = !$isClosed && $genba->due_date && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay();
+                    $isOverdue = !$isClosed && $genba->status !== 'Process Verification' && $genba->due_date && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay();
                     @endphp
                     <div class="rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm flex items-center justify-between transition-all duration-300 {{ $isOverdue ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-slate-100 border-transparent text-slate-800' }}">
                         <div class="flex items-center gap-2">
