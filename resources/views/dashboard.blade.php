@@ -54,16 +54,9 @@
                         <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
                             <div class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full bg-[#008FFB] shadow-sm shadow-blue-200"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Need Approve</span>
+                                <span class="font-semibold text-slate-700 text-xs text-nowrap">Need Verif</span>
                             </div>
                             <span id="val_needApprove" class="font-bold text-slate-800 text-xs">...</span>
-                        </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
-                            <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Overdue</span>
-                            </div>
-                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
@@ -71,6 +64,13 @@
                                 <span class="font-semibold text-slate-700 text-xs">Closed</span>
                             </div>
                             <span id="val_findingsClose" class="font-bold text-slate-800 text-xs">...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
+                                <span class="font-semibold text-slate-700 text-xs">Overdue</span>
+                            </div>
+                            <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                     </div>
                 </div>
@@ -108,6 +108,7 @@
                             label="Department"
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
+                            updateEvent="updateDeptFilter"
                             hideLabel="true" />
                     </div>
 
@@ -277,8 +278,8 @@
                 const pieData = [
                     response.findingsOpen,
                     response.needApprove,
-                    response.dueDateCount,
-                    response.findingsClose
+                    response.findingsClose,
+                    response.dueDateCount
                 ];
 
                 if (statsPieChart) {
@@ -289,14 +290,14 @@
                     statsPieChart = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Open', 'Need Approve', 'Overdue', 'Closed'],
+                            labels: ['Open', 'Need Verif', 'Closed', 'Overdue'],
                             datasets: [{
                                 data: pieData,
                                 backgroundColor: [
                                     '#FEB019',
                                     '#008FFB',
-                                    '#FF4560',
-                                    '#00E396'
+                                    '#00E396',
+                                    '#FF4560'
                                 ],
                                 borderWidth: 0,
                                 hoverOffset: 4
@@ -347,6 +348,8 @@
 
     // --- Department Chart Logic ---
     let deptChart = null;
+    let table = null; // Global table variable
+    let currentStatusFilter = ''; // Initial status filter
 
     function loadDeptChart(yearMonth) {
         $.ajax({
@@ -364,7 +367,8 @@
                 const allValues = [
                     ...response.data_total_open,
                     ...response.data_total_close,
-                    ...response.data_total_overdue
+                    ...response.data_total_overdue,
+                    ...response.data_total_need_approve
                 ];
                 const maxValue = Math.max(...allValues, 0);
                 const suggestedMax = maxValue + 1;
@@ -379,6 +383,11 @@
                                 label: 'Open',
                                 data: response.data_total_open,
                                 backgroundColor: '#f59e0b', // amber-500 (Yellow)
+                            },
+                            {
+                                label: 'Need Verif',
+                                data: response.data_total_need_approve,
+                                backgroundColor: '#008FFB', // blue-500 (matching pie)
                             },
                             {
                                 label: 'Close',
@@ -444,6 +453,40 @@
                                 loop: false
                             }
                         },
+                        onClick: (e) => {
+                            const points = deptChart.getElementsAtEventForMode(e, 'nearest', {
+                                intersect: true
+                            }, true);
+
+                            if (points.length) {
+                                const firstPoint = points[0];
+                                const label = deptChart.data.labels[firstPoint.index];
+                                const datasetLabel = deptChart.data.datasets[firstPoint.datasetIndex].label;
+
+                                // 1. Update Department Filter
+                                window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                                    detail: {
+                                        id: label,
+                                        name: label
+                                    }
+                                }));
+
+                                // 2. Set Status Filter
+                                // Map display label to backend code
+                                let statusCode = '';
+                                if (datasetLabel === 'Open') statusCode = 'OPEN';
+                                else if (datasetLabel === 'Need Verif') statusCode = 'NEED_VERIF';
+                                else if (datasetLabel === 'Close') statusCode = 'CLOSE';
+                                else if (datasetLabel === 'Overdue') statusCode = 'OVERDUE';
+
+                                currentStatusFilter = statusCode;
+
+                                // 3. Reload Table
+                                if (table) {
+                                    table.ajax.reload();
+                                }
+                            }
+                        },
                         interaction: {
                             intersect: false,
                             mode: 'index',
@@ -451,7 +494,10 @@
                         scales: {
                             x: {
                                 grid: {
-                                    display: false
+                                    display: true,
+                                    drawOnChartArea: true,
+                                    drawTicks: false,
+                                    color: 'rgba(203, 213, 225, 0.4)', // slate-300 with opacity
                                 }
                             },
                             y: {
@@ -537,7 +583,7 @@
     // --- Findings Table Logic (Ported) ---
 
     $(document).ready(function() {
-        var table = $('#findingsTable').DataTable({
+        table = $('#findingsTable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -549,6 +595,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.status = currentStatusFilter;
                 }
             },
             columns: [{
@@ -651,6 +698,14 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            currentStatusFilter = '';
+            // Reset searchable select UI
+            window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
             table.ajax.reload();
         });
 

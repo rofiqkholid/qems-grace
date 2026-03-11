@@ -118,6 +118,7 @@ class DashboardController extends Controller
         $date_to = $request->date_to;
         $auditor = $request->auditor;
         $dept = $request->dept;
+        $status_filter = $request->status;
         $columns = array(
             0 => 'a.SysID',
             1 => 'DocNum',
@@ -130,7 +131,7 @@ class DashboardController extends Controller
             8 => 'a.SysID'
         );
 
-        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
@@ -138,18 +139,18 @@ class DashboardController extends Controller
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
         if (empty($search)) {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
         } else {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
-            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept)->count();
+            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter)->count();
         }
 
         $data = array();
@@ -346,6 +347,13 @@ class DashboardController extends Controller
             SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL AND g.verification_result IS NULL
                      AND CAST(g.due_date AS DATE) < CAST(GETDATE() AS DATE)
                      THEN 1 ELSE 0 END) AS TotalOverdue
+            "),
+                // Logic NEED APPROVE: Sudah fix (evidence & action), Belum verify
+                DB::raw("
+            SUM(CASE WHEN (g.corrective_action = '1' OR g.corrective_action = 1) 
+                     AND (g.evidence = '1' OR g.evidence = 1) 
+                     AND (g.verification_result IS NULL OR g.verification_result = '0' OR g.verification_result = 0)
+                     THEN 1 ELSE 0 END) AS TotalNeedApprove
             ")
             )
             ->where(function ($q) {
@@ -368,9 +376,7 @@ class DashboardController extends Controller
 
             $open = $openOverdueResults[$dept]->TotalOpen ?? 0;
             $overdue = $openOverdueResults[$dept]->TotalOverdue ?? 0;
-
-            if ($open == 0 && $close == 0 && $overdue == 0) {
-            }
+            $needApprove = $openOverdueResults[$dept]->TotalNeedApprove ?? 0;
 
             $deptName = $dept;
             if ($deptName === 'TS') $deptName = 'Mtc';
@@ -380,6 +386,7 @@ class DashboardController extends Controller
                 'open' => (int) $open,
                 'close' => (int) $close,
                 'overdue' => (int) $overdue,
+                'need_approve' => (int) $needApprove,
             ];
         }
 
@@ -392,6 +399,7 @@ class DashboardController extends Controller
             'data_total_open' => array_column($data, 'open'),
             'data_total_close' => array_column($data, 'close'),
             'data_total_overdue' => array_column($data, 'overdue'),
+            'data_total_need_approve' => array_column($data, 'need_approve'),
             'data_name_dept' => array_column($data, 'name'),
         ]);
     }
