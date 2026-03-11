@@ -41,7 +41,7 @@ $isClosed = $genba->status === 'Close';
                     <div class="rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm flex items-center justify-between transition-all duration-300 {{ $isOverdue ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-slate-100 border-transparent text-slate-800' }}">
                         <div class="flex items-center gap-2">
                             @if($isOverdue)
-                            <i class="fa-solid fa-clock-rotate-left text-red-500 animate-pulse"></i>
+                            <i class="fa-solid fa-triangle-exclamation text-red-500 animate-pulse"></i>
                             @endif
                             <span>{{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}</span>
                         </div>
