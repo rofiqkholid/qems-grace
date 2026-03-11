@@ -46,7 +46,7 @@ $isClosed = $genba->status === 'Close';
                             <span>{{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}</span>
                         </div>
                         @if($isOverdue)
-                        <span class="text-[10px] font-bold uppercase tracking-wider ml-2 opacity-70">Overdue</span>
+                        <span class="text-[13px] text-red-500 ml-2 opacity-70">Overdue</span>
                         @endif
                     </div>
                 </div>
