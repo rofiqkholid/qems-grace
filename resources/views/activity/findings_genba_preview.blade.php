@@ -34,7 +34,12 @@ $isClosed = $genba->status === 'Close';
 
                 <!-- Due Date -->
                 <div class="flex flex-col gap-2">
-                    <label class="text-slate-700 font-medium text-sm">Due Date</label>
+                    <div class="flex items-center gap-2">
+                        <label class="text-slate-700 font-medium text-sm">Due Date</label>
+                        @if(!$isClosed && $genba->due_date && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay())
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-600 border border-red-200">Overdue</span>
+                        @endif
+                    </div>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
                         {{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}
                     </div>
@@ -559,28 +564,14 @@ $isClosed = $genba->status === 'Close';
             </button>
         `;
 
-        // For new images, we just append since existing are already rendered by server-side blade loop for initial load
-        // But wait, the server-side loop has its own onclick. I should unify this or just let the server render the initial state.
-
-        // Actually, this function is mostly for NEW images. Existing images are rendered by Blade.
-        // But if I want to use this for unified rendering, I'd need to clear container first.
-        // For now, let's just append new ones.
-
         container.appendChild(div);
 
-        // Update index for removal? The removeImage function needs to know ONE thing: is it existing or new?
-        // If new, remove from newImages array by matching src string or index.
-        // Let's modify removeImage to handle the DOM element and data.
     }
 
     function removeImage(btn, pathOrIndex) {
         const parentDiv = btn.closest('.group');
         const container = document.getElementById('evidencePreviewContainer');
         const placeholder = document.getElementById('placeholderText');
-
-        // Check if it's existing or new
-        // Existing buttons have a path string. New buttons have empty string passed in my render logic above? 
-        // Actually, let's fix the render logic.
 
         const img = parentDiv.querySelector('img');
         const src = img.src;
