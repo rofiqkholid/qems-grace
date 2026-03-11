@@ -34,14 +34,20 @@ $isClosed = $genba->status === 'Close';
 
                 <!-- Due Date -->
                 <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-2">
-                        <label class="text-slate-700 font-medium text-sm">Due Date</label>
-                        @if(!$isClosed && $genba->due_date && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay())
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-600 border border-red-200">Overdue</span>
+                    <label class="text-slate-700 font-medium text-sm">Due Date</label>
+                    @php
+                    $isOverdue = !$isClosed && $genba->due_date && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay();
+                    @endphp
+                    <div class="rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm flex items-center justify-between border transition-all duration-300 {{ $isOverdue ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-slate-100 border-transparent text-slate-800' }}">
+                        <div class="flex items-center gap-2">
+                            @if($isOverdue)
+                            <i class="fa-solid fa-clock-rotate-left text-red-500 animate-pulse"></i>
+                            @endif
+                            <span>{{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}</span>
+                        </div>
+                        @if($isOverdue)
+                        <span class="text-[10px] font-bold uppercase tracking-wider ml-2 opacity-70">Overdue</span>
                         @endif
-                    </div>
-                    <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->due_date ? \Carbon\Carbon::parse($genba->due_date)->format('d/m/Y') : '-' }}
                     </div>
                 </div>
 
