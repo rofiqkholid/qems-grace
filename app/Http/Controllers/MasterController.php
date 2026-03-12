@@ -408,20 +408,25 @@ class MasterController extends Controller
 
     public function check_item()
     {
-        return view('master.check_item');
+        $categories = DB::table('GenbaCategory')->get();
+        return view('master.check_item', compact('categories'));
     }
 
     public function check_item_table(Request $request)
     {
-        $query = DB::table('GenbaAuditItem')->orderBy('SysID', 'desc');
+        $query = DB::table('GenbaAuditItem as a')
+            ->leftJoin('GenbaCategory as b', 'b.SysID', '=', 'a.Category')
+            ->select('a.*', 'b.Category as CategoryName')
+            ->orderBy('a.SysID', 'desc');
 
         // Search
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
             $query->where(function ($q) use ($searchValue) {
-                $q->where('Scope_item', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('Check_item', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('Check_item_eng', 'LIKE', "%{$searchValue}%");
+                $q->where('a.Scope_item', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('a.Check_item', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('a.Check_item_eng', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('b.Category', 'LIKE', "%{$searchValue}%");
             });
         }
 
@@ -445,7 +450,8 @@ class MasterController extends Controller
                 return [
                     "no" => $start + $key + 1,
                     "Scope_id" => $item->Scope_id,
-                    "Category" => $item->Category,
+                    "Category" => $item->CategoryName,
+                    "Category_id" => $item->Category,
                     "Scope_item" => $item->Scope_item,
                     "Check_item" => $item->Check_item,
                     "Check_item_eng" => $item->Check_item_eng,

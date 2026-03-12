@@ -78,18 +78,22 @@
                 @csrf
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
+                        <input type="hidden" name="scope_id" value="1">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Scope ID</label>
-                            <input type="number" name="scope_id" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Scope ID">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Category <span class="text-red-500">*</span></label>
+                            <x-searchable-select 
+                                name="category" 
+                                id="create_category_select" 
+                                label="Category" 
+                                :required="true"
+                                :hideLabel="true"
+                                apiUrl="{{ route('genba.header.category') }}"
+                            />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                            <input type="text" name="category" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Category">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item <span class="text-red-500">*</span></label>
+                            <input type="text" name="scope_item" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Scope Item">
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item</label>
-                        <input type="text" name="scope_item" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Scope Item">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (ID)</label>
@@ -125,18 +129,23 @@
                 <input type="hidden" name="sys_id" id="edit_sys_id">
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
+                        <input type="hidden" name="scope_id" id="edit_scope_id">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Scope ID</label>
-                            <input type="number" name="scope_id" id="edit_scope_id" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Category <span class="text-red-500">*</span></label>
+                            <x-searchable-select 
+                                name="category" 
+                                id="edit_category" 
+                                label="Category" 
+                                :required="true"
+                                :hideLabel="true"
+                                apiUrl="{{ route('genba.header.category') }}"
+                                updateEvent="update-category"
+                            />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                            <input type="text" name="category" id="edit_category" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item <span class="text-red-500">*</span></label>
+                            <input type="text" name="scope_item" id="edit_scope_item" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item</label>
-                        <input type="text" name="scope_item" id="edit_scope_item" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (ID)</label>
@@ -225,9 +234,38 @@
                 {
                     data: 'action',
                     name: 'action',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center'
+                    render: function(data, type, row) {
+                        return `<div class="flex items-center justify-center gap-2">
+                                <button type="button" title="Edit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
+                                    onclick="handleEdit(this)"
+                                    data-sysid="${row.SysID}"
+                                    data-scope_id="${row.Scope_id}"
+                                    data-category_id="${row.Category_id}"
+                                    data-scope_item="${row.Scope_item}"
+                                    data-check_item="${row.Check_item}"
+                                    data-check_item_eng="${row.Check_item_eng}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
+                                    <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path><path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
+                                </svg>
+                                </button>
+                                
+                                <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" 
+                                    id="btn_delete_${row.no}" 
+                                    onclick="handleDelete(${row.SysID}, ${row.no})">
+                                    
+                                    <span id="icon_delete_${row.no}" class="flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none">
+                                            <path opacity="0.3" d="M5 9C5 8.44772 5.44772 8 6 8H18C18.5523 8 19 8.44772 19 9V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V9Z" fill="currentColor"/>
+                                            <path d="M5 5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V7H5V5Z" fill="currentColor"/>
+                                            <path d="M9 4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V4H9V4Z" fill="currentColor"/>
+                                        </svg>
+                                    </span>
+                                    
+                                    <span id="loader_delete_${row.no}" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                                </button>
+                           </div>`;
+                    }
                 }
             ],
             language: {
@@ -261,14 +299,23 @@
     function handleEdit(btn) {
         const sysId = btn.getAttribute('data-sysid');
         const scopeId = btn.getAttribute('data-scope_id');
-        const category = btn.getAttribute('data-category');
+        const categoryId = btn.getAttribute('data-category_id');
+        const categoryName = btn.getAttribute('data-category'); // The data-category attribute now holds the name
         const scopeItem = btn.getAttribute('data-scope_item');
         const checkItem = btn.getAttribute('data-check_item');
         const checkItemEng = btn.getAttribute('data-check_item_eng');
 
         $('#edit_sys_id').val(sysId);
         $('#edit_scope_id').val(scopeId);
-        $('#edit_category').val(category);
+        
+        // Update searchable-select
+        window.dispatchEvent(new CustomEvent('update-category', {
+            detail: {
+                id: categoryId,
+                name: categoryName
+            }
+        }));
+
         $('#edit_scope_item').val(scopeItem);
         $('#edit_check_item').val(checkItem);
         $('#edit_check_item_eng').val(checkItemEng);
