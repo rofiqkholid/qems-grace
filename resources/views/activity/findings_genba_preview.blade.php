@@ -130,7 +130,7 @@ $isClosed = $genba->status === 'Close';
                 <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Close Date</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm h-[46px] flex items-center">
-                        {{ $genba->complete_date ? \Carbon\Carbon::parse($genba->complete_date)->format('d/m/Y') : '-' }}
+                        {{ $genba->complete_date ? \Carbon\Carbon::parse($genba->complete_date)->format('d/m/Y') : '' }}
                     </div>
                 </div>
             </div>
