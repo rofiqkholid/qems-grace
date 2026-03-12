@@ -910,7 +910,7 @@ class GenbaManagementController extends Controller
                 $date_header = $d->Date;
             }
             if ($date_header) {
-                $due_date = Carbon::parse($date_header)->addWeeks(2)->format('Y-m-d');
+                $due_date = Carbon::parse($date_header)->addWeeks(1)->format('Y-m-d');
             }
         }
 
