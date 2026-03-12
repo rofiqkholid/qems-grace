@@ -31,11 +31,13 @@ class GenbaManagementController extends Controller
             1 => 'DocNum',
             2 => 'a.Path',
             3 => 'b.Date',
-            4 => 'b.Area_Checked',
-            5 => 'a.findings',
-            6 => 'b.Auditor',
-            7 => 'a.status',
-            8 => 'a.SysID'
+            4 => 'a.area_detail',
+            5 => 'b.Area_Checked',
+            6 => 'a.asign_to_dept',
+            7 => 'a.findings',
+            8 => 'b.Auditor',
+            9 => 'a.status',
+            10 => 'a.SysID'
         );
         $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status)->count();
         $totalFiltered = $totalData;
@@ -139,6 +141,8 @@ class GenbaManagementController extends Controller
                 $nestedData['date'] = $date;
 
                 $nestedData['path'] = $post->Path;
+                $nestedData['process'] = $post->process;
+                $nestedData['station'] = $post->area_detail;
                 $nestedData['area_checked'] = $post->Area_Checked;
                 $nestedData['dept'] = $post->asign_to_dept;
                 $nestedData['findings'] = $post->findings;
@@ -205,7 +209,7 @@ class GenbaManagementController extends Controller
                     'a.asign_to_dept_name',
                     'a.type',
                     'a.area_detail',
-                    'a.area_detail',
+                    'b.process',
                     'a.corrective_action',
                     'a.preventive_action',
                     'a.evidence',
@@ -302,10 +306,9 @@ class GenbaManagementController extends Controller
             0 => 'SysID',
             1 => 'date',
             2 => 'process',
-            3 => 'station',
-            4 => 'Area_checked',
-            5 => 'auditor',
-            6 => 'category',
+            3 => 'Area_checked',
+            4 => 'auditor',
+            5 => 'category',
         );
         $totalData = GenbaManagement::get_genba_activity_list($search, $status_id)->count();
         $totalFiltered = $totalData;
@@ -364,7 +367,7 @@ class GenbaManagementController extends Controller
                 $nestedData['no'] = $no;
                 $nestedData['date'] = $date;
                 $nestedData['process'] = $post->process;
-                $nestedData['station'] = $post->station;
+                $nestedData['station'] = $post->station ?: $post->process;
                 $nestedData['line_checked'] = $post->Area_checked;
                 $nestedData['auditor'] = $post->Auditor;
                 $nestedData['category'] = $post->category;
@@ -590,8 +593,8 @@ class GenbaManagementController extends Controller
         $date = $request->input('date');
         $auditor = $request->input('auditor');
         $category = $request->input('category'); // Updated from genba_category to match form name
-        $station = $request->input('station');
         $process = $request->input('process');
+        $station = $request->input('station') ?? $process;
 
         $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process);
 
@@ -620,7 +623,7 @@ class GenbaManagementController extends Controller
 
                 $data["code"] = 200;
                 $data["id_activity"] = $db->first()->SysID;
-                $data["process"] = $process . '-' . $station;
+                $data["process"] = $process;
 
                 $dbScopes = DB::table('GenbaAuditItem as b')
                     ->leftJoin('GenbaProcAuditDtl as c', function ($join) use ($insert) {
@@ -922,6 +925,10 @@ class GenbaManagementController extends Controller
             $errors[] = 'Assign to is required';
         }
 
+        if (empty($detail_area)) {
+            $errors[] = 'Station / Mech. Num is required';
+        }
+
         // Check if there are photos (either new or existing)
         $photoPaths = [];
 
@@ -1213,6 +1220,33 @@ class GenbaManagementController extends Controller
                 'message' => 'Failed to save data.',
                 'photos' => ''
             ]);
+        }
+    }
+
+    public function get_stations(Request $request)
+    {
+        try {
+            $search = $request->input('search');
+            $page = $request->input('page', 1);
+            $perPage = 20;
+
+            $query = GenbaManagement::get_stations($search);
+            
+            $stations = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'items' => collect($stations->items())->map(function($item) {
+                    return [
+                        'id' => $item->Station,
+                        'name' => ($item->Station ?? 'N/A') . ' (' . ($item->LineDesc ?? 'N/A') . ')'
+                    ];
+                })->values(),
+                'pagination' => [
+                    'more' => $stations->hasMorePages()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['items' => [], 'pagination' => ['more' => false], 'error' => $e->getMessage()]);
         }
     }
 }

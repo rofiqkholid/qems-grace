@@ -75,6 +75,7 @@ class GenbaManagement extends Model
                 'a.verification_result',
                 'a.verification_result',
                 'b.Auditor',
+                'b.process',
                 DB::raw("FORMAT(b.Date, 'ddMMyy') + '-' + CAST(a.SysID AS VARCHAR(20)) as DocNum")
             )
             ->where('b.IsDelete', 0)
@@ -86,6 +87,7 @@ class GenbaManagement extends Model
                 $q->where('b.Area_Checked', 'LIKE', "%{$search}%")
                     ->orWhere('b.Auditor', 'LIKE', "%{$search}%")
                     ->orWhere('a.findings', 'LIKE', "%{$search}%")
+                    ->orWhere('a.area_detail', 'LIKE', "%{$search}%")
                     ->orWhere(DB::raw("FORMAT(b.Date, 'ddMMyy') + '-' + CAST(a.SysID AS VARCHAR(20))"), 'LIKE', "%{$search}%");
             });
         }
@@ -166,6 +168,7 @@ class GenbaManagement extends Model
                 $q->where('a.asign_to_dept', 'LIKE', "%{$search}%")
                     ->orWhere('b.Auditor', 'LIKE', "%{$search}%")
                     ->orWhere('a.findings', 'LIKE', "%{$search}%")
+                    ->orWhere('a.area_detail', 'LIKE', "%{$search}%")
                     ->orWhere(DB::raw("FORMAT(b.Date, 'ddMMyy') + '-' + CAST(a.SysID AS VARCHAR(20))"), 'LIKE', "%{$search}%");
             });
         }
@@ -393,5 +396,22 @@ class GenbaManagement extends Model
             ->where('scope_id', $scope_id)
             ->where('check_item_id', $check_item_id);
         return $result;
+    }
+
+    public static function get_stations($search = null)
+    {
+        $query = DB::connection('sqlsrv2')
+            ->table('erp.ResourceGroup as a')
+            ->leftJoin('erp.Resource as b', 'a.ResourceGrpID', '=', 'b.ResourceGrpID')
+            ->select('a.ResourceGrpID as Line', 'a.Description as LineDesc', 'b.ResourceID as Station');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('b.ResourceID', 'like', '%' . $search . '%')
+                    ->orWhere('a.Description', 'like', '%' . $search . '%');
+            });
+        }
+
+        return $query;
     }
 }

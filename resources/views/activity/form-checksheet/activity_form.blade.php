@@ -68,7 +68,7 @@
                             x-transition:leave-end="opacity-0 -translate-y-2"
                             style="display: none;"
                             class="absolute right-0 top-full mt-2 w-72 p-4 bg-white rounded-xl border border-slate-200 z-[100]">
-                            <h4 class="font-semibold text-slate-800 mb-3">Information</h4>
+                            <h3 class="text-sm font-semibold text-slate-700 mb-2">Process</h3>
                             <div class='text-sm space-y-3 text-slate-600'>
                                 <div class='flex items-start gap-2'>
                                     <i class='fa fa-circle text-blue-500 mt-1 text-xs'></i>
@@ -193,55 +193,59 @@
                                 <!-- Modal Body - 2 Column Layout -->
                                 <div class="px-8 py-6 bg-slate-50 flex-1 overflow-y-auto">
                                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        <!-- Left Column: Evidence Photos -->
-                                        <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                            <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-base">
-                                                <i class="fas fa-image text-blue-500"></i> Finding Captured
-                                            </h4>
+                                        <!-- Left Column -->
+                                        <div class="space-y-5">
+                                            <!-- Box: Evidence Photos -->
+                                            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                                <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-base">
+                                                    <i class="fas fa-image text-blue-500"></i> Finding Captured
+                                                </h4>
 
-                                            <div class="grid grid-cols-2 gap-3" x-data>
-                                                <!-- Native Camera Trigger -->
-                                                <div class="relative group">
-                                                    <input type="file"
-                                                        id="cameraInput_{{ $itemId }}"
-                                                        accept="image/*"
-                                                        capture="environment"
-                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                        @change="handleFileUpload($event, {{ $itemId }})">
-                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
-                                                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                            <i class="fas fa-camera"></i>
+                                                <div class="grid grid-cols-2 gap-3" x-data>
+                                                    <div class="relative group">
+                                                        <input type="file" id="cameraInput_{{ $itemId }}" accept="image/*" capture="environment"
+                                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                            @change="handleFileUpload($event, {{ $itemId }})">
+                                                        <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
+                                                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                                <i class="fas fa-camera"></i>
+                                                            </div>
+                                                            <span class="text-sm font-medium text-blue-600">Take Photo</span>
                                                         </div>
-                                                        <span class="text-sm font-medium text-blue-600">Take Photo</span>
+                                                    </div>
+
+                                                    <div class="relative group">
+                                                        <input type="file" id="uploadInput_{{ $itemId }}" multiple accept="image/*"
+                                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                            @change="handleFileUpload($event, {{ $itemId }})">
+                                                        <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
+                                                            <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                                <i class="fas fa-images"></i>
+                                                            </div>
+                                                            <span class="text-sm font-medium text-slate-600">From Gallery</span>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <!-- Gallery Upload Trigger -->
-                                                <div class="relative group">
-                                                    <input type="file"
-                                                        id="uploadInput_{{ $itemId }}"
-                                                        multiple
-                                                        accept="image/*"
-                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                        @change="handleFileUpload($event, {{ $itemId }})">
-                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
-                                                        <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                            <i class="fas fa-images"></i>
-                                                        </div>
-                                                        <span class="text-sm font-medium text-slate-600">From Gallery</span>
+                                                <div class="mt-4 grid grid-cols-4 gap-2" id="preview_container_{{ $itemId }}"></div>
+                                                <input type="hidden" name="photo_names[]" id="photoname_{{ $itemId }}">
+                                            </div>
+
+                                            <!-- Box: Detailed Area -->
+                                            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                                <div class="grid grid-cols-3 gap-4 items-center">
+                                                    <label class="text-sm text-slate-600 font-semibold">Area / Process</label>
+                                                    <div class="col-span-2">
+                                                        <input type="text" value="{{ $process }}" disabled
+                                                            class="w-full px-4 py-[9px] bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-500 cursor-not-allowed outline-none">
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Thumbnails -->
-                                            <div class="mt-4 grid grid-cols-4 gap-2" id="preview_container_{{ $itemId }}">
-                                                <!-- Dynamic content via JS -->
-                                            </div>
-                                            <input type="hidden" name="photo_names[]" id="photoname_{{ $itemId }}">
                                         </div>
 
-                                        <!-- Right Column: Form Fields -->
+                                        <!-- Right Column -->
                                         <div class="space-y-5">
+                                            <!-- Box: Assign To -->
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
                                                 <x-searchable-select
                                                     id="asign_to_dept_{{ $itemId }}"
@@ -251,9 +255,26 @@
                                                     required="true" />
                                             </div>
 
+                                            <!-- Box: Station -->
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
                                                 <div class="grid grid-cols-3 gap-4 items-center">
-                                                    <label class="text-sm text-slate-600">Related <span class="text-red-500">*</span></label>
+                                                    <label class="text-sm text-slate-600 font-semibold">Station / Mech. Num <span class="text-red-500">*</span></label>
+                                                    <div class="col-span-2">
+                                                        <x-searchable-select 
+                                                            id="area_detail_{{ $itemId }}" 
+                                                            name="area_detail_{{ $itemId }}" 
+                                                            label="Station" 
+                                                            :apiUrl="route('genba.get_stations')"
+                                                            required="true"
+                                                            :hideLabel="true" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Box: Related -->
+                                            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                                <div class="grid grid-cols-3 gap-4 items-center">
+                                                    <label class="text-sm text-slate-600 font-semibold">Related <span class="text-red-500">*</span></label>
                                                     <div class="col-span-2 relative" x-data="{
                                                         open: false,
                                                         search: '',
@@ -321,20 +342,10 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Box: Finding / Comments -->
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
                                                 <label class="block text-sm font-semibold text-slate-700 mb-2">Finding / Comments <span class="text-red-500">*</span></label>
                                                 <textarea id="findings_{{ $itemId }}" name="findings" rows="5" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none" placeholder="Describe the issue..."></textarea>
-                                            </div>
-
-                                            <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                <div class="grid grid-cols-3 gap-4 items-center">
-                                                    <label class="text-sm text-slate-600 font-semibold">Detailed Area</label>
-                                                    <div class="col-span-2">
-                                                        <input type="text" value="{{ $process }}" disabled
-                                                            class="w-full px-4 py-[9px] bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-500 cursor-not-allowed outline-none">
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" id="area_detail_{{ $itemId }}" value="{{ $process }}">
                                             </div>
                                         </div>
                                     </div>
@@ -489,17 +500,18 @@
                             document.getElementById(`findings_${itemId}`).value = data.findings;
                         }
 
-                        // Populate type
-                        const typeHidden = document.getElementById(`type_${itemId}`);
-                        if (typeHidden) {
-                            $(`#type_${itemId}`).val(data.type || '');
-                            const typeAlpine = typeHidden.closest('[x-data]');
-                            if (typeAlpine && typeAlpine._x_dataStack) {
-                                const typeData = typeAlpine._x_dataStack[0];
-                                if (typeData) {
-                                    typeData.selectedId = data.type || '';
-                                    typeData.selectedName = data.type || '';
-                                    typeData.search = data.type || '';
+                        // Populate station / area detail
+                        const areaDetailInput = document.getElementById(`area_detail_${itemId}`);
+                        if (areaDetailInput) {
+                            $(`#area_detail_${itemId}`).val(data.area_detail || '');
+                            
+                            const alpineContainer = areaDetailInput.closest('[x-data]');
+                            if (alpineContainer && alpineContainer._x_dataStack) {
+                                const alpineData = alpineContainer._x_dataStack[0];
+                                if (alpineData) {
+                                    alpineData.selectedId = data.area_detail || '';
+                                    alpineData.selectedName = data.area_detail || '';
+                                    alpineData.search = data.area_detail || '';
                                 }
                             }
                         }
@@ -653,10 +665,15 @@
                     const textInput = hiddenInput.nextElementSibling?.querySelector('input[type="text"]');
                     if (textInput) asignToDeptName = textInput.value;
                 }
+                const typeValue = document.getElementById(`type_${itemId}`).value;
                 const areaDetailInput = document.getElementById(`area_detail_${itemId}`);
                 const detailArea = areaDetailInput ? areaDetailInput.value : '';
 
-                const typeValue = document.getElementById(`type_${itemId}`).value;
+                if (!detailArea || detailArea.trim() === '') {
+                    showToast('Station / Mech. Num is required', 'error');
+                    this.isLoading = false;
+                    return;
+                }
 
                 if (!typeValue) {
                     showToast('Finding Related is required', 'error');

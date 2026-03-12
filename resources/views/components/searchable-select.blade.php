@@ -194,13 +194,35 @@
                     this.fetchItems();
                 @endif
             }
+        },
+
+        validate() {
+            if (this.search === null || this.search.trim() === '') {
+                if (this.selectedId !== '') {
+                    this.selectedId = '';
+                    this.selectedName = '';
+                    this.search = '';
+                    $('#{{ $id }}').val('');
+                    // Trigger change only if it was not empty before
+                    document.getElementById('{{ $id }}').dispatchEvent(new Event('change'));
+                } else {
+                    // Just clear the display search if it had some partial text but no ID
+                    this.search = '';
+                }
+            } else if (this.search !== this.selectedName) {
+                this.search = this.selectedName || '';
+            }
         }
         }">
         <input type="hidden" id="{{ $id }}" name="{{ $name }}" required>
 
         <!-- Trigger/Input -->
         <div class="relative">
-            <input type="text" x-model="search" @input.debounce.300ms="onSearch" @click="toggle" @click.outside="open = false"
+            <input type="text" x-model="search" 
+                @input.debounce.300ms="onSearch" 
+                @click="toggle" 
+                @click.outside="open = false; validate()"
+                @keydown.enter.prevent="open = false; validate()"
                 placeholder="Select {{ $label }}..."
                 class="w-full px-4 py-[9px] border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">

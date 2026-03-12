@@ -70,7 +70,6 @@
                                 <th class="w-[4%] text-center">No</th>
                                 <th class="w-[12%]">Genba Date</th>
                                 <th class="w-[15%]">Process</th>
-                                <th class="w-[15%]">Station / Mech. Num</th>
                                 <th class="w-[12%]">Line Checked</th>
                                 <th class="w-[18%]">Auditor</th>
                                 <th class="w-[12%]">Category</th>
@@ -164,12 +163,6 @@
                                     hideLabel="true" />
                             </div>
 
-                            <!-- Station / Mech. Num -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Station / Mech. Num</label>
-                                <input type="text" id="formStation" name="station" placeholder="E.g. ST-01 or MC-123"
-                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
-                            </div>
 
                             <!-- Auditor -->
                             <div>
@@ -274,13 +267,6 @@
                 },
                 {
                     data: 'process',
-                    className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || '') + '</span>';
-                    }
-                },
-                {
-                    data: 'station',
                     className: 'text-slate-700',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + (data || '') + '</span>';

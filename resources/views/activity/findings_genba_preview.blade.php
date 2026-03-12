@@ -77,10 +77,19 @@ $isClosed = $genba->status === 'Close';
                     </div>
                 </div>
 
+                <!-- Main Process (Header) -->
                 <div class="flex flex-col gap-2">
-                    <label class="text-slate-700 font-medium text-sm">Station / Mech. Num</label>
+                    <label class="text-slate-700 font-medium text-sm">Line Checked</label>
                     <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->Area_Checked }}
+                        {{ $genba->Area_Checked ?? '-' }}
+                    </div>
+                </div>
+                
+                <!-- Finding Level Detail (formerly Detail Area, now called Process per user request) -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-slate-700 font-medium text-sm">Detail Area</label>
+                    <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
+                        {{ $genba->area_detail ?? '-' }}
                     </div>
                 </div>
 

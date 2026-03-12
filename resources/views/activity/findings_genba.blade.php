@@ -94,7 +94,8 @@
                             <th class="w-[8%]">DocNum</th>
                             <th class="w-[5%]">Picture</th>
                             <th class="w-[10%]">Genba Date</th>
-                            <th class="w-[9%]">Area Checked</th>
+                            <th class="w-[10%]">Detail Area</th>
+                            <th class="w-[9%]">Line Checked</th>
                             <th class="w-[9%]">Dept</th>
                             <th class="w-[23%]">Findings</th>
                             <th class="w-[12%]">Auditor</th>
@@ -225,6 +226,10 @@
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
                     d.status = $('#statusFilter').val();
+                },
+                error: function(xhr, error, code) {
+                    console.error('DataTables AJAX error:', error, code);
+                    console.error('Response:', xhr.responseText);
                 }
             },
             columns: [{
@@ -258,6 +263,13 @@
                     className: 'text-slate-700',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'station',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + (data || '') + '</span>';
                     }
                 },
                 {
