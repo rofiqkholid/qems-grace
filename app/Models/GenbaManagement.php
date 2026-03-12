@@ -140,6 +140,7 @@ class GenbaManagement extends Model
             ->select(
                 'a.SysID',
                 'b.Date',
+                'b.Area_Checked',
                 'a.asign_to_dept',
                 'a.findings',
                 'a.Path',

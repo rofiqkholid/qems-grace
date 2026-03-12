@@ -155,6 +155,7 @@ class ExecutionGenbaController extends Controller
                 $nestedData['execution_comment'] = $post->execution_comment;
                 $nestedData['execution_comment'] = $post->execution_comment;
                 $nestedData['area_detail'] = $post->area_detail;
+                $nestedData['area_checked'] = $post->Area_Checked;
                 $nestedData['verif_img'] = $post->verif_img;
 
                 $data[] = $nestedData;
