@@ -15,11 +15,27 @@
             </div>
             @endif
 
-            <!-- Dashboard -->
-            <a href="{{ url('dashboard') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->path() == 'dashboard' || request()->path() == '/' ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
-                <i class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center {{ request()->path() == 'dashboard' || request()->path() == '/' ? 'text-blue-500' : 'text-slate-700' }}"></i>
-                <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard</span>
-            </a>
+            <!-- Dashboard with Submenus -->
+            <div class="menu-item">
+                <button type="button" onclick="toggleMenu('dashboard-menu')" class="w-full flex items-center gap-3 px-4 py-3 {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
+                    <i class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-500' : 'text-slate-700' }}"></i>
+                    <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Dashboard</span>
+                    <i class="fa-solid fa-chevron-down text-xs opacity-0 group-hover:opacity-100 transition-all duration-300 {{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'rotate-0' }}" id="arrow-dashboard-menu"></i>
+                </button>
+
+                <div class="hidden group-hover:block">
+                    <div class="{{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="dashboard-menu">
+                        <a href="{{ url('dashboard') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == 'dashboard' || request()->path() == '/' ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Genba Management</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200 cursor-not-allowed opacity-60" title="Coming Soon">
+                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                            <span class="text-sm whitespace-nowrap">Genba BIQ</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <!-- Main Menus -->
             @foreach($menuStructure['mainMenus'] as $idx => $mainItem)

@@ -618,8 +618,7 @@
                     orderable: false,
                     className: 'text-left',
                     render: function(data, type, row) {
-                        // Pass findings and execution details to viewGenbaImages
-                        // Escape quotes for JS string passing
+                       
                         const findings = encodeURIComponent(row.findings || '');
                         const execComment = encodeURIComponent(row.execution_comment || '');
                         const pathAfter = (row.execution_path || '');
