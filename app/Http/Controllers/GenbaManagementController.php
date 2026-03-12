@@ -692,7 +692,7 @@ class GenbaManagementController extends Controller
 
                 $data["scopes"] = $scopes;
                 $data["finding_status"] = $findingStatus;
-                $data["finding_types"] = collect(['Quality', 'Safety & Environment', 'Cost', 'Delivery'])->map(function ($t) {
+                $data["finding_types"] = collect(['Safety', 'Quality', 'Delivery/Productivity', 'Cost/Waste', 'Moral (SDM)', 'Environment', '5S'])->map(function ($t) {
                     return ['id' => $t, 'name' => $t];
                 })->toArray();
                 // Double check view path for standard activity
