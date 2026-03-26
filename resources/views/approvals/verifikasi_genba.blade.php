@@ -359,8 +359,6 @@
             table.ajax.reload();
         });
 
-        // Search on enter
-        // Debounce function
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -370,12 +368,10 @@
             };
         }
 
-        // Auto-search with debounce
         $('#searchInput').on('keyup', debounce(function() {
             table.ajax.reload();
         }, 500));
 
-        // Mobile sidebar toggle
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -396,22 +392,18 @@
     });
 
     function document_preview(id, no) {
-        // Redirect to preview page - Reusing existing preview
         window.location.href = "{{ route('genba.preview', '') }}/" + id;
     }
 
-    // Viewer instance
     var galleryViewer = null;
 
     const findingPhotoBaseUrl = "{{ asset('findings-photo') }}";
     const evidencePhotoBaseUrl = "{{ asset('evidence-photo') }}";
 
     function viewGenbaImages(pathBefore, pathAfter, captionBefore, captionAfter) {
-        // Reset state
         $('#imageContainerBefore, #imageContainerAfter').empty();
         $('#noImageBefore, #noImageAfter').addClass('hidden');
 
-        // Convert captions
         $('#modalCaptionBefore').text(decodeURIComponent(captionBefore));
         $('#modalCaptionAfter').text(decodeURIComponent(captionAfter));
 

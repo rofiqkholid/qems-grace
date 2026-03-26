@@ -76,10 +76,8 @@ class ExecutionGenbaController extends Controller
                 $execution_path = $post->execution_path;
                 $date = Carbon::parse($post->Date)->format('d M Y');
 
-                // Action Buttons - customized for Execution/Approval
                 if ($verification_result == 1 || $verification_result == 2) {
                     $verifImg = $post->verif_img ? $post->verif_img : '';
-                    // Rollback Button
                     $button = '<div class="flex items-center justify-center gap-2">
                                 <button type="button" title="Rollback" class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" onclick="rollbackGenba(' . $sys_id . ', \'' . $verifImg . '\')">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -89,7 +87,6 @@ class ExecutionGenbaController extends Controller
                                 </button>
                            </div>';
                 } else {
-                    // Approve Button
                     $button = '<div class="flex items-center justify-center gap-2">
                                 <button type="button" title="Approve" class="w-10 h-10 flex items-center justify-center rounded-xl bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" onclick="approveGenba(' . $sys_id . ')">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -99,12 +96,9 @@ class ExecutionGenbaController extends Controller
                            </div>';
                 }
 
-                // Stepper Logic
                 $line = '<div class="w-8 h-0.5 bg-gray-200"></div>';
                 $activeLine = '<div class="w-8 h-0.5 bg-blue-200"></div>';
                 $rejectedLine = '<div class="w-8 h-0.5 bg-red-100"></div>';
-
-                // Helper for progress circles
                 $renderCircle = function ($isActive) {
                     return $isActive
                         ? '<div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-500 shadow-sm">
