@@ -30,10 +30,10 @@
             <!-- Right: Actions -->
             <div class="flex items-center gap-3">
                 <!-- Realtime Clock -->
-                <div class="flex items-center gap-3 mr-4">
-                    <span id="realtime-date" class="text-xl text-slate-700 font-medium">-</span>
-                    <div class="w-px h-6 bg-slate-200"></div>
-                    <span id="realtime-time" class="text-xl text-slate-700 font-medium tabular-nums min-w-[85px] text-center">-</span>
+                <div class="flex items-center gap-2 md:gap-3 mr-2 md:mr-4">
+                    <span id="realtime-date" class="text-xs sm:text-sm md:text-xl text-slate-700 font-medium whitespace-nowrap">-</span>
+                    <div class="w-px h-4 md:h-6 bg-slate-200"></div>
+                    <span id="realtime-time" class="text-xs sm:text-sm md:text-xl text-slate-700 font-medium tabular-nums min-w-[60px] md:min-w-[85px] text-center">-</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
