@@ -29,6 +29,13 @@
 
             <!-- Right: Actions -->
             <div class="flex items-center gap-3">
+                <!-- Realtime Clock -->
+                <div class="flex items-center gap-3 mr-4">
+                    <span id="realtime-date" class="text-xl text-slate-700 font-medium">-</span>
+                    <div class="w-px h-6 bg-slate-200"></div>
+                    <span id="realtime-time" class="text-xl text-slate-700 font-medium tabular-nums min-w-[85px] text-center">-</span>
+                </div>
+
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
 
                 <!-- User Profile Dropdown -->
@@ -110,5 +117,34 @@
                 }
             });
         }
+
+        // Realtime Clock
+        function updateClock() {
+            const now = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const dayName = days[now.getDay()];
+            const date = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const dateEl = document.getElementById('realtime-date');
+            const timeEl = document.getElementById('realtime-time');
+            
+            if (dateEl) {
+                dateEl.textContent = `${dayName}, ${date} ${monthName} ${year}`;
+            }
+            if (timeEl) {
+                timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
     });
 </script>
