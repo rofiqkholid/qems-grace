@@ -401,15 +401,14 @@ class GenbaManagement extends Model
 
     public static function get_stations($search = null)
     {
-        $query = DB::connection('sqlsrv2')
-            ->table('erp.ResourceGroup as a')
-            ->leftJoin('erp.Resource as b', 'a.ResourceGrpID', '=', 'b.ResourceGrpID')
-            ->select('a.ResourceGrpID as Line', 'a.Description as LineDesc', 'b.ResourceID as Station');
+        $query = DB::connection('sqlsrv')
+            ->table('GenbaStationMech')
+            ->select('Area as LineDesc', 'DetailArea as Station');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
-                $q->where('b.ResourceID', 'like', '%' . $search . '%')
-                    ->orWhere('a.Description', 'like', '%' . $search . '%');
+                $q->where('DetailArea', 'like', '%' . $search . '%')
+                    ->orWhere('Area', 'like', '%' . $search . '%');
             });
         }
 
