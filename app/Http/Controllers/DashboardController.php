@@ -26,10 +26,8 @@ class DashboardController extends Controller
             ->whereNotNull('a.asign_to_dept')
             ->whereNotNull('a.findings')
             ->where(function ($q) {
-                $q->whereNull('a.evidence')->orWhere('a.evidence', '0');
-            })
-            ->where(function ($q) {
-                $q->whereNull('a.corrective_action')->orWhere('a.corrective_action', '0');
+                $q->whereNull('a.evidence')->orWhere('a.evidence', '0')
+                    ->orWhereNull('a.corrective_action')->orWhere('a.corrective_action', '0');
             })
             ->where(function ($q) {
                 $q->where('a.result', '!=', 1)
@@ -63,14 +61,10 @@ class DashboardController extends Controller
             ->whereNotNull('a.findings')
             ->whereDate('a.due_date', '<', today())
             ->where(function ($q) {
-                $q->where(function ($sub) {
-                    $sub->whereNull('a.evidence')
-                        ->orWhere('a.evidence', 0);
-                })
-                    ->where(function ($sub) {
-                        $sub->whereNull('a.corrective_action')
-                            ->orWhere('a.corrective_action', 0);
-                    });
+                $q->whereNull('a.evidence')
+                    ->orWhere('a.evidence', 0)
+                    ->orWhereNull('a.corrective_action')
+                    ->orWhere('a.corrective_action', 0);
             })
             ->where(function ($q) {
                 $q->where('a.result', '!=', 1)
@@ -336,15 +330,17 @@ class DashboardController extends Controller
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->select(
                 'g.asign_to_dept',
-                // Logic OPEN: Belum fix, Belum verify, Due Date masih aman
+                // Logic OPEN: Salah satu belum (fix/evidence), Belum verify, Due Date masih aman
                 DB::raw("
-            SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL
+            SUM(CASE WHEN (g.corrective_action IS NULL OR g.corrective_action = '0' OR g.corrective_action = 0 OR g.evidence IS NULL OR g.evidence = '0' OR g.evidence = 0)
+                     AND (g.verification_result IS NULL OR g.verification_result = '0' OR g.verification_result = 0)
                      AND CAST(g.due_date AS DATE) >= CAST(GETDATE() AS DATE)
                      THEN 1 ELSE 0 END) AS TotalOpen
             "),
-                // Logic OVERDUE: Belum fix, Belum verify, Due Date sudah lewat
+                // Logic OVERDUE: Salah satu belum (fix/evidence), Belum verify, Due Date sudah lewat
                 DB::raw("
-            SUM(CASE WHEN g.corrective_action IS NULL AND g.evidence IS NULL AND g.verification_result IS NULL
+            SUM(CASE WHEN (g.corrective_action IS NULL OR g.corrective_action = '0' OR g.corrective_action = 0 OR g.evidence IS NULL OR g.evidence = '0' OR g.evidence = 0)
+                     AND (g.verification_result IS NULL OR g.verification_result = '0' OR g.verification_result = 0)
                      AND CAST(g.due_date AS DATE) < CAST(GETDATE() AS DATE)
                      THEN 1 ELSE 0 END) AS TotalOverdue
             "),
