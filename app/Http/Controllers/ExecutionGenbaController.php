@@ -19,8 +19,6 @@ class ExecutionGenbaController extends Controller
         $date_to = $request->date_to;
         $dept = $request->dept;
 
-        // For Verification/Approval, we might want to see all or filter by specific status
-        // Reusing logic from GenbaManagementController for consistency
 
         $columns = array(
             0 => 'a.created_at',
