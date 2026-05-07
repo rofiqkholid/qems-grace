@@ -47,7 +47,7 @@ class GenbaManagement extends Model
             ->all();
     }
 
-    public static function get_genba_mng_activity_list($search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null)
+    public static function get_genba_mng_activity_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -130,7 +130,7 @@ class GenbaManagement extends Model
 
         return $result;
     }
-    public static function get_genba_approval_list($search, $date_from = null, $date_to = null, $auditor = null, $dept = null)
+    public static function get_genba_approval_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -193,10 +193,10 @@ class GenbaManagement extends Model
         return $result;
     }
 
-    public static function get_genba_activity_list($search, $status_id)
+    public static function get_genba_activity_list(mixed $search, mixed $status_id)
     {
         $my_id = Auth::user()->username;
-        $my_name = Auth::user()->fullname;
+        $my_name = Auth::user()->full_name;
         $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')
             ->join('GenbaCategory as b ', 'b.SysID', '=', 'a.Category_id')
             ->select(
@@ -220,7 +220,7 @@ class GenbaManagement extends Model
             });
         }
         if ($my_id != '270723-001' && $my_id != '260422-001') {
-            $result = $result->where('a.Auditor', $my_name);
+            $result = $result->where('a.Auditor', 'LIKE', '%' . $my_name . '%');
         }
 
         if ($status_id == 4) {
@@ -232,7 +232,7 @@ class GenbaManagement extends Model
         return $result->where('IsDelete', 0);
     }
 
-    public static function get_genba_activity($id)
+    public static function get_genba_activity(mixed $id)
     {
         $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')
             ->leftJoin('GenbaCategory as b', 'b.SysID', '=', 'a.Category_id')
@@ -287,18 +287,19 @@ class GenbaManagement extends Model
         return $result;
     }
 
-    public static function add_genba_activity($Area_Checked, $Auditor, $category, $Date,  $sysID, $station, $process)
+    public static function add_genba_activity(mixed $Area_Checked, mixed $Auditor, mixed $category, mixed $Date, mixed $sysID, mixed $station, mixed $process)
     {
-        $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')->where('a.Date', $Date)
+        $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')
             ->where('a.SysID', $sysID)
             ->select('a.SysID');
+        
         $data_genba = $result;
         if ($data_genba->count() == 0) {
             return DB::table('GenbaProcAudit')->insertGetId([
                 'Area_Checked'  => $Area_Checked,
                 'Date'  => $Date,
                 'Auditor'       => $Auditor,
-                'category_id'       => $category,
+                'category_id'   => $category,
                 'station'       => $station,
                 'process'       => $process,
                 'created_at' => Carbon::now(),
@@ -307,25 +308,22 @@ class GenbaManagement extends Model
                 'IsDelete' => 0
             ]);
         } else {
+            $existing_id = $data_genba->first()->SysID;
             $update = DB::table('GenbaProcAudit')
-                ->where('SysID', $sysID)
+                ->where('SysID', $existing_id)
                 ->update([
                     'Area_Checked'  => $Area_Checked,
                     'Date'  => $Date,
                     'Auditor'       => $Auditor,
                     'station'       => $station,
                     'process'       => $process,
-                    'category_id'       => $category,
+                    'category_id'   => $category,
                     'updated_at' => Carbon::now()
                 ]);
-            if ($update > 0) {
-                return $sysID;
-            } else {
-                return 0;
-            }
+            return $existing_id;
         }
     }
-    public static function check_date_activity($id_activity)
+    public static function check_date_activity(mixed $id_activity)
     {
         $result = DB::table('GenbaProcAudit as a')
             ->where('SysID', $id_activity)
@@ -333,7 +331,7 @@ class GenbaManagement extends Model
         return $result;
     }
 
-    public static function save_genba_activity_detail($my_id, $id_activity, $scope_id, $check_item_id,  $answer, $due_date)
+    public static function save_genba_activity_detail(mixed $my_id, mixed $id_activity, mixed $scope_id, mixed $check_item_id, mixed $answer, mixed $due_date)
     {
         $result = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')->where('a.genba_id', $id_activity)
             ->where('a.scope_id', $scope_id)
@@ -377,7 +375,7 @@ class GenbaManagement extends Model
         }
     }
 
-    public static function get_genba_activity_detail($activity_id, $scope_id, $check_item_id)
+    public static function get_genba_activity_detail(mixed $activity_id, mixed $scope_id, mixed $check_item_id)
     {
         $result = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
             ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')

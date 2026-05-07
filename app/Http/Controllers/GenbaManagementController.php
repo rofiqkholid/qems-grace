@@ -187,7 +187,7 @@ class GenbaManagementController extends Controller
         }
     }
 
-    public function preview($id)
+    public function preview(string $id)
     {
         try {
             // Decrypt the ID
@@ -409,7 +409,7 @@ class GenbaManagementController extends Controller
         }
     }
 
-    public function genbaHeaderView($id)
+    public function genbaHeaderView(string $id)
     {
         try {
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $id)[0]));
@@ -580,13 +580,21 @@ class GenbaManagementController extends Controller
 
     public function add_genba(Request $request)
     {
-        $str_req = explode("_", $request->trc_unix_id);
+        $data = [];
+        $trc_unix_id = $request->trc_unix_id;
+        $str_req = explode("_", $trc_unix_id);
 
         if ($str_req[0] != "0") {
             $str = explode("_", Crypt::decryptString(str_replace("-", "=", $str_req[0])));
             $sysID = $str[0];
         } else {
-            $sysID = $str_req[0];
+            // Check if this exact "New" submission was already processed (e.g., due to page refresh)
+            $sessionKey = 'genba_submission_' . $trc_unix_id;
+            if (session()->has($sessionKey)) {
+                $sysID = session()->get($sessionKey);
+            } else {
+                $sysID = $str_req[0]; // 0
+            }
         }
 
         $area_checked = $request->input('line_checked'); // Updated from area_checked to match form name
@@ -599,6 +607,11 @@ class GenbaManagementController extends Controller
         $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process);
 
         if ($insert > 0) {
+            // If this was a new submission (sysID == 0 originally), save the new ID to the session
+            if (isset($sessionKey) && !session()->has($sessionKey)) {
+                session()->put($sessionKey, $insert);
+            }
+
             $db = DB::table('GenbaProcAudit')
                 ->where('SysID', $insert)
                 ->select('SysID', 'Category_id');
@@ -704,7 +717,7 @@ class GenbaManagementController extends Controller
         return $data;
     }
 
-    public function add_genba_rusty($id_activity)
+    public function add_genba_rusty(int|string $id_activity)
     {
         $audit = DB::table('GenbaProcAudit')->where('SysID', $id_activity)->first();
 
@@ -735,7 +748,7 @@ class GenbaManagementController extends Controller
         ]);
     }
 
-    public function add_genba_biq($id_activity)
+    public function add_genba_biq(int|string $id_activity)
     {
         $audit = DB::table('GenbaProcAudit')->where('SysID', $id_activity)->first();
 
@@ -1199,7 +1212,6 @@ class GenbaManagementController extends Controller
             ->where('SysID', $sysID)
             ->update([
                 'execution_path' => $photoPathsString,
-                'execution_path' => $photoPathsString,
                 'execution_comment' => $execution_comment,
                 'preventive_action' => $preventive_action,
                 'evidence' => $evidence,
@@ -1231,11 +1243,11 @@ class GenbaManagementController extends Controller
             $perPage = 20;
 
             $query = GenbaManagement::get_stations($search);
-            
+
             $stations = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'items' => collect($stations->items())->map(function($item) {
+                'items' => collect($stations->items())->map(function ($item) {
                     return [
                         'id' => $item->Station,
                         'name' => ($item->Station ?? 'N/A') . ' (' . ($item->LineDesc ?? 'N/A') . ')'
