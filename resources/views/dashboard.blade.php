@@ -100,7 +100,7 @@
                             class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
-                    <!-- Department Filer -->
+                    <!-- Department Filter -->
                     <div class="w-full lg:w-auto min-w-[200px]">
                         <x-searchable-select
                             name="dept"
@@ -110,6 +110,24 @@
                             valueField="name"
                             updateEvent="updateDeptFilter"
                             hideLabel="true" />
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="w-full lg:w-auto min-w-[160px]">
+                        <x-searchable-select
+                            name="status"
+                            id="statusFilter"
+                            label="Status"
+                            :initialOptions="[
+                                ['id' => 'OPEN', 'name' => 'Open'],
+                                ['id' => 'NEED_VERIF', 'name' => 'Need Verif'],
+                                ['id' => 'CLOSE', 'name' => 'Close'],
+                                ['id' => 'OVERDUE', 'name' => 'Overdue']
+                            ]"
+                            valueField="id"
+                            updateEvent="updateStatusFilter"
+                            hideLabel="true"
+                            placeholder="Select Status..." />
                     </div>
 
                     <!-- Reset Button -->
@@ -481,7 +499,15 @@
 
                                 currentStatusFilter = statusCode;
 
-                                // 3. Reload Table
+                                // 3. Update Status Dropdown UI
+                                window.dispatchEvent(new CustomEvent('updateStatusFilter', {
+                                    detail: {
+                                        id: statusCode,
+                                        name: datasetLabel
+                                    }
+                                }));
+
+                                // 4. Reload Table
                                 if (table) {
                                     table.ajax.reload();
                                 }
@@ -687,7 +713,10 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #statusFilter').on('change', function() {
+            if (this.id === 'statusFilter') {
+                currentStatusFilter = $(this).val();
+            }
             table.ajax.reload();
         });
 
@@ -697,9 +726,16 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            $('#statusFilter').val('');
             currentStatusFilter = '';
             // Reset searchable select UI
             window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
+            window.dispatchEvent(new CustomEvent('updateStatusFilter', {
                 detail: {
                     id: '',
                     name: ''
