@@ -569,7 +569,7 @@ class GenbaManagementController extends Controller
         return response()->json([
             'items' => collect($users->items())->map(function ($user) {
                 return [
-                    'id' => $user->username,
+                    'id' => $user->id,
                     'name' => $user->full_name,
                     'text' => $user->full_name // For compatibility
                 ];
@@ -606,6 +606,11 @@ class GenbaManagementController extends Controller
         $process = $request->input('process');
         $station = $request->input('station') ?? $process;
         $is_team = $request->input('is_team');
+
+        // Fallback: If is_team is empty, at least include the creator's ID as a JSON array
+        if (empty($is_team)) {
+            $is_team = json_encode([(string) Auth::user()->id]);
+        }
 
         $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process, $is_team);
 

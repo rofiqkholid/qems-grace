@@ -223,7 +223,8 @@ class GenbaManagement extends Model
 
     public static function get_genba_activity_list(mixed $search, mixed $status_id, bool $is_room_team = false)
     {
-        $my_id = Auth::user()->username;
+        $my_nik = Auth::user()->username;
+        $my_id = Auth::user()->id;
         $my_name = Auth::user()->full_name;
         $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')
             ->join('GenbaCategory as b ', 'b.SysID', '=', 'a.Category_id')
@@ -251,8 +252,13 @@ class GenbaManagement extends Model
         if ($is_room_team) {
             $result->where('a.is_team', 'LIKE', '%' . trim($my_id) . '%');
         } else {
-            if ($my_id != '270723-001' && $my_id != '260422-001') {
-                $result = $result->where('a.Auditor', 'LIKE', '%' . $my_name . '%');
+            // Admin users who can see everything
+            $admins = ['270723-001', '260422-001', '121020-002'];
+            if (!in_array($my_nik, $admins)) {
+                $result = $result->where(function($q) use ($my_name, $my_id) {
+                    $q->where('a.Auditor', 'LIKE', '%' . $my_name . '%')
+                      ->orWhere('a.is_team', 'LIKE', '%' . $my_id . '%');
+                });
             }
         }
 
@@ -303,7 +309,7 @@ class GenbaManagement extends Model
     public static function get_users($search = null)
     {
         $query = DB::table('users')
-            ->select('username', 'full_name');
+            ->select('id', 'username', 'full_name');
 
         if ($search) {
             $query->where('full_name', 'like', '%' . $search . '%')
@@ -329,32 +335,32 @@ class GenbaManagement extends Model
 
         $data_genba = $result;
         if ($data_genba->count() == 0) {
-            return DB::table('GenbaProcAudit')->insertGetId([
+            return DB::connection('sqlsrv')->table('GenbaProcAudit')->insertGetId([
                 'Area_Checked'  => $Area_Checked,
-                'Date'  => $Date,
+                'Date'          => $Date,
                 'Auditor'       => $Auditor,
-                'category_id'   => $category,
+                'Category_id'   => $category,
                 'station'       => $station,
                 'process'       => $process,
                 'is_team'       => $is_team,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-                'status' => 4,
-                'IsDelete' => 0
+                'created_at'    => Carbon::now(),
+                'updated_at'    => Carbon::now(),
+                'status'        => 4,
+                'IsDelete'      => 0
             ]);
         } else {
             $existing_id = $data_genba->first()->SysID;
-            $update = DB::table('GenbaProcAudit')
+            $update = DB::connection('sqlsrv')->table('GenbaProcAudit')
                 ->where('SysID', $existing_id)
                 ->update([
                     'Area_Checked'  => $Area_Checked,
-                    'Date'  => $Date,
+                    'Date'          => $Date,
                     'Auditor'       => $Auditor,
                     'station'       => $station,
                     'process'       => $process,
-                    'category_id'   => $category,
+                    'Category_id'   => $category,
                     'is_team'       => $is_team,
-                    'updated_at' => Carbon::now()
+                    'updated_at'    => Carbon::now()
                 ]);
             return $existing_id;
         }

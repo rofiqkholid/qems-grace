@@ -199,21 +199,21 @@
                                                     <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-sm text-slate-700 shadow-sm group hover:border-blue-300 transition-all">
                                                         <span x-text="member.name" class="font-medium uppercase"></span>
                                                         <button type="button" @click="removeMember(member.id, member.name)" 
-                                                            x-show="member.id !== '{{ Auth::user()->username }}' && member.name !== '{{ Auth::user()->full_name }}'"
-                                                            class="text-red-400 hover:text-red-600 transition-colors ml-1">
-                                                            <i class="fa-solid fa-xmark text-sm"></i>
-                                                        </button>
-                                                        <span x-show="member.id === '{{ Auth::user()->username }}' || member.name === '{{ Auth::user()->full_name }}'" class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded ml-1">You</span>
+                                                             x-show="String(member.id) !== '{{ Auth::user()->id }}'"
+                                                             class="text-red-400 hover:text-red-600 transition-colors ml-1">
+                                                             <i class="fa-solid fa-xmark text-sm"></i>
+                                                         </button>
+                                                         <span x-show="String(member.id) === '{{ Auth::user()->id }}'" class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded ml-1">You</span>
                                                     </div>
                                                 </template>
                                             </div>
                                             <p x-show="members.length === 1" class="text-xs text-slate-400 mt-3 italic">You are currently alone. Invite others to work together!</p>
                                         </div>
 
-                                        <!-- Final Auditor String for DB -->
-                                        <input type="hidden" name="auditor" :value="auditorString">
-                                        <input type="hidden" name="is_team" :value="members.map(m => m.id).join(', ')">
-                                    </div>
+                                         <!-- Final Auditor String for DB -->
+                                         <input type="hidden" name="auditor" :value="auditorString">
+                                         <input type="hidden" name="is_team" :value="teamIds">
+                                     </div>
                                 </div>
                             </div>
                         </div>
@@ -276,21 +276,35 @@
     // Alpine component for team management
     function teamManager() {
         return {
-            members: [{ id: '{{ Auth::user()->username }}', name: '{{ Auth::user()->full_name }}' }],
+            members: [{ id: '{{ Auth::user()->id }}', name: '{{ Auth::user()->full_name }}' }],
+            auditorString: '{{ Auth::user()->full_name }}',
+            teamIds: JSON.stringify(['{{ Auth::user()->id }}']),
             
+            isInviting: false,
+
             init() {
+                this.$watch('members', (value) => {
+                    this.auditorString = value.map(m => m.name).join(', ');
+                    this.teamIds = JSON.stringify(value.map(m => m.id));
+                });
                 window.addEventListener('member-selected', (e) => {
                     this.inviteMember(e.detail.id, e.detail.name);
                 });
             },
 
             inviteMember(selId, selName) {
+                if (this.isInviting) return;
+                this.isInviting = true;
+                
+                // Set timeout to reset the flag
+                setTimeout(() => { this.isInviting = false; }, 300);
+
                 if (!selId || !selName) {
                     selId = selId || $('#memberSelect').val();
                     selName = selName || $('#memberSelect').parent().find('input[type=text]').val();
                 }
                 
-                if (selId && !this.members.find(m => m.id === selId)) {
+                if (selId && !this.members.find(m => m.id.toString() === selId.toString())) {
                     this.members.push({ id: selId, name: selName });
                     showToast('Auditor invited: ' + selName, 'success');
                 } else if (selId) {
@@ -304,15 +318,11 @@
             },
 
             removeMember(id, name) {
-                if (id === '{{ Auth::user()->username }}' || name === '{{ Auth::user()->full_name }}') {
+                if (String(id) === '{{ Auth::user()->id }}') {
                     showToast('You cannot remove yourself from the team', 'warning');
                     return;
                 }
                 this.members = this.members.filter(m => m.id !== id && m.name !== name);
-            },
-
-            get auditorString() {
-                return this.members.map(m => m.name).join(', ');
             }
         };
     }
@@ -411,19 +421,44 @@
                 window.dispatchEvent(new CustomEvent('update-category-value', { detail: { id: response.category_id || '', name: response.category || '' } }));
                 
                 // Update Team Members via Alpine
-                let members = [{ id: '{{ Auth::user()->username }}', name: '{{ Auth::user()->full_name }}' }];
+                let members = [{ id: '{{ Auth::user()->id }}', name: '{{ Auth::user()->full_name }}' }];
                 
                 if (response.is_team && response.auditor) {
-                    const ids = response.is_team.split(', ');
-                    // Split by comma or ampersand
+                    let ids = [];
+                    try {
+                        ids = JSON.parse(response.is_team);
+                        if (!Array.isArray(ids)) ids = [ids];
+                    } catch (e) {
+                        ids = response.is_team.split(', ');
+                    }
+                    
+                    // Split names by comma or ampersand
                     const names = response.auditor.split(/\s*[,&]\s*/);
-                    members = ids.map((id, index) => ({ 
-                        id: id.trim(), 
-                        name: (names[index] || id).trim() 
-                    }));
+                    members = ids.map((id, index) => {
+                        let memberId = String(id).trim();
+                        // If it's the first member (creator) and it looks like a name instead of an ID,
+                        // use current user ID as a fix for legacy data consistency.
+                        if (index === 0 && (isNaN(memberId) || memberId.includes('-'))) {
+                            memberId = '{{ Auth::user()->id }}';
+                        }
+                        return { 
+                            id: memberId, 
+                            name: (names[index] || memberId).trim() 
+                        };
+                    });
                 } else if (response.auditor) {
                     const names = response.auditor.split(/\s*[,&]\s*/);
-                    members = names.map(n => ({ id: n.trim(), name: n.trim() }));
+                    members = names.map((n, index) => {
+                        let name = n.trim();
+                        let memberId = name;
+                        
+                        // Fix for legacy data: if it's the creator and it's a name, use ID
+                        if (index === 0 && (isNaN(memberId) || memberId.includes('-'))) {
+                            memberId = '{{ Auth::user()->id }}';
+                        }
+                        
+                        return { id: memberId, name: name };
+                    });
                 }
                 window.dispatchEvent(new CustomEvent('update-team', { detail: { members: members } }));
 
