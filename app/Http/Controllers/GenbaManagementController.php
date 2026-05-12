@@ -302,6 +302,7 @@ class GenbaManagementController extends Controller
     {
         $search = $request->front_table_search;
         $status_id = $request->status_id;
+        $is_room_team = $request->is_room_team == 'true';
         $columns = array(
             0 => 'SysID',
             1 => 'date',
@@ -310,25 +311,25 @@ class GenbaManagementController extends Controller
             4 => 'auditor',
             5 => 'category',
         );
-        $totalData = GenbaManagement::get_genba_activity_list($search, $status_id)->count();
+        $totalData = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = ($request->input('order.0.column') == 0 ? $columns[0] : $columns[$request->input('order.0.column')]);
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
         if (empty($search)) {
-            $posts = GenbaManagement::get_genba_activity_list($search, $status_id)
+            $posts = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)
                 ->offset($start)
                 ->limit($limit)
                 ->orderBy($order, $dir)
                 ->get();
         } else {
-            $posts = GenbaManagement::get_genba_activity_list($search, $status_id)
+            $posts = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)
                 ->offset($start)
                 ->limit($limit)
                 ->orderBy($order, $dir)
                 ->get();
-            $totalFiltered = GenbaManagement::get_genba_activity_list($search, $status_id)->count();
+            $totalFiltered = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)->count();
         }
         $data = array();
         if (!empty($posts)) {
@@ -458,6 +459,7 @@ class GenbaManagementController extends Controller
                 $form_genba['station'] = $d->station;
                 $form_genba['category_id'] = $d->Category_id;
                 $form_genba['category'] = $d->category . ' - ' . $d->category_desc;
+                $form_genba['is_team'] = $d->is_team;
             }
         } else {
             $form_genba['area_checked'] = '';
@@ -603,8 +605,9 @@ class GenbaManagementController extends Controller
         $category = $request->input('category'); // Updated from genba_category to match form name
         $process = $request->input('process');
         $station = $request->input('station') ?? $process;
+        $is_team = $request->input('is_team');
 
-        $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process);
+        $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process, $is_team);
 
         if ($insert > 0) {
             // If this was a new submission (sysID == 0 originally), save the new ID to the session

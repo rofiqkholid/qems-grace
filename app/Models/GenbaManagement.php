@@ -80,8 +80,7 @@ class GenbaManagement extends Model
             )
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->orderBy('a.created_at', 'DESC')
             ->where(function ($q) {
@@ -183,8 +182,7 @@ class GenbaManagement extends Model
             )
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->orderBy('a.created_at', 'DESC')
             ->where(function ($q) {
@@ -223,7 +221,7 @@ class GenbaManagement extends Model
         return $result;
     }
 
-    public static function get_genba_activity_list(mixed $search, mixed $status_id)
+    public static function get_genba_activity_list(mixed $search, mixed $status_id, bool $is_room_team = false)
     {
         $my_id = Auth::user()->username;
         $my_name = Auth::user()->full_name;
@@ -249,8 +247,13 @@ class GenbaManagement extends Model
                     ->orWhere('b.Description', 'LIKE', "%$search%");
             });
         }
-        if ($my_id != '270723-001' && $my_id != '260422-001') {
-            $result = $result->where('a.Auditor', 'LIKE', '%' . $my_name . '%');
+
+        if ($is_room_team) {
+            $result->where('a.is_team', 'LIKE', '%' . trim($my_id) . '%');
+        } else {
+            if ($my_id != '270723-001' && $my_id != '260422-001') {
+                $result = $result->where('a.Auditor', 'LIKE', '%' . $my_name . '%');
+            }
         }
 
         if ($status_id == 4) {
@@ -274,6 +277,7 @@ class GenbaManagement extends Model
                 'a.process',
                 'a.station',
                 'a.Category_id',
+                'a.is_team',
                 'b.Category as category',
                 'b.Description as category_desc'
             )
@@ -317,12 +321,12 @@ class GenbaManagement extends Model
         return $result;
     }
 
-    public static function add_genba_activity(mixed $Area_Checked, mixed $Auditor, mixed $category, mixed $Date, mixed $sysID, mixed $station, mixed $process)
+    public static function add_genba_activity(mixed $Area_Checked, mixed $Auditor, mixed $category, mixed $Date, mixed $sysID, mixed $station, mixed $process, mixed $is_team = null)
     {
         $result = DB::connection('sqlsrv')->table('GenbaProcAudit as a')
             ->where('a.SysID', $sysID)
             ->select('a.SysID');
-        
+
         $data_genba = $result;
         if ($data_genba->count() == 0) {
             return DB::table('GenbaProcAudit')->insertGetId([
@@ -332,6 +336,7 @@ class GenbaManagement extends Model
                 'category_id'   => $category,
                 'station'       => $station,
                 'process'       => $process,
+                'is_team'       => $is_team,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'status' => 4,
@@ -348,6 +353,7 @@ class GenbaManagement extends Model
                     'station'       => $station,
                     'process'       => $process,
                     'category_id'   => $category,
+                    'is_team'       => $is_team,
                     'updated_at' => Carbon::now()
                 ]);
             return $existing_id;

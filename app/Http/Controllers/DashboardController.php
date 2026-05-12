@@ -26,8 +26,7 @@ class DashboardController extends Controller
             ->where('b.Auditor', '!=', '')
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->whereNotNull('a.asign_to_dept')
             ->whereNotNull('a.findings')
@@ -50,8 +49,7 @@ class DashboardController extends Controller
             ->where('b.Auditor', '!=', '')
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
@@ -73,8 +71,7 @@ class DashboardController extends Controller
             ->where('b.Auditor', '!=', '')
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->whereNotNull('a.findings')
             ->whereDate('a.due_date', '<', today())
@@ -98,8 +95,7 @@ class DashboardController extends Controller
             ->where('b.Auditor', '!=', '')
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
@@ -120,8 +116,7 @@ class DashboardController extends Controller
             ->where('b.Auditor', '!=', '')
             ->where(function ($q) {
                 $q->where('b.IsDelete', 0)
-                    ->orWhereNull('b.IsDelete')
-                    ->orWhere('b.IsDelete', '!=', 1);
+                    ->orWhereNull('b.IsDelete');
             })
             ->whereNotNull('a.findings')
             ->where('a.created_at', '<=', $endOfMonth)

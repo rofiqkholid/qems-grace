@@ -39,6 +39,14 @@ Route::middleware(['auth'])->group(function () {
         return view('activity.genba_header_form');
     })->name('genba_management');
 
+    Route::get('/team', function () {
+        return view('activity.setup.genba_team');
+    })->name('genba_team');
+
+    Route::get('/room-team', function () {
+        return view('activity.setup.room_team');
+    })->name('room_team');
+
     Route::get('/genba_mng_management', function () {
         return view('activity.findings_genba');
     })->name('genba_mng_management');
