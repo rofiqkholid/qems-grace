@@ -18,7 +18,7 @@
             <p class="text-slate-500 mt-1">Monitor audit findings and performance in real-time.</p>
         </div>
 
-        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8">
+        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8 lg:overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
@@ -77,8 +77,8 @@
             </div>
 
             <!-- Full Width Findings Table -->
-            <div class="overflow-x-auto mt-8 border-t border-slate-200 pt-8">
-                <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-5">
+            <div class="mt-8 border-t border-slate-200 pt-8">
+                <div class="flex flex-col lg:flex-row lg:flex-wrap lg:items-center gap-3 mb-5">
                     <!-- Search -->
                     <div class="w-full lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
@@ -137,17 +137,18 @@
                         Reset
                     </button>
                 </div>
-                <table id="findingsTable" class="qms-table w-full">
+                <div class="overflow-x-auto lg:overflow-x-hidden">
+                    <table id="findingsTable" class="qms-table w-full">
                     <thead>
                         <tr>
-                            <th class="w-[3%] text-center hidden lg:table-cell">No</th>
-                            <th class="w-[8%]">DocNum</th>
-                            <th class="w-[5%]">Picture</th>
+                            <th class="w-[4%] text-center hidden lg:table-cell">No</th>
+                            <th class="w-[10%]">DocNum</th>
+                            <th class="w-[7%]">Picture</th>
                             <th class="w-[12%]">Genba Date</th>
-                            <th class="w-[12%] hidden lg:table-cell">Area Checked</th>
-                            <th class="w-[8%] hidden lg:table-cell">Dept</th>
-                            <th class="w-[15%] hidden lg:table-cell">Auditor</th>
-                            <th class="w-[18%]">
+                            <th class="w-[15%] hidden lg:table-cell">Area Checked</th>
+                            <th class="w-[10%] hidden lg:table-cell">Dept</th>
+                            <th class="w-[12%] hidden lg:table-cell">Auditor</th>
+                            <th class="w-[22%]">
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span>Status</span>
                                     <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
@@ -164,7 +165,8 @@
                     </thead>
                     <tbody class="bg-white">
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
             <!-- Data Count Component -->
             <x-data-table tableId="findingsTable" />
@@ -610,6 +612,7 @@
 
     $(document).ready(function() {
         table = $('#findingsTable').DataTable({
+            autoWidth: false,
             processing: true,
             serverSide: true,
             ajax: {

@@ -63,7 +63,7 @@
                 </div>
 
                 <!-- Table Section -->
-                <div class="overflow-x-auto p-6">
+                <div class="overflow-x-auto lg:overflow-x-hidden p-6">
                     <table id="genbaFormTable" class="qms-table w-full">
                         <thead>
                             <tr>

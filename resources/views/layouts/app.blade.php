@@ -63,6 +63,14 @@
             const loader = document.getElementById('page-loader');
             if (loader) loader.classList.remove('hidden');
         });
+        // Global DataTable Resize Adjustment
+        $(window).on('resize', function() {
+            $('.dataTable').each(function() {
+                if ($.fn.DataTable.isDataTable(this)) {
+                    $(this).DataTable().columns.adjust();
+                }
+            });
+        });
     </script>
 </body>
 
