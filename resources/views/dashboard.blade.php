@@ -684,7 +684,7 @@
                     data: 'auditor',
                     className: 'text-slate-700 hidden lg:table-cell',
                     render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || '') + '</span>';
+                        return data || '';
                     }
                 },
                 {

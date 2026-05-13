@@ -283,7 +283,7 @@
                     data: 'auditor',
                     className: 'text-blue-600',
                     render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || '') + '</span>';
+                        return data || '';
                     }
                 },
                 {

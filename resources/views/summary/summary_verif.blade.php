@@ -372,7 +372,7 @@
                     data: 'auditor',
                     className: 'text-slate-700',
                     render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
+                        return data || '-';
                     }
                 }
             ],

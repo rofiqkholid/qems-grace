@@ -350,13 +350,7 @@
                     data: 'auditor', 
                     className: 'text-blue-600 font-medium',
                     render: function(data) {
-                        if (!data) return '';
-                        // Split by comma or ampersand (with optional surrounding spaces)
-                        const members = data.split(/\s*[,&]\s*/).filter(Boolean);
-                        if (members.length <= 1 && !data.includes('&') && !data.includes(',')) return data;
-                        return `<div class="flex flex-wrap gap-1">
-                                    ${members.map(m => `<span class="px-3 py-1.5 bg-slate-50 text-slate-600 text-[11px] border border-slate-200 font-bold uppercase">${m}</span>`).join('')}
-                                </div>`;
+                        return data || '';
                     }
                 },
                 { data: 'category', className: 'text-slate-700' },

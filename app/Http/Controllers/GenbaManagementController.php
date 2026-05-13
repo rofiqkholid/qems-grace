@@ -151,7 +151,13 @@ class GenbaManagementController extends Controller
                 $nestedData['execution_path'] = '<button class="btn btn-sm w-9 h-9 flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors" id="btn_corrective_path_' . $no . '" onclick="btn_corrective(' . $sys_id . ',' . $no . ')"><i class="fa fa-camera"></i></button>';
                 $nestedData['status'] = $status;
                 $nestedData['action'] = $button;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $data[] = $nestedData;
             }
         } else {
@@ -370,7 +376,13 @@ class GenbaManagementController extends Controller
                 $nestedData['process'] = $post->process;
                 $nestedData['station'] = $post->station ?: $post->process;
                 $nestedData['line_checked'] = $post->Area_checked;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $nestedData['category'] = $post->category;
                 $nestedData['action'] = $button;
                 $data[] = $nestedData;
