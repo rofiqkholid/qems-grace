@@ -1146,6 +1146,11 @@ class GenbaManagementController extends Controller
             $sys_id = end($parts);
         }
 
+        // Check if SysID is numeric to avoid SQL Server database conversion errors
+        if (!is_numeric($sys_id)) {
+            return redirect()->back()->with('error', 'Document not found.');
+        }
+
         // Check if finding exists
         $exists = DB::connection('sqlsrv')->table('GenbaProcAuditDtl')
             ->where('SysID', $sys_id)
