@@ -17,8 +17,9 @@
                 </button>
 
                 <!-- Application Name -->
-                <div class="flex items-center pr-1">
-                    <span class="text-xl font-bold tracking-wider bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">GRACE</span>
+                <div class="flex flex-col justify-center">
+                    <span class="text-xl font-extrabold tracking-wider text-sky-500 leading-none">GRACE</span>
+                    <span class="hidden sm:block text-[9px] text-slate-400 font-medium whitespace-nowrap mt-0.5">Genba Recording & Action for Corrective Execution</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
