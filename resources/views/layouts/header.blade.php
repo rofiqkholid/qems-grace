@@ -16,6 +16,13 @@
                     </svg>
                 </button>
 
+                <!-- Application Name -->
+                <div class="flex items-center pr-1">
+                    <span class="text-xl font-bold tracking-wider bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">GRACE</span>
+                </div>
+
+                <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
+
                 <!-- Search -->
                 <div class="hidden sm:flex items-center">
                     <div class="relative">
