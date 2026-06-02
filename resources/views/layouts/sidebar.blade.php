@@ -75,7 +75,7 @@
             </div>
             @endif
             @endforeach
-            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001')
+            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001' || Auth::user()?->username === '031114-001' || Auth::user()?->username === '121020-002')
             <div class="menu-item">
                 <button type="button" onclick="toggleMenu('data-master')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
                     <i class="fa-solid fa-database w-5 flex-shrink-0 text-center text-slate-700"></i>
