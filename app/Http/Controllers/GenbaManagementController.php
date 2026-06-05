@@ -302,6 +302,33 @@ class GenbaManagementController extends Controller
         }
     }
 
+    public function update_detail_area(Request $request)
+    {
+        // Security: Restrict detail area editing to specific users
+        $allowedUsers = ['270723-001', '260422-001', '121020-002'];
+        if (!in_array(optional(Auth::user())->username, $allowedUsers)) {
+            return response()->json(['code' => 403, 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $id = $request->input('trc_unix_id');
+            $detailArea = $request->input('detail_area');
+
+            $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $id)[0]));
+
+            DB::connection('sqlsrv')
+                ->table('GenbaProcAuditDtl')
+                ->where('SysID', $sysId)
+                ->update([
+                    'area_detail' => $detailArea
+                ]);
+
+            return response()->json(['code' => 200, 'message' => 'Detail Area updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['code' => 500, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
     // ========== GENBA HEADER METHODS ==========
 
     public function genbaHeaderTable(Request $request)
