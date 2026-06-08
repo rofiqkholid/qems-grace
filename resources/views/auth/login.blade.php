@@ -3,7 +3,7 @@
 @section('title', 'Login - QMS')
 
 @section('content')
-<div class="relative min-h-screen flex items-center justify-end p-4 lg:p-16 bg-center bg-no-repeat" style="background-image: url('{{ asset('image/login-bg.png') }}'); background-size: 100% 100%;">
+<div class="relative min-h-screen flex items-center justify-end p-4 lg:p-16 bg-cover lg:bg-[length:100%_100%] bg-right bg-no-repeat" style="background-image: url('{{ asset('image/login-bg.png') }}');">
     <!-- Premium overlay to soften background and enhance contrast -->
     <div class="absolute inset-0 bg-slate-900/20"></div>
 
