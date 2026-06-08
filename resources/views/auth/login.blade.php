@@ -7,13 +7,13 @@
     <!-- Premium overlay to soften background and enhance contrast -->
     <div class="absolute inset-0 bg-slate-900/20"></div>
 
-    <div class="relative z-10 w-full max-w-lg lg:mr-72">
+    <div class="relative z-10 w-full max-w-[460px] lg:mr-[100px]">
         <!-- Login Card -->
         <div class="bg-white/30 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
             <!-- Header -->
             <div class="bg-transparent text-center border-b border-white/20">
-                <div class="flex justify-center overflow-hidden py-2">
-                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[260px] w-auto mix-blend-multiply scale-125">
+                <div class="flex justify-center overflow-hidden py-1">
+                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[180px] w-auto mix-blend-multiply scale-110">
                 </div>
             </div>
 
@@ -38,7 +38,7 @@
 
                     <!-- Username -->
                     <div>
-                        <label for="username" class="block text-md font-medium text-slate-700 mb-2">
+                        <label for="username" class="block text-sm font-medium text-slate-700 mb-2">
                             <i class="fa-solid fa-user mr-2 text-slate-600"></i>Username
                         </label>
                         <input
@@ -54,7 +54,7 @@
 
                     <!-- Password -->
                     <div>
-                        <label for="password" class="block text-md font-medium text-slate-700 mb-2">
+                        <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
                             <i class="fa-solid fa-lock mr-2 text-slate-600"></i>Password
                         </label>
                         <div class="relative">
