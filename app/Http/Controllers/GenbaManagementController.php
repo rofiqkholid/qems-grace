@@ -329,7 +329,6 @@ class GenbaManagementController extends Controller
         }
     }
 
-    // ========== GENBA HEADER METHODS ==========
 
     public function genbaHeaderTable(Request $request)
     {
@@ -1078,8 +1077,8 @@ class GenbaManagementController extends Controller
                 'user_id' => $my_id,
                 'due_date' => $due_date,
                 'type' => $findingType,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now()
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ]);
 
             // Refresh count locally or re-fetch? 
@@ -1116,7 +1115,7 @@ class GenbaManagementController extends Controller
                     'area_detail' => $detail_area,
                     'due_date' => $due_date,
                     'type' => $findingType,
-                    'updated_at' => \Carbon\Carbon::now()
+                    'updated_at' => Carbon::now()
                 ]);
             $updates = true;
         }

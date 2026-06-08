@@ -608,15 +608,13 @@
         });
     }
 
-    // --- Findings Table Logic (Ported) ---
-
     $(document).ready(function() {
         table = $('#findingsTable').DataTable({
             autoWidth: false,
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('dashboard.table') }}", // Uses DashboardController@table (No Delete Button)
+                url: "{{ route('dashboard.table') }}", // Uses DashboardController table method (no delete button)
                 type: 'POST',
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
