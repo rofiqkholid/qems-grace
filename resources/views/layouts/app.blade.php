@@ -37,6 +37,8 @@
 <body class="font-sans antialiased bg-gray-100 text-gray-900">
     @yield('content')
 
+    @include('components.central-toast')
+
     <!-- jQuery and DataTables must load before @stack('scripts') -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
@@ -62,6 +64,14 @@
         window.addEventListener('beforeunload', function() {
             const loader = document.getElementById('page-loader');
             if (loader) loader.classList.remove('hidden');
+        });
+        // Global DataTable Resize Adjustment
+        $(window).on('resize', function() {
+            $('.dataTable').each(function() {
+                if ($.fn.DataTable.isDataTable(this)) {
+                    $(this).DataTable().columns.adjust();
+                }
+            });
         });
     </script>
 </body>

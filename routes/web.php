@@ -39,6 +39,14 @@ Route::middleware(['auth'])->group(function () {
         return view('activity.genba_header_form');
     })->name('genba_management');
 
+    Route::get('/team', function () {
+        return view('activity.setup.genba_team');
+    })->name('genba_team');
+
+    Route::get('/room-team', function () {
+        return view('activity.setup.room_team');
+    })->name('room_team');
+
     Route::get('/genba_mng_management', function () {
         return view('activity.findings_genba');
     })->name('genba_mng_management');
@@ -77,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/genba/save_action_plan', [GenbaManagementController::class, 'save_action_plan'])->name('genba.save_action_plan');
     Route::get('/genba/search-doc', [GenbaManagementController::class, 'search_doc'])->name('genba.search_doc');
     Route::post('/genba/update_department', [GenbaManagementController::class, 'update_department'])->name('genba.update_department');
+    Route::post('/genba/update_detail_area', [GenbaManagementController::class, 'update_detail_area'])->name('genba.update_detail_area');
     Route::post('/genba/get_stations', [GenbaManagementController::class, 'get_stations'])->name('genba.get_stations');
 
     // Execution Genba Routes

@@ -143,7 +143,13 @@ class ExecutionGenbaController extends Controller
                 $nestedData['findings'] = $post->findings;
                 $nestedData['status'] = $statusIcons;
                 $nestedData['action'] = $button;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $nestedData['execution_comment'] = $post->execution_comment;
                 $nestedData['execution_comment'] = $post->execution_comment;
                 $nestedData['area_detail'] = $post->area_detail;

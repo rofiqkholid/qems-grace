@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<aside id="sidebar" class="group fixed top-0 left-0 z-40 h-screen transition-all duration-300 w-20 hover:w-64 -translate-x-full lg:translate-x-0">
+<aside id="sidebar" class="group fixed top-0 left-0 z-40 h-screen transition-all duration-300 w-64 lg:w-20 lg:hover:w-64 -translate-x-full lg:translate-x-0">
     <div class="h-full px-3 py-6 overflow-y-auto overflow-x-hidden bg-white border-r border-slate-200">
         <!-- Logo -->
         <a href="{{ url('/') }}" class="flex items-center justify-center mb-8 px-2 h-12">
@@ -10,7 +10,7 @@
         <nav class="space-y-1">
             <!-- Label -->
             @if($menuStructure['label'])
-            <div class="px-4 py-2 mt-4 first:mt-0 invisible group-hover:visible">
+            <div class="px-4 py-2 mt-4 first:mt-0 lg:invisible lg:group-hover:visible">
                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $menuStructure['label']->menu_name }}</span>
             </div>
             @endif
@@ -19,11 +19,11 @@
             <div class="menu-item">
                 <button type="button" onclick="toggleMenu('dashboard-menu')" class="w-full flex items-center gap-3 px-4 py-3 {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
                     <i class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-500' : 'text-slate-700' }}"></i>
-                    <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Dashboard</span>
-                    <i class="fa-solid fa-chevron-down text-xs opacity-0 group-hover:opacity-100 transition-all duration-300 {{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'rotate-0' }}" id="arrow-dashboard-menu"></i>
+                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Dashboard</span>
+                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 {{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'rotate-0' }}" id="arrow-dashboard-menu"></i>
                 </button>
 
-                <div class="hidden group-hover:block">
+                <div class="lg:hidden lg:group-hover:block">
                     <div class="{{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="dashboard-menu">
                         <a href="{{ url('dashboard') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == 'dashboard' || request()->path() == '/' ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
@@ -43,11 +43,11 @@
             <div class="menu-item">
                 <button type="button" onclick="toggleMenu('main-{{ $idx }}')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
                     <i class="fa-solid fa-users w-5 flex-shrink-0 text-center text-slate-700"></i>
-                    <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">{{ $mainItem['menu']->menu_name }}</span>
-                    <i class="fa-solid fa-chevron-down text-xs opacity-0 group-hover:opacity-100 transition-all duration-300" id="arrow-main-{{ $idx }}"></i>
+                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">{{ $mainItem['menu']->menu_name }}</span>
+                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300" id="arrow-main-{{ $idx }}"></i>
                 </button>
 
-                <div class="hidden group-hover:block">
+                <div class="lg:hidden lg:group-hover:block">
                     <div class="hidden pl-2 mt-1 space-y-1" id="main-{{ $idx }}">
                         @foreach($mainItem['children'] as $subIdx => $subItem)
                         @if($subItem['menu'])
@@ -75,15 +75,15 @@
             </div>
             @endif
             @endforeach
-            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001')
+            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001' || Auth::user()?->username === '031114-001' || Auth::user()?->username === '121020-002')
             <div class="menu-item">
                 <button type="button" onclick="toggleMenu('data-master')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
                     <i class="fa-solid fa-database w-5 flex-shrink-0 text-center text-slate-700"></i>
-                    <span class="font-base text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Data Master</span>
-                    <i class="fa-solid fa-chevron-down text-xs opacity-0 group-hover:opacity-100 transition-all duration-300" id="arrow-data-master"></i>
+                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Data Master</span>
+                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300" id="arrow-data-master"></i>
                 </button>
 
-                <div class="hidden group-hover:block">
+                <div class="lg:hidden lg:group-hover:block">
                     <div class="hidden pl-2 mt-1 space-y-1" id="data-master">
                         <a href="{{ url('data-master/line-checked') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>

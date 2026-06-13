@@ -16,6 +16,14 @@
                     </svg>
                 </button>
 
+                <!-- Application Name -->
+                <div class="flex flex-col justify-center">
+                    <span class="text-xl font-extrabold tracking-wider text-blue-600 leading-none">GRACE</span>
+                    <span class="hidden sm:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Recording & Action for Corrective Execution</span>
+                </div>
+
+                <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
+
                 <!-- Search -->
                 <div class="hidden sm:flex items-center">
                     <div class="relative">

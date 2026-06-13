@@ -151,7 +151,13 @@ class GenbaManagementController extends Controller
                 $nestedData['execution_path'] = '<button class="btn btn-sm w-9 h-9 flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors" id="btn_corrective_path_' . $no . '" onclick="btn_corrective(' . $sys_id . ',' . $no . ')"><i class="fa fa-camera"></i></button>';
                 $nestedData['status'] = $status;
                 $nestedData['action'] = $button;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $data[] = $nestedData;
             }
         } else {
@@ -187,7 +193,7 @@ class GenbaManagementController extends Controller
         }
     }
 
-    public function preview($id)
+    public function preview(string $id)
     {
         try {
             // Decrypt the ID
@@ -296,12 +302,39 @@ class GenbaManagementController extends Controller
         }
     }
 
-    // ========== GENBA HEADER METHODS ==========
+    public function update_detail_area(Request $request)
+    {
+        // Security: Restrict detail area editing to specific users
+        $allowedUsers = ['270723-001', '260422-001', '121020-002'];
+        if (!in_array(optional(Auth::user())->username, $allowedUsers)) {
+            return response()->json(['code' => 403, 'message' => 'Unauthorized']);
+        }
+
+        try {
+            $id = $request->input('trc_unix_id');
+            $detailArea = $request->input('detail_area');
+
+            $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $id)[0]));
+
+            DB::connection('sqlsrv')
+                ->table('GenbaProcAuditDtl')
+                ->where('SysID', $sysId)
+                ->update([
+                    'area_detail' => $detailArea
+                ]);
+
+            return response()->json(['code' => 200, 'message' => 'Detail Area updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['code' => 500, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
 
     public function genbaHeaderTable(Request $request)
     {
         $search = $request->front_table_search;
         $status_id = $request->status_id;
+        $is_room_team = $request->is_room_team == 'true';
         $columns = array(
             0 => 'SysID',
             1 => 'date',
@@ -310,25 +343,25 @@ class GenbaManagementController extends Controller
             4 => 'auditor',
             5 => 'category',
         );
-        $totalData = GenbaManagement::get_genba_activity_list($search, $status_id)->count();
+        $totalData = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = ($request->input('order.0.column') == 0 ? $columns[0] : $columns[$request->input('order.0.column')]);
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
         if (empty($search)) {
-            $posts = GenbaManagement::get_genba_activity_list($search, $status_id)
+            $posts = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)
                 ->offset($start)
                 ->limit($limit)
                 ->orderBy($order, $dir)
                 ->get();
         } else {
-            $posts = GenbaManagement::get_genba_activity_list($search, $status_id)
+            $posts = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)
                 ->offset($start)
                 ->limit($limit)
                 ->orderBy($order, $dir)
                 ->get();
-            $totalFiltered = GenbaManagement::get_genba_activity_list($search, $status_id)->count();
+            $totalFiltered = GenbaManagement::get_genba_activity_list($search, $status_id, $is_room_team)->count();
         }
         $data = array();
         if (!empty($posts)) {
@@ -369,7 +402,13 @@ class GenbaManagementController extends Controller
                 $nestedData['process'] = $post->process;
                 $nestedData['station'] = $post->station ?: $post->process;
                 $nestedData['line_checked'] = $post->Area_checked;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $nestedData['category'] = $post->category;
                 $nestedData['action'] = $button;
                 $data[] = $nestedData;
@@ -409,7 +448,7 @@ class GenbaManagementController extends Controller
         }
     }
 
-    public function genbaHeaderView($id)
+    public function genbaHeaderView(string $id)
     {
         try {
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $id)[0]));
@@ -458,6 +497,7 @@ class GenbaManagementController extends Controller
                 $form_genba['station'] = $d->station;
                 $form_genba['category_id'] = $d->Category_id;
                 $form_genba['category'] = $d->category . ' - ' . $d->category_desc;
+                $form_genba['is_team'] = $d->is_team;
             }
         } else {
             $form_genba['area_checked'] = '';
@@ -567,7 +607,7 @@ class GenbaManagementController extends Controller
         return response()->json([
             'items' => collect($users->items())->map(function ($user) {
                 return [
-                    'id' => $user->username,
+                    'id' => $user->id,
                     'name' => $user->full_name,
                     'text' => $user->full_name // For compatibility
                 ];
@@ -580,13 +620,21 @@ class GenbaManagementController extends Controller
 
     public function add_genba(Request $request)
     {
-        $str_req = explode("_", $request->trc_unix_id);
+        $data = [];
+        $trc_unix_id = $request->trc_unix_id;
+        $str_req = explode("_", $trc_unix_id);
 
         if ($str_req[0] != "0") {
             $str = explode("_", Crypt::decryptString(str_replace("-", "=", $str_req[0])));
             $sysID = $str[0];
         } else {
-            $sysID = $str_req[0];
+            // Check if this exact "New" submission was already processed (e.g., due to page refresh)
+            $sessionKey = 'genba_submission_' . $trc_unix_id;
+            if (session()->has($sessionKey)) {
+                $sysID = session()->get($sessionKey);
+            } else {
+                $sysID = $str_req[0]; // 0
+            }
         }
 
         $area_checked = $request->input('line_checked'); // Updated from area_checked to match form name
@@ -595,10 +643,21 @@ class GenbaManagementController extends Controller
         $category = $request->input('category'); // Updated from genba_category to match form name
         $process = $request->input('process');
         $station = $request->input('station') ?? $process;
+        $is_team = $request->input('is_team');
 
-        $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process);
+        // Fallback: If is_team is empty, at least include the creator's ID as a JSON array
+        if (empty($is_team)) {
+            $is_team = json_encode([(string) Auth::user()->id]);
+        }
+
+        $insert = GenbaManagement::add_genba_activity($area_checked, $auditor, $category, $date, $sysID, $station, $process, $is_team);
 
         if ($insert > 0) {
+            // If this was a new submission (sysID == 0 originally), save the new ID to the session
+            if (isset($sessionKey) && !session()->has($sessionKey)) {
+                session()->put($sessionKey, $insert);
+            }
+
             $db = DB::table('GenbaProcAudit')
                 ->where('SysID', $insert)
                 ->select('SysID', 'Category_id');
@@ -704,7 +763,7 @@ class GenbaManagementController extends Controller
         return $data;
     }
 
-    public function add_genba_rusty($id_activity)
+    public function add_genba_rusty(int|string $id_activity)
     {
         $audit = DB::table('GenbaProcAudit')->where('SysID', $id_activity)->first();
 
@@ -735,7 +794,7 @@ class GenbaManagementController extends Controller
         ]);
     }
 
-    public function add_genba_biq($id_activity)
+    public function add_genba_biq(int|string $id_activity)
     {
         $audit = DB::table('GenbaProcAudit')->where('SysID', $id_activity)->first();
 
@@ -1018,8 +1077,8 @@ class GenbaManagementController extends Controller
                 'user_id' => $my_id,
                 'due_date' => $due_date,
                 'type' => $findingType,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now()
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ]);
 
             // Refresh count locally or re-fetch? 
@@ -1056,7 +1115,7 @@ class GenbaManagementController extends Controller
                     'area_detail' => $detail_area,
                     'due_date' => $due_date,
                     'type' => $findingType,
-                    'updated_at' => \Carbon\Carbon::now()
+                    'updated_at' => Carbon::now()
                 ]);
             $updates = true;
         }
@@ -1111,6 +1170,11 @@ class GenbaManagementController extends Controller
         } else {
             // Take the last part as SysID
             $sys_id = end($parts);
+        }
+
+        // Check if SysID is numeric to avoid SQL Server database conversion errors
+        if (!is_numeric($sys_id)) {
+            return redirect()->back()->with('error', 'Document not found.');
         }
 
         // Check if finding exists
@@ -1199,7 +1263,6 @@ class GenbaManagementController extends Controller
             ->where('SysID', $sysID)
             ->update([
                 'execution_path' => $photoPathsString,
-                'execution_path' => $photoPathsString,
                 'execution_comment' => $execution_comment,
                 'preventive_action' => $preventive_action,
                 'evidence' => $evidence,
@@ -1231,11 +1294,11 @@ class GenbaManagementController extends Controller
             $perPage = 20;
 
             $query = GenbaManagement::get_stations($search);
-            
+
             $stations = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'items' => collect($stations->items())->map(function($item) {
+                'items' => collect($stations->items())->map(function ($item) {
                     return [
                         'id' => $item->Station,
                         'name' => ($item->Station ?? 'N/A') . ' (' . ($item->LineDesc ?? 'N/A') . ')'

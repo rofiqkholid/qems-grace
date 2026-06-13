@@ -18,7 +18,7 @@
             <p class="text-slate-500 mt-1">Monitor audit findings and performance in real-time.</p>
         </div>
 
-        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8">
+        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8 lg:overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
@@ -77,8 +77,8 @@
             </div>
 
             <!-- Full Width Findings Table -->
-            <div class="overflow-x-auto mt-8 border-t border-slate-200 pt-8">
-                <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-5">
+            <div class="mt-8 border-t border-slate-200 pt-8">
+                <div class="flex flex-col lg:flex-row lg:flex-wrap lg:items-center gap-3 mb-5">
                     <!-- Search -->
                     <div class="w-full lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
@@ -100,7 +100,7 @@
                             class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
-                    <!-- Department Filer -->
+                    <!-- Department Filter -->
                     <div class="w-full lg:w-auto min-w-[200px]">
                         <x-searchable-select
                             name="dept"
@@ -112,6 +112,24 @@
                             hideLabel="true" />
                     </div>
 
+                    <!-- Status Filter -->
+                    <div class="w-full lg:w-auto min-w-[160px]">
+                        <x-searchable-select
+                            name="status"
+                            id="statusFilter"
+                            label="Status"
+                            :initialOptions="[
+                                ['id' => 'OPEN', 'name' => 'Open'],
+                                ['id' => 'NEED_VERIF', 'name' => 'Need Verif'],
+                                ['id' => 'CLOSE', 'name' => 'Close'],
+                                ['id' => 'OVERDUE', 'name' => 'Overdue']
+                            ]"
+                            valueField="id"
+                            updateEvent="updateStatusFilter"
+                            hideLabel="true"
+                            placeholder="Select Status..." />
+                    </div>
+
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
                         class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
@@ -119,17 +137,18 @@
                         Reset
                     </button>
                 </div>
-                <table id="findingsTable" class="qms-table w-full">
+                <div class="overflow-x-auto lg:overflow-x-hidden">
+                    <table id="findingsTable" class="qms-table w-full">
                     <thead>
                         <tr>
-                            <th class="w-[3%] text-center hidden lg:table-cell">No</th>
-                            <th class="w-[8%]">DocNum</th>
-                            <th class="w-[5%]">Picture</th>
+                            <th class="w-[4%] text-center hidden lg:table-cell">No</th>
+                            <th class="w-[10%]">DocNum</th>
+                            <th class="w-[7%]">Picture</th>
                             <th class="w-[12%]">Genba Date</th>
-                            <th class="w-[12%] hidden lg:table-cell">Area Checked</th>
-                            <th class="w-[8%] hidden lg:table-cell">Dept</th>
-                            <th class="w-[15%] hidden lg:table-cell">Auditor</th>
-                            <th class="w-[18%]">
+                            <th class="w-[15%] hidden lg:table-cell">Area Checked</th>
+                            <th class="w-[10%] hidden lg:table-cell">Dept</th>
+                            <th class="w-[12%] hidden lg:table-cell">Auditor</th>
+                            <th class="w-[22%]">
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span>Status</span>
                                     <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
@@ -146,7 +165,8 @@
                     </thead>
                     <tbody class="bg-white">
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
             <!-- Data Count Component -->
             <x-data-table tableId="findingsTable" />
@@ -481,7 +501,15 @@
 
                                 currentStatusFilter = statusCode;
 
-                                // 3. Reload Table
+                                // 3. Update Status Dropdown UI
+                                window.dispatchEvent(new CustomEvent('updateStatusFilter', {
+                                    detail: {
+                                        id: statusCode,
+                                        name: datasetLabel
+                                    }
+                                }));
+
+                                // 4. Reload Table
                                 if (table) {
                                     table.ajax.reload();
                                 }
@@ -580,14 +608,13 @@
         });
     }
 
-    // --- Findings Table Logic (Ported) ---
-
     $(document).ready(function() {
         table = $('#findingsTable').DataTable({
+            autoWidth: false,
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('dashboard.table') }}", // Uses DashboardController@table (No Delete Button)
+                url: "{{ route('dashboard.table') }}", // Uses DashboardController table method (no delete button)
                 type: 'POST',
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
@@ -655,7 +682,7 @@
                     data: 'auditor',
                     className: 'text-slate-700 hidden lg:table-cell',
                     render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || '') + '</span>';
+                        return data || '';
                     }
                 },
                 {
@@ -687,7 +714,10 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #statusFilter').on('change', function() {
+            if (this.id === 'statusFilter') {
+                currentStatusFilter = $(this).val();
+            }
             table.ajax.reload();
         });
 
@@ -697,9 +727,16 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            $('#statusFilter').val('');
             currentStatusFilter = '';
             // Reset searchable select UI
             window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
+            window.dispatchEvent(new CustomEvent('updateStatusFilter', {
                 detail: {
                     id: '',
                     name: ''

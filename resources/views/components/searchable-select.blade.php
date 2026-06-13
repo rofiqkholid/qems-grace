@@ -171,6 +171,8 @@
             @if($changeEvent)
             window.dispatchEvent(new CustomEvent('{{ $changeEvent }}', { 
                 detail: { 
+                    id: item.id,
+                    name: item.name,
                     {{ $dependencyParam ? $dependencyParam : 'value' }}: val 
                 } 
             }));

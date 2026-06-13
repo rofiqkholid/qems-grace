@@ -88,8 +88,40 @@ $isClosed = $genba->status === 'Close';
                 <!-- Finding Level Detail (formerly Detail Area, now called Process per user request) -->
                 <div class="flex flex-col gap-2">
                     <label class="text-slate-700 font-medium text-sm">Detail Area</label>
-                    <div class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm">
-                        {{ $genba->area_detail ?? '-' }}
+
+                    <!-- Detail Area Display -->
+                    <div id="detail-area-display-container" class="bg-slate-100 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-slate-800 text-sm flex items-center justify-between h-[46px]">
+                        <span id="detail-area-display-text" class="truncate">
+                            {{ $genba->area_detail ?? '-' }}
+                        </span>
+
+                        @if(!$isClosed && $canEditDept)
+                        <button type="button" onclick="toggleDetailAreaEdit()" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-blue-600 hover:bg-white transition-all ml-2" title="Edit Detail Area">
+                            <i class="fa-solid fa-pencil text-xs"></i>
+                        </button>
+                        @endif
+                    </div>
+
+                    <!-- Detail Area Edit (Hidden) -->
+                    <div id="detail-area-edit-container" class="hidden flex items-center gap-2 w-full h-[46px]">
+                        <div class="flex-1 h-full">
+                            <x-searchable-select
+                                name="detail_area"
+                                id="detail-area-select"
+                                label="Detail Area"
+                                :apiUrl="route('genba.get_stations')"
+                                :hideLabel="true"
+                                valueField="id"
+                                updateEvent="set-detail-area-value" />
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button type="button" onclick="saveDetailArea()" class="mb-1 w-10 h-[42px] flex items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-all" title="Save">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </button>
+                            <button type="button" onclick="toggleDetailAreaEdit()" class="mb-1 w-10 h-[42px] flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all" title="Cancel">
+                                <i class="fa-solid fa-times text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -386,6 +418,20 @@ $isClosed = $genba->status === 'Close';
                 }));
             }, 100);
         }
+
+        // Set initial detail area if exists
+        const currentDetailArea = "{{ $genba->area_detail }}";
+
+        if (currentDetailArea) {
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('set-detail-area-value', {
+                    detail: {
+                        id: currentDetailArea,
+                        name: currentDetailArea
+                    }
+                }));
+            }, 100);
+        }
     });
 
     // Mobile Sidebar Toggle
@@ -489,6 +535,63 @@ $isClosed = $genba->status === 'Close';
             })
             .catch(err => {
                 console.error('Error updating department:', err);
+                showToast('An error occurred while updating', 'error');
+            });
+    }
+
+    // Toggle Detail Area Edit
+    function toggleDetailAreaEdit() {
+        const displayContainer = document.getElementById('detail-area-display-container');
+        const editContainer = document.getElementById('detail-area-edit-container');
+
+        if (displayContainer.classList.contains('hidden')) {
+            displayContainer.classList.remove('hidden');
+            editContainer.classList.add('hidden');
+        } else {
+            displayContainer.classList.add('hidden');
+            editContainer.classList.remove('hidden');
+        }
+    }
+
+    // Save Detail Area
+    function saveDetailArea() {
+        const trcUnixId = document.getElementById('trc_unix_id').value;
+        const selectedDetailArea = document.getElementById('detail-area-select').value;
+
+        if (!selectedDetailArea) {
+            showToast('Please select a detail area', 'warning');
+            return;
+        }
+
+        fetch("{{ route('genba.update_detail_area') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    trc_unix_id: trcUnixId,
+                    detail_area: selectedDetailArea
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showToast(data.message, 'success');
+
+                    // Update display text
+                    const displayText = document.getElementById('detail-area-display-text');
+                    displayText.textContent = selectedDetailArea;
+                    displayText.classList.remove('hidden');
+
+                    // Toggle back
+                    toggleDetailAreaEdit();
+                } else {
+                    showToast(data.message || 'Failed to update detail area', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error updating detail area:', err);
                 showToast('An error occurred while updating', 'error');
             });
     }

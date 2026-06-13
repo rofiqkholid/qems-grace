@@ -11,7 +11,7 @@ class MasterController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $allowedUsers = ['270723-001', '260422-001', '121020-002'];
+            $allowedUsers = ['270723-001', '260422-001', '121020-002', '031114-001'];
             if (!Auth::check() || !in_array(Auth::user()->username, $allowedUsers)) {
                 return response()->view('direct_403.direct_403');
             }

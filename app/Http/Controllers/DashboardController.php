@@ -21,8 +21,13 @@ class DashboardController extends Controller
 
         // 1. Findings Open: evidence IS NULL AND status IS NULL, IsDelete = 0
         $findingsOpen = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
-            ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
-            ->where('b.IsDelete', 0)
+            ->join('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
+            ->where(function ($q) {
+                $q->where('b.IsDelete', 0)
+                    ->orWhereNull('b.IsDelete');
+            })
             ->whereNotNull('a.asign_to_dept')
             ->whereNotNull('a.findings')
             ->where(function ($q) {
@@ -39,8 +44,13 @@ class DashboardController extends Controller
 
         // 2. Need Approve: evidence = '1' AND status = '1' AND verification_result IS NULL, IsDelete = 0
         $needApprove = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
-            ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
-            ->where('b.IsDelete', 0)
+            ->join('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
+            ->where(function ($q) {
+                $q->where('b.IsDelete', 0)
+                    ->orWhereNull('b.IsDelete');
+            })
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
             ->where('a.corrective_action', '1')
@@ -56,8 +66,13 @@ class DashboardController extends Controller
 
         // 3. Due Date (Overdue): due_date < today AND (evidence is null/0 OR corrective_action is null/0)
         $dueDateCount = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
-            ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
-            ->where('b.IsDelete', 0)
+            ->join('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
+            ->where(function ($q) {
+                $q->where('b.IsDelete', 0)
+                    ->orWhereNull('b.IsDelete');
+            })
             ->whereNotNull('a.findings')
             ->whereDate('a.due_date', '<', today())
             ->where(function ($q) {
@@ -75,8 +90,13 @@ class DashboardController extends Controller
 
         // 4. Closed: evidence='1' AND corrective_action='1' AND verification_result='1'
         $findingsClose = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
-            ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
-            ->where('b.IsDelete', 0)
+            ->join('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
+            ->where(function ($q) {
+                $q->where('b.IsDelete', 0)
+                    ->orWhereNull('b.IsDelete');
+            })
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
             ->where('a.corrective_action', '1')
@@ -91,8 +111,13 @@ class DashboardController extends Controller
 
         // 5. All Findings: findings is not null, IsDelete = 0
         $allFindings = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
-            ->leftJoin('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
-            ->where('b.IsDelete', 0)
+            ->join('GenbaProcAudit as b', 'b.SysID', '=', 'a.genba_id')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
+            ->where(function ($q) {
+                $q->where('b.IsDelete', 0)
+                    ->orWhereNull('b.IsDelete');
+            })
             ->whereNotNull('a.findings')
             ->where('a.created_at', '<=', $endOfMonth)
             ->count();
@@ -242,7 +267,13 @@ class DashboardController extends Controller
                 $nestedData['execution_path'] = $post->execution_path;
                 $nestedData['status'] = $status;
                 $nestedData['action'] = $button;
-                $nestedData['auditor'] = $post->Auditor;
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+                $nestedData['auditor'] = $auditorHtml;
                 $data[] = $nestedData;
             }
         } else {
@@ -289,6 +320,8 @@ class DashboardController extends Controller
         $deptFromDb = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
             ->distinct()
             ->whereNotNull('g.asign_to_dept')
             ->where(function ($q) {
@@ -304,6 +337,8 @@ class DashboardController extends Controller
         $closedResults = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
             ->select(
                 'g.asign_to_dept',
                 DB::raw("SUM(CASE WHEN (g.verification_result = '1' OR g.verification_result = 1) THEN 1 ELSE 0 END) AS TotalClose")
@@ -328,6 +363,8 @@ class DashboardController extends Controller
         $openOverdueResults = DB::connection('sqlsrv')
             ->table('GenbaProcAuditDtl as g')
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
+            ->whereNotNull('b.Auditor')
+            ->where('b.Auditor', '!=', '')
             ->select(
                 'g.asign_to_dept',
                 // Logic OPEN: Salah satu belum (fix/evidence), Belum verify, Due Date masih aman

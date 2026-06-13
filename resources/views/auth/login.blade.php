@@ -3,14 +3,17 @@
 @section('title', 'Login - QMS')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-100 flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
+<div class="relative min-h-screen flex items-center justify-end p-4 lg:p-16 bg-cover lg:bg-[length:100%_100%] bg-right bg-no-repeat" style="background-image: url('{{ asset('image/login-bg.png') }}');">
+    <!-- Premium overlay to soften background and enhance contrast -->
+    <div class="absolute inset-0 bg-slate-900/20"></div>
+
+    <div class="relative z-10 w-full max-w-[460px] lg:mr-[100px]">
         <!-- Login Card -->
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+        <div class="bg-white/30 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
             <!-- Header -->
-            <div class="bg-white  text-center border-b border-slate-100">
-                <div class="flex justify-center">
-                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[220px] w-auto">
+            <div class="bg-transparent text-center border-b border-white/20">
+                <div class="flex justify-center overflow-hidden py-1">
+                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[180px] w-auto mix-blend-multiply scale-110">
                 </div>
             </div>
 
@@ -36,14 +39,14 @@
                     <!-- Username -->
                     <div>
                         <label for="username" class="block text-sm font-medium text-slate-700 mb-2">
-                            <i class="fa-solid fa-user mr-2 text-slate-400"></i>Username
+                            <i class="fa-solid fa-user mr-2 text-slate-600"></i>Username
                         </label>
                         <input
                             type="text"
                             id="username"
                             name="username"
                             value="{{ old('username') }}"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                             placeholder="Masukkan username"
                             required
                             autofocus>
@@ -52,7 +55,7 @@
                     <!-- Password -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
-                            <i class="fa-solid fa-lock mr-2 text-slate-400"></i>Password
+                            <i class="fa-solid fa-lock mr-2 text-slate-600"></i>Password
                         </label>
                         <div class="relative">
                             <input
@@ -88,7 +91,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-center text-sm text-slate-500 mt-6">
+        <p class="text-center text-sm text-slate-300 mt-6 drop-shadow-sm">
             &copy; {{ date('Y') }} ICT - SAI. All rights reserved.
         </p>
     </div>
