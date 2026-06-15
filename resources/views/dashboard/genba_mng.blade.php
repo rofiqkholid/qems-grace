@@ -14,8 +14,8 @@
     <main class="flex-1 p-4 lg:p-6">
         <!-- Page Title -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
-            <p class="text-slate-500 mt-1">Monitor audit findings and performance in real-time.</p>
+            <h1 class="text-2xl font-bold text-slate-800">Genba Management Dashboard</h1>
+            <p class="text-slate-500 mt-1">Monitor Genba Management audit findings and performance in real-time.</p>
         </div>
 
         <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8 lg:overflow-x-hidden">
