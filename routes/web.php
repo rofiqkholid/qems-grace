@@ -28,11 +28,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/', function () {
-        return view('dashboard');
+        return view('dashboard.genba_mng');
     })->name('dashboard');
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
+    Route::get('/dashboard-mng', function () {
+        return view('dashboard.genba_mng');
     })->name('dashboard.index');
 
     Route::get('/genba_management', function () {
@@ -58,9 +58,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/spv_verification', [SummaryGenbaController::class, 'index'])->name('summary_verif');
 
     // Dashboard Routes
-    Route::get('/dashboard/data_cards', [DashboardController::class, 'data_cards'])->name('dashboard.data_cards');
-    Route::post('/dashboard/table', [DashboardController::class, 'table'])->name('dashboard.table');
-    Route::get('/dashboard/chart-data/{yearMonth}', [DashboardController::class, 'chart_all_dept'])->name('dashboard.chart_data');
+    Route::get('/dashboard-mng/data_cards', [DashboardController::class, 'data_cards'])->name('dashboard.data_cards');
+    Route::post('/dashboard-mng/table', [DashboardController::class, 'table'])->name('dashboard.table');
+    Route::get('/dashboard-mng/chart-data/{yearMonth}', [DashboardController::class, 'chart_all_dept'])->name('dashboard.chart_data');
+
+    // Genba BIQ Dashboard Routes
+    Route::get('/dashboard-biq', [DashboardController::class, 'biq_index'])->name('dashboard.biq');
+    Route::get('/dashboard-biq/data_cards', [DashboardController::class, 'biq_data_cards'])->name('dashboard.biq.data_cards');
+    Route::post('/dashboard-biq/table', [DashboardController::class, 'biq_table'])->name('dashboard.biq.table');
+    Route::get('/dashboard-biq/chart-data/{yearMonth}', [DashboardController::class, 'biq_chart_all_dept'])->name('dashboard.biq.chart_data');
 
 
     // Genba Header Routes

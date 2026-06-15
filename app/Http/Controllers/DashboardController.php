@@ -11,13 +11,27 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function data_cards(Request $request)
+    public function data_cards(Request $request, $category_id = 'NOT_BIQ')
     {
         $yearMonth = $request->input('yearMonth', date('Y-m'));
         [$year, $month] = explode('-', $yearMonth);
         $year = (int) $year;
         $month = (int) $month;
         $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
+
+        $categoryFilter = function ($q) use ($category_id) {
+            if ($category_id === 'NOT_BIQ') {
+                $q->where(function($sub) {
+                    $sub->whereNotIn('b.Category_id', [7, 8, 9])->orWhereNull('b.Category_id');
+                });
+            } else {
+                if (is_array($category_id)) {
+                    $q->whereIn('b.Category_id', $category_id);
+                } else {
+                    $q->where('b.Category_id', $category_id);
+                }
+            }
+        };
 
         // 1. Findings Open: evidence IS NULL AND status IS NULL, IsDelete = 0
         $findingsOpen = DB::connection('sqlsrv')->table('GenbaProcAuditDtl as a')
@@ -28,6 +42,7 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', 0)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where($categoryFilter)
             ->whereNotNull('a.asign_to_dept')
             ->whereNotNull('a.findings')
             ->where(function ($q) {
@@ -51,6 +66,7 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', 0)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where($categoryFilter)
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
             ->where('a.corrective_action', '1')
@@ -73,6 +89,7 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', 0)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where($categoryFilter)
             ->whereNotNull('a.findings')
             ->whereDate('a.due_date', '<', today())
             ->where(function ($q) {
@@ -97,6 +114,7 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', 0)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where($categoryFilter)
             ->whereNotNull('a.findings')
             ->where('a.evidence', '1')
             ->where('a.corrective_action', '1')
@@ -118,6 +136,7 @@ class DashboardController extends Controller
                 $q->where('b.IsDelete', 0)
                     ->orWhereNull('b.IsDelete');
             })
+            ->where($categoryFilter)
             ->whereNotNull('a.findings')
             ->where('a.created_at', '<=', $endOfMonth)
             ->count();
@@ -130,7 +149,7 @@ class DashboardController extends Controller
             'allFindings' => $allFindings
         ]);
     }
-    public function table(Request $request)
+    public function table(Request $request, $category_id = 'NOT_BIQ')
     {
         $search = $request->front_table_search;
         $date_from = $request->date_from;
@@ -151,7 +170,7 @@ class DashboardController extends Controller
             8 => 'a.SysID'
         );
 
-        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area)->count();
+        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
@@ -159,18 +178,18 @@ class DashboardController extends Controller
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
         if (empty($search)) {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
         } else {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area)
+            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
                 ->offset($start)
                 ->limit($limit)
                 ->reorder($order, $dir)
                 ->get();
-            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area)->count();
+            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)->count();
         }
 
         $data = array();
@@ -296,12 +315,26 @@ class DashboardController extends Controller
         echo json_encode($json_data);
     }
 
-    public function chart_all_dept($yearMonth)
+    public function chart_all_dept($yearMonth, $category_id = 'NOT_BIQ')
     {
         [$year, $month] = explode('-', $yearMonth);
         $year = (int) $year;
         $month = (int) $month;
         $endOfMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
+
+        $categoryFilter = function ($q) use ($category_id) {
+            if ($category_id === 'NOT_BIQ') {
+                $q->where(function($sub) {
+                    $sub->whereNotIn('b.Category_id', [7, 8, 9])->orWhereNull('b.Category_id');
+                });
+            } else {
+                if (is_array($category_id)) {
+                    $q->whereIn('b.Category_id', $category_id);
+                } else {
+                    $q->where('b.Category_id', $category_id);
+                }
+            }
+        };
 
         $departments = [
             'PUR',
@@ -323,6 +356,7 @@ class DashboardController extends Controller
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->whereNotNull('b.Auditor')
             ->where('b.Auditor', '!=', '')
+            ->where($categoryFilter)
             ->distinct()
             ->whereNotNull('g.asign_to_dept')
             ->where(function ($q) {
@@ -340,6 +374,7 @@ class DashboardController extends Controller
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->whereNotNull('b.Auditor')
             ->where('b.Auditor', '!=', '')
+            ->where($categoryFilter)
             ->select(
                 'g.asign_to_dept',
                 DB::raw("SUM(CASE WHEN (g.verification_result = '1' OR g.verification_result = 1) THEN 1 ELSE 0 END) AS TotalClose")
@@ -366,6 +401,7 @@ class DashboardController extends Controller
             ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
             ->whereNotNull('b.Auditor')
             ->where('b.Auditor', '!=', '')
+            ->where($categoryFilter)
             ->select(
                 'g.asign_to_dept',
                 // Logic OPEN: Salah satu belum (fix/evidence), Belum verify, Due Date masih aman
@@ -436,5 +472,25 @@ class DashboardController extends Controller
             'data_total_need_approve' => array_column($data, 'need_approve'),
             'data_name_dept' => array_column($data, 'name'),
         ]);
+    }
+
+    public function biq_index()
+    {
+        return view('dashboard.genba_biq');
+    }
+
+    public function biq_data_cards(Request $request)
+    {
+        return $this->data_cards($request, [7, 8, 9]);
+    }
+
+    public function biq_table(Request $request)
+    {
+        return $this->table($request, [7, 8, 9]);
+    }
+
+    public function biq_chart_all_dept($yearMonth)
+    {
+        return $this->chart_all_dept($yearMonth, [7, 8, 9]);
     }
 }

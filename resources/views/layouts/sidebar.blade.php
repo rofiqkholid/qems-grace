@@ -25,11 +25,11 @@
 
                 <div class="lg:hidden lg:group-hover:block">
                     <div class="{{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="dashboard-menu">
-                        <a href="{{ url('dashboard') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == 'dashboard' || request()->path() == '/' ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
+                        <a href="{{ url('dashboard-mng') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == 'dashboard-mng' || request()->path() == '/' ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                             <span class="text-sm whitespace-nowrap">Genba Management</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200 cursor-not-allowed opacity-60" title="Coming Soon">
+                        <a href="{{ route('dashboard.biq') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->is('dashboard-biq') ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                             <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                             <span class="text-sm whitespace-nowrap">Genba BIQ</span>
                         </a>

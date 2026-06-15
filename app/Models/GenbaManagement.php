@@ -47,7 +47,7 @@ class GenbaManagement extends Model
             ->all();
     }
 
-    public static function get_genba_mng_activity_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null, $detail_area = null)
+    public static function get_genba_mng_activity_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null, $detail_area = null, $category_id = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -89,6 +89,19 @@ class GenbaManagement extends Model
             })
             ->whereNotNull('b.Auditor')
             ->where('b.Auditor', '!=', '');
+
+        if ($category_id !== null) {
+            if ($category_id === 'NOT_BIQ') {
+                $result->where(function ($q) {
+                    $q->whereNotIn('b.Category_id', [7, 8, 9])
+                      ->orWhereNull('b.Category_id');
+                });
+            } elseif (is_array($category_id)) {
+                $result->whereIn('b.Category_id', $category_id);
+            } else {
+                $result->where('b.Category_id', $category_id);
+            }
+        }
 
         if ($search) {
             $result->where(function ($q) use ($search) {
