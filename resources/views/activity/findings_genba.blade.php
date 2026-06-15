@@ -44,7 +44,7 @@
                             class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
-                    <!-- Department Filer -->
+                    <!-- Department Filter -->
                     <div class="min-w-[200px]">
                         <x-searchable-select
                             name="dept"
@@ -52,12 +52,21 @@
                             label="Department"
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
+                            updateEvent="reset-dept"
                             hideLabel="true" />
                     </div>
 
-
-
-
+                    <!-- Detail Area Filter -->
+                    <div class="min-w-[200px]">
+                        <x-searchable-select
+                            name="detail_area"
+                            id="detailAreaFilter"
+                            label="Detail Area"
+                            :initialOptions="collect($detail_areas)->map(fn($da) => ['id' => $da, 'name' => $da])->values()->toArray()"
+                            valueField="name"
+                            updateEvent="reset-detail-area"
+                            hideLabel="true" />
+                    </div>
 
                     <!-- Status Filter -->
                     <div class="min-w-[150px]">
@@ -73,6 +82,7 @@
                             id="statusFilter"
                             label="Status"
                             :initialOptions="$statusOptions"
+                            updateEvent="reset-status"
                             hideLabel="true" />
                     </div>
 
@@ -226,6 +236,7 @@
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
                     d.status = $('#statusFilter').val();
+                    d.detail_area = $('#detailAreaFilter').val();
                 },
                 error: function(xhr, error, code) {
                     console.error('DataTables AJAX error:', error, code);
@@ -340,7 +351,7 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #statusFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #statusFilter, #detailAreaFilter').on('change', function() {
             table.ajax.reload();
         });
 
@@ -353,8 +364,12 @@
             $('#searchInput').val('');
             $('#dateFrom').val('');
             $('#dateTo').val('');
-            $('#deptFilter').val('');
-            $('#statusFilter').val('');
+            
+            // Reset searchable-select components via their updateEvent triggers
+            window.dispatchEvent(new CustomEvent('reset-dept', { detail: '' }));
+            window.dispatchEvent(new CustomEvent('reset-status', { detail: '' }));
+            window.dispatchEvent(new CustomEvent('reset-detail-area', { detail: '' }));
+            
             table.ajax.reload();
         });
 

@@ -47,7 +47,7 @@ class GenbaManagement extends Model
             ->all();
     }
 
-    public static function get_genba_mng_activity_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null)
+    public static function get_genba_mng_activity_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $status = null, $detail_area = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -114,6 +114,10 @@ class GenbaManagement extends Model
 
         if (!empty($dept)) {
             $result->where('a.asign_to_dept', $dept);
+        }
+
+        if (!empty($detail_area)) {
+            $result->where('a.area_detail', $detail_area);
         }
 
         if (!empty($status)) {
@@ -455,5 +459,34 @@ class GenbaManagement extends Model
         }
 
         return $query;
+    }
+
+    public static function get_all_detail_areas()
+    {
+        // 1. Fetch from Master Stations (DetailArea)
+        $masterAreas = DB::connection('sqlsrv')
+            ->table('GenbaStationMech')
+            ->select('DetailArea')
+            ->distinct()
+            ->whereNotNull('DetailArea')
+            ->pluck('DetailArea')
+            ->toArray();
+
+        // 2. Fetch distinct used in transaction
+        $usedAreas = DB::connection('sqlsrv')
+            ->table('GenbaProcAuditDtl')
+            ->select('area_detail')
+            ->distinct()
+            ->whereNotNull('area_detail')
+            ->pluck('area_detail')
+            ->toArray();
+
+        $allAreas = array_unique(array_merge($masterAreas, $usedAreas));
+        $allAreas = array_filter($allAreas, function($value) {
+            return !empty(trim($value));
+        });
+        sort($allAreas);
+
+        return array_values($allAreas);
     }
 }
