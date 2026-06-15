@@ -112,6 +112,19 @@
                             hideLabel="true" />
                     </div>
 
+                    <!-- Detail Area Filter -->
+                    <div class="w-full lg:w-auto min-w-[200px]">
+                        <x-searchable-select
+                            name="detail_area"
+                            id="detailAreaFilter"
+                            label="Detail Area"
+                            :initialOptions="collect($detail_areas)->map(fn($da) => ['id' => $da, 'name' => $da])->values()->toArray()"
+                            valueField="name"
+                            updateEvent="updateDetailAreaFilter"
+                            hideLabel="true"
+                            placeholder="Select Detail Area..." />
+                    </div>
+
                     <!-- Status Filter -->
                     <div class="w-full lg:w-auto min-w-[160px]">
                         <x-searchable-select
@@ -622,6 +635,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.detail_area = $('#detailAreaFilter').val();
                     d.status = currentStatusFilter;
                 }
             },
@@ -714,7 +728,7 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #statusFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #statusFilter, #detailAreaFilter').on('change', function() {
             if (this.id === 'statusFilter') {
                 currentStatusFilter = $(this).val();
             }
@@ -728,6 +742,7 @@
             $('#dateTo').val('');
             $('#deptFilter').val('');
             $('#statusFilter').val('');
+            $('#detailAreaFilter').val('');
             currentStatusFilter = '';
             // Reset searchable select UI
             window.dispatchEvent(new CustomEvent('updateDeptFilter', {
@@ -737,6 +752,12 @@
                 }
             }));
             window.dispatchEvent(new CustomEvent('updateStatusFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
+            window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
                 detail: {
                     id: '',
                     name: ''
