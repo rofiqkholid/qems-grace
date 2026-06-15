@@ -118,8 +118,8 @@
                             name="detail_area"
                             id="detailAreaFilter"
                             label="Detail Area"
-                            :initialOptions="collect($detail_areas)->map(fn($da) => ['id' => $da, 'name' => $da])->values()->toArray()"
-                            valueField="name"
+                            :initialOptions="$detail_areas"
+                            valueField="id"
                             updateEvent="updateDetailAreaFilter"
                             hideLabel="true"
                             placeholder="Select Detail Area..." />

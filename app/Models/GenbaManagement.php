@@ -467,30 +467,26 @@ class GenbaManagement extends Model
 
     public static function get_all_detail_areas()
     {
-        // 1. Fetch from Master Stations (DetailArea)
-        $masterAreas = DB::connection('sqlsrv')
+        $stations = DB::connection('sqlsrv')
             ->table('GenbaStationMech')
-            ->select('DetailArea')
+            ->select('DetailArea as id', 'Area as LineDesc')
             ->distinct()
             ->whereNotNull('DetailArea')
-            ->pluck('DetailArea')
-            ->toArray();
+            ->where('DetailArea', '!=', '')
+            ->get();
 
-        // 2. Fetch distinct used in transaction
-        $usedAreas = DB::connection('sqlsrv')
-            ->table('GenbaProcAuditDtl')
-            ->select('area_detail')
-            ->distinct()
-            ->whereNotNull('area_detail')
-            ->pluck('area_detail')
-            ->toArray();
+        $formatted = [];
+        foreach ($stations as $item) {
+            $formatted[] = [
+                'id' => $item->id,
+                'name' => ($item->id) . ' (' . ($item->LineDesc ?? 'N/A') . ')'
+            ];
+        }
 
-        $allAreas = array_unique(array_merge($masterAreas, $usedAreas));
-        $allAreas = array_filter($allAreas, function($value) {
-            return !empty(trim($value));
+        usort($formatted, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
         });
-        sort($allAreas);
 
-        return array_values($allAreas);
+        return $formatted;
     }
 }
