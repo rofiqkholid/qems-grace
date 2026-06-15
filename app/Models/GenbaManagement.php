@@ -154,7 +154,7 @@ class GenbaManagement extends Model
 
         return $result;
     }
-    public static function get_genba_approval_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null)
+    public static function get_genba_approval_list(mixed $search, $date_from = null, $date_to = null, $auditor = null, $dept = null, $detail_area = null)
     {
         // $my_id = Auth::user()->username;
         // $qems = ['121020-002', '031114-001', '260422-001'];
@@ -220,6 +220,10 @@ class GenbaManagement extends Model
 
         if (!empty($dept)) {
             $result->where('a.asign_to_dept', $dept);
+        }
+
+        if (!empty($detail_area)) {
+            $result->where('a.area_detail', $detail_area);
         }
 
         return $result;

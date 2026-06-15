@@ -55,6 +55,19 @@
                             hideLabel="true" />
                     </div>
 
+                    <!-- Detail Area Filter -->
+                    <div class="min-w-[200px]">
+                        <x-searchable-select
+                            name="detail_area"
+                            id="detailAreaFilter"
+                            label="Detail Area"
+                            :initialOptions="collect($detail_areas)->map(fn($da) => ['id' => $da, 'name' => $da])->values()->toArray()"
+                            valueField="name"
+                            updateEvent="updateDetailAreaFilter"
+                            hideLabel="true"
+                            placeholder="Select Detail Area..." />
+                    </div>
+
 
 
                     <!-- Reset Button -->
@@ -221,6 +234,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.detail_area = $('#detailAreaFilter').val();
                 }
             },
             columns: [{
@@ -344,7 +358,7 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #detailAreaFilter').on('change', function() {
             table.ajax.reload();
         });
 
@@ -356,6 +370,13 @@
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#deptFilter').val('');
+            $('#detailAreaFilter').val('');
+            window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
             table.ajax.reload();
         });
 
