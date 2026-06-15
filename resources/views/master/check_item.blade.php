@@ -241,6 +241,7 @@
                                     data-sysid="${row.SysID}"
                                     data-scope_id="${row.Scope_id}"
                                     data-category_id="${row.Category_id}"
+                                    data-category="${row.Category}"
                                     data-scope_item="${row.Scope_item}"
                                     data-check_item="${row.Check_item}"
                                     data-check_item_eng="${row.Check_item_eng}">

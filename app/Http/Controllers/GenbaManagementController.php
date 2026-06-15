@@ -773,25 +773,78 @@ class GenbaManagementController extends Controller
         }
         $category_id = $audit->Category_id;
         $dbScopes = DB::table('GenbaAuditItem as b')
-            ->leftJoin('GenbaProcAuditDtl as s', 'b.scope_id', '=', 's.SysID')
-            ->where('b.Category', $category_id)
-            ->select('b.SysID as check_item_id', 'b.scope_id')
+            ->leftJoin('GenbaProcAuditDtl as c', function ($join) use ($id_activity) {
+                $join->on('b.SysID', '=', 'c.check_item_id')
+                    ->where('c.genba_id', '=', $id_activity);
+            })
+            ->leftJoin('GenbaProcAudit as d', function ($join) {
+                $join->on('d.SysID', '=', 'c.genba_id')
+                    ->where('d.IsDelete', '=', 0);
+            })
+            ->where('b.Category', '=', $category_id)
             ->select(
                 'b.scope_id as scope_id',
-                'b.scope_item'
+                'b.scope_item',
+                'b.SysID as check_item_id',
+                'b.Photos as foto',
+                'b.Check_item',
+                'b.Check_item_eng',
+                'b.sortOrder',
+                'c.result as Hasil',
+                'c.Path'
             )
-            ->get();
+            ->orderBy('b.Category', 'asc')
+            ->orderBy('b.scope_id', 'asc')
+            ->orderBy('b.sortOrder', 'asc')
+            ->get()
+            ->unique('check_item_id');
 
         $scopes = [];
         foreach ($dbScopes as $item) {
             $scopes[$item->scope_item][] = [
                 'scope_id' => $item->scope_id,
+                'check_item_id' => $item->check_item_id,
+                'check_item' => $item->Check_item,
+                'check_item_eng' => $item->Check_item_eng,
+                'foto' => $item->foto,
+                'result' => $item->Hasil,
+                'photo' => $item->Path,
+                'sortOrder' => $item->sortOrder ?? $item->check_item_id
             ];
         }
 
+        // Fetch finding status
+        $allFindings = DB::table('GenbaProcAuditDtl')
+            ->where('genba_id', $id_activity)
+            ->orderBy('SysID', 'asc')
+            ->get();
+
+        $findingStatus = [];
+        $itemCounts = [];
+
+        foreach ($allFindings as $finding) {
+            $itemId = $finding->check_item_id;
+
+            if (!isset($itemCounts[$itemId])) {
+                $itemCounts[$itemId] = 0;
+            }
+            $itemCounts[$itemId]++;
+            $currentIndex = $itemCounts[$itemId];
+
+            $hasContent = !empty($finding->findings) || !empty($finding->Path);
+            $findingStatus["{$itemId}_{$currentIndex}"] = $hasContent;
+        }
+
+        $finding_types = collect(['Safety', 'Quality', 'Delivery/Productivity', 'Cost/Waste', 'Moral (SDM)', 'Environment', '5S'])->map(function ($t) {
+            return ['id' => $t, 'name' => $t];
+        })->toArray();
+
         return view('activity.no-checksheet.activity_rusty', [
             'id_activity' => $id_activity,
-            'scopes' => $scopes
+            'process' => $audit->process,
+            'scopes' => $scopes,
+            'finding_status' => $findingStatus,
+            'finding_types' => $finding_types
         ]);
     }
 

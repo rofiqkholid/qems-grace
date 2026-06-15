@@ -100,7 +100,7 @@
                             <div class="flex-1">
                                 <div class="flex items-start gap-3">
                                     <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center mt-0.5">
-                                        {{ $item['sortOrder'] ?? $loop->iteration }}
+                                        {{ $loop->iteration }}
                                     </span>
                                     <div>
                                         <p class="text-slate-800 font-medium text-base leading-relaxed">{{ $item['check_item'] }}</p>
