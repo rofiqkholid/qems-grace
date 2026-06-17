@@ -206,6 +206,16 @@ class MenuSeeder extends Seeder
                 'icon' => '<span></span>'
             ],
             [
+                'id' => 106,
+                'sequence_id' => 3,
+                'level_menu_id' => 3,
+                'group_id' => 7,
+                'sub_group_id' => 100,
+                'menu' => 'dashboard-safety',
+                'menu_name' => 'Genba Safety',
+                'icon' => '<span></span>'
+            ],
+            [
                 'id' => 104,
                 'sequence_id' => 2,
                 'level_menu_id' => 2,

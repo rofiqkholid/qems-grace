@@ -63,6 +63,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard-biq/table', [DashboardController::class, 'biq_table'])->name('dashboard.biq.table');
     Route::get('/dashboard-biq/chart-data/{yearMonth}', [DashboardController::class, 'biq_chart_all_dept'])->name('dashboard.biq.chart_data');
 
+    // Genba Safety Dashboard Routes
+    Route::get('/dashboard-safety', [DashboardController::class, 'safety_index'])->name('dashboard.safety');
+    Route::get('/dashboard-safety/data_cards', [DashboardController::class, 'safety_data_cards'])->name('dashboard.safety.data_cards');
+    Route::post('/dashboard-safety/table', [DashboardController::class, 'safety_table'])->name('dashboard.safety.table');
+    Route::get('/dashboard-safety/chart-data/{yearMonth}', [DashboardController::class, 'safety_chart_all_dept'])->name('dashboard.safety.chart_data');
+
 
     // Genba Header Routes
     Route::post('/genba_header/table', [GenbaManagementController::class, 'genbaHeaderTable'])->name('genba.header.table');

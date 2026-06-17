@@ -19,7 +19,7 @@ class UserMenuPermissionSeeder extends Seeder
         $adminNiksWithDelete = ['270723-001', '260422-001', '121020-002'];
         $adminNiksViewOnly = ['031114-001'];
         
-        $menuIds = [90, 91, 95, 96, 97, 98, 99, 103, 104, 105]; // Genba Form, Findings, Data Master and its submenus, User Management, Setting, Menu Management
+        $menuIds = [90, 91, 95, 96, 97, 98, 99, 103, 104, 105, 106]; // Genba Form, Findings, Data Master and its submenus, User Management, Setting, Menu Management, Safety Dashboard
 
         // Seed users with Delete permission
         $deleteUsers = User::whereIn('username', $adminNiksWithDelete)->get();

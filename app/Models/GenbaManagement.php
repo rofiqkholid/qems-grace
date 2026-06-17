@@ -93,7 +93,7 @@ class GenbaManagement extends Model
         if ($category_id !== null) {
             if ($category_id === 'NOT_BIQ') {
                 $result->where(function ($q) {
-                    $q->whereNotIn('b.Category_id', [7, 8, 9])
+                    $q->whereNotIn('b.Category_id', [7, 8, 9, 10])
                       ->orWhereNull('b.Category_id');
                 });
             } elseif (is_array($category_id)) {

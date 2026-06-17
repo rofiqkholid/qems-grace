@@ -25,6 +25,8 @@ class DashboardController extends Controller
             $menuId = 101; // Genba Management Dashboard
             if ($request->is('*dashboard-biq*')) {
                 $menuId = 102;
+            } elseif ($request->is('*dashboard-safety*')) {
+                $menuId = 106;
             }
             
             if (!UserMenuPermission::canView($menuId)) {
@@ -81,7 +83,7 @@ class DashboardController extends Controller
         $categoryFilter = function ($q) use ($category_id) {
             if ($category_id === 'NOT_BIQ') {
                 $q->where(function($sub) {
-                    $sub->whereNotIn('b.Category_id', [7, 8, 9])->orWhereNull('b.Category_id');
+                    $sub->whereNotIn('b.Category_id', [7, 8, 9, 10])->orWhereNull('b.Category_id');
                 });
             } else {
                 if (is_array($category_id)) {
@@ -384,7 +386,7 @@ class DashboardController extends Controller
         $categoryFilter = function ($q) use ($category_id) {
             if ($category_id === 'NOT_BIQ') {
                 $q->where(function($sub) {
-                    $sub->whereNotIn('b.Category_id', [7, 8, 9])->orWhereNull('b.Category_id');
+                    $sub->whereNotIn('b.Category_id', [7, 8, 9, 10])->orWhereNull('b.Category_id');
                 });
             } else {
                 if (is_array($category_id)) {
@@ -551,5 +553,25 @@ class DashboardController extends Controller
     public function biq_chart_all_dept($yearMonth)
     {
         return $this->chart_all_dept($yearMonth, [7, 8, 9]);
+    }
+
+    public function safety_index()
+    {
+        return view('dashboard.genba_safety');
+    }
+
+    public function safety_data_cards(Request $request)
+    {
+        return $this->data_cards($request, 10);
+    }
+
+    public function safety_table(Request $request)
+    {
+        return $this->table($request, 10);
+    }
+
+    public function safety_chart_all_dept($yearMonth)
+    {
+        return $this->chart_all_dept($yearMonth, 10);
     }
 }
