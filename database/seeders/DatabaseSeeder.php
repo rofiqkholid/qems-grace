@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(GenbaCategorySeeder::class);
+        $this->call([
+            GenbaCategorySeeder::class,
+            MenuSeeder::class,
+        ]);
     }
 }

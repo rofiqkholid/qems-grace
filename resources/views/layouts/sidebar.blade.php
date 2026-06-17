@@ -15,43 +15,42 @@
             </div>
             @endif
 
-            <!-- Dashboard with Submenus -->
-            <div class="menu-item">
-                <button type="button" onclick="toggleMenu('dashboard-menu')" class="w-full flex items-center gap-3 px-4 py-3 {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
-                    <i class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center {{ request()->is('dashboard*') || request()->path() == '/' ? 'text-blue-500' : 'text-slate-700' }}"></i>
-                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Dashboard</span>
-                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 {{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'rotate-0' }}" id="arrow-dashboard-menu"></i>
-                </button>
-
-                <div class="lg:hidden lg:group-hover:block">
-                    <div class="{{ request()->is('dashboard*') || request()->path() == '/' ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="dashboard-menu">
-                        <a href="{{ url('dashboard-mng') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == 'dashboard-mng' || request()->path() == '/' ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Genba Management</span>
-                        </a>
-                        <a href="{{ route('dashboard.biq') }}" class="flex items-center gap-3 px-4 py-2 {{ request()->is('dashboard-biq') ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Genba BIQ</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main Menus -->
             @foreach($menuStructure['mainMenus'] as $idx => $mainItem)
             @if($mainItem['menu'])
+                @if($mainItem['menu']->menu === 'data-master' && !(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001' || Auth::user()?->username === '031114-001' || Auth::user()?->username === '121020-002'))
+                    @continue
+                @endif
+                @php
+                    $isActive = request()->is($mainItem['menu']->menu . '*') || ($mainItem['menu']->menu === 'dashboard' && (request()->is('dashboard*') || request()->path() === '/'));
+                    $iconClass = match($mainItem['menu']->menu) {
+                        'genba' => 'fa-users',
+                        'data-master' => 'fa-database',
+                        'dashboard' => 'fa-chart-pie',
+                        default => 'fa-folder'
+                    };
+                @endphp
             <div class="menu-item">
-                <button type="button" onclick="toggleMenu('main-{{ $idx }}')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
-                    <i class="fa-solid fa-users w-5 flex-shrink-0 text-center text-slate-700"></i>
+                <button type="button" onclick="toggleMenu('main-{{ $idx }}')" class="w-full flex items-center gap-3 px-4 py-3 {{ $isActive ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
+                    <i class="fa-solid {{ $iconClass }} w-5 flex-shrink-0 text-center {{ $isActive ? 'text-blue-500' : 'text-slate-700' }}"></i>
                     <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">{{ $mainItem['menu']->menu_name }}</span>
-                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300" id="arrow-main-{{ $idx }}"></i>
+                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 {{ $isActive ? 'rotate-180' : '' }}" id="arrow-main-{{ $idx }}"></i>
                 </button>
 
                 <div class="lg:hidden lg:group-hover:block">
-                    <div class="hidden pl-2 mt-1 space-y-1" id="main-{{ $idx }}">
+                    <div class="{{ $isActive ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="main-{{ $idx }}">
                         @foreach($mainItem['children'] as $subIdx => $subItem)
                         @if($subItem['menu'])
                         <div>
+                            @if(empty($subItem['children']))
+                            @php
+                                $isSubActive = request()->is($subItem['menu']->menu . '*') || ($subItem['menu']->menu === 'dashboard-mng' && request()->path() === '/');
+                            @endphp
+                            <a href="{{ url($subItem['menu']->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ $isSubActive ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
+                                <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
+                                <span class="text-sm whitespace-nowrap">{{ $subItem['menu']->menu_name }}</span>
+                            </a>
+                            @else
                             <button type="button" onclick="toggleMenu('sub-{{ $idx }}-{{ $subIdx }}')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
                                 <i class="fa-solid fa-circle text-[6px] w-5 flex-shrink-0 text-center"></i>
                                 <span class="text-sm whitespace-nowrap flex-1 text-left">{{ $subItem['menu']->menu_name }}</span>
@@ -60,13 +59,14 @@
                             <div class="hidden pl-3 mt-1 space-y-1" id="sub-{{ $idx }}-{{ $subIdx }}">
                                 @foreach($subItem['children'] as $childId)
                                 @if(isset($menus[$childId]))
-                                <a href="{{ url($menus[$childId]->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ request()->path() == $menus[$childId]->menu ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
+                                <a href="{{ url($menus[$childId]->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ request()->is($menus[$childId]->menu . '*') ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                                     <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                                     <span class="text-sm whitespace-nowrap">{{ $menus[$childId]->menu_name }}</span>
                                 </a>
                                 @endif
                                 @endforeach
                             </div>
+                            @endif
                         </div>
                         @endif
                         @endforeach
@@ -75,37 +75,6 @@
             </div>
             @endif
             @endforeach
-            @if(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001' || Auth::user()?->username === '031114-001' || Auth::user()?->username === '121020-002')
-            <div class="menu-item">
-                <button type="button" onclick="toggleMenu('data-master')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200">
-                    <i class="fa-solid fa-database w-5 flex-shrink-0 text-center text-slate-700"></i>
-                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">Data Master</span>
-                    <i class="fa-solid fa-chevron-down text-xs lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300" id="arrow-data-master"></i>
-                </button>
-
-                <div class="lg:hidden lg:group-hover:block">
-                    <div class="hidden pl-2 mt-1 space-y-1" id="data-master">
-                        <a href="{{ url('data-master/line-checked') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Line Checked</span>
-                        </a>
-                        <a href="{{ url('data-master/category') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Category</span>
-                        </a>
-
-                        <a href="{{ url('data-master/department') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Departement</span>
-                        </a>
-                        <a href="{{ url('data-master/check-item') }}" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
-                            <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
-                            <span class="text-sm whitespace-nowrap">Check Item</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endif
         </nav>
     </div>
 </aside>
