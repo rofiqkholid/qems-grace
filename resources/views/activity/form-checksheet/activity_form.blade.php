@@ -332,7 +332,7 @@
                                                             <template x-for="item in items" :key="item.id">
                                                                 <div x-show="!search || search === selectedName || item.name.toLowerCase().includes(search.toLowerCase())"
                                                                     @click="select(item)"
-                                                                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50"
+                                                                    class="pl-4 pr-8 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50 whitespace-normal break-words"
                                                                     :class="selectedId === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700'">
                                                                     <span x-text="item.name"></span>
                                                                 </div>
@@ -345,7 +345,7 @@
                                             <!-- Box: Finding / Comments -->
                                             <div class="bg-white p-5 rounded-xl border border-slate-200">
                                                 <label class="block text-sm font-semibold text-slate-700 mb-2">Finding / Comments <span class="text-red-500">*</span></label>
-                                                <textarea id="findings_{{ $itemId }}" name="findings" rows="5" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none" placeholder="Describe the issue..."></textarea>
+                                                <textarea id="findings_{{ $itemId }}" name="findings" rows="5" class="w-full rounded-none border border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3" placeholder="Describe the issue..."></textarea>
                                             </div>
                                         </div>
                                     </div>

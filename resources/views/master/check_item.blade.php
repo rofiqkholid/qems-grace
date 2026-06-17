@@ -97,11 +97,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (ID)</label>
-                        <textarea name="check_item" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Check Item in Indonesian"></textarea>
+                        <textarea name="check_item" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Check Item in Indonesian"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (EN)</label>
-                        <textarea name="check_item_eng" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Check Item in English"></textarea>
+                        <textarea name="check_item_eng" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="Enter Check Item in English"></textarea>
                     </div>
                 </div>
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 rounded-b-xl">
@@ -149,11 +149,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (ID)</label>
-                        <textarea name="check_item" id="edit_check_item" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"></textarea>
+                        <textarea name="check_item" id="edit_check_item" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (EN)</label>
-                        <textarea name="check_item_eng" id="edit_check_item_eng" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"></textarea>
+                        <textarea name="check_item_eng" id="edit_check_item_eng" rows="3" required class="w-full px-4 py-2 border border-slate-200 rounded-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"></textarea>
                     </div>
                 </div>
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 rounded-b-xl">

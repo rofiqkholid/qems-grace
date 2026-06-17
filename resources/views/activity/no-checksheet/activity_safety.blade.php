@@ -161,13 +161,13 @@
                                         class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg max-h-60 overflow-y-auto">
 
                                         <template x-if="items.length === 0">
-                                            <div class="px-3 py-2 text-xs text-slate-500 text-center">No options found</div>
+                                            <div class="px-3 py-2 text-sm text-slate-500 text-center">No options found</div>
                                         </template>
 
                                         <template x-for="item in items" :key="item.id">
                                             <div x-show="!search || search === selectedName || item.name.toLowerCase().includes(search.toLowerCase())"
                                                 @click="select(item)"
-                                                class="px-3 py-2 text-xs cursor-pointer transition-colors hover:bg-slate-50"
+                                                class="pl-3 pr-8 py-2 text-sm cursor-pointer transition-colors hover:bg-slate-50 whitespace-normal break-words"
                                                 :class="selectedId === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700'">
                                                 <span x-text="item.name"></span>
                                             </div>
@@ -203,7 +203,7 @@
                             <!-- Finding / Comments -->
                             <div class="pt-2">
                                 <label class="block text-xs font-semibold text-slate-500 mb-1">Finding / Comments <span class="text-red-500">*</span></label>
-                                <textarea id="findings_{{ $itemId }}" name="findings" rows="4" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3" placeholder="Describe the issue..."></textarea>
+                                <textarea id="findings_{{ $itemId }}" name="findings" rows="4" class="w-full rounded-none border border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3" placeholder="Describe the issue..."></textarea>
                             </div>
                         </div>
                     </div>
