@@ -11,6 +11,7 @@ use Carbon\Carbon;
 
 
 use App\Models\UserMenuPermission;
+use App\Models\Menu;
 
 class DashboardController extends Controller
 {
@@ -27,11 +28,41 @@ class DashboardController extends Controller
             }
             
             if (!UserMenuPermission::canView($menuId)) {
+                // If they land on home '/' or '/dashboard-mng' but don't have dashboard permission,
+                // redirect to the first menu that they DO have permission to view.
+                if ($request->is('/') || $request->is('*dashboard-mng*')) {
+                    $firstMenu = $this->getFirstPermittedMenu(Auth::user()->id);
+                    if ($firstMenu) {
+                        return redirect($firstMenu->menu);
+                    }
+                }
                 return response()->view('direct_403.direct_403');
             }
             
             return $next($request);
         });
+    }
+
+    private function getFirstPermittedMenu($userId)
+    {
+        $orderedIds = Menu::getOrderedIds();
+        
+        $permissions = DB::table('t100_user_menus_permission')
+            ->where('id_user', $userId)
+            ->where('is_view', 1)
+            ->pluck('id_menus')
+            ->toArray();
+            
+        foreach ($orderedIds as $menuId) {
+            if (in_array($menuId, $permissions)) {
+                $menu = DB::table('t100_menus')->where('id', $menuId)->first();
+                if ($menu && !empty($menu->menu)) {
+                    return $menu;
+                }
+            }
+        }
+        
+        return null;
     }
 
     public function index()

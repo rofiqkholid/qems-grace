@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserMenuPermission;
+use App\Models\Menu;
 
 class MasterController extends Controller
 {
@@ -787,8 +788,7 @@ class MasterController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found.'], 404);
         }
 
-        // Get all menus ordered by defined hierarchical structure to match the sidebar sequence
-        $orderedIds = [100, 101, 102, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 104, 103, 105];
+        $orderedIds = Menu::getOrderedIds();
         $menusKeyed = DB::table('t100_menus')->get()->keyBy('id');
         
         $allMenus = collect();

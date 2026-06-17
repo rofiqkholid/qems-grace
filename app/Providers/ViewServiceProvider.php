@@ -25,41 +25,26 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('layouts.sidebar', function ($view) {
             $menus = Menu::orderBy('sequence_id')->get()->keyBy('id');
 
+            $config = Menu::getMenuStructureConfig();
+            
+            $mainMenus = [];
+            foreach ($config['mainMenus'] as $main) {
+                $children = [];
+                foreach ($main['children'] as $sub) {
+                    $children[] = [
+                        'menu' => $menus[$sub['menu']] ?? null,
+                        'children' => $sub['children']
+                    ];
+                }
+                $mainMenus[] = [
+                    'menu' => $menus[$main['menu']] ?? null,
+                    'children' => $children
+                ];
+            }
+            
             $menuStructure = [
-                'label' => $menus[5] ?? null,
-                'mainMenus' => [
-                    [
-                        'menu' => $menus[100] ?? null,
-                        'children' => [
-                            ['menu' => $menus[101] ?? null, 'children' => []],
-                            ['menu' => $menus[102] ?? null, 'children' => []],
-                        ]
-                    ],
-                    [
-                        'menu' => $menus[85] ?? null,
-                        'children' => [
-                            ['menu' => $menus[86] ?? null, 'children' => [87, 88]],
-                            ['menu' => $menus[89] ?? null, 'children' => [90, 91]],
-                            ['menu' => $menus[92] ?? null, 'children' => [93, 94]],
-                        ]
-                    ],
-                    [
-                        'menu' => $menus[95] ?? null,
-                        'children' => [
-                            ['menu' => $menus[96] ?? null, 'children' => []],
-                            ['menu' => $menus[97] ?? null, 'children' => []],
-                            ['menu' => $menus[98] ?? null, 'children' => []],
-                            ['menu' => $menus[99] ?? null, 'children' => []],
-                        ]
-                    ],
-                    [
-                        'menu' => $menus[104] ?? null,
-                        'children' => [
-                            ['menu' => $menus[103] ?? null, 'children' => []],
-                            ['menu' => $menus[105] ?? null, 'children' => []],
-                        ]
-                    ]
-                ]
+                'label' => $menus[$config['label']] ?? null,
+                'mainMenus' => $mainMenus
             ];
 
             $view->with('menuStructure', $menuStructure)
