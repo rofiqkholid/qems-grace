@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\GenbaManagement;
+use App\Models\UserMenuPermission;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Result;
 use Illuminate\Support\Facades\Auth;
@@ -63,8 +64,7 @@ class GenbaManagementController extends Controller
         $data = array();
         if (!empty($posts)) {
             $no = $start;
-            $user_nik = Auth::check() ? trim(Auth::user()->username) : null;
-            $target_nik = ['270723-001', '260422-001', '121020-002'];
+            $hasDeletePermission = UserMenuPermission::canDelete(91);
             foreach ($posts as $post) {
                 $no++;
                 $trc_id = Crypt::encryptString($post->SysID);
@@ -83,7 +83,7 @@ class GenbaManagementController extends Controller
                         <span id="spinner_form_view_doc_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
                     </button>';
 
-                if (in_array($user_nik, $target_nik)) {
+                if ($hasDeletePermission) {
                     $button .= '
                         <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" 
                             id="btn_f_genba_conform_delete_' . $no . '" 
@@ -182,6 +182,10 @@ class GenbaManagementController extends Controller
 
     public function delete(Request $request)
     {
+        if (!UserMenuPermission::canDelete(91)) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menghapus data.']);
+        }
+
         try {
             $rawSysId = trim($request->sys_id, "'");
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $rawSysId)[0]));
@@ -258,12 +262,7 @@ class GenbaManagementController extends Controller
 
             $departments = GenbaManagement::get_master_departments();
 
-            $canEditDept = false;
-            // Security: Restrict department editing to specific users
-            $allowedUsers = ['270723-001', '260422-001', '121020-002'];
-            if (in_array(optional(Auth::user())->username, $allowedUsers)) {
-                $canEditDept = true;
-            }
+            $canEditDept = UserMenuPermission::canView(95);
 
             return view('activity.findings_genba_preview', compact('genba', 'departments', 'canEditDept'));
         } catch (\Exception $e) {
@@ -274,8 +273,7 @@ class GenbaManagementController extends Controller
     public function update_department(Request $request)
     {
         // Security: Restrict department editing to specific users
-        $allowedUsers = ['270723-001', '260422-001', '121020-002'];
-        if (!in_array(optional(Auth::user())->username, $allowedUsers)) {
+        if (!UserMenuPermission::canView(95)) {
             return response()->json(['code' => 403, 'message' => 'Unauthorized']);
         }
 
@@ -306,8 +304,7 @@ class GenbaManagementController extends Controller
     public function update_detail_area(Request $request)
     {
         // Security: Restrict detail area editing to specific users
-        $allowedUsers = ['270723-001', '260422-001', '121020-002'];
-        if (!in_array(optional(Auth::user())->username, $allowedUsers)) {
+        if (!UserMenuPermission::canView(95)) {
             return response()->json(['code' => 403, 'message' => 'Unauthorized']);
         }
 
@@ -367,6 +364,7 @@ class GenbaManagementController extends Controller
         $data = array();
         if (!empty($posts)) {
             $no = $start;
+            $hasDeleteHeaderPermission = UserMenuPermission::canDelete(90);
             foreach ($posts as $post) {
                 $no++;
                 $trc_id = Crypt::encryptString($post->SysID);
@@ -378,8 +376,10 @@ class GenbaManagementController extends Controller
                                     <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
                                     <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path><path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
                                 </svg>
-                                </button>
-                                
+                                </button>';
+                
+                if ($hasDeleteHeaderPermission) {
+                    $button .= '
                                 <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" 
                                     id="btn_f_genba_header_delete_' . $no . '" 
                                     onclick="f_genba_header_delete(' . $sys_id . ',' . $no . ')">
@@ -393,8 +393,9 @@ class GenbaManagementController extends Controller
                                     </span>
                                     
                                     <span id="loader_f_genba_header_delete_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
-                                </button>
-                           </div>';
+                                </button>';
+                }
+                $button .= '</div>';
 
                 $date = Carbon::parse($post->Date)->format('d M Y');
 
@@ -436,6 +437,10 @@ class GenbaManagementController extends Controller
 
     public function genbaHeaderDelete(Request $request)
     {
+        if (!UserMenuPermission::canDelete(90)) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menghapus data.']);
+        }
+
         try {
             $rawSysId = trim($request->sys_id, "'");
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $rawSysId)[0]));

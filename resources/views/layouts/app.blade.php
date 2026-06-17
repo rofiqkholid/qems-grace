@@ -31,10 +31,21 @@
     <!-- Vite Assets (loads last to override CDN styles) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Preload styles to prevent transition flickers on load -->
+    <style>
+        .preload, .preload * {
+            -webkit-transition: none !important;
+            -moz-transition: none !important;
+            -ms-transition: none !important;
+            -o-transition: none !important;
+            transition: none !important;
+        }
+    </style>
+
     @stack('styles')
 </head>
 
-<body class="font-sans antialiased bg-gray-100 text-gray-900">
+<body class="font-sans antialiased bg-gray-100 text-gray-900 preload">
     @yield('content')
 
     @include('components.central-toast')
@@ -46,6 +57,10 @@
     @stack('scripts')
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('preload');
+        });
+
         // Global Loading Bar Logic
         window.addEventListener('load', function() {
             const loader = document.getElementById('page-loader');

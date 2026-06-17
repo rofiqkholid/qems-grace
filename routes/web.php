@@ -128,6 +128,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/check-item/delete', [MasterController::class, 'delete_check_item'])->name('master.check_item.delete');
     });
 
+    Route::get('/user-management', [MasterController::class, 'user_management'])->name('master.user_management');
+    Route::get('/user-management/list', [MasterController::class, 'user_list'])->name('master.user_management.list');
+    Route::get('/user-management/{id}/permissions', [MasterController::class, 'get_user_permissions'])->name('master.user_management.get_permissions');
+    Route::post('/user-management/table', [MasterController::class, 'user_management_table'])->name('master.user_management.table');
+    Route::post('/user-management/update-permission', [MasterController::class, 'update_user_permission'])->name('master.user_management.update_permission');
+
+    Route::get('/menu-management', [MasterController::class, 'menu_management'])->name('master.menu_management');
+    Route::post('/menu-management/table', [MasterController::class, 'menu_management_table'])->name('master.menu_management.table');
+
     // Fallback for 404 inside auth middleware
     Route::fallback(function () {
         return response()->view('errors.404', [], 404);

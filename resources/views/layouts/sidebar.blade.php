@@ -15,22 +15,31 @@
             </div>
             @endif
 
-            <!-- Main Menus -->
             @foreach($menuStructure['mainMenus'] as $idx => $mainItem)
             @if($mainItem['menu'])
-                @if($mainItem['menu']->menu === 'data-master' && !(Auth::user()?->username === '270723-001' || Auth::user()?->username === '260422-001' || Auth::user()?->username === '031114-001' || Auth::user()?->username === '121020-002'))
+                @if(!\App\Models\UserMenuPermission::canView($mainItem['menu']->id))
                     @continue
                 @endif
                 @php
-                    $isActive = request()->is($mainItem['menu']->menu . '*') || ($mainItem['menu']->menu === 'dashboard' && (request()->is('dashboard*') || request()->path() === '/'));
+                    $isActive = request()->is($mainItem['menu']->menu . '*') || 
+                                ($mainItem['menu']->menu === 'dashboard' && (request()->is('dashboard*') || request()->path() === '/')) ||
+                                ($mainItem['menu']->menu === 'setting' && (request()->is('setting*') || request()->is('user-management*') || request()->is('menu-management*')));
                     $iconClass = match($mainItem['menu']->menu) {
                         'genba' => 'fa-users',
                         'data-master' => 'fa-database',
                         'dashboard' => 'fa-chart-pie',
+                        'setting' => 'fa-gear',
+                        'user-management' => 'fa-user-shield',
                         default => 'fa-folder'
                     };
                 @endphp
             <div class="menu-item">
+                @if(empty($mainItem['children']))
+                <a href="{{ url($mainItem['menu']->menu) }}" class="w-full flex items-center gap-3 px-4 py-3 {{ $isActive ? 'text-blue-600 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
+                    <i class="fa-solid {{ $iconClass }} w-5 flex-shrink-0 text-center {{ $isActive ? 'text-blue-500' : 'text-slate-700' }}"></i>
+                    <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">{{ $mainItem['menu']->menu_name }}</span>
+                </a>
+                @else
                 <button type="button" onclick="toggleMenu('main-{{ $idx }}')" class="w-full flex items-center gap-3 px-4 py-3 {{ $isActive ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} rounded-xl transition-colors duration-200">
                     <i class="fa-solid {{ $iconClass }} w-5 flex-shrink-0 text-center {{ $isActive ? 'text-blue-500' : 'text-slate-700' }}"></i>
                     <span class="font-base text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex-1 text-left">{{ $mainItem['menu']->menu_name }}</span>
@@ -72,6 +81,7 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
             </div>
             @endif
             @endforeach

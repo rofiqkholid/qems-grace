@@ -23,8 +23,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         // Share menu data with sidebar
         View::composer('layouts.sidebar', function ($view) {
-            $menuIds = [5, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102];
-            $menus = Menu::whereIn('id', $menuIds)->orderBy('sequence_id')->get()->keyBy('id');
+            $menus = Menu::orderBy('sequence_id')->get()->keyBy('id');
 
             $menuStructure = [
                 'label' => $menus[5] ?? null,
@@ -51,6 +50,13 @@ class ViewServiceProvider extends ServiceProvider
                             ['menu' => $menus[97] ?? null, 'children' => []],
                             ['menu' => $menus[98] ?? null, 'children' => []],
                             ['menu' => $menus[99] ?? null, 'children' => []],
+                        ]
+                    ],
+                    [
+                        'menu' => $menus[104] ?? null,
+                        'children' => [
+                            ['menu' => $menus[103] ?? null, 'children' => []],
+                            ['menu' => $menus[105] ?? null, 'children' => []],
                         ]
                     ]
                 ]

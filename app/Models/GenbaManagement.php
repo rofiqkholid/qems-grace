@@ -274,8 +274,7 @@ class GenbaManagement extends Model
             $result->where('a.is_team', 'LIKE', '%' . trim($my_id) . '%');
         } else {
             // Admin users who can see everything
-            $admins = ['270723-001', '260422-001', '121020-002'];
-            if (!in_array($my_nik, $admins)) {
+            if (!UserMenuPermission::canView(95)) {
                 $result = $result->where(function($q) use ($my_name, $my_id) {
                     $q->where('a.Auditor', 'LIKE', '%' . $my_name . '%')
                       ->orWhere('a.is_team', 'LIKE', '%' . $my_id . '%');

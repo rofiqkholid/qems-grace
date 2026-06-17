@@ -204,6 +204,36 @@ class MenuSeeder extends Seeder
                 'menu' => 'dashboard-biq',
                 'menu_name' => 'Genba BIQ',
                 'icon' => '<span></span>'
+            ],
+            [
+                'id' => 104,
+                'sequence_id' => 2,
+                'level_menu_id' => 2,
+                'group_id' => 8,
+                'sub_group_id' => 104,
+                'menu' => 'setting',
+                'menu_name' => 'Setting',
+                'icon' => '<span></span>'
+            ],
+            [
+                'id' => 103,
+                'sequence_id' => 1,
+                'level_menu_id' => 3,
+                'group_id' => 8,
+                'sub_group_id' => 104,
+                'menu' => 'user-management',
+                'menu_name' => 'User Management',
+                'icon' => '<span></span>'
+            ],
+            [
+                'id' => 105,
+                'sequence_id' => 2,
+                'level_menu_id' => 3,
+                'group_id' => 8,
+                'sub_group_id' => 104,
+                'menu' => 'menu-management',
+                'menu_name' => 'Menu Management',
+                'icon' => '<span></span>'
             ]
         ];
 

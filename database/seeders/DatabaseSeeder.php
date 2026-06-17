@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             GenbaCategorySeeder::class,
             MenuSeeder::class,
+            UserMenuPermissionSeeder::class,
         ]);
     }
 }

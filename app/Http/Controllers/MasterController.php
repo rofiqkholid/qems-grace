@@ -5,14 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UserMenuPermission;
 
 class MasterController extends Controller
 {
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $allowedUsers = ['270723-001', '260422-001', '121020-002', '031114-001'];
-            if (!Auth::check() || !in_array(Auth::user()->username, $allowedUsers)) {
+            if (!Auth::check()) {
+                return response()->view('direct_403.direct_403');
+            }
+            
+            $menuId = 95;
+            if ($request->is('*user-management*')) {
+                $menuId = 103;
+            } elseif ($request->is('*menu-management*')) {
+                $menuId = 105;
+            }
+            if (!UserMenuPermission::canView($menuId)) {
                 return response()->view('direct_403.direct_403');
             }
             return $next($request);
@@ -558,5 +568,264 @@ class MasterController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    public function user_management()
+    {
+        return view('setting.user_management');
+    }
+
+    public function user_management_table(Request $request)
+    {
+        $query = DB::table('users')->orderBy('id', 'asc');
+
+        // Search
+        if ($request->has('search') && !empty($request->search['value'])) {
+            $searchValue = $request->search['value'];
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('username', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('full_name', 'LIKE', "%{$searchValue}%");
+            });
+        }
+
+        $totalRecords = DB::table('users')->count();
+        $filteredRecords = $query->count();
+
+        // Pagination
+        if ($request->has('start') && $request->has('length')) {
+            $query->skip($request->start)->take($request->length);
+        }
+
+        $data = $query->get();
+
+        // All menus to pass into action button
+        $allMenus = DB::table('t100_menus')->orderBy('level_menu_id')->orderBy('sequence_id')->get();
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $filteredRecords,
+            "data" => $data->map(function ($item, $key) use ($request, $allMenus) {
+                $start = $request->start ?? 0;
+                
+                // Get permissions for this user
+                $userPermissions = DB::table('t100_user_menus_permission')
+                    ->where('id_user', $item->id)
+                    ->get()
+                    ->keyBy('id_menus');
+
+                // Map permissions status
+                $permissionsMapped = $allMenus->map(function($menu) use ($userPermissions) {
+                    $perm = $userPermissions->get($menu->id);
+                    return [
+                        'id' => $menu->id,
+                        'menu_name' => $menu->menu_name,
+                        'level_menu_id' => $menu->level_menu_id,
+                        'is_view' => $perm ? $perm->is_view : 0,
+                        'is_delete' => $perm ? $perm->is_delete : 0,
+                    ];
+                });
+
+                $permissionsJson = json_encode($permissionsMapped);
+                $escapedJson = htmlspecialchars($permissionsJson, ENT_QUOTES, 'UTF-8');
+                $escapedFullName = htmlspecialchars($item->full_name, ENT_QUOTES, 'UTF-8');
+
+                $actionButton = '
+                    <button type="button" 
+                        class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-colors"
+                        onclick="openPermissionsModal(' . $item->id . ', \'' . $item->username . '\', \'' . $escapedFullName . '\', \'' . $escapedJson . '\')">
+                        <i class="fa-solid fa-key mr-1"></i> Permissions
+                    </button>';
+
+                return [
+                    "no" => $start + $key + 1,
+                    "username" => $item->username,
+                    "full_name" => $item->full_name,
+                    "role_id" => $item->role_id,
+                    "action" => $actionButton
+                ];
+            })
+        ]);
+    }
+
+    public function update_user_permission(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $permissions = $request->input('permissions', []);
+
+        try {
+            DB::beginTransaction();
+
+            // Fetch all menu IDs
+            $allMenuIds = DB::table('t100_menus')->pluck('id')->toArray();
+
+            foreach ($allMenuIds as $menuId) {
+                $isView = isset($permissions[$menuId]['is_view']) ? 1 : 0;
+                $isDelete = isset($permissions[$menuId]['is_delete']) ? 1 : 0;
+
+                DB::table('t100_user_menus_permission')->updateOrInsert(
+                    [
+                        'id_user' => $userId,
+                        'id_menus' => $menuId
+                    ],
+                    [
+                        'is_view' => $isView,
+                        'is_delete' => $isDelete
+                    ]
+                );
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Permissions updated successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Error updating permissions: ' . $e->getMessage()]);
+        }
+    }
+
+    public function menu_management()
+    {
+        return view('setting.menu_management');
+    }
+
+    public function menu_management_table(Request $request)
+    {
+        $query = DB::table('t100_menus')->orderBy('level_menu_id', 'asc')->orderBy('sequence_id', 'asc');
+
+        if ($request->has('search') && !empty($request->search['value'])) {
+            $searchValue = $request->search['value'];
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('menu_name', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('menu', 'LIKE', "%{$searchValue}%");
+            });
+        }
+
+        $totalRecords = DB::table('t100_menus')->count();
+        $filteredRecords = $query->count();
+
+        if ($request->has('start') && $request->has('length')) {
+            $query->skip($request->start)->take($request->length);
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $filteredRecords,
+            "data" => $data->map(function ($item, $key) use ($request) {
+                $start = $request->start ?? 0;
+                return [
+                    "no" => $start + $key + 1,
+                    "id" => $item->id,
+                    "menu_name" => $item->menu_name,
+                    "menu" => $item->menu,
+                    "level_menu_id" => $item->level_menu_id,
+                    "sequence_id" => $item->sequence_id,
+                ];
+            })
+        ]);
+    }
+
+    public function user_list(Request $request)
+    {
+        $search = $request->input('search');
+        $query = DB::table('users');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('username', 'LIKE', "%{$search}%")
+                  ->orWhere('full_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $users = $query->orderBy('full_name', 'asc')->paginate(15);
+
+        // Fetch all level 2 menus for tags
+        $allMenus = DB::table('t100_menus')->where('level_menu_id', 2)->get()->keyBy('id');
+
+        $data = collect($users->items())->map(function ($user) use ($allMenus) {
+            // Get viewable menu permissions
+            $viewMenuIds = DB::table('t100_user_menus_permission')
+                ->where('id_user', $user->id)
+                ->where('is_view', 1)
+                ->pluck('id_menus')
+                ->toArray();
+
+            $tags = [];
+            foreach ($viewMenuIds as $menuId) {
+                if (isset($allMenus[$menuId])) {
+                    $tags[] = $allMenus[$menuId]->menu_name;
+                }
+            }
+
+            return [
+                'id' => $user->id,
+                'username' => $user->username,
+                'full_name' => $user->full_name,
+                'email' => $user->email ?? '-',
+                'role_id' => $user->role_id,
+                'avatar' => $user->avatar ?? 'blank.png',
+                'tags' => $tags
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+            'current_page' => $users->currentPage(),
+            'last_page' => $users->lastPage(),
+            'total' => $users->total(),
+            'per_page' => $users->perPage()
+        ]);
+    }
+
+    public function get_user_permissions($id)
+    {
+        $user = DB::table('users')->where('id', $id)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        // Get all menus ordered by defined hierarchical structure to match the sidebar sequence
+        $orderedIds = [100, 101, 102, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 104, 103, 105];
+        $menusKeyed = DB::table('t100_menus')->get()->keyBy('id');
+        
+        $allMenus = collect();
+        foreach ($orderedIds as $menuId) {
+            if (isset($menusKeyed[$menuId])) {
+                $allMenus->push($menusKeyed[$menuId]);
+            }
+        }
+
+        // Get permissions for this user
+        $userPermissions = DB::table('t100_user_menus_permission')
+            ->where('id_user', $id)
+            ->get()
+            ->keyBy('id_menus');
+
+        // Map menus to their permissions
+        $permissionsMapped = $allMenus->map(function($menu) use ($userPermissions) {
+            $perm = $userPermissions->get($menu->id);
+            return [
+                'id' => $menu->id,
+                'menu_name' => $menu->menu_name,
+                'level_menu_id' => $menu->level_menu_id,
+                'is_view' => $perm ? $perm->is_view : 0,
+                'is_delete' => $perm ? $perm->is_delete : 0,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'full_name' => $user->full_name,
+                'email' => $user->email,
+                'role_id' => $user->role_id
+            ],
+            'permissions' => $permissionsMapped
+        ]);
     }
 }
