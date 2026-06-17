@@ -5,12 +5,40 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
 use App\Models\GenbaManagement;
 use Carbon\Carbon;
 
 
+use App\Models\UserMenuPermission;
+
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!Auth::check()) {
+                return response()->view('direct_403.direct_403');
+            }
+            
+            $menuId = 101; // Genba Management Dashboard
+            if ($request->is('*dashboard-biq*')) {
+                $menuId = 102;
+            }
+            
+            if (!UserMenuPermission::canView($menuId)) {
+                return response()->view('direct_403.direct_403');
+            }
+            
+            return $next($request);
+        });
+    }
+
+    public function index()
+    {
+        return view('dashboard.genba_mng');
+    }
+
     public function data_cards(Request $request, $category_id = 'NOT_BIQ')
     {
         $yearMonth = $request->input('yearMonth', date('Y-m'));

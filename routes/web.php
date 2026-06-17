@@ -27,13 +27,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', function () {
-        return view('dashboard.genba_mng');
-    })->name('dashboard');
-
-    Route::get('/dashboard-mng', function () {
-        return view('dashboard.genba_mng');
-    })->name('dashboard.index');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-mng', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::get('/genba_management', function () {
         return view('activity.genba_header_form');
