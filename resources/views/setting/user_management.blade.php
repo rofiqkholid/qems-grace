@@ -224,7 +224,7 @@
 
         // Fetch detailed permissions for this user
         $.ajax({
-            url: `/user-management/${userId}/permissions`,
+            url: `{{ route('master.user_management.get_permissions', ['id' => ':id']) }}`.replace(':id', userId),
             type: "GET",
             success: function(response) {
                 if (!response.success) {
