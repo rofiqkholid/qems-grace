@@ -371,16 +371,21 @@
         </div>
 
         <!-- Submit Button at Bottom -->
-        <div class="mt-8 mb-8 flex justify-end">
+        <div class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 p-3 flex justify-between items-center sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mt-8 sm:mb-8 sm:justify-start sm:gap-4">
+            <span class="text-[11px] sm:text-sm text-slate-400 font-medium max-w-[55%] sm:max-w-none leading-tight text-right sm:text-left order-1 sm:order-2">
+                Please remember to submit after completing all checksheets.
+            </span>
             <button @click="submitForm()"
-                class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-8 py-3 rounded-xl font-bold text-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-4 py-2 sm:px-8 sm:py-3 rounded-none font-bold text-sm sm:text-lg shrink-0 order-2 sm:order-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                <span>Submit Audit</span>
+                <span>Finish Audit</span>
             </button>
         </div>
     </main>
+    @include('layouts.footer')
+    <div class="h-20 sm:hidden"></div>
 </div>
 
 <!-- Mobile Sidebar Overlay -->
