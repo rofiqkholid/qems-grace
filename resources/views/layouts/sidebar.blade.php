@@ -50,6 +50,9 @@
                     <div class="{{ $isActive ? '' : 'hidden' }} pl-2 mt-1 space-y-1" id="main-{{ $idx }}">
                         @foreach($mainItem['children'] as $subIdx => $subItem)
                         @if($subItem['menu'])
+                            @if(!\App\Models\UserMenuPermission::canView($subItem['menu']->id))
+                                @continue
+                            @endif
                         <div>
                             @if(empty($subItem['children']))
                             @php
@@ -68,6 +71,9 @@
                             <div class="hidden pl-3 mt-1 space-y-1" id="sub-{{ $idx }}-{{ $subIdx }}">
                                 @foreach($subItem['children'] as $childId)
                                 @if(isset($menus[$childId]))
+                                    @if(!\App\Models\UserMenuPermission::canView($childId))
+                                        @continue
+                                    @endif
                                 <a href="{{ url($menus[$childId]->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ request()->is($menus[$childId]->menu . '*') ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                                     <i class="fa-solid fa-circle text-[4px] w-5 flex-shrink-0 text-center"></i>
                                     <span class="text-sm whitespace-nowrap">{{ $menus[$childId]->menu_name }}</span>

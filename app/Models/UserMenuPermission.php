@@ -42,12 +42,6 @@ class UserMenuPermission extends Model
      */
     public static function canView(int $menuId, ?int $userId = null): bool
     {
-        // If no permissions are defined for this menu, it is public/unrestricted
-        $hasRestrictions = self::where('id_menus', $menuId)->exists();
-        if (!$hasRestrictions) {
-            return true;
-        }
-
         $uid = $userId ?? (Auth::check() ? Auth::user()->id : null);
         if (!$uid) {
             return false;
