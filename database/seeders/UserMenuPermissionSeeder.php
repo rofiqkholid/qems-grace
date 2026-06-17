@@ -54,5 +54,20 @@ class UserMenuPermissionSeeder extends Seeder
                 );
             }
         }
+
+        // Give full access (all views and deletes) to User ID 53
+        $allMenuIds = DB::table('t100_menus')->pluck('id')->toArray();
+        foreach ($allMenuIds as $menuId) {
+            DB::table('t100_user_menus_permission')->updateOrInsert(
+                [
+                    'id_user' => 53,
+                    'id_menus' => $menuId,
+                ],
+                [
+                    'is_view' => 1,
+                    'is_delete' => 1
+                ]
+            );
+        }
     }
 }
