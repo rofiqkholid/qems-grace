@@ -14,22 +14,36 @@
     <main class="flex-1 p-4 lg:p-6">
         <!-- Page Title -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-slate-800">Genba BIQ Dashboard</h1>
-            <p class="text-slate-500 mt-1">Monitor Genba BIQ audit findings and performance in real-time.</p>
+            <h1 class="text-xl md:text-2xl font-bold text-slate-800">Genba BIQ Dashboard</h1>
+            <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Genba BIQ audit findings and performance in real-time.</p>
         </div>
 
-        <div class="bg-white p-5 border border-gray-200 rounded-2xl mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center justify-between gap-4 mb-6">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-800">Department Performance</h3>
-                            <p class="text-slate-500 text-sm">Findings status per department</p>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800">Department Performance</h3>
+                            <p class="text-[10px] sm:text-sm text-slate-500">Findings status per department</p>
                         </div>
-                        <div>
+                        <div class="flex flex-col items-end gap-2">
                             <input type="month" id="chartFilterDate" value="{{ date('Y-m') }}"
-                                class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-slate-50">
+                                class="w-[95px] sm:w-auto px-2 py-1.5 sm:px-4 sm:py-2 border border-slate-300 rounded-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm outline-none bg-slate-50">
+                            <!-- Chart Pagination (Visible on Mobile only) -->
+                            <div id="chartPagination" class="hidden items-center gap-1.5">
+                                <span id="chartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
+                                <button type="button" id="btnChartPrev" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <button type="button" id="btnChartNext" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="relative h-[390px] w-full">
@@ -44,30 +58,30 @@
                         <canvas id="statsPieChart"></canvas>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-100">
+                        <div class="flex items-center justify-between p-3 rounded-none bg-amber-50/50 border border-amber-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FEB019] -amber-200"></span>
+                                <span class="w-3 h-3 rounded-none bg-[#FEB019] -amber-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Open</span>
                             </div>
                             <span id="val_findingsOpen" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                        <div class="flex items-center justify-between p-3 rounded-none bg-blue-50/50 border border-blue-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#008FFB] -blue-200"></span>
+                                <span class="w-3 h-3 rounded-none bg-[#008FFB] -blue-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs text-nowrap">Need Verif</span>
                             </div>
                             <span id="val_needApprove" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
+                        <div class="flex items-center justify-between p-3 rounded-none bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#00E396] -green-200"></span>
+                                <span class="w-3 h-3 rounded-none bg-[#00E396] -green-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Closed</span>
                             </div>
                             <span id="val_findingsClose" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
+                        <div class="flex items-center justify-between p-3 rounded-none bg-red-50/50 border border-red-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FF4560] -red-200"></span>
+                                <span class="w-3 h-3 rounded-none bg-[#FF4560] -red-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Overdue</span>
                             </div>
                             <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>
@@ -78,30 +92,30 @@
 
             <!-- Full Width Findings Table -->
             <div class="mt-8 border-t border-slate-200 pt-8">
-                <div class="flex flex-col lg:flex-row lg:flex-wrap lg:items-center gap-3 mb-5">
+                <div class="grid grid-cols-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center gap-3 mb-5">
                     <!-- Search -->
-                    <div class="w-full lg:flex-1 lg:min-w-[200px]">
+                    <div class="col-span-2 lg:col-span-auto lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search findings..."
-                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         </div>
                     </div>
 
                     <!-- Date From -->
-                    <div class="w-full lg:w-auto">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateFrom"
-                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Date To -->
-                    <div class="w-full lg:w-auto">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateTo"
-                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Department Filter -->
-                    <div class="w-full lg:w-auto min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
@@ -113,7 +127,7 @@
                     </div>
 
                     <!-- Detail Area Filter -->
-                    <div class="w-full lg:w-auto min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="detail_area"
                             id="detailAreaFilter"
@@ -126,7 +140,7 @@
                     </div>
 
                     <!-- Status Filter -->
-                    <div class="w-full lg:w-auto min-w-[160px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[160px]">
                         <x-searchable-select
                             name="status"
                             id="statusFilter"
@@ -145,30 +159,30 @@
 
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
-                        class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
+                        class="col-span-1 lg:col-span-auto w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-none hover:bg-slate-300 text-sm font-base transition-colors">
                         <i class="fa-solid fa-rotate-right text-sm"></i>
                         Reset
                     </button>
                 </div>
-                <div class="overflow-x-auto lg:overflow-x-hidden">
-                    <table id="findingsTable" class="qms-table w-full">
+                <div>
+                    <table id="findingsTable" class="qms-table w-full min-w-[1200px]">
                     <thead>
                         <tr>
-                            <th class="w-[4%] text-center hidden lg:table-cell">No</th>
+                            <th class="w-[4%] text-center">No</th>
                             <th class="w-[10%]">DocNum</th>
                             <th class="w-[7%]">Picture</th>
                             <th class="w-[12%]">Genba Date</th>
-                            <th class="w-[15%] hidden lg:table-cell">Area Checked</th>
-                            <th class="w-[10%] hidden lg:table-cell">Dept</th>
-                            <th class="w-[12%] hidden lg:table-cell">Auditor</th>
+                            <th class="w-[15%]">Area Checked</th>
+                            <th class="w-[10%]">Dept</th>
+                            <th class="w-[12%]">Auditor</th>
                             <th class="w-[22%]">
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span>Status</span>
                                     <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
                                         <span>Action</span>
-                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
+                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-none shrink-0"></span>
                                         <span>Evidence</span>
-                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
+                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-none shrink-0"></span>
                                         <span>Close</span>
                                     </div>
                                 </div>
@@ -202,7 +216,7 @@
 
     <!-- Modal -->
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-5xl transform transition-all h-[90vh] flex flex-col">
+        <div class="bg-white rounded-none w-full max-w-5xl transform transition-all h-[90vh] flex flex-col">
             <!-- Header -->
             <div class="flex items-center justify-between p-4 border-b border-slate-200">
                 <h3 class="text-lg font-semibold text-slate-800">Findings & Evidence Preview</h3>
@@ -217,7 +231,7 @@
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
                     <!-- Before Section -->
-                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
+                    <div class="bg-slate-50/50 rounded-none p-5 border border-slate-100 h-full flex flex-col">
                         <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
                             <div>
                                 <h4 class="text-sm font-bold text-slate-800">Before Condition</h4>
@@ -226,7 +240,7 @@
 
                         <!-- Findings Text -->
                         <div class="mb-4">
-                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
+                            <div class="relative bg-white p-3.5 rounded-none border border-slate-200">
                                 <p id="modalCaptionBefore" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
                             </div>
                         </div>
@@ -235,8 +249,8 @@
                         <div id="imageContainerBefore" class="grid grid-cols-2 gap-3 content-start"></div>
 
                         <!-- Empty State -->
-                        <div id="noImageBefore" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
+                        <div id="noImageBefore" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-none border border-dashed border-slate-300/60 mt-auto">
+                            <div class="w-10 h-10 bg-white rounded-none flex items-center justify-center mb-2 border border-slate-100">
                                 <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -246,7 +260,7 @@
                     </div>
 
                     <!-- After Section -->
-                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
+                    <div class="bg-slate-50/50 rounded-none p-5 border border-slate-100 h-full flex flex-col">
                         <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
                             <div>
                                 <h4 class="text-sm font-bold text-slate-800">After Condition</h4>
@@ -255,7 +269,7 @@
 
                         <!-- Evidence Text -->
                         <div class="mb-4">
-                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
+                            <div class="relative bg-white p-3.5 rounded-none border border-slate-200">
                                 <p id="modalCaptionAfter" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
                             </div>
                         </div>
@@ -264,8 +278,8 @@
                         <div id="imageContainerAfter" class="grid grid-cols-2 gap-3 content-start"></div>
 
                         <!-- Empty State -->
-                        <div id="noImageAfter" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
+                        <div id="noImageAfter" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-none border border-dashed border-slate-300/60 mt-auto">
+                            <div class="w-10 h-10 bg-white rounded-none flex items-center justify-center mb-2 border border-slate-100">
                                 <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -279,7 +293,7 @@
             <!-- Footer -->
             <div class="flex justify-end p-4 border-t border-slate-200">
                 <button type="button" onclick="closeImageModal()"
-                    class="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-colors">
+                    class="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-none font-medium hover:bg-slate-200 transition-colors">
                     Close
                 </button>
             </div>
@@ -384,210 +398,282 @@
     let table = null; // Global table variable
     let currentStatusFilter = ''; // Initial status filter
 
+    // Pagination state
+    let rawChartData = null;
+    let currentChartPage = 1;
+    const chartPageSize = 5;
+    let isMobileMode = null;
+
     function loadDeptChart(yearMonth) {
         $.ajax({
             url: "{{ route('dashboard.biq.chart_data', ':yearMonth') }}".replace(':yearMonth', yearMonth),
             type: "GET",
             dataType: "json",
             success: function(response) {
-                const ctx = document.getElementById('deptChart').getContext('2d');
-
-                if (deptChart) {
-                    deptChart.destroy();
-                }
-
-                // Calculate max value for y-axis scaling
-                const allValues = [
-                    ...response.data_total_open,
-                    ...response.data_total_close,
-                    ...response.data_total_overdue,
-                    ...response.data_total_need_approve
-                ];
-                const maxValue = Math.max(...allValues, 0);
-                const suggestedMax = maxValue + 1;
-
-                let delayed;
-
-                deptChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: response.data_name_dept,
-                        datasets: [{
-                                label: 'Open',
-                                data: response.data_total_open,
-                                backgroundColor: '#f59e0b', // amber-500 (Yellow)
-                            },
-                            {
-                                label: 'Need Verif',
-                                data: response.data_total_need_approve,
-                                backgroundColor: '#008FFB', // blue-500 (matching pie)
-                            },
-                            {
-                                label: 'Close',
-                                data: response.data_total_close,
-                                backgroundColor: '#22c55e', // green-500
-                            },
-                            {
-                                label: 'Overdue',
-                                data: response.data_total_overdue,
-                                backgroundColor: '#ef4444', // red-500
-                            }
-                        ]
-                    },
-                    plugins: [{
-                        id: 'customLabels',
-                        afterDatasetsDraw: (chart) => {
-                            const {
-                                ctx
-                            } = chart;
-                            chart.data.datasets.forEach((dataset, i) => {
-                                const meta = chart.getDatasetMeta(i);
-                                if (!meta.hidden) {
-                                    meta.data.forEach((element, index) => {
-                                        const data = dataset.data[index];
-                                        if (data > 0) {
-                                            ctx.fillStyle = '#334155'; // slate-700
-                                            ctx.font = 'bold 11px sans-serif';
-                                            ctx.textAlign = 'center';
-                                            ctx.textBaseline = 'bottom';
-
-                                            // Adjust position based on bar
-                                            const xPos = element.x;
-                                            const yPos = element.y - 3;
-
-                                            ctx.fillText(data, xPos, yPos);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    }],
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animations: {
-                            y: {
-                                duration: 1000,
-                                easing: 'easeOutQuart',
-                                delay: context => {
-                                    let delay = 0;
-                                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
-                                        delay = context.dataIndex * 0 + 100; // Simultaneous 500ms delay on start
-                                    }
-                                    return delay;
-                                },
-                                from: (context) => {
-                                    if (context.type === 'data' && context.mode === 'default' && !delayed) {
-                                        const scale = context.chart.scales.y;
-                                        if (scale) return scale.getPixelForValue(0);
-                                    }
-                                    return undefined; // Default behavior for updates (hide/show)
-                                },
-                                loop: false
-                            }
-                        },
-                        onClick: (e) => {
-                            const points = deptChart.getElementsAtEventForMode(e, 'nearest', {
-                                intersect: true
-                            }, true);
-
-                            if (points.length) {
-                                const firstPoint = points[0];
-                                const label = deptChart.data.labels[firstPoint.index];
-                                const datasetLabel = deptChart.data.datasets[firstPoint.datasetIndex].label;
-
-                                // 1. Update Department Filter
-                                window.dispatchEvent(new CustomEvent('updateDeptFilter', {
-                                    detail: {
-                                        id: label,
-                                        name: label
-                                    }
-                                }));
-
-                                // 2. Set Status Filter
-                                // Map display label to backend code
-                                let statusCode = '';
-                                if (datasetLabel === 'Open') statusCode = 'OPEN';
-                                else if (datasetLabel === 'Need Verif') statusCode = 'NEED_VERIF';
-                                else if (datasetLabel === 'Close') statusCode = 'CLOSE';
-                                else if (datasetLabel === 'Overdue') statusCode = 'OVERDUE';
-
-                                currentStatusFilter = statusCode;
-
-                                // 3. Update Status Dropdown UI
-                                window.dispatchEvent(new CustomEvent('updateStatusFilter', {
-                                    detail: {
-                                        id: statusCode,
-                                        name: datasetLabel
-                                    }
-                                }));
-
-                                // 4. Reload Table
-                                if (table) {
-                                    table.ajax.reload();
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index',
-                        },
-                        scales: {
-                            x: {
-                                grid: {
-                                    display: true,
-                                    drawOnChartArea: true,
-                                    drawTicks: false,
-                                    color: 'rgba(203, 213, 225, 0.4)', // slate-300 with opacity
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                max: suggestedMax, // Dynamic max value
-                                grid: {
-                                    borderDash: [2, 2]
-                                },
-                                ticks: {
-                                    maxTicksLimit: 6
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 20
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += context.parsed.y;
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Mark initial animation as done
-                // We use a timeout to roughly match the animation duration
-                setTimeout(() => {
-                    delayed = true;
-                }, 1500);
+                rawChartData = response;
+                currentChartPage = 1;
+                renderDeptChart();
             },
             error: function(xhr) {
                 console.error("Failed to load chart data:", xhr);
             }
         });
+    }
+
+    function renderDeptChart() {
+        if (!rawChartData) return;
+
+        const ctx = document.getElementById('deptChart').getContext('2d');
+
+        if (deptChart) {
+            deptChart.destroy();
+        }
+
+        const isMobile = window.innerWidth < 768;
+        isMobileMode = isMobile;
+
+        let labels = rawChartData.data_name_dept;
+        let openData = rawChartData.data_total_open;
+        let needApproveData = rawChartData.data_total_need_approve;
+        let closeData = rawChartData.data_total_close;
+        let overdueData = rawChartData.data_total_overdue;
+
+        if (isMobile) {
+            // Zip and sort by overdue descending, then open descending
+            let zipped = [];
+            for (let i = 0; i < labels.length; i++) {
+                zipped.push({
+                    name: labels[i],
+                    open: openData[i] || 0,
+                    needApprove: needApproveData[i] || 0,
+                    close: closeData[i] || 0,
+                    overdue: overdueData[i] || 0
+                });
+            }
+
+            zipped.sort((a, b) => {
+                if (b.overdue !== a.overdue) {
+                    return b.overdue - a.overdue;
+                }
+                return b.open - a.open;
+            });
+
+            labels = zipped.map(item => item.name);
+            openData = zipped.map(item => item.open);
+            needApproveData = zipped.map(item => item.needApprove);
+            closeData = zipped.map(item => item.close);
+            overdueData = zipped.map(item => item.overdue);
+
+            const totalItems = labels.length;
+            const totalPages = Math.ceil(totalItems / chartPageSize) || 1;
+            
+            // Boundary checks
+            if (currentChartPage < 1) currentChartPage = 1;
+            if (currentChartPage > totalPages) currentChartPage = totalPages;
+
+            const startIndex = (currentChartPage - 1) * chartPageSize;
+            const endIndex = startIndex + chartPageSize;
+
+            labels = labels.slice(startIndex, endIndex);
+            openData = openData.slice(startIndex, endIndex);
+            needApproveData = needApproveData.slice(startIndex, endIndex);
+            closeData = closeData.slice(startIndex, endIndex);
+            overdueData = overdueData.slice(startIndex, endIndex);
+
+            $('#chartPageIndicator').text(currentChartPage + '/' + totalPages);
+            $('#btnChartPrev').prop('disabled', currentChartPage === 1);
+            $('#btnChartNext').prop('disabled', currentChartPage === totalPages);
+            $('#chartPagination').removeClass('hidden').addClass('flex');
+        } else {
+            $('#chartPagination').removeClass('flex').addClass('hidden');
+        }
+
+        // Calculate max value for y-axis scaling
+        const allValues = [
+            ...openData,
+            ...closeData,
+            ...overdueData,
+            ...needApproveData
+        ];
+        const maxValue = Math.max(...allValues, 0);
+        const suggestedMax = maxValue + 1;
+
+        let delayed;
+
+        deptChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                        label: 'Open',
+                        data: openData,
+                        backgroundColor: '#f59e0b', // amber-500 (Yellow)
+                    },
+                    {
+                        label: 'Need Verif',
+                        data: needApproveData,
+                        backgroundColor: '#008FFB', // blue-500 (matching pie)
+                    },
+                    {
+                        label: 'Close',
+                        data: closeData,
+                        backgroundColor: '#22c55e', // green-500
+                    },
+                    {
+                        label: 'Overdue',
+                        data: overdueData,
+                        backgroundColor: '#ef4444', // red-500
+                    }
+                ]
+            },
+            plugins: [{
+                id: 'customLabels',
+                afterDatasetsDraw: (chart) => {
+                    const {
+                        ctx
+                    } = chart;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        if (!meta.hidden) {
+                            meta.data.forEach((element, index) => {
+                                const data = dataset.data[index];
+                                if (data > 0) {
+                                    ctx.fillStyle = '#334155'; // slate-700
+                                    ctx.font = 'bold 11px sans-serif';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+
+                                    // Adjust position based on bar
+                                    const xPos = element.x;
+                                    const yPos = element.y - 3;
+
+                                    ctx.fillText(data, xPos, yPos);
+                                }
+                            });
+                        }
+                    });
+                }
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animations: {
+                    y: {
+                        duration: 1000,
+                        easing: 'easeOutQuart',
+                        delay: context => {
+                            let delay = 0;
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                delay = context.dataIndex * 0 + 100; // Simultaneous 500ms delay on start
+                            }
+                            return delay;
+                        },
+                        from: (context) => {
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                const scale = context.chart.scales.y;
+                                if (scale) return scale.getPixelForValue(0);
+                            }
+                            return undefined; // Default behavior for updates (hide/show)
+                        },
+                        loop: false
+                    }
+                },
+                onClick: (e) => {
+                    const points = deptChart.getElementsAtEventForMode(e, 'nearest', {
+                        intersect: true
+                    }, true);
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const label = deptChart.data.labels[firstPoint.index];
+                        const datasetLabel = deptChart.data.datasets[firstPoint.datasetIndex].label;
+
+                        // 1. Update Department Filter
+                        window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                            detail: {
+                                id: label,
+                                name: label
+                            }
+                        }));
+
+                        // 2. Set Status Filter
+                        // Map display label to backend code
+                        let statusCode = '';
+                        if (datasetLabel === 'Open') statusCode = 'OPEN';
+                        else if (datasetLabel === 'Need Verif') statusCode = 'NEED_VERIF';
+                        else if (datasetLabel === 'Close') statusCode = 'CLOSE';
+                        else if (datasetLabel === 'Overdue') statusCode = 'OVERDUE';
+
+                        currentStatusFilter = statusCode;
+
+                        // 3. Update Status Dropdown UI
+                        window.dispatchEvent(new CustomEvent('updateStatusFilter', {
+                            detail: {
+                                id: statusCode,
+                                name: datasetLabel
+                            }
+                        }));
+
+                        // 4. Reload Table
+                        if (table) {
+                            table.ajax.reload();
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            color: 'rgba(203, 213, 225, 0.4)', // slate-300 with opacity
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: suggestedMax, // Dynamic max value
+                        grid: {
+                            borderDash: [2, 2]
+                        },
+                        ticks: {
+                            maxTicksLimit: 6
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Mark initial animation as done
+        setTimeout(() => {
+            delayed = true;
+        }, 1500);
     }
 
     // Initialize Chart
@@ -600,29 +686,41 @@
             loadDeptChart($(this).val());
             loadDataCards($(this).val());
         });
+
+        // Pagination buttons
+        $('#btnChartPrev').click(function() {
+            if (currentChartPage > 1) {
+                currentChartPage--;
+                renderDeptChart();
+            }
+        });
+
+        $('#btnChartNext').click(function() {
+            if (rawChartData) {
+                const totalItems = rawChartData.data_name_dept.length;
+                const totalPages = Math.ceil(totalItems / chartPageSize) || 1;
+                if (currentChartPage < totalPages) {
+                    currentChartPage++;
+                    renderDeptChart();
+                }
+            }
+        });
+
+        // Handle resize
+        $(window).resize(function() {
+            const currentMobile = window.innerWidth < 768;
+            if (currentMobile !== isMobileMode) {
+                currentChartPage = 1;
+                renderDeptChart();
+            }
+        });
     });
 
-    // Mobile Sidebar Toggle
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-    }
-
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        });
-    }
 
     $(document).ready(function() {
         table = $('#findingsTable').DataTable({
+            dom: '<"overflow-x-auto"t>ip',
             autoWidth: false,
             processing: true,
             serverSide: true,
@@ -642,7 +740,7 @@
             columns: [{
                     data: 'no',
                     orderable: false,
-                    className: 'text-center font-base text-slate-700 hidden lg:table-cell',
+                    className: 'text-center font-base text-slate-700',
                     render: function(data, type, row) {
                         return data;
                     }
@@ -651,7 +749,7 @@
                     data: 'DocNum',
                     className: 'font-base text-slate-900',
                     render: function(data, type, row) {
-                        return '<span class="inline-flex items-center rounded-md text-sm font-base text-slate-800 font-mono">' + data + '</span>';
+                        return '<span class="inline-flex items-center rounded-none text-sm font-base text-slate-800 font-mono">' + data + '</span>';
                     }
                 },
                 {
@@ -664,7 +762,7 @@
                         const execComment = encodeURIComponent(row.execution_comment || '');
                         const pathAfter = (row.execution_path || '');
 
-                        return `<button class="w-9 h-9 flex items-center justify-center text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" 
+                        return `<button class="w-9 h-9 flex items-center justify-center text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-none transition-colors" 
                                 onclick="viewGenbaImages('${data}', '${pathAfter}', '${findings}', '${execComment}')" title="View Image">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -680,21 +778,21 @@
                 },
                 {
                     data: 'area_checked',
-                    className: 'text-slate-700 hidden lg:table-cell',
+                    className: 'text-slate-700',
                     render: function(data, type, row) {
                         return '<span class="text-sm">' + data + '</span>';
                     }
                 },
                 {
                     data: 'dept',
-                    className: 'hidden lg:table-cell',
+                    className: '',
                     render: function(data, type, row) {
                         return '<div class="text-sm text-slate-600">' + (data || '') + '</div>';
                     }
                 },
                 {
                     data: 'auditor',
-                    className: 'text-slate-700 hidden lg:table-cell',
+                    className: 'text-slate-700',
                     render: function(data, type, row) {
                         return data || '';
                     }
@@ -811,7 +909,7 @@
                 if (imgName) {
                     const fullPath = findingPhotoBaseUrl + '/' + imgName;
                     const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
+                        <div class="relative group cursor-zoom-in overflow-hidden rounded-none bg-slate-100 border border-slate-200 aspect-[4/3]">
                             <img src="${fullPath}" 
                                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                                  alt="Before Image"
@@ -833,7 +931,7 @@
                 if (imgName) {
                     const fullPath = evidencePhotoBaseUrl + '/' + imgName;
                     const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
+                        <div class="relative group cursor-zoom-in overflow-hidden rounded-none bg-slate-100 border border-slate-200 aspect-[4/3]">
                             <img src="${fullPath}" 
                                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                                  alt="After Image"

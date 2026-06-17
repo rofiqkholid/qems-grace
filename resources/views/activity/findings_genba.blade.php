@@ -22,9 +22,9 @@
         <div class="bg-white rounded-lg border border-slate-200">
             <!-- Filter Section -->
             <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="grid grid-cols-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center gap-3">
                     <!-- Search -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="col-span-2 lg:col-span-auto lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search Findings and DocNum..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
@@ -33,19 +33,19 @@
                     </div>
 
                     <!-- Date From -->
-                    <div>
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateFrom"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Date To -->
-                    <div>
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateTo"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Department Filter -->
-                    <div class="min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
@@ -57,7 +57,7 @@
                     </div>
 
                     <!-- Detail Area Filter -->
-                    <div class="min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="detail_area"
                             id="detailAreaFilter"
@@ -69,7 +69,7 @@
                     </div>
 
                     <!-- Status Filter -->
-                    <div class="min-w-[150px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[150px]">
                         @php
                         $statusOptions = [
                         ['id' => 'OPEN', 'name' => 'Open'],
@@ -88,7 +88,7 @@
 
                     <!-- Reset Button -->
                     <button type="button" id="btnReset"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
+                        class="col-span-1 lg:col-span-auto w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
                         <i class="fa-solid fa-rotate-right text-sm"></i>
                         Reset
                     </button>
@@ -96,20 +96,20 @@
             </div>
 
             <!-- Table Section -->
-            <div class="overflow-x-auto p-6">
-                <table id="findingsTable" class="qms-table w-full">
+            <div class="p-6">
+                <table id="findingsTable" class="qms-table w-full min-w-[1500px]">
                     <thead>
                         <tr>
-                            <th class="w-[4%] text-center">No</th>
+                            <th class="w-[3%] text-center">No</th>
                             <th class="w-[8%]">DocNum</th>
                             <th class="w-[5%]">Picture</th>
-                            <th class="w-[10%]">Genba Date</th>
+                            <th class="w-[8%]">Genba Date</th>
                             <th class="w-[10%]">Detail Area</th>
-                            <th class="w-[9%]">Line Checked</th>
-                            <th class="w-[9%]">Dept</th>
-                            <th class="w-[23%]">Findings</th>
-                            <th class="w-[12%]">Auditor</th>
-                            <th class="w-[18%]">
+                            <th class="w-[8%]">Line Checked</th>
+                            <th class="w-[6%]">Dept</th>
+                            <th class="w-[15%]">Findings</th>
+                            <th class="w-[8%]">Auditor</th>
+                            <th class="w-[20%]">
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span>Status</span>
                                     <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
@@ -121,7 +121,7 @@
                                     </div>
                                 </div>
                             </th>
-                            <th class="w-[8%]">Action</th>
+                            <th class="w-[9%]">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -224,6 +224,7 @@
 <script>
     $(document).ready(function() {
         var table = $('#findingsTable').DataTable({
+            dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
             ajax: {
@@ -389,24 +390,6 @@
             table.ajax.reload();
         }, 500));
 
-        // Mobile sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-                sidebarOverlay.classList.toggle('hidden');
-            });
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', () => {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            });
-        }
     });
 
     function document_preview(id, no) {

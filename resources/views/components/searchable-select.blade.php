@@ -236,7 +236,7 @@
                 :disabled="dependencyValue === ''"
                 :class="dependencyValue === '' ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : ''"
                 @endif
-                class="w-full px-4 py-[9px] border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700">
+                class="w-full pl-4 pr-8 py-[9px] border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                 <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
             </div>

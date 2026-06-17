@@ -119,4 +119,44 @@
             if (arrow) arrow.classList.toggle('rotate-180');
         }
     }
+
+    function initMobileSidebar() {
+        if (window.innerWidth < 1024) {
+            const submenus = document.querySelectorAll('[id$="-menu"], [id^="main-"], #data-master');
+            submenus.forEach(menu => {
+                menu.classList.remove('hidden');
+                const arrow = document.getElementById('arrow-' + menu.id);
+                if (arrow) arrow.classList.add('rotate-180');
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initMobileSidebar();
+
+        // Mobile Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('-translate-x-full');
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.toggle('hidden');
+                }
+            });
+        }
+
+        if (sidebarOverlay && sidebar) {
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            });
+        }
+    });
+
+    // Run immediately since script is at the bottom of the DOM
+    initMobileSidebar();
 </script>

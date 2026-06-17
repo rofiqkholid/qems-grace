@@ -126,35 +126,36 @@
                                     class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
                             </div>
 
-                            <!-- Process -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Process <span class="text-red-500">*</span></label>
-                                <x-searchable-select
-                                    name="process"
-                                    id="formProcess"
-                                    label="Process"
-                                    required="true"
-                                    optionsEvent="update-process-options"
-                                    updateEvent="update-process-value"
-                                    changeEvent="process-changed"
-                                    dependencyParam="process"
-                                    hideLabel="true" />
-                            </div>
+                            <!-- Process & Line Checked Row -->
+                            <div class="col-span-1 lg:col-span-2 grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Process <span class="text-red-500">*</span></label>
+                                    <x-searchable-select
+                                        name="process"
+                                        id="formProcess"
+                                        label="Process"
+                                        required="true"
+                                        optionsEvent="update-process-options"
+                                        updateEvent="update-process-value"
+                                        changeEvent="process-changed"
+                                        dependencyParam="process"
+                                        hideLabel="true" />
+                                </div>
 
-                            <!-- Line Checked -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Line Checked <span class="text-red-500">*</span></label>
-                                <x-searchable-select
-                                    name="line_checked"
-                                    id="formLineChecked"
-                                    label="Line Checked"
-                                    required="true"
-                                    apiUrl="{{ route('genba.header.area') }}"
-                                    dependencyEvent="process-changed"
-                                    dependencyParam="process"
-                                    valueField="name"
-                                    updateEvent="update-line-value"
-                                    hideLabel="true" />
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Line Checked <span class="text-red-500">*</span></label>
+                                    <x-searchable-select
+                                        name="line_checked"
+                                        id="formLineChecked"
+                                        label="Line Checked"
+                                        required="true"
+                                        apiUrl="{{ route('genba.header.area') }}"
+                                        dependencyEvent="process-changed"
+                                        dependencyParam="process"
+                                        valueField="name"
+                                        updateEvent="update-line-value"
+                                        hideLabel="true" />
+                                </div>
                             </div>
 
                             <!-- Category -->

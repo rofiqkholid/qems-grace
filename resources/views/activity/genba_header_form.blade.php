@@ -63,8 +63,8 @@
                 </div>
 
                 <!-- Table Section -->
-                <div class="overflow-x-auto lg:overflow-x-hidden p-6">
-                    <table id="genbaFormTable" class="qms-table w-full">
+                <div class="p-6">
+                    <table id="genbaFormTable" class="qms-table w-full min-w-[1200px]">
                         <thead>
                             <tr>
                                 <th class="w-[4%] text-center">No</th>
@@ -111,47 +111,48 @@
                         @csrf
                         <input type="hidden" id="formTrcUnixId" name="trc_unix_id">
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-6">
                             <!-- Date -->
-                            <div>
+                            <div class="col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Date <span class="text-red-500">*</span></label>
                                 <input type="date" id="formDate" name="date" required
                                     class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
                             </div>
 
-                            <!-- Process -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Process <span class="text-red-500">*</span></label>
-                                <x-searchable-select
-                                    name="process"
-                                    id="formProcess"
-                                    label="Process"
-                                    required="true"
-                                    optionsEvent="update-process-options"
-                                    updateEvent="update-process-value"
-                                    changeEvent="process-changed"
-                                    dependencyParam="process"
-                                    hideLabel="true" />
-                            </div>
+                            <!-- Process & Line Checked Row -->
+                            <div class="col-span-2 grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Process <span class="text-red-500">*</span></label>
+                                    <x-searchable-select
+                                        name="process"
+                                        id="formProcess"
+                                        label="Process"
+                                        required="true"
+                                        optionsEvent="update-process-options"
+                                        updateEvent="update-process-value"
+                                        changeEvent="process-changed"
+                                        dependencyParam="process"
+                                        hideLabel="true" />
+                                </div>
 
-                            <!-- Line Checked -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Line Checked <span class="text-red-500">*</span></label>
-                                <x-searchable-select
-                                    name="line_checked"
-                                    id="formLineChecked"
-                                    label="Line Checked"
-                                    required="true"
-                                    apiUrl="{{ route('genba.header.area') }}"
-                                    dependencyEvent="process-changed"
-                                    dependencyParam="process"
-                                    valueField="name"
-                                    updateEvent="update-line-value"
-                                    hideLabel="true" />
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Line Checked <span class="text-red-500">*</span></label>
+                                    <x-searchable-select
+                                        name="line_checked"
+                                        id="formLineChecked"
+                                        label="Line Checked"
+                                        required="true"
+                                        apiUrl="{{ route('genba.header.area') }}"
+                                        dependencyEvent="process-changed"
+                                        dependencyParam="process"
+                                        valueField="name"
+                                        updateEvent="update-line-value"
+                                        hideLabel="true" />
+                                </div>
                             </div>
 
                             <!-- Category -->
-                            <div>
+                            <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Category <span class="text-red-500">*</span></label>
                                 <x-searchable-select
                                     name="category"
@@ -165,7 +166,7 @@
 
 
                             <!-- Auditor -->
-                            <div>
+                            <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Auditor <span class="text-red-500">*</span></label>
                                 <input type="text" id="formAuditor" name="auditor" required
                                     value="{{ Auth::user()->full_name ?? '' }}"
@@ -239,6 +240,7 @@
 
     $(document).ready(function() {
         var table = $('#genbaFormTable').DataTable({
+            dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
             ajax: {
@@ -336,24 +338,7 @@
             }, 500);
         });
 
-        // Mobile sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-                sidebarOverlay.classList.toggle('hidden');
-            });
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', () => {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            });
-        }
 
         // Form validation on submit
         $('#createGenbaForm').on('submit', function(e) {
