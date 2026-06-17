@@ -666,7 +666,7 @@ class GenbaManagementController extends Controller
             if ($db->count() > 0) {
                 $category_id = $db->first()->Category_id;
 
-                if ($category_id == 4) {
+                if ($category_id == 4 || $category_id == 10) {
                     return $this->add_genba_rusty($db->first()->SysID);
                 }
 
@@ -837,7 +837,12 @@ class GenbaManagementController extends Controller
             return ['id' => $t, 'name' => $t];
         })->toArray();
 
-        return view('activity.no-checksheet.activity_rusty_sefety', [
+        $viewName = 'activity.no-checksheet.activity_etc';
+        if ($category_id == 10) {
+            $viewName = 'activity.no-checksheet.activity_safety';
+        }
+
+        return view($viewName, [
             'id_activity' => $id_activity,
             'process' => $audit->process,
             'scopes' => $scopes,

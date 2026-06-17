@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Genba Form')
+@section('title', 'Etc Genba Form')
 
 @section('content')
 @include('layouts.sidebar')
@@ -30,7 +30,7 @@
                         <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
-                <h1 class="text-2xl font-bold text-slate-800">Genba Form</h1>
+                <h1 class="text-2xl font-bold text-slate-800">No Checksheet Genba Form</h1>
             </div>
         </div>
 
@@ -40,14 +40,14 @@
             $firstScope = array_key_first($scopes);
             $firstItem = $scopes[$firstScope][0] ?? null;
             $itemId = $firstItem ? $firstItem['check_item_id'] : 64;
-            $scopeId = $firstItem ? $firstItem['scope_id'] : 4;
+            $scopeId = $firstItem ? $firstItem['scope_id'] : 13;
         @endphp
 
         <!-- Form Card -->
         <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
             <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                <h2 class="text-xl font-bold text-slate-800">Input Temuan Genba</h2>
-                <p class="text-slate-500 text-sm mt-1">Unggah foto temuan dan isi detail informasi di bawah ini.</p>
+                <h2 class="text-xl font-bold text-slate-800">Input Finding Etc.</h2>
+                <p class="text-slate-500 text-sm mt-1">Upload photo finding and fill in the details below.</p>
             </div>
 
             <div class="p-4 sm:p-8">
