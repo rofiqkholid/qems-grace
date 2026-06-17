@@ -54,7 +54,7 @@ class DashboardController extends Controller
                     ->orWhereNull('a.result');
             })
             ->whereDate('a.due_date', '>=', today())
-            ->where('a.created_at', '<=', $endOfMonth)
+            ->where('b.Date', '<=', $endOfMonth)
             ->count();
 
         // 2. Need Approve: evidence = '1' AND status = '1' AND verification_result IS NULL, IsDelete = 0
@@ -77,7 +77,7 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
-            ->where('a.created_at', '<=', $endOfMonth)
+            ->where('b.Date', '<=', $endOfMonth)
             ->count();
 
         // 3. Due Date (Overdue): due_date < today AND (evidence is null/0 OR corrective_action is null/0)
@@ -102,7 +102,7 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
-            ->where('a.created_at', '<=', $endOfMonth)
+            ->where('b.Date', '<=', $endOfMonth)
             ->count();
 
         // 4. Closed: evidence='1' AND corrective_action='1' AND verification_result='1'
@@ -123,8 +123,8 @@ class DashboardController extends Controller
                 $q->where('a.result', '!=', 1)
                     ->orWhereNull('a.result');
             })
-            ->whereYear('a.created_at', $year)
-            ->whereMonth('a.created_at', $month)
+            ->whereYear('b.Date', $year)
+            ->whereMonth('b.Date', $month)
             ->count();
 
         // 5. All Findings: findings is not null, IsDelete = 0
@@ -138,7 +138,7 @@ class DashboardController extends Controller
             })
             ->where($categoryFilter)
             ->whereNotNull('a.findings')
-            ->where('a.created_at', '<=', $endOfMonth)
+            ->where('b.Date', '<=', $endOfMonth)
             ->count();
 
         return response()->json([
@@ -320,7 +320,7 @@ class DashboardController extends Controller
         [$year, $month] = explode('-', $yearMonth);
         $year = (int) $year;
         $month = (int) $month;
-        $endOfMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
+        $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d 23:59:59');
 
         $categoryFilter = function ($q) use ($category_id) {
             if ($category_id === 'NOT_BIQ') {
@@ -388,8 +388,8 @@ class DashboardController extends Controller
                     ->orWhereNull('g.result');
             })
             // Filter Waktu AKTIF disini
-            ->whereYear('g.created_at', $year)
-            ->whereMonth('g.created_at', $month)
+            ->whereYear('b.Date', $year)
+            ->whereMonth('b.Date', $month)
             ->whereNotNull('g.asign_to_dept')
             ->groupBy('g.asign_to_dept')
             ->get()
@@ -434,7 +434,7 @@ class DashboardController extends Controller
                 $q->where('g.result', '!=', 1)
                     ->orWhereNull('g.result');
             })
-            ->where('g.created_at', '<=', $endOfMonth)
+            ->where('b.Date', '<=', $endOfMonth)
             ->whereNotNull('g.asign_to_dept')
             ->groupBy('g.asign_to_dept')
             ->get()

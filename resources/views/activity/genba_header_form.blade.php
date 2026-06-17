@@ -477,6 +477,13 @@
                 }));
                 $('#formProcess').val(processVal);
 
+                // Dispatch dependency event to enable/disable Line Checked
+                window.dispatchEvent(new CustomEvent('process-changed', {
+                    detail: {
+                        process: processVal
+                    }
+                }));
+
                 // Update line checked value via event
                 var lineVal = response.area_checked || '';
                 window.dispatchEvent(new CustomEvent('update-line-value', {

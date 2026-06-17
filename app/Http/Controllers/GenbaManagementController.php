@@ -669,9 +669,7 @@ class GenbaManagementController extends Controller
                 if ($category_id == 4) {
                     return $this->add_genba_rusty($db->first()->SysID);
                 }
-                if ($category_id == 5) {
-                    return $this->add_genba_biq($db->first()->SysID);
-                }
+
 
                 // Default logic for other categories (omitted/placeholder based on user provided snippet)
                 // Assuming the user will add more logic or this is sufficient for now.
@@ -839,7 +837,7 @@ class GenbaManagementController extends Controller
             return ['id' => $t, 'name' => $t];
         })->toArray();
 
-        return view('activity.no-checksheet.activity_rusty', [
+        return view('activity.no-checksheet.activity_rusty_sefety', [
             'id_activity' => $id_activity,
             'process' => $audit->process,
             'scopes' => $scopes,
@@ -848,36 +846,7 @@ class GenbaManagementController extends Controller
         ]);
     }
 
-    public function add_genba_biq(int|string $id_activity)
-    {
-        $audit = DB::table('GenbaProcAudit')->where('SysID', $id_activity)->first();
 
-        if (!$audit) {
-            abort(404, 'Data audit dengan ID tersebut tidak ditemukan.');
-        }
-        $category_id = $audit->Category_id;
-        $dbScopes = DB::table('GenbaAuditItem as b')
-            ->leftJoin('GenbaProcAuditDtl as s', 'b.scope_id', '=', 's.SysID')
-            ->where('b.Category', $category_id)
-            ->select('b.SysID as check_item_id', 'b.scope_id')
-            ->select(
-                'b.scope_id as scope_id',
-                'b.scope_item'
-            )
-            ->get();
-
-        $scopes = [];
-        foreach ($dbScopes as $item) {
-            $scopes[$item->scope_item][] = [
-                'scope_id' => $item->scope_id,
-            ];
-        }
-
-        return view('activity.biq.activity_biq', [
-            'id_activity' => $id_activity,
-            'scopes' => $scopes
-        ]);
-    }
 
     public function post_form_spv(Request $request)
     {
@@ -1203,7 +1172,7 @@ class GenbaManagementController extends Controller
             $data['code'] = 500;
             $data['message'] = 'Data gagal disimpan';
         }
-        return json_encode($data);
+        return response()->json($data);
     }
 
     public function search_doc(Request $request)

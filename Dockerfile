@@ -33,6 +33,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && a2enmod rewrite headers
 
+# Configure PHP settings
+RUN printf "post_max_size = 64M\nupload_max_filesize = 64M\nmemory_limit = 256M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www/html
 
 # Expose port 80
