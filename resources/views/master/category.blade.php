@@ -10,21 +10,18 @@
     <!-- Page Content -->
     <main class="flex-1 p-6">
         <!-- Page Title -->
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">Category Master</h1>
-                <p class="text-slate-500 mt-1">Manage category definitions and their associated details</p>
-            </div>
-
+        <div class="mb-6">
+            <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Category Master</h1>
+            <p class="text-slate-500 text-xs sm:text-sm mt-1">Manage category definitions and their associated details</p>
         </div>
 
         <!-- Main Card -->
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
             <!-- Filter Section -->
-            <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="flex flex-wrap items-center gap-3">
+            <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <!-- Search -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="flex-1">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search Category or Description..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
@@ -32,15 +29,15 @@
                         </div>
                     </div>
                     <!-- Add Button -->
-                    <button onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-plus"></i>
+                    <button onclick="openCreateModal()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm font-medium">
+                        <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
                         <span>Add Category</span>
                     </button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto p-6">
-                <table id="categoryTable" class="qms-table w-full">
+            <div class="p-6">
+                <table id="categoryTable" class="qms-table w-full min-w-[800px]">
                     <thead>
                         <tr>
                             <th class="w-[5%] text-center">No</th>
@@ -59,6 +56,9 @@
     </main>
     @include('layouts.footer')
 </div>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
 
 <!-- Create Modal -->
 <div id="createModal" class="fixed inset-0 z-50 hidden">
@@ -187,7 +187,7 @@
             language: {
                 emptyTable: '<div class="flex flex-col items-center justify-center py-8 text-slate-500"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p>No data available</p></div>',
             },
-            dom: 'rt<"flex items-center justify-between p-4 border-t border-slate-200"ip>',
+            dom: 'r<"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-200 gap-4"ip>',
             pagingType: "simple_numbers",
             drawCallback: function(settings) {
                 // Re-apply any needed generic styles or behaviors here

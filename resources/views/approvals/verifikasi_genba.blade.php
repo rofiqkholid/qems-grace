@@ -22,9 +22,9 @@
         <div class="bg-white rounded-lg border border-slate-200">
             <!-- Filter Section -->
             <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="grid grid-cols-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center gap-3">
                     <!-- Search -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="col-span-2 lg:col-span-auto lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search findings..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
@@ -33,19 +33,19 @@
                     </div>
 
                     <!-- Date From -->
-                    <div>
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateFrom"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
                     <!-- Date To -->
-                    <div>
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <input type="date" id="dateTo"
-                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                     </div>
 
-                    <!-- Department Filer -->
-                    <div class="min-w-[200px]">
+                    <!-- Department Filter -->
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
@@ -56,7 +56,7 @@
                     </div>
 
                     <!-- Detail Area Filter -->
-                    <div class="min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="detail_area"
                             id="detailAreaFilter"
@@ -68,20 +68,20 @@
                             placeholder="Select Detail Area..." />
                     </div>
 
-
-
                     <!-- Reset Button -->
-                    <button type="button" id="btnReset"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
-                        <i class="fa-solid fa-rotate-right text-sm"></i>
-                        Reset
-                    </button>
+                    <div class="col-span-2 lg:col-span-auto">
+                        <button type="button" id="btnReset"
+                            class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
+                            <i class="fa-solid fa-rotate-right text-sm"></i>
+                            Reset
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Table Section -->
             <div class="overflow-x-auto p-6">
-                <table id="findingsTable" class="qms-table w-full">
+                <table id="findingsTable" class="qms-table w-full min-w-[1500px]">
                     <thead>
                         <tr>
                             <th class="w-[4%] text-center">No</th>
@@ -223,6 +223,7 @@
 <script>
     $(document).ready(function() {
         var table = $('#findingsTable').DataTable({
+            dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
             ajax: {
@@ -392,24 +393,6 @@
         $('#searchInput').on('keyup', debounce(function() {
             table.ajax.reload();
         }, 500));
-
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-                sidebarOverlay.classList.toggle('hidden');
-            });
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', () => {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            });
-        }
     });
 
     function document_preview(id, no) {
