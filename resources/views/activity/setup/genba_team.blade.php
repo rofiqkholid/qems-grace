@@ -40,12 +40,12 @@
                         <!-- Create & Room Buttons -->
                         <div class="flex items-center gap-2">
                             <a href="{{ route('room_team') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all shadow-sm">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all">
                                 <i class="fa-solid fa-users text-sm"></i>
                                 Room Team
                             </a>
                             <button type="button" onclick="showCreateForm()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors">
                                 <i class="fa-solid fa-users-medical text-sm"></i>
                                 Create Team Genba
                             </button>
@@ -96,7 +96,7 @@
             <div class="mb-6">
                 <div class="flex items-center gap-3">
                     <button type="button" onclick="hideCreateForm()"
-                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm">
+                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all">
                         <i class="fa-solid fa-arrow-left text-sm"></i>
                     </button>
                     <div>
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Form Card -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
                     <h2 class="text-lg font-bold text-slate-800">Audit Configuration</h2>
                     <p class="text-slate-500 text-sm mt-1">Configure your team and audit parameters.</p>
@@ -196,7 +196,7 @@
                                             <div class="text-sm font-semibold text-slate-400 mb-3">Active Team Members</div>
                                             <div class="flex flex-wrap gap-2">
                                                 <template x-for="member in members" :key="member.id">
-                                                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-sm text-slate-700 shadow-sm group hover:border-blue-300 transition-all">
+                                                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-sm text-slate-700 group hover:border-blue-300 transition-all">
                                                         <span x-text="member.name" class="font-medium uppercase"></span>
                                                         <button type="button" @click="removeMember(member.id, member.name)" 
                                                              x-show="String(member.id) !== '{{ Auth::user()->id }}'"
@@ -221,11 +221,11 @@
                         <!-- Action Buttons -->
                         <div class="flex justify-end gap-3 pt-8 mt-8 border-t border-slate-100">
                             <button type="button" onclick="hideCreateForm()"
-                                class="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all shadow-sm">
+                                class="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all">
                                 Cancel
                             </button>
                             <button type="submit"
-                                class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-all shadow-sm hover:shadow-md active:scale-95">
+                                class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-all hover: active:scale-95">
                                 <span>Start Team Genba</span>
                                 <i class="fa-solid fa-arrow-right text-sm"></i>
                             </button>

@@ -323,7 +323,7 @@
                                                             x-transition:enter="transition ease-out duration-100"
                                                             x-transition:enter-start="opacity-0 scale-95"
                                                             x-transition:enter-end="opacity-100 scale-100"
-                                                            class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                            class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg max-h-60 overflow-y-auto">
 
                                                             <template x-if="items.length === 0">
                                                                 <div class="px-4 py-3 text-sm text-slate-500 text-center">No options found</div>
@@ -373,7 +373,7 @@
         <!-- Submit Button at Bottom -->
         <div class="mt-8 mb-8 flex justify-end">
             <button @click="submitForm()"
-                class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-8 py-3 rounded-xl    font-bold text-lg">
+                class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-8 py-3 rounded-xl font-bold text-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
@@ -523,7 +523,7 @@
                             data.photo.forEach(photoPath => {
                                 if (photoPath && photoPath.trim() !== '') {
                                     const div = document.createElement('div');
-                                    div.className = "relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
+                                    div.className="relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
                                     div.innerHTML = `
                                     <img src="{{ asset('findings-photo') }}/${photoPath}" class="w-full h-full object-cover">
                                     <button onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -617,7 +617,7 @@
             addThumbnail(itemId, url) {
                 const container = document.getElementById(`preview_container_${itemId}`);
                 const div = document.createElement('div');
-                div.className = "relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
+                div.className="relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
                 div.innerHTML = `
                         <img src="${url}" class="w-full h-full object-cover">
                         <button onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

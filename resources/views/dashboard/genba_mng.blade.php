@@ -18,7 +18,7 @@
             <p class="text-slate-500 mt-1">Monitor Genba Management audit findings and performance in real-time.</p>
         </div>
 
-        <div class="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-2xl mb-8 lg:overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
@@ -46,28 +46,28 @@
                     <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
                         <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FEB019] shadow-sm shadow-amber-200"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#FEB019] -amber-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Open</span>
                             </div>
                             <span id="val_findingsOpen" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/50 border border-blue-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#008FFB] shadow-sm shadow-blue-200"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#008FFB] -blue-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs text-nowrap">Need Verif</span>
                             </div>
                             <span id="val_needApprove" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#00E396] shadow-sm shadow-green-200"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#00E396] -green-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Closed</span>
                             </div>
                             <span id="val_findingsClose" class="font-bold text-slate-800 text-xs">...</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-xl bg-red-50/50 border border-red-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-full bg-[#FF4560] shadow-sm shadow-red-200"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#FF4560] -red-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Overdue</span>
                             </div>
                             <span id="val_dueDateCount" class="font-bold text-slate-800 text-xs">...</span>

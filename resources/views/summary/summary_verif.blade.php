@@ -288,7 +288,7 @@
                                     <img src="${imageSrc}" alt="Before Image"
                                         decoding="async"
                                         onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
-                                        class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:opacity-90 transition"
+                                        class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('before', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
                     }
@@ -323,7 +323,7 @@
                                     <img src="${imageSrc}" alt="After Image"
                                         decoding="async"
                                         onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
-                                        class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:opacity-90 transition"
+                                        class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('after', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
                     }
@@ -336,7 +336,7 @@
                         const firstImage = getFirstImagePath(data);
                         if (!firstImage) {
                             return `<div class="flex items-center justify-center">
-                                        <div class="w-16 h-16 p-2 rounded-lg border border-slate-300 bg-slate-100 flex flex-col items-center justify-center gap-1 shadow-sm">
+                                        <div class="w-16 h-16 p-2 rounded-lg border border-slate-300 bg-slate-100 flex flex-col items-center justify-center gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -356,7 +356,7 @@
                                     <img src="${imageSrc}" alt="Verification Image"
                                         decoding="async"
                                         onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
-                                        class="w-16 h-16 object-cover rounded-lg border border-emerald-200 shadow-sm cursor-pointer hover:opacity-90 transition"
+                                        class="w-16 h-16 object-cover rounded-lg border border-emerald-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('verification', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
                     }

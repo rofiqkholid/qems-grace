@@ -18,8 +18,8 @@
 
                 <!-- Application Name -->
                 <div class="flex flex-col justify-center">
-                    <span class="text-xl font-extrabold tracking-wider text-blue-600 leading-none">GRACE</span>
-                    <span class="hidden sm:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Recording & Action for Corrective Execution</span>
+                    <span class="text-base sm:text-xl font-extrabold tracking-wider text-blue-600 leading-none">GRACE</span>
+                    <span class="hidden sm:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Report & Action for Corrective Execution</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
@@ -56,11 +56,11 @@
                         <div class="relative group">
                             <button type="button" id="user-menu-button" class="relative focus:outline-none">
                                 @if(Auth::user()?->avatar)
-                                <img src="{{ asset('image/' . Auth::user()->avatar) }}" alt="Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white">
+                                <img src="{{ asset('image/' . Auth::user()->avatar) }}" alt="Profile" class="w-7 h-7 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-white">
                                 @else
-                                <img src="{{ asset('image/blank.png') }}" alt="Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white">
+                                <img src="{{ asset('image/blank.png') }}" alt="Profile" class="w-7 h-7 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-white">
                                 @endif
-                                <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                                <span class="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></span>
                             </button>
 
                             <!-- Dropdown Menu -->
@@ -145,7 +145,7 @@
             const timeEl = document.getElementById('realtime-time');
             
             if (dateEl) {
-                dateEl.textContent = `${dayName}, ${date} ${monthName} ${year}`;
+                dateEl.innerHTML = `<span class="hidden sm:inline">${dayName}, </span>${date} ${monthName} ${year}`;
             }
             if (timeEl) {
                 timeEl.textContent = `${hours}:${minutes}:${seconds}`;

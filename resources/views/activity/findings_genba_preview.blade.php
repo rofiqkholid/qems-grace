@@ -41,7 +41,7 @@ $isClosed = $genba->status === 'Close';
                         (!$isClosed && $genba->status !== 'Process Verification' && \Carbon\Carbon::parse($genba->due_date)->startOfDay() < \Carbon\Carbon::now()->startOfDay())
                     );
                     @endphp
-                    <div class="rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm flex items-center justify-between transition-all duration-300 {{ $isOverdue ? 'bg-red-50 border-red-200 text-red-700 shadow-sm' : 'bg-slate-100 border-transparent text-slate-800' }}">
+                    <div class="rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm flex items-center justify-between transition-all duration-300 {{ $isOverdue ? 'bg-red-50 border-red-200 text-red-700 ' : 'bg-slate-100 border-transparent text-slate-800' }}">
                         <div class="flex items-center gap-2">
                             @if($isOverdue)
                             <i class="fa-solid fa-stopwatch text-red-500 animate-pulse"></i>
@@ -673,7 +673,7 @@ $isClosed = $genba->status === 'Close';
         placeholder.classList.add('hidden');
 
         const div = document.createElement('div');
-        div.className = 'relative group aspect-square';
+        div.className='relative group aspect-square';
 
         // If it's a new base64 image, src is the data. If existing, src might be full URL but we need path for remove logic
 

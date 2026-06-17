@@ -9,7 +9,7 @@
 
     <div class="relative z-10 w-full max-w-[460px] lg:mr-[100px]">
         <!-- Login Card -->
-        <div class="bg-white/30 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
+        <div class="bg-white/30 backdrop-blur-sm rounded-2xl border border-white/30 overflow-hidden">
             <!-- Header -->
             <div class="bg-transparent text-center border-b border-white/20">
                 <div class="flex justify-center overflow-hidden py-1">
@@ -82,7 +82,7 @@
                     <!-- Submit Button -->
                     <button
                         type="submit"
-                        class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-all duration-200 flex items-center justify-center gap-2">
+                        class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl -blue-500/30 hover:-blue-500/40 transition-all duration-200 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-to-bracket"></i>
                         <span>Login</span>
                     </button>
@@ -91,7 +91,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-center text-sm text-slate-300 mt-6 drop-shadow-sm">
+        <p class="text-center text-sm text-slate-300 mt-6 drop-">
             &copy; {{ date('Y') }} ICT - SAI. All rights reserved.
         </p>
     </div>

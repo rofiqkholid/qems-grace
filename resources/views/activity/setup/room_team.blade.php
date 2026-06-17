@@ -17,7 +17,7 @@
             <!-- Page Title -->
             <div class="mb-6 flex items-center gap-4">
                 <a href="{{ route('genba_team') }}" 
-                    class="inline-flex items-center justify-center w-10 h-10 bg-white text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
+                    class="inline-flex items-center justify-center w-10 h-10 bg-white text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-all"
                     title="Back to My Genba">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </a>

@@ -19,7 +19,7 @@
         </div>
 
         <!-- Main Card -->
-        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
             <!-- Filter Section -->
             <div class="p-6 border-b border-slate-200 bg-slate-50/50">
                 <div class="flex flex-wrap items-center gap-3">
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <!-- Add Button -->
-                    <button onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                    <button onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
                         <i class="fa-solid fa-plus"></i>
                         <span>Add Line Checked</span>
                     </button>
@@ -64,7 +64,7 @@
 <div id="createModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeCreateModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="bg-white rounded-xl w-full max-w-md transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Add Line Checked</h3>
                 <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600">
@@ -96,7 +96,7 @@
 <div id="editModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeEditModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="bg-white rounded-xl w-full max-w-md transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Edit Line Checked</h3>
                 <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
@@ -129,7 +129,7 @@
 <div id="deleteModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeDeleteModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm transform transition-all">
+        <div class="bg-white rounded-xl w-full max-w-sm transform transition-all">
             <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>

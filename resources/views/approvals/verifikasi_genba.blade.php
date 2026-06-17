@@ -526,7 +526,7 @@
 
         // Icon
         const iconContainer = modal.querySelector('#modalIcon');
-        iconContainer.className = 'w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.className='w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
 
         // Show file input for approval
         document.getElementById('approvalFileInputContainer').classList.remove('hidden');
@@ -535,14 +535,14 @@
 
         // Confirm Button (Green)
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.className = 'px-5 py-2.5 bg-emerald-50 text-emerald-600 font-medium rounded-xl hover:bg-emerald-700 hover:text-white transition-colors border border-emerald-200';
+        confirmBtn.className='px-5 py-2.5 bg-emerald-50 text-emerald-600 font-medium rounded-xl hover:bg-emerald-700 hover:text-white transition-colors border border-emerald-200';
         confirmBtn.innerText = 'Yes, Approve';
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('hidden');
 
         // Reject Button (Red)
         const rejectBtn = document.getElementById('rejectBtn');
-        rejectBtn.className = 'px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200';
+        rejectBtn.className='px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200';
         rejectBtn.innerText = 'Yes, Reject';
         rejectBtn.disabled = false;
         rejectBtn.classList.remove('hidden');
@@ -591,7 +591,7 @@
 
         // Icon (Amber Undo/Refresh)
         const iconContainer = modal.querySelector('#modalIcon');
-        iconContainer.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.className='w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
         iconContainer.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
 
         // Hide file input for rollback
@@ -599,7 +599,7 @@
 
         // Confirm Button (Amber)
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.className = 'px-5 py-2.5 bg-amber-50 text-amber-600 font-medium rounded-xl hover:bg-amber-700 hover:text-white transition-colors border border-amber-200';
+        confirmBtn.className='px-5 py-2.5 bg-amber-50 text-amber-600 font-medium rounded-xl hover:bg-amber-700 hover:text-white transition-colors border border-amber-200';
         confirmBtn.innerText = 'Yes, Rollback';
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('hidden');
@@ -791,14 +791,14 @@
                     <!-- Placeholder / Buttons -->
                     <div id="uploadPlaceholder" class="flex flex-col items-center gap-3 py-4">
                         <div class="flex gap-4">
-                            <button onclick="triggerCamera()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-500 hover:text-blue-500 transition-all group">
+                            <button onclick="triggerCamera()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
                                 <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                                 <span class="text-xs font-semibold">Camera</span>
                             </button>
-                            <button onclick="triggerGallery()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-500 hover:text-blue-500 transition-all group">
+                            <button onclick="triggerGallery()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
                                 <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
@@ -810,8 +810,8 @@
 
                     <!-- Preview Container -->
                     <div id="previewContainer" class="hidden relative">
-                        <img id="previewImage" src="" class="max-h-[200px] mx-auto rounded-lg shadow-sm border border-slate-200">
-                        <button onclick="resetSelection()" class="absolute top-[-10px] right-[-10px] bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors">
+                        <img id="previewImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
+                        <button onclick="resetSelection()" class="absolute top-[-10px] right-[-10px] bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -824,7 +824,7 @@
             <!-- Rollback Image Display -->
             <div id="rollbackImageContainer" class="hidden mb-6">
                 <label class="block text-sm font-medium text-slate-700 mb-2">Verification Evidence to Delete</label>
-                <img id="rollbackImage" src="" class="max-h-[200px] mx-auto rounded-lg shadow-sm border border-slate-200">
+                <img id="rollbackImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
             </div>
 
             <input type="hidden" id="confirmationId">
