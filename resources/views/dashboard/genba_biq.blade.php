@@ -401,7 +401,7 @@
     // Pagination state
     let rawChartData = null;
     let currentChartPage = 1;
-    const chartPageSize = 5;
+    let chartPageSize = 5;
     let isMobileMode = null;
 
     function loadDeptChart(yearMonth) {
@@ -429,8 +429,17 @@
             deptChart.destroy();
         }
 
-        const isMobile = window.innerWidth < 768;
+        const isMobile = window.innerWidth < 1280;
         isMobileMode = isMobile;
+
+        // Dynamic page size based on screen width
+        const width = window.innerWidth;
+        if (width < 380) chartPageSize = 3;
+        else if (width < 480) chartPageSize = 4;
+        else if (width < 640) chartPageSize = 5;
+        else if (width < 768) chartPageSize = 6;
+        else if (width < 1024) chartPageSize = 7;
+        else chartPageSize = 9;
 
         let labels = rawChartData.data_name_dept;
         let openData = rawChartData.data_total_open;
@@ -631,6 +640,11 @@
                             drawOnChartArea: true,
                             drawTicks: false,
                             color: 'rgba(203, 213, 225, 0.4)', // slate-300 with opacity
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false
                         }
                     },
                     y: {
@@ -708,7 +722,7 @@
 
         // Handle resize
         $(window).resize(function() {
-            const currentMobile = window.innerWidth < 768;
+            const currentMobile = window.innerWidth < 1280;
             if (currentMobile !== isMobileMode) {
                 currentChartPage = 1;
                 renderDeptChart();
