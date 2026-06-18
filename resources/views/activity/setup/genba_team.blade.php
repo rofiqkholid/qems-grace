@@ -23,29 +23,26 @@
             <!-- Main Card -->
             <div class="bg-white rounded-lg border border-slate-200">
                 <!-- Filter Section -->
-                <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                    <div class="flex flex-wrap items-center gap-3">
+                <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <!-- Search -->
-                        <div class="flex-1 min-w-[200px]">
+                        <div class="w-full sm:w-72">
                             <div class="relative">
                                 <input type="text" id="searchInput" placeholder="Search team sessions..."
-                                    class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                                    class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                             </div>
                         </div>
 
-                        <!-- Spacer -->
-                        <div class="flex-1"></div>
-
                         <!-- Create & Room Buttons -->
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
                             <a href="{{ route('room_team') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all">
+                                class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium transition-all">
                                 <i class="fa-solid fa-users text-sm"></i>
                                 Room Team
                             </a>
                             <button type="button" onclick="showCreateForm()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors">
+                                class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white border border-transparent rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors">
                                 <i class="fa-solid fa-users-medical text-sm"></i>
                                 Create Team Genba
                             </button>
@@ -70,8 +67,8 @@
                 </div>
 
                 <!-- Table Section -->
-                <div class="overflow-x-auto p-6">
-                    <table id="genbaFormTable" class="qms-table w-full">
+                <div class="p-6">
+                    <table id="genbaFormTable" class="qms-table w-full min-w-[1000px]">
                         <thead>
                             <tr>
                                 <th class="w-[4%] text-center">No</th>
@@ -330,6 +327,7 @@
 
     $(document).ready(function() {
         table = $('#genbaFormTable').DataTable({
+            dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
             ajax: {

@@ -232,7 +232,7 @@ class MenuSeeder extends Seeder
                 'group_id' => 8,
                 'sub_group_id' => 104,
                 'menu' => 'user-management',
-                'menu_name' => 'User Management',
+                'menu_name' => 'User Permission',
                 'icon' => '<span></span>'
             ],
             [
@@ -241,8 +241,8 @@ class MenuSeeder extends Seeder
                 'level_menu_id' => 3,
                 'group_id' => 8,
                 'sub_group_id' => 104,
-                'menu' => 'menu-management',
-                'menu_name' => 'Menu Management',
+                'menu' => 'user-setting',
+                'menu_name' => 'User Setting',
                 'icon' => '<span></span>'
             ]
         ];

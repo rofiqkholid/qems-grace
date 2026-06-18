@@ -20,6 +20,8 @@ class MasterController extends Controller
             $menuId = 95;
             if ($request->is('*user-management*')) {
                 $menuId = 103;
+            } elseif ($request->is('*user-setting*')) {
+                $menuId = 105;
             } elseif ($request->is('*menu-management*')) {
                 $menuId = 105;
             }
@@ -827,5 +829,64 @@ class MasterController extends Controller
             ],
             'permissions' => $permissionsMapped
         ]);
+    }
+
+    public function user_setting()
+    {
+        $user = Auth::user();
+        return view('setting.user_setting', compact('user'));
+    }
+
+    public function update_user_setting(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer',
+            'full_name' => 'required|string|max:255',
+            'call_name' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        $userId = $request->user_id;
+        $user = DB::table('users')->where('id', $userId)->first();
+        if (!$user) {
+            return redirect()->back()->withErrors(['user_id' => 'User not found.']);
+        }
+
+        $data = [
+            'full_name' => $request->full_name,
+            'call_name' => $request->call_name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('image'), $filename);
+            
+            // Delete old avatar if exists and not blank
+            if ($user->avatar && $user->avatar !== 'blank.png' && file_exists(public_path('image/' . $user->avatar))) {
+                @unlink(public_path('image/' . $user->avatar));
+            }
+            
+            $data['avatar'] = $filename;
+        }
+
+        DB::table('users')->where('id', $userId)->update($data);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully.',
+                'user' => DB::table('users')->where('id', $userId)->first()
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Profile updated successfully.')->with('selected_user_id', $userId);
     }
 }

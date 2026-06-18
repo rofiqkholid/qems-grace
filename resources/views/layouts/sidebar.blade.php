@@ -23,7 +23,7 @@
                 @php
                     $isActive = request()->is($mainItem['menu']->menu . '*') || 
                                 ($mainItem['menu']->menu === 'dashboard' && (request()->is('dashboard*') || request()->path() === '/')) ||
-                                ($mainItem['menu']->menu === 'setting' && (request()->is('setting*') || request()->is('user-management*') || request()->is('menu-management*')));
+                                ($mainItem['menu']->menu === 'setting' && (request()->is('setting*') || request()->is('user-management*') || request()->is('menu-management*') || request()->is('user-setting*')));
                     $iconClass = match($mainItem['menu']->menu) {
                         'genba' => 'fa-users',
                         'data-master' => 'fa-database',

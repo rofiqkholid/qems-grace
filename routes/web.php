@@ -135,6 +135,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user-management/table', [MasterController::class, 'user_management_table'])->name('master.user_management.table');
     Route::post('/user-management/update-permission', [MasterController::class, 'update_user_permission'])->name('master.user_management.update_permission');
 
+    Route::get('/user-setting', [MasterController::class, 'user_setting'])->name('master.user_setting');
+    Route::post('/user-setting/update', [MasterController::class, 'update_user_setting'])->name('master.user_setting.update');
+
     Route::get('/menu-management', [MasterController::class, 'menu_management'])->name('master.menu_management');
     Route::post('/menu-management/table', [MasterController::class, 'menu_management_table'])->name('master.menu_management.table');
 

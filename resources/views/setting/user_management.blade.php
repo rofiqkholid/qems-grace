@@ -4,13 +4,21 @@
 @include('layouts.sidebar')
 @include('components.toast')
 
-<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50">
+<div class="lg:ml-20 h-screen flex flex-col bg-slate-50 overflow-hidden">
     @include('layouts.header')
 
     <!-- Page Content -->
-    <main class="flex-1 flex flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
+    <div class="px-6 py-4 bg-white border-b border-slate-200 shrink-0">
+        <!-- Page Title -->
+        <div>
+            <h1 class="text-lg sm:text-xl font-bold text-slate-800">User Permission</h1>
+            <p class="text-slate-500 text-xs mt-0.5">Configure user application access and deletion overrides</p>
+        </div>
+    </div>
+
+    <main class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         <!-- LEFT PANEL: User List -->
-        <section class="w-full lg:w-[380px] shrink-0 border-r border-slate-200 bg-white flex flex-col h-[calc(100vh-4rem)]">
+        <section id="userListSection" class="w-full lg:w-[380px] shrink-0 border-r border-slate-200 bg-white flex flex-col h-full lg:flex">
             <!-- Filter & Header Buttons -->
             <div class="px-4 border-b border-slate-200 bg-slate-50/50 shrink-0 h-[60px] flex items-center justify-between gap-4">
                 <span class="text-md font-bold text-slate-800 shrink-0">User List</span>
@@ -42,7 +50,7 @@
         </section>
 
         <!-- RIGHT PANEL: User Profile & Permission Controls -->
-        <section class="flex-1 flex flex-col bg-slate-50/50 h-[calc(100vh-4rem)] overflow-y-auto">
+        <section id="userDetailSection" class="flex-1 flex flex-col bg-slate-50/50 h-full overflow-y-auto hidden lg:flex">
             <!-- Empty State -->
             <div id="emptyStatePanel" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div class="w-16 h-16 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-300 shadow-sm mb-4">
@@ -55,8 +63,13 @@
             <!-- User Detail & Form Panel (Hidden by default) -->
             <div id="userDetailPanel" class="hidden flex-1 flex flex-col h-full">
                 <!-- Header with details -->
-                <div class="px-6 border-b border-slate-200 bg-white flex items-center justify-between gap-4 shrink-0 h-[60px]">
+                <div class="px-4 sm:px-6 border-b border-slate-200 bg-white flex items-center justify-between gap-4 shrink-0 h-[60px]">
                     <div class="flex items-center gap-3">
+                        <!-- Back button for mobile -->
+                        <button type="button" onclick="backToUserList()" class="lg:hidden p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors mr-1">
+                            <i class="fa-solid fa-arrow-left text-base"></i>
+                        </button>
+
                         <div id="detailAvatar" class="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-white">
                             <img src="{{ asset('image/blank.png') }}" alt="Avatar" class="w-full h-full object-cover">
                         </div>
@@ -72,7 +85,7 @@
                 </div>
 
                 <!-- Scrollable Form Body -->
-                <div class="flex-1 p-6 overflow-y-auto">
+                <div class="flex-1 p-3 sm:p-6 overflow-y-auto">
                     <form id="permissionForm" action="{{ route('master.user_management.update_permission') }}" method="POST" class="space-y-6">
                         @csrf
                         <input type="hidden" name="user_id" id="perm_user_id">
@@ -88,9 +101,9 @@
                             <table class="qms-table w-full">
                                 <thead>
                                     <tr>
-                                        <th class="px-6 py-4 text-left">Menu Structure</th>
-                                        <th class="px-6 py-4 text-center w-[20%]">Can View</th>
-                                        <th class="px-6 py-4 text-center w-[20%]">Can Delete</th>
+                                        <th class="px-3 sm:px-6 py-4 text-left">Menu Structure</th>
+                                        <th class="px-3 sm:px-6 py-4 text-center w-[22%] sm:w-[20%]">Can View</th>
+                                        <th class="px-3 sm:px-6 py-4 text-center w-[22%] sm:w-[20%]">Can Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody id="permissionsTableBody" class="bg-white divide-y divide-slate-100 text-sm text-slate-700">
@@ -252,22 +265,22 @@
 
                     // Menu nesting display logic
                     let rowClass = 'hover:bg-slate-50/50';
-                    let indentClass = 'pl-6';
+                    let indentClass = 'pl-4 sm:pl-6';
                     let labelClass = 'text-slate-700 font-medium';
 
                     if (item.level_menu_id == 1) {
                         rowClass = 'bg-slate-100/50 font-bold';
-                        indentClass = 'pl-4';
+                        indentClass = 'pl-2 sm:pl-4';
                         labelClass = 'uppercase text-slate-800 font-extrabold text-xs tracking-wider';
                     } else if (item.level_menu_id == 2) {
                         rowClass = 'bg-slate-50/30';
-                        indentClass = 'pl-10';
+                        indentClass = 'pl-4 sm:pl-10';
                         labelClass = 'text-slate-800 font-bold text-sm';
                     } else if (item.level_menu_id == 3) {
-                        indentClass = 'pl-20';
+                        indentClass = 'pl-6 sm:pl-20';
                         labelClass = 'text-slate-600 font-medium text-sm';
                     } else if (item.level_menu_id == 4) {
-                        indentClass = 'pl-28';
+                        indentClass = 'pl-8 sm:pl-28';
                         labelClass = 'text-slate-500 font-normal text-sm';
                     }
 
@@ -292,15 +305,15 @@
 
                     const row = `
                         <tr class="${rowClass}">
-                            <td class="pr-6 py-3.5 align-middle">
+                            <td class="pr-3 sm:pr-6 py-3.5 align-middle">
                                 <div class="${indentClass}">
                                     <span class="${labelClass}">${item.menu_name}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-3.5 text-center align-middle">
+                            <td class="px-3 sm:px-6 py-3.5 text-center align-middle">
                                 ${viewCheckbox}
                             </td>
-                            <td class="px-6 py-3.5 text-center align-middle">
+                            <td class="px-3 sm:px-6 py-3.5 text-center align-middle">
                                 ${deleteCheckbox}
                             </td>
                         </tr>
@@ -311,11 +324,24 @@
                 // Display detail panel & hide empty state
                 $('#emptyStatePanel').addClass('hidden');
                 $('#userDetailPanel').removeClass('hidden');
+
+                // If on mobile view, hide left list and show right details
+                if (window.innerWidth < 1024) {
+                    $('#userListSection').addClass('hidden');
+                    $('#userDetailSection').removeClass('hidden').addClass('flex');
+                }
             },
             error: function() {
                 showToast('Error', 'Failed to retrieve user permissions data', 'error');
             }
         });
+    }
+
+    function backToUserList() {
+        if (window.innerWidth < 1024) {
+            $('#userDetailSection').addClass('hidden').removeClass('flex');
+            $('#userListSection').removeClass('hidden');
+        }
     }
 
     // Lookup map for children
@@ -326,7 +352,7 @@
         92: [93, 94],          // Verification -> Findings Result, Verifikasi Genba
         95: [96, 97, 98, 99],  // Data Master -> Line Checked, Category, Department, Check Item
         100: [101, 102],       // Dashboard -> Genba Management, Genba BIQ
-        104: [103, 105]        // Setting -> User Management, Menu Management
+        104: [103, 105]        // Setting -> User Permission, User Setting
     };
 
     // Lookup map for parents
