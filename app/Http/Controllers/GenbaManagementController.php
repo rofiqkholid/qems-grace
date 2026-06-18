@@ -514,7 +514,15 @@ class GenbaManagementController extends Controller
             $form_genba['category_id'] = 0;
             $form_genba['category'] = '';
         }
-        $form_genba['process_options'] = ['STP', 'ASSY', 'Receiving & Delivery', 'Storage'];
+        $form_genba['process_options'] = DB::connection('sqlsrv')
+            ->table('Genba_Area')
+            ->select('Process')
+            ->distinct()
+            ->whereNotNull('Process')
+            ->where('Process', '!=', '')
+            ->orderBy('Process', 'asc')
+            ->pluck('Process')
+            ->toArray();
         $form_genba['trc_unix_id'] = $request->trc_unix_id;
         $form_genba['head_title'] = "Genba Activity";
 

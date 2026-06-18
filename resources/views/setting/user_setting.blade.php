@@ -432,7 +432,7 @@
 
                 // Automatically load active/selected user details
                 if (selectedUserId) {
-                    selectUser(selectedUserId);
+                    selectUser(selectedUserId, true);
                 }
             },
             error: function() {
@@ -446,7 +446,7 @@
         });
     }
 
-    function selectUser(userId) {
+    function selectUser(userId, isInitial = false) {
         $('[id^="user-card-"]').removeClass('border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-500/20').addClass('border-slate-100 hover:bg-slate-50 hover:border-slate-200');
         $(`#user-card-${userId}`).addClass('border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-500/20').removeClass('border-slate-100 hover:bg-slate-50 hover:border-slate-200');
 
@@ -465,7 +465,15 @@
 
                 $('#emptyStatePanel').addClass('hidden');
                 $('#userDetailPanel').removeClass('hidden');
-                $('#userDetailSection').removeClass('hidden').addClass('flex');
+                
+                if (window.innerWidth < 1024) {
+                    if (!isInitial) {
+                        $('#userListSection').addClass('hidden');
+                        $('#userDetailSection').removeClass('hidden').addClass('flex');
+                    }
+                } else {
+                    $('#userDetailSection').removeClass('hidden').addClass('flex');
+                }
 
                 // Fill form
                 $('#form_user_id').val(response.user.id);
@@ -500,7 +508,10 @@
     }
 
     function backToUserList() {
-        $('#userDetailSection').addClass('hidden').removeClass('flex');
+        if (window.innerWidth < 1024) {
+            $('#userDetailSection').addClass('hidden').removeClass('flex');
+            $('#userListSection').removeClass('hidden');
+        }
     }
 
     function showFeatureNotAvailableAlert() {
