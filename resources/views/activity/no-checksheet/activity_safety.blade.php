@@ -99,10 +99,10 @@
 
                     <!-- Right Column -->
                     <div class="flex flex-col h-full">
-                        <!-- Box: Detail Temuan -->
+                        <!-- Box: Detail Finding -->
                         <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 space-y-3 sm:space-y-4 h-full flex-1">
                             <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2 text-base">
-                                <i class="fas fa-list-alt text-blue-500"></i> Detail Temuan
+                                <i class="fas fa-list-alt text-blue-500"></i> Detail Finding
                             </h4>
 
                             <div class="grid grid-cols-2 gap-4">
