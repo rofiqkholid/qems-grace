@@ -19,7 +19,7 @@
                 <!-- Application Name -->
                 <div class="flex flex-col justify-center">
                     <span class="text-base sm:text-xl font-extrabold tracking-wider text-blue-600 leading-none">GRACE</span>
-                    <span class="hidden sm:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Report & Action for Corrective Execution</span>
+                    <span class="hidden xl:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Report & Action for Corrective Execution</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
@@ -27,7 +27,7 @@
                 <!-- Search -->
                 <div class="hidden sm:flex items-center">
                     <div class="relative">
-                        <input type="text" id="globalSearchInput" placeholder="Search DocNum..." class="w-64 pl-10 pr-4 py-2 text-sm bg-slate-100 border-0 rounded-[15px] focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 outline-none">
+                        <input type="text" id="globalSearchInput" placeholder="Search DocNum..." class="w-36 sm:w-44 md:w-48 lg:w-48 xl:w-64 pl-10 pr-4 py-2 text-sm bg-slate-100 border-0 rounded-[15px] focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 outline-none">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -39,9 +39,9 @@
             <div class="flex items-center gap-3">
                 <!-- Realtime Clock -->
                 <div class="flex items-center gap-2 md:gap-3 mr-2 md:mr-4">
-                    <span id="realtime-date" class="text-xs sm:text-sm md:text-xl text-slate-700 font-medium whitespace-nowrap">-</span>
-                    <div class="w-px h-4 md:h-6 bg-slate-200"></div>
-                    <span id="realtime-time" class="text-xs sm:text-sm md:text-xl text-slate-700 font-medium tabular-nums min-w-[60px] md:min-w-[85px] text-center">-</span>
+                    <span id="realtime-date" class="text-xs sm:text-sm lg:text-base xl:text-xl text-slate-700 font-medium whitespace-nowrap">-</span>
+                    <div class="w-px h-4 lg:h-6 bg-slate-200"></div>
+                    <span id="realtime-time" class="text-xs sm:text-sm lg:text-base xl:text-xl text-slate-700 font-medium tabular-nums min-w-[60px] lg:min-w-[70px] xl:min-w-[85px] text-center">-</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
@@ -49,7 +49,7 @@
                 <!-- User Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <div class="flex items-center gap-3">
-                        <div class="hidden sm:block text-right">
+                        <div class="hidden sm:block text-right whitespace-nowrap">
                             <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
                             <p class="text-xs text-slate-500">{{ Auth::user()?->call_name ?? 'User' }}</p>
                         </div>

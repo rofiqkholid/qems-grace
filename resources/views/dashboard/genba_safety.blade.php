@@ -19,9 +19,9 @@
         </div>
 
         <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
                 <!-- Left Column: Chart & Table (80%) -->
-                <div class="lg:col-span-4 border-b border-gray-100 pb-8 lg:pb-0 lg:border-b-0 lg:border-r pr-0 lg:pr-8">
+                <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-8">
                     <div class="flex items-center justify-between gap-4 mb-6">
                         <div>
                             <h3 class="text-base sm:text-lg font-bold text-slate-800">Department Performance</h3>
@@ -52,7 +52,7 @@
                 </div>
 
                 <!-- Right Column: Findings Overview (20%) -->
-                <div class="lg:col-span-1 pt-8 lg:pt-0">
+                <div class="xl:col-span-1 pt-8 xl:pt-0">
                     <h3 class="text-lg font-bold text-slate-800 mb-6">Overview</h3>
                     <div class="relative h-64 w-full flex justify-center mb-6">
                         <canvas id="statsPieChart"></canvas>
