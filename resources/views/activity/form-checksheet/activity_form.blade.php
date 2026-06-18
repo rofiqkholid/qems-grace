@@ -409,24 +409,7 @@
             initForm() {
                 console.log('Genba Form Initialized');
 
-                // Mobile sidebar toggle
-                const sidebar = document.getElementById('sidebar');
-                const sidebarToggle = document.getElementById('sidebar-toggle');
-                const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-                if (sidebarToggle) {
-                    sidebarToggle.addEventListener('click', () => {
-                        sidebar.classList.toggle('-translate-x-full');
-                        sidebarOverlay.classList.toggle('hidden');
-                    });
-                }
-
-                if (sidebarOverlay) {
-                    sidebarOverlay.addEventListener('click', () => {
-                        sidebar.classList.add('-translate-x-full');
-                        sidebarOverlay.classList.add('hidden');
-                    });
-                }
 
                 // Initialize finding status (can be populated via API later if needed, 
                 // but for now we rely on user interaction or fetching data)
