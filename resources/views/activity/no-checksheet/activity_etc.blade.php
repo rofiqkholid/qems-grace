@@ -46,7 +46,12 @@
         <!-- Form Card -->
         <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
             <div class="px-6 py-4 sm:px-8 sm:py-6 border-b border-slate-100 bg-slate-50/50">
-                <h2 class="text-base sm:text-xl font-bold text-slate-800">Input Finding Etc.</h2>
+                <h2 class="text-base sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span>Input Finding Etc.</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-100 text-blue-800">
+                        Finding #<span x-text="activeFindingIndex"></span>
+                    </span>
+                </h2>
                 <p class="text-slate-500 text-xs sm:text-sm mt-1">Upload photo finding and fill in the details below.</p>
             </div>
 
@@ -56,7 +61,7 @@
                     <!-- Left Column -->
                     <div class="flex flex-col h-full">
                         <!-- Box: Evidence Photos -->
-                        <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 h-full flex-1">
+                        <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 h-full flex-1 flex flex-col">
                             <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-base">
                                 <i class="fas fa-image text-blue-500"></i> Finding Captured <span class="text-red-500">*</span>
                             </h4>
@@ -87,7 +92,7 @@
                                 </div>
                             </div>
 
-                            <div class="mt-4 grid grid-cols-4 gap-2" id="preview_container_{{ $itemId }}"></div>
+                            <div class="mt-4 grid grid-cols-5 gap-2 h-24 sm:h-32" id="preview_container_{{ $itemId }}"></div>
                             <input type="hidden" name="photo_names[]" id="photoname_{{ $itemId }}">
                         </div>
                     </div>
@@ -212,17 +217,37 @@
                 <input type="hidden" id="scope_id_{{ $itemId }}" value="{{ $scopeId }}">
 
                 <!-- Submit Button inside Card -->
-                <div class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 p-3 flex justify-between items-center sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mt-6 sm:pt-6 sm:border-t sm:border-slate-100 sm:justify-start sm:gap-4">
-                    <span class="text-[11px] sm:text-sm text-slate-400 font-medium max-w-[55%] sm:max-w-none leading-tight text-right sm:text-left order-1 sm:order-2">
+                <div class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 p-3 flex flex-col gap-2 sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mt-6 sm:pt-6 sm:border-t sm:border-slate-100 sm:flex-row sm:justify-start sm:items-center sm:gap-4">
+                    <span class="text-[11px] sm:text-sm text-slate-400 font-medium text-center sm:text-left order-1 sm:order-2">
                         Please remember to submit after completing all checksheets.
                     </span>
-                    <button @click="submitForm()"
-                        class="flex items-center gap-1.5 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-4 py-2 sm:px-5 sm:py-2 rounded-none font-semibold text-sm shrink-0 order-2 sm:order-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
-                        <span>Finish Audit</span>
-                    </button>
+                    <div class="grid grid-cols-3 gap-3 w-full sm:w-auto sm:flex sm:items-center sm:gap-4 order-2 sm:order-1">
+                        <button @click="submitForm()"
+                            class="flex items-center justify-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 border border-green-400 px-2 py-2 sm:px-5 sm:py-2 rounded-none font-semibold text-[11px] sm:text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Finish Audit</span>
+                        </button>
+                        <button @click="prevFinding()"
+                            :disabled="activeFindingIndex <= 1"
+                            :class="activeFindingIndex <= 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-300'"
+                            class="flex items-center justify-center gap-1 border px-2 py-2 sm:px-5 sm:py-2 rounded-none font-semibold text-[11px] sm:text-sm transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M20 19l-7-7 7-7" />
+                            </svg>
+                            <span>Prev Finding</span>
+                        </button>
+                        <button @click="nextFinding()"
+                            :disabled="!isFinished"
+                            :class="!isFinished ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-400'"
+                            class="flex items-center justify-center gap-1 border px-2 py-2 sm:px-5 sm:py-2 rounded-none font-semibold text-[11px] sm:text-sm transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                            <span>Next Finding</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,6 +265,7 @@
         Alpine.data('genbaForm', () => ({
             isLoading: false,
             activeFindingIndex: 1,
+            isFinished: false,
 
             initForm() {
                 const sidebar = document.getElementById('sidebar');
@@ -267,6 +293,7 @@
             loadEvidence(itemId, scopeId, findingIndex = 1) {
                 this.activeFindingIndex = findingIndex;
                 this.isLoading = true;
+                this.isFinished = false;
 
                 let activityId = document.getElementById('activity_id').value;
                 let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -292,6 +319,7 @@
                         // Populate findings
                         if (data.findings) {
                             document.getElementById(`findings_${itemId}`).value = data.findings;
+                            this.isFinished = true;
                         }
 
                         // Populate station / area detail
@@ -317,7 +345,7 @@
                             data.photo.forEach(photoPath => {
                                 if (photoPath && photoPath.trim() !== '') {
                                     const div = document.createElement('div');
-                                    div.className="relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
+                                    div.className="relative group rounded-lg overflow-hidden aspect-square h-full bg-slate-100 border border-slate-200";
                                     div.innerHTML = `
                                     <img src="{{ asset('findings-photo') }}/${photoPath}" class="w-full h-full object-cover">
                                     <button onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -394,7 +422,7 @@
             addThumbnail(itemId, url) {
                 const container = document.getElementById(`preview_container_${itemId}`);
                 const div = document.createElement('div');
-                div.className="relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
+                div.className="relative group rounded-lg overflow-hidden aspect-square h-full bg-slate-100 border border-slate-200";
                 div.innerHTML = `
                     <img src="${url}" class="w-full h-full object-cover">
                     <button onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -477,7 +505,7 @@
                         activity_id: activityId,
                         scope_id: scopeId,
                         check_item_id: itemId,
-                        finding_index: 1,
+                        finding_index: this.activeFindingIndex,
                         findings: findings,
                         dataphoto: dataphoto.length > 0 ? dataphoto : null,
                         existing_photos: existing_photos,
@@ -537,9 +565,7 @@
                     this.isLoading = false;
                     if (data.code === 200) {
                         showToast(data.message, 'success');
-                        setTimeout(() => {
-                            window.location.href = "{{ route('genba_management') }}";
-                        }, 1500);
+                        this.isFinished = true;
                     } else {
                         showToast(data.message, 'error');
                     }
@@ -548,7 +574,6 @@
                     this.isLoading = false;
                     console.error('Error saving or submitting:', err);
                     if (err && err.message) {
-                        // If it's a long HTML error from php/laravel, show a cleaner message but log it
                         if (err.message.includes('<!DOCTYPE html>') || err.message.includes('<html')) {
                             showToast('Gagal submit audit (Server Error)', 'error');
                         } else {
@@ -558,6 +583,76 @@
                         showToast('Gagal submit audit', 'error');
                     }
                 });
+            },
+
+            clearFormFields(itemId) {
+                document.getElementById(`findings_${itemId}`).value = '';
+                const container = document.getElementById(`preview_container_${itemId}`);
+                if (container) container.innerHTML = '';
+                
+                const assignToSelect = document.getElementById(`asign_to_dept_${itemId}`);
+                if (assignToSelect) {
+                    $(`#asign_to_dept_${itemId}`).val('');
+                    const alpineContainer = assignToSelect.closest('[x-data]');
+                    if (alpineContainer && alpineContainer._x_dataStack) {
+                        const alpineData = alpineContainer._x_dataStack[0];
+                        if (alpineData) {
+                            alpineData.selectedId = '';
+                            alpineData.selectedName = '';
+                            alpineData.search = '';
+                        }
+                    }
+                }
+                
+                const areaDetailInput = document.getElementById(`area_detail_${itemId}`);
+                if (areaDetailInput) {
+                    $(`#area_detail_${itemId}`).val('');
+                    const alpineContainer = areaDetailInput.closest('[x-data]');
+                    if (alpineContainer && alpineContainer._x_dataStack) {
+                        const alpineData = alpineContainer._x_dataStack[0];
+                        if (alpineData) {
+                            alpineData.selectedId = '';
+                            alpineData.selectedName = '';
+                            alpineData.search = '';
+                        }
+                    }
+                }
+                
+                const typeHidden = document.getElementById(`type_${itemId}`);
+                if (typeHidden) {
+                    $(`#type_${itemId}`).val('');
+                    const typeAlpine = typeHidden.closest('[x-data]');
+                    if (typeAlpine && typeAlpine._x_dataStack) {
+                        const typeData = typeAlpine._x_dataStack[0];
+                        if (typeData) {
+                            typeData.selectedId = '';
+                            typeData.selectedName = '';
+                            typeData.search = '';
+                        }
+                    }
+                }
+
+                const cameraInput = document.getElementById(`cameraInput_${itemId}`);
+                if (cameraInput) cameraInput.value = '';
+                const uploadInput = document.getElementById(`uploadInput_${itemId}`);
+                if (uploadInput) uploadInput.value = '';
+            },
+
+            nextFinding() {
+                const itemId = {{ $itemId }};
+                const scopeId = {{ $scopeId }};
+                this.activeFindingIndex++;
+                this.clearFormFields(itemId);
+                this.loadEvidence(itemId, scopeId, this.activeFindingIndex);
+            },
+
+            prevFinding() {
+                if (this.activeFindingIndex <= 1) return;
+                const itemId = {{ $itemId }};
+                const scopeId = {{ $scopeId }};
+                this.activeFindingIndex--;
+                this.clearFormFields(itemId);
+                this.loadEvidence(itemId, scopeId, this.activeFindingIndex);
             }
         }))
     });
