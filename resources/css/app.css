@@ -263,6 +263,13 @@ table.dataTable.qms-table tbody td {
     background: transparent;
     cursor: pointer;
     z-index: 2;
+    opacity: 0;
+}
+
+.date-input-container input[type="date"]::-webkit-inner-spin-button,
+.date-input-container input[type="date"]::-webkit-clear-button {
+    display: none;
+    -webkit-appearance: none;
 }
 
 .date-input-container input {
