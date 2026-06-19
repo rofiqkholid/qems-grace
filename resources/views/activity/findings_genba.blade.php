@@ -34,14 +34,24 @@
 
                     <!-- Date From -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
-                        <input type="date" id="dateFrom"
-                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                        <div class="date-input-container w-full lg:w-auto">
+                            <input type="text" id="dateFrom" placeholder="dd/mm/yyyy" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'"
+                                class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                <i class="fa-regular fa-calendar text-sm"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Date To -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
-                        <input type="date" id="dateTo"
-                            class="w-full lg:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                        <div class="date-input-container w-full lg:w-auto">
+                            <input type="text" id="dateTo" placeholder="dd/mm/yyyy" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'"
+                                class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                <i class="fa-regular fa-calendar text-sm"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Department Filter -->
@@ -363,8 +373,8 @@
         // Reset button
         $('#btnReset').click(function() {
             $('#searchInput').val('');
-            $('#dateFrom').val('');
-            $('#dateTo').val('');
+            $('#dateFrom').val('').attr('type', 'text');
+            $('#dateTo').val('').attr('type', 'text');
             
             // Reset searchable-select components via their updateEvent triggers
             window.dispatchEvent(new CustomEvent('reset-dept', { detail: '' }));
@@ -373,6 +383,10 @@
             
             table.ajax.reload();
         });
+
+        // Handle initial date values (if any)
+        if ($('#dateFrom').val()) $('#dateFrom').attr('type', 'date');
+        if ($('#dateTo').val()) $('#dateTo').attr('type', 'date');
 
         // Search on enter
         // Debounce function

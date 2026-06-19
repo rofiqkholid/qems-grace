@@ -245,3 +245,26 @@ table.dataTable.qms-table tbody td {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* Custom date picker styling */
+.date-input-container {
+    position: relative;
+}
+
+.date-input-container input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    color: transparent;
+    background: transparent;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.date-input-container input::placeholder {
+    color: #94a3b8; /* slate-400 */
+}

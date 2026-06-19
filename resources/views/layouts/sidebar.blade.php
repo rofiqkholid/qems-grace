@@ -55,7 +55,7 @@
                     <div>
                         @if(empty($subItem['children']))
                         @php
-                            $isSubActive = request()->is($subItem['menu']->menu . '*') || ($subItem['menu']->menu === 'dashboard-mng' && request()->path() === '/');
+                            $isSubActive = request()->is($subItem['menu']->menu) || request()->is($subItem['menu']->menu . '/*') || ($subItem['menu']->menu === 'dashboard-mng' && request()->path() === '/');
                         @endphp
                         <a href="{{ url($subItem['menu']->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ $isSubActive ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                             <div class="w-5 flex items-center justify-center flex-shrink-0">
@@ -64,22 +64,31 @@
                             <span class="text-sm whitespace-nowrap lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 ml-4">{{ $subItem['menu']->menu_name }}</span>
                         </a>
                         @else
-                        <button type="button" onclick="toggleMenu('sub-{{ $idx }}-{{ $subIdx }}')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200">
+                        @php
+                            $isSubSubActive = false;
+                            foreach ($subItem['children'] as $childId) {
+                                if (isset($menus[$childId]) && (request()->is($menus[$childId]->menu) || request()->is($menus[$childId]->menu . '/*'))) {
+                                    $isSubSubActive = true;
+                                    break;
+                                }
+                            }
+                        @endphp
+                        <button type="button" onclick="toggleMenu('sub-{{ $idx }}-{{ $subIdx }}')" class="w-full flex items-center gap-3 px-4 py-2 {{ $isSubSubActive ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                             <div class="w-5 flex items-center justify-center flex-shrink-0">
-                                <span class="w-2.5 h-[2px] bg-slate-400 rounded-full transition-colors"></span>
+                                <span class="w-2.5 h-[2px] {{ $isSubSubActive ? 'bg-blue-500' : 'bg-slate-400' }} rounded-full transition-colors"></span>
                             </div>
                             <span class="text-sm whitespace-nowrap flex-1 text-left lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 ml-4">{{ $subItem['menu']->menu_name }}</span>
-                            <i class="fa-solid fa-chevron-down text-xs transition-all duration-300 lg:opacity-0 lg:group-hover:opacity-100" id="arrow-sub-{{ $idx }}-{{ $subIdx }}"></i>
+                            <i class="fa-solid fa-chevron-down text-xs transition-all duration-300 lg:opacity-0 lg:group-hover:opacity-100 {{ $isSubSubActive ? 'rotate-180' : '' }}" id="arrow-sub-{{ $idx }}-{{ $subIdx }}"></i>
                         </button>
                         <div class="lg:hidden lg:group-hover:block">
-                            <div class="hidden pl-3 mt-1 space-y-1" id="sub-{{ $idx }}-{{ $subIdx }}">
+                            <div class="{{ $isSubSubActive ? '' : 'hidden' }} pl-3 mt-1 space-y-1" id="sub-{{ $idx }}-{{ $subIdx }}">
                                 @foreach($subItem['children'] as $childId)
                                 @if(isset($menus[$childId]))
                                     @if(!\App\Models\UserMenuPermission::canView($childId))
                                         @continue
                                     @endif
                                 @php
-                                    $isChildActive = request()->is($menus[$childId]->menu . '*');
+                                    $isChildActive = request()->is($menus[$childId]->menu) || request()->is($menus[$childId]->menu . '/*');
                                 @endphp
                                 <a href="{{ url($menus[$childId]->menu) }}" class="flex items-center gap-3 px-4 py-2 {{ $isChildActive ? 'text-blue-600 font-semibold' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50' }} rounded-lg transition-colors duration-200">
                                     <div class="w-5 flex items-center justify-center flex-shrink-0">
