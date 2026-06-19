@@ -277,3 +277,21 @@ table.dataTable.qms-table tbody td {
 .date-input-container input::placeholder {
     color: #94a3b8; /* slate-400 */
 }
+
+/* Custom placeholder overlay styling */
+.placeholder-overlay {
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 1;
+}
+
+.date-input-container input:focus ~ .placeholder-overlay,
+.date-input-container input[data-has-value="true"] ~ .placeholder-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Hide native browser date input placeholder text when empty and unfocused */
+.date-input-container input[type="date"]:not(:focus):not([data-has-value="true"])::-webkit-datetime-edit {
+    color: transparent !important;
+}

@@ -35,8 +35,9 @@
                     <!-- Date From -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
-                            <input type="text" id="dateFrom" placeholder="dd/mm/yyyy" onfocus="this.type='date'; try { this.showPicker(); } catch(e) {}" onblur="if(!this.value) this.type='text'" onkeydown="return false;"
+                            <input type="date" id="dateFrom" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
+                            <span class="placeholder-overlay absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">dd/mm/yyyy</span>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                                 <i class="fa-regular fa-calendar text-sm"></i>
                             </div>
@@ -46,8 +47,9 @@
                     <!-- Date To -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
-                            <input type="text" id="dateTo" placeholder="dd/mm/yyyy" onfocus="this.type='date'; try { this.showPicker(); } catch(e) {}" onblur="if(!this.value) this.type='text'" onkeydown="return false;"
+                            <input type="date" id="dateTo" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
+                            <span class="placeholder-overlay absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">dd/mm/yyyy</span>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                                 <i class="fa-regular fa-calendar text-sm"></i>
                             </div>
@@ -378,8 +380,8 @@
         // Reset button
         $('#btnReset').click(function() {
             $('#searchInput').val('');
-            $('#dateFrom').val('').attr('type', 'text');
-            $('#dateTo').val('').attr('type', 'text');
+            $('#dateFrom').val('').removeAttr('data-has-value');
+            $('#dateTo').val('').removeAttr('data-has-value');
             $('#deptFilter').val('');
             $('#detailAreaFilter').val('');
             window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
@@ -405,8 +407,8 @@
         }, 500));
 
         // Handle initial date values (if any)
-        if ($('#dateFrom').val()) $('#dateFrom').attr('type', 'date');
-        if ($('#dateTo').val()) $('#dateTo').attr('type', 'date');
+        if ($('#dateFrom').val()) $('#dateFrom').attr('data-has-value', 'true');
+        if ($('#dateTo').val()) $('#dateTo').attr('data-has-value', 'true');
     });
 
     function document_preview(id, no) {
