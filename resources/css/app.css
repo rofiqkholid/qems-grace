@@ -253,8 +253,10 @@ table.dataTable.qms-table tbody td {
 
 .date-input-container input[type="date"]::-webkit-calendar-picker-indicator {
     display: none !important;
+    opacity: 0 !important;
     -webkit-appearance: none !important;
     appearance: none !important;
+    background: none !important;
 }
 
 .date-input-container input[type="date"]::-webkit-inner-spin-button,
@@ -266,6 +268,12 @@ table.dataTable.qms-table tbody td {
 
 .date-input-container input[type="date"]::-moz-calendar-picker-indicator {
     display: none !important;
+}
+
+.date-input-container input[type="date"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
 }
 
 .date-input-container input {
