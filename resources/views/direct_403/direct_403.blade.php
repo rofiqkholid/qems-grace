@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Page Not Found - QMS')
+@section('title', 'Page Not Found')
 
 @section('content')
 @include('layouts.sidebar')
@@ -37,4 +37,4 @@
 <!-- Mobile Sidebar Overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
 @endsection
-
+

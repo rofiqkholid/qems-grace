@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Login - QMS')
+@section('title', 'Login GRACE')
 
 @section('content')
 <div class="relative min-h-screen flex items-center justify-end p-4 lg:p-16 bg-cover lg:bg-[length:100%_100%] bg-right bg-no-repeat" style="background-image: url('{{ asset('image/login-bg.png') }}');">

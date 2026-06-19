@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Room Team Collaboration - QMS')
+@section('title', 'Room Team Collaboration')
 
 @section('content')
 @include('layouts.sidebar')

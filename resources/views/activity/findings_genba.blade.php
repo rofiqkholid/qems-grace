@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Findings Genba - QMS')
+@section('title', 'Findings Genba')
 
 @section('content')
 @include('layouts.sidebar')

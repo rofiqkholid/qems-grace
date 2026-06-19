@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Department Master')
+
 @section('content')
 @include('layouts.sidebar')
 @include('components.toast')

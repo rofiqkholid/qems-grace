@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Genba Finding Preview - QMS')
+@section('title', 'Genba Finding Preview')
 
 @section('content')
 @php

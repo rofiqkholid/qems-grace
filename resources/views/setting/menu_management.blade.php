@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Menu Management')
+
 @section('content')
 @include('layouts.sidebar')
 @include('components.toast')
