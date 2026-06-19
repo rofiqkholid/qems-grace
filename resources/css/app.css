@@ -236,3 +236,12 @@ table.dataTable.qms-table tbody td {
 .animate-progress-bar {
     animation: progress-bar 1.2s ease-in-out infinite;
 }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
