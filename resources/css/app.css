@@ -252,24 +252,20 @@ table.dataTable.qms-table tbody td {
 }
 
 .date-input-container input[type="date"]::-webkit-calendar-picker-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    color: transparent;
-    background: transparent;
-    cursor: pointer;
-    z-index: 2;
-    opacity: 0;
+    display: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
 }
 
 .date-input-container input[type="date"]::-webkit-inner-spin-button,
 .date-input-container input[type="date"]::-webkit-clear-button {
-    display: none;
-    -webkit-appearance: none;
+    display: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+.date-input-container input[type="date"]::-moz-calendar-picker-indicator {
+    display: none !important;
 }
 
 .date-input-container input {
