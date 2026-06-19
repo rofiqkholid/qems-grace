@@ -265,6 +265,15 @@ table.dataTable.qms-table tbody td {
     z-index: 2;
 }
 
+.date-input-container input {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    caret-color: transparent;
+    cursor: pointer;
+}
+
 .date-input-container input::placeholder {
     color: #94a3b8; /* slate-400 */
 }

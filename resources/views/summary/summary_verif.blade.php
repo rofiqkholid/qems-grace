@@ -34,7 +34,7 @@
                     <!-- Date From -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
-                            <input type="text" id="dateFrom" placeholder="dd/mm/yyyy" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'"
+                            <input type="text" id="dateFrom" placeholder="dd/mm/yyyy" onfocus="this.type='date'; try { this.showPicker(); } catch(e) {}" onblur="if(!this.value) this.type='text'" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                                 <i class="fa-regular fa-calendar text-sm"></i>
@@ -45,7 +45,7 @@
                     <!-- Date To -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
-                            <input type="text" id="dateTo" placeholder="dd/mm/yyyy" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'"
+                            <input type="text" id="dateTo" placeholder="dd/mm/yyyy" onfocus="this.type='date'; try { this.showPicker(); } catch(e) {}" onblur="if(!this.value) this.type='text'" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                                 <i class="fa-regular fa-calendar text-sm"></i>
