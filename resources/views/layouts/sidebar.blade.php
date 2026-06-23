@@ -23,6 +23,7 @@
                 @php
                     $isActive = request()->is($mainItem['menu']->menu . '*') || 
                                 ($mainItem['menu']->menu === 'dashboard' && (request()->is('dashboard*') || request()->path() === '/')) ||
+                                ($mainItem['menu']->menu === 'genba-internal-main' && request()->is('genba-internal*')) ||
                                 ($mainItem['menu']->menu === 'setting' && (request()->is('setting*') || request()->is('user-management*') || request()->is('menu-management*') || request()->is('user-setting*')));
                     $iconClass = match($mainItem['menu']->menu) {
                         'genba' => 'fa-users',
@@ -31,6 +32,7 @@
                         'setting' => 'fa-gear',
                         'user-management' => 'fa-user-shield',
                         'genba-internal' => 'fa-sitemap',
+                        'genba-internal-main' => 'fa-sitemap',
                         default => 'fa-folder'
                     };
                 @endphp

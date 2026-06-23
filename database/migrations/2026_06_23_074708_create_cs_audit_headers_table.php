@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('CsAuditHeader', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->nullable()->constrained('CsAuditSchedule')->onDelete('set null');
             $table->date('audit_date');
+            $table->string('auditee');
             $table->string('auditor_names'); // Auditor conducting the session
             $table->string('auditee_dept');  // Department code
-            $table->string('status')->default('Draft'); // 'Draft', 'Submitted', 'Verification', 'Closed'
+            $table->string('status')->default('Scheduled'); // 'Scheduled', 'Done'
             $table->timestamps();
         });
     }
