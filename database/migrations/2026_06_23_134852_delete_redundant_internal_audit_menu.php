@@ -18,16 +18,16 @@ return new class extends Migration
         DB::table('t100_menus')
             ->where('id', 107)
             ->update([
-                'menu' => 'genba-internal-main',
-                'menu_name' => 'Genba Internal'
+                'menu' => 'internal-audit-main',
+                'menu_name' => 'Internal Audit'
             ]);
 
-        // Update sub menu 108 to point directly to genba-internal
+        // Update sub menu 108 to point directly to internal-audit
         DB::table('t100_menus')
             ->where('id', 108)
             ->update([
-                'menu' => 'genba-internal',
-                'menu_name' => 'Genba Internal'
+                'menu' => 'internal-audit',
+                'menu_name' => 'Internal Audit Form'
             ]);
     }
 

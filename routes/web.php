@@ -35,18 +35,18 @@ Route::middleware(['auth'])->group(function () {
         return view('activity.genba_header_form');
     })->name('genba_management');
 
-    Route::get('/genba-internal', [InternalAuditController::class, 'index'])->name('internal_audit');
-    Route::post('/genba-internal/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
-    Route::post('/genba-internal/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
-    Route::get('/genba-internal/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');
-    Route::post('/genba-internal/schedules/delete/{id}', [InternalAuditController::class, 'deleteSchedule'])->name('internal_audit.schedules.delete');
-    Route::get('/genba-internal/checksheet', [InternalAuditController::class, 'getChecksheet'])->name('internal_audit.checksheet');
-    Route::post('/genba-internal/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
-    Route::get('/genba-internal/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
-    Route::post('/genba-internal/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
-    Route::post('/genba-internal/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
-    Route::post('/genba-internal/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
-    Route::post('/genba-internal/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
+    Route::get('/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
+    Route::post('/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
+    Route::post('/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
+    Route::get('/internal-audit/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');
+    Route::post('/internal-audit/schedules/delete/{id}', [InternalAuditController::class, 'deleteSchedule'])->name('internal_audit.schedules.delete');
+    Route::get('/internal-audit/checksheet', [InternalAuditController::class, 'getChecksheet'])->name('internal_audit.checksheet');
+    Route::post('/internal-audit/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
+    Route::get('/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
+    Route::post('/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
+    Route::post('/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
+    Route::post('/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
+    Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
 
     Route::get('/team', function () {
         return view('activity.setup.genba_team');

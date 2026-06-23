@@ -251,8 +251,8 @@ class MenuSeeder extends Seeder
                 'level_menu_id' => 2,
                 'group_id' => 9,
                 'sub_group_id' => 107,
-                'menu' => 'genba-internal',
-                'menu_name' => 'Genba Internal',
+                'menu' => 'internal-audit-main',
+                'menu_name' => 'Internal Audit',
                 'icon' => '<span></span>'
             ],
             [
@@ -261,8 +261,8 @@ class MenuSeeder extends Seeder
                 'level_menu_id' => 3,
                 'group_id' => 9,
                 'sub_group_id' => 107,
-                'menu' => 'genba-internal/internal-audit',
-                'menu_name' => 'Internal Audit',
+                'menu' => 'internal-audit',
+                'menu_name' => 'Internal Audit Form',
                 'icon' => '<span></span>'
             ]
         ];

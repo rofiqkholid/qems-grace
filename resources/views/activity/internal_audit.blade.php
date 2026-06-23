@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Genba Internal')
+@section('title', 'Internal Audit')
 
 @section('content')
 @include('layouts.sidebar')
@@ -16,7 +16,7 @@
         <div id="listView">
             <!-- Page Title -->
             <div class="mb-6">
-                <h1 class="text-2xl font-bold text-slate-800">Genba Internal</h1>
+                <h1 class="text-2xl font-bold text-slate-800">Internal Audit</h1>
                 <p class="text-slate-500 mt-1">Plan agendas, conduct standard compliance audits, and manage CAR workflows</p>
             </div>
 
@@ -71,7 +71,7 @@
                                 <th class="w-[15%]">Audit Date</th>
                                 <th class="w-[20%]">Auditee</th>
                                 <th class="w-[20%]">Auditor</th>
-                                <th class="w-[20%]">Departemen Diaudit</th>
+                                <th class="w-[20%]">Departemen Auditee</th>
                                 <th class="w-[10%]">Status</th>
                                 <th class="w-[10%]">Action</th>
                             </tr>
@@ -93,8 +93,8 @@
                         <i class="fa-solid fa-arrow-left text-[11px] sm:text-sm"></i>
                     </button>
                     <div>
-                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Genba Internal</h1>
-                        <p class="text-slate-500 text-sm">Create or edit genba internal audit details</p>
+                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Internal Audit</h1>
+                        <p class="text-slate-500 text-sm">Create or edit Internal Audit audit details</p>
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@
                         <div class="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-6">
                             <!-- Target Auditee Department -->
                             <div class="col-span-2 lg:col-span-1">
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Departemen Diaudit <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Departemen Auditee <span class="text-red-500">*</span></label>
                                 <x-searchable-select
                                     name="auditee_dept"
                                     id="formAuditeeDept"
@@ -311,7 +311,7 @@
             const deptVal = $('#formAuditeeDept').val();
             if (!deptVal) {
                 isValid = false;
-                errors.push('Departemen Diaudit is required');
+                errors.push('Departemen Auditee is required');
             }
 
             if (!isValid) {
@@ -373,7 +373,7 @@
         $('#page-loader').removeClass('hidden');
         
         $.ajax({
-            url: "{{ url('/genba-internal/schedules/detail') }}/" + id,
+            url: "{{ url('/internal-audit/schedules/detail') }}/" + id,
             type: 'GET',
             success: function(response) {
                 if (response.success) {
@@ -507,7 +507,7 @@
         $('#page-loader').removeClass('hidden');
 
         $.ajax({
-            url: "{{ url('/genba-internal/schedules/delete') }}/" + id,
+            url: "{{ url('/internal-audit/schedules/delete') }}/" + id,
             type: 'POST',
             data: {
                 _token: "{{ csrf_token() }}"
