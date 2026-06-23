@@ -51,7 +51,7 @@
                     <div class="flex items-center gap-3">
                         <div class="hidden sm:block text-right whitespace-nowrap">
                             <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
-                            <p class="text-xs text-slate-500">{{ Auth::user()?->call_name ?? 'User' }}</p>
+                            <p class="text-xs text-slate-500">{{ Auth::user()?->username ?? 'User' }}</p>
                         </div>
                         <div class="relative group">
                             <button type="button" id="user-menu-button" class="relative focus:outline-none">

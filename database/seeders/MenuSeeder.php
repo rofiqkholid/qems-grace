@@ -244,6 +244,26 @@ class MenuSeeder extends Seeder
                 'menu' => 'user-setting',
                 'menu_name' => 'User Setting',
                 'icon' => '<span></span>'
+            ],
+            [
+                'id' => 107,
+                'sequence_id' => 2,
+                'level_menu_id' => 2,
+                'group_id' => 9,
+                'sub_group_id' => 107,
+                'menu' => 'genba-internal',
+                'menu_name' => 'Genba Internal',
+                'icon' => '<span></span>'
+            ],
+            [
+                'id' => 108,
+                'sequence_id' => 1,
+                'level_menu_id' => 3,
+                'group_id' => 9,
+                'sub_group_id' => 107,
+                'menu' => 'genba-internal/internal-audit',
+                'menu_name' => 'Internal Audit',
+                'icon' => '<span></span>'
             ]
         ];
 

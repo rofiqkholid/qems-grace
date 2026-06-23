@@ -14,7 +14,7 @@ return new class extends Migration
         if (!Schema::hasTable('t100_user_menus_permission')) {
             Schema::create('t100_user_menus_permission', function (Blueprint $table) {
                 $table->increments('id');
-                $table->integer('id_user');
+                $table->unsignedInteger('id_user');
                 $table->integer('id_menus');
                 $table->tinyInteger('is_view')->nullable()->default(0);
                 

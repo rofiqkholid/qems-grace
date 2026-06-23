@@ -7,6 +7,7 @@ use App\Http\Controllers\ExecutionGenbaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SummaryGenbaController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\InternalAuditController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -33,6 +34,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/genba_management', function () {
         return view('activity.genba_header_form');
     })->name('genba_management');
+
+    Route::get('/genba-internal/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
+    Route::post('/genba-internal/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
+    Route::post('/genba-internal/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
+    Route::post('/genba-internal/internal-audit/schedules/delete/{id}', [InternalAuditController::class, 'deleteSchedule'])->name('internal_audit.schedules.delete');
+    Route::get('/genba-internal/internal-audit/checksheet', [InternalAuditController::class, 'getChecksheet'])->name('internal_audit.checksheet');
+    Route::get('/genba-internal/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
+    Route::post('/genba-internal/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
+    Route::post('/genba-internal/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
+    Route::post('/genba-internal/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
+    Route::post('/genba-internal/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
 
     Route::get('/team', function () {
         return view('activity.setup.genba_team');

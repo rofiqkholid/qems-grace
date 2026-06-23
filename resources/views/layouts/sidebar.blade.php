@@ -30,6 +30,7 @@
                         'dashboard' => 'fa-chart-pie',
                         'setting' => 'fa-gear',
                         'user-management' => 'fa-user-shield',
+                        'genba-internal' => 'fa-sitemap',
                         default => 'fa-folder'
                     };
                 @endphp

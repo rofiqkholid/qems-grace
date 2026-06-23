@@ -15,11 +15,29 @@ class UserMenuPermissionSeeder extends Seeder
      */
     public function run()
     {
+        // First, seed the users if they don't exist
+        $usersToSeed = [
+            [
+                'username' => 'superadmin',
+                'full_name' => 'Super Admin',
+                'password' => 'password',
+                'role_id' => 1,
+                'status_id' => 1,
+            ]
+        ];
+
+        foreach ($usersToSeed as $userData) {
+            User::firstOrCreate(
+                ['username' => $userData['username']],
+                $userData
+            );
+        }
+
         // Target users with Data Master access (view only or full delete)
         $adminNiksWithDelete = ['270723-001', '260422-001', '121020-002'];
         $adminNiksViewOnly = ['031114-001'];
         
-        $menuIds = [90, 91, 95, 96, 97, 98, 99, 103, 104, 105, 106]; // Genba Form, Findings, Data Master and its submenus, User Management, Setting, Menu Management, Safety Dashboard
+        $menuIds = [90, 91, 95, 96, 97, 98, 99, 103, 104, 105, 106, 107, 108]; // Genba Form, Findings, Data Master and its submenus, User Management, Setting, Menu Management, Safety Dashboard, Genba Internal, C/S Audit
 
         // Seed users with Delete permission
         $deleteUsers = User::whereIn('username', $adminNiksWithDelete)->get();
@@ -55,12 +73,13 @@ class UserMenuPermissionSeeder extends Seeder
             }
         }
 
-        // Give full access (all views and deletes) to User ID 53
+        // Give full access (all views and deletes) to Super Admin
+        $superadmin = User::where('username', 'superadmin')->first();
         $allMenuIds = DB::table('t100_menus')->pluck('id')->toArray();
         foreach ($allMenuIds as $menuId) {
             DB::table('t100_user_menus_permission')->updateOrInsert(
                 [
-                    'id_user' => 53,
+                    'id_user' => $superadmin->id,
                     'id_menus' => $menuId,
                 ],
                 [

@@ -21,7 +21,8 @@
             </div>
 
             <h1 class="text-4xl font-bold text-slate-800 mb-2">Error 404</h1>
-            <p class="text-lg text-slate-600 mb-8">Halaman Tidak Tersedia</p>
+            <p class="text-lg text-slate-600 font-medium">Halaman Tidak Tersedia</p>
+            <p class="text-sm text-slate-500 mb-8">Page Not Found</p>
 
             <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <i class="fa-solid fa-arrow-left mr-2"></i>
