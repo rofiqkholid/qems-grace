@@ -13,7 +13,7 @@
     @include('layouts.header')
 
     <!-- Loading State -->
-    <div x-show="isLoading" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/20 backdrop-blur-[2px]">
+    <div x-show="isLoading" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/20">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
