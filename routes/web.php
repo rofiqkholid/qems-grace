@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
     Route::get('/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
     Route::post('/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
+    Route::post('/internal-audit/save-judgment', [InternalAuditController::class, 'saveJudgment'])->name('internal_audit.save_judgment');
     Route::post('/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
     Route::post('/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
     Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
@@ -141,6 +142,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/check-item/store', [MasterController::class, 'store_check_item'])->name('master.check_item.store');
         Route::post('/check-item/update', [MasterController::class, 'update_check_item'])->name('master.check_item.update');
         Route::post('/check-item/delete', [MasterController::class, 'delete_check_item'])->name('master.check_item.delete');
+
+        Route::get('/intr-check-item', [MasterController::class, 'intr_check_item'])->name('master.intr_check_item');
+        Route::post('/intr-check-item/table', [MasterController::class, 'intr_check_item_table'])->name('master.intr_check_item.table');
+        Route::post('/intr-check-item/store', [MasterController::class, 'store_intr_check_item'])->name('master.intr_check_item.store');
+        Route::post('/intr-check-item/update', [MasterController::class, 'update_intr_check_item'])->name('master.intr_check_item.update');
+        Route::post('/intr-check-item/delete', [MasterController::class, 'delete_intr_check_item'])->name('master.intr_check_item.delete');
     });
 
     Route::get('/user-management', [MasterController::class, 'user_management'])->name('master.user_management');

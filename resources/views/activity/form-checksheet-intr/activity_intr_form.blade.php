@@ -99,172 +99,197 @@
                     </div>
 
                     <div class="p-6 space-y-6 flex-1 overflow-y-auto">
-                        @foreach ($items as $item)
-                        @php $itemId = $item->id; @endphp
-                        <div class="group relative rounded-xl border bg-white p-5 transition-all duration-300"
-                            :style="answers[{{ $itemId }}] !== 'OK' ? 'border-color: #fecaca; background-color: rgba(254, 242, 242, 0.1);' : 'border-color: #f1f5f9;'">
+                        @php
+                            $groupedItems = $items->groupBy(function($item) {
+                                return $item->scope_item ?: 'General';
+                            });
+                            $globalIteration = 1;
+                        @endphp
 
-                            <div class="flex flex-col lg:flex-row gap-6">
-                                <!-- Question -->
-                                <div class="flex-1">
-                                    <div class="flex items-start gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center mt-0.5">
-                                            {{ $loop->iteration }}
-                                        </span>
-                                        <div>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 mb-2">
-                                                {{ $item->clause_number }}
-                                            </span>
-                                            <p class="text-slate-800 font-medium text-base leading-relaxed">{{ $item->requirement_desc }}</p>
-                                        </div>
+                        @foreach ($groupedItems as $scopeName => $scopeGroup)
+                        <div class="mb-8 last:mb-0">
+                            <div class="flex items-center justify-between mb-4 px-1">
+                                <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    {{ $scopeName }}
+                                </h3>
+                                @php
+                                    $firstItem = $scopeGroup->first();
+                                @endphp
+                                @if($firstItem && $firstItem->scope_id)
+                                    <div class="text-slate-400 hover:text-slate-600 transition-colors cursor-help" title="Scope ID: {{ $firstItem->scope_id }}">
+                                        <i class="fa-solid fa-circle-info text-base sm:text-lg"></i>
                                     </div>
-                                </div>
-
-                                <!-- Action Area -->
-                                <div class="flex-shrink-0 flex flex-col sm:flex-row gap-4 lg:w-[480px]">
-                                    <!-- Radio Options -->
-                                    <div class="grid grid-cols-4 sm:flex sm:items-center sm:justify-center gap-2 bg-slate-50 rounded-lg p-1.5 w-full sm:w-auto self-start">
-                                        @foreach(['OK' => ['icon' => 'fa-circle', 'textColor' => '#22c55e', 'bgColor' => '#f0fdf4'],
-                                                  'OFI' => ['icon' => 'fa-info-circle', 'textColor' => '#3b82f6', 'bgColor' => '#eff6ff'],
-                                                  'Minor' => ['icon' => 'fa-exclamation-triangle', 'textColor' => '#f97316', 'bgColor' => '#fff7ed'],
-                                                  'Mayor' => ['icon' => 'fa-times', 'textColor' => '#ef4444', 'bgColor' => '#fef2f2']] as $val => $style)
-                                        <label class="cursor-pointer relative w-full sm:w-auto flex justify-center">
-                                            <input type="radio"
-                                                name="answers[{{ $itemId }}]"
-                                                value="{{ $val }}"
-                                                class="peer sr-only"
-                                                @click="updateAnswer({{ $itemId }}, '{{ $val }}')"
-                                                :checked="answers[{{ $itemId }}] === '{{ $val }}'"
-                                                :disabled="isReadOnly">
-                                            <div class="w-full sm:px-3 h-10 rounded-md flex items-center justify-center text-slate-300 hover:bg-white hover:text-slate-400 transition-all peer-checked:ring-1 peer-checked:ring-offset-1 peer-checked:ring-slate-200"
-                                                :style="answers[{{ $itemId }}] === '{{ $val }}' ? 'background-color: {{ $style['bgColor'] }}; color: {{ $style['textColor'] }};' : ''"
-                                                title="{{ $val }}">
-                                                <i class="fas {{ $style['icon'] }} text-base mr-1"></i>
-                                                <span class="text-xs font-bold">{{ $val }}</span>
-                                            </div>
-                                        </label>
-                                        @endforeach
-                                    </div>
-
-                                    <!-- Camera/Evidences Trigger -->
-                                    <div x-show="answers[{{ $itemId }}] !== 'OK'"
-                                        x-transition:enter="transition ease-out duration-200"
-                                        x-transition:enter-start="opacity-0 translate-x-4"
-                                        x-transition:enter-end="opacity-100 translate-x-0"
-                                        class="flex-1">
-                                        <button @click="openModal({{ $itemId }})"
-                                            class="w-full flex items-center justify-center gap-2 px-3 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 group-hover:border-blue-200"
-                                            :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : ''">
-                                            <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
-                                            <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Evidence Added' : 'Add Finding Evidence')"></span>
-                                        </button>
-                                    </div>
-                                </div>
+                                @endif
                             </div>
-                        </div>
+                            <div class="space-y-4">
+                                @foreach ($scopeGroup as $item)
+                                @php 
+                                    $itemId = $item->id; 
+                                    $currentNo = $globalIteration++;
+                                @endphp
+                                <div class="group relative rounded-xl border bg-white p-5 transition-all duration-300"
+                                    :style="answers[{{ $itemId }}] !== 'OK' && answers[{{ $itemId }}] !== '' ? 'border-color: #fecaca; background-color: rgba(254, 242, 242, 0.1);' : 'border-color: #f1f5f9;'">
 
-                        <!-- Modal for Item {{ $itemId }} -->
-                        <div x-show="activeModal === {{ $itemId }}"
-                            style="display: none;"
-                            class="fixed inset-0 z-[60] overflow-hidden"
-                            aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                            <div class="fixed inset-0 flex items-center justify-center p-0 md:p-4">
-                                <div x-show="activeModal === {{ $itemId }}"
-                                    x-transition:enter="ease-out duration-300"
-                                    x-transition:enter-start="opacity-0"
-                                    x-transition:enter-end="opacity-100"
-                                    x-transition:leave="ease-in duration-200"
-                                    x-transition:leave-start="opacity-100"
-                                    x-transition:leave-end="opacity-0"
-                                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                                    @click="closeModal()"></div>
-
-                                <div x-show="activeModal === {{ $itemId }}"
-                                    x-transition:enter="ease-out duration-300"
-                                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                                    x-transition:leave="ease-in duration-200"
-                                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                    class="relative bg-white text-left overflow-hidden transform transition-all flex flex-col w-full h-full rounded-none md:w-[95vw] md:max-w-4xl md:max-h-[85vh] md:rounded-2xl shadow-xl">
-
-                                    <!-- Modal Header -->
-                                    <div class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center flex-shrink-0">
-                                        <div>
-                                            <h3 class="text-lg font-bold text-gray-800">Finding & Evidence Details</h3>
-                                            <p class="text-slate-500 text-xs mt-0.5">Clause: {{ $item->clause_number }}</p>
+                                    <div class="flex flex-col lg:flex-row gap-6">
+                                        <!-- Question -->
+                                        <div class="flex-1">
+                                            <div class="flex items-start gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center mt-0.5">
+                                                    {{ $currentNo }}
+                                                </span>
+                                                <div class="flex-1">
+                                                    
+                                                    <p class="text-slate-800 font-medium text-base leading-relaxed">{{ $item->check_item_idn }}</p>
+                                                    <p class="text-slate-500 text-sm mt-1 leading-relaxed">{{ $item->check_item_en }}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <button @click="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
-                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+
+                                        <!-- Action Area -->
+                                        <div class="flex flex-col sm:flex-row items-center gap-4">
+                                            <!-- Radio Options -->
+                                            <div class="grid grid-cols-4 sm:flex sm:items-center sm:justify-center gap-2 bg-slate-50 rounded-lg p-1.5 w-full sm:w-auto">
+                                                @foreach(['OK' => ['icon' => 'fa-circle', 'textColor' => '#22c55e', 'bgColor' => '#f0fdf4'],
+                                                          'OFI' => ['icon' => 'fa-info-circle', 'textColor' => '#3b82f6', 'bgColor' => '#eff6ff'],
+                                                          'Minor' => ['icon' => 'fa-exclamation-triangle', 'textColor' => '#f97316', 'bgColor' => '#fff7ed'],
+                                                          'Mayor' => ['icon' => 'fa-times', 'textColor' => '#ef4444', 'bgColor' => '#fef2f2']] as $val => $style)
+                                                <label class="cursor-pointer relative w-full sm:w-auto flex justify-center">
+                                                    <input type="radio"
+                                                        name="answers[{{ $itemId }}]"
+                                                        value="{{ $val }}"
+                                                        class="peer sr-only"
+                                                        @click="updateAnswer({{ $itemId }}, '{{ $val }}')"
+                                                        :checked="answers[{{ $itemId }}] === '{{ $val }}'"
+                                                        :disabled="isReadOnly">
+                                                    <div class="w-full sm:px-3 h-10 rounded-md flex items-center justify-center text-slate-300 hover:bg-white hover:text-slate-400 transition-all peer-checked:ring-1 peer-checked:ring-offset-1 peer-checked:ring-slate-200"
+                                                        :style="answers[{{ $itemId }}] === '{{ $val }}' ? 'background-color: {{ $style['bgColor'] }}; color: {{ $style['textColor'] }};' : ''"
+                                                        title="{{ $val }}">
+                                                        <i class="fas {{ $style['icon'] }} text-base mr-1"></i>
+                                                        <span class="text-xs font-bold">{{ $val }}</span>
+                                                    </div>
+                                                </label>
+                                                @endforeach
+                                            </div>
+
+                                            <!-- Camera/Evidences Trigger -->
+                                            <div :class="answers[{{ $itemId }}] !== 'OK' && answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+                                                class="flex-1 w-full transition-all duration-200">
+                                                <button @click="openModal({{ $itemId }})"
+                                                    class="w-full flex items-center justify-center gap-2 px-3 h-[52px] bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 group-hover:border-blue-200"
+                                                    :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : ''">
+                                                    <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
+                                                    <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Evidence Added' : 'Add Finding Evidence')"></span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <!-- Modal Body - 2 Column Layout -->
-                                    <div class="px-8 py-6 bg-slate-50 flex-1 overflow-y-auto">
-                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                            <!-- Left Column -->
-                                            <div class="space-y-5">
-                                                <!-- Box: Evidence Photos -->
-                                                <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                    <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                                        <i class="fas fa-image text-blue-500"></i> Finding Attachment
-                                                    </h4>
+                                <!-- Modal for Item {{ $itemId }} -->
+                                <div x-show="activeModal === {{ $itemId }}"
+                                    style="display: none;"
+                                    class="fixed inset-0 z-[60] overflow-hidden"
+                                    aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                    <div class="fixed inset-0 flex items-center justify-center p-0 md:p-4">
+                                        <div x-show="activeModal === {{ $itemId }}"
+                                            x-transition:enter="ease-out duration-300"
+                                            x-transition:enter-start="opacity-0"
+                                            x-transition:enter-end="opacity-100"
+                                            x-transition:leave="ease-in duration-200"
+                                            x-transition:leave-start="opacity-100"
+                                            x-transition:leave-end="opacity-0"
+                                            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                            @click="closeModal()"></div>
 
-                                                    <div class="grid grid-cols-2 gap-3" x-show="!isReadOnly">
-                                                        <div class="relative group">
-                                                            <input type="file" id="cameraInput_{{ $itemId }}" accept="image/*" capture="environment"
-                                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                                @change="handleFileUpload($event, {{ $itemId }})">
-                                                            <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
-                                                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                                    <i class="fas fa-camera text-sm"></i>
+                                        <div x-show="activeModal === {{ $itemId }}"
+                                            x-transition:enter="ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                            x-transition:leave="ease-in duration-200"
+                                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                            class="relative bg-white text-left overflow-hidden transform transition-all flex flex-col w-full h-full rounded-none md:w-[95vw] md:max-w-4xl md:max-h-[85vh] md:rounded-2xl shadow-xl">
+
+                                            <!-- Modal Header -->
+                                            <div class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center flex-shrink-0">
+                                                <div>
+                                                    <h3 class="text-lg font-bold text-gray-800">Finding & Evidence Details</h3>
+                                                    <p class="text-slate-500 text-xs mt-0.5">Scope: {{ $item->scope_item ?: 'General' }}</p>
+                                                </div>
+                                                <button @click="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Body - 2 Column Layout -->
+                                            <div class="px-8 py-6 bg-slate-50 flex-1 overflow-y-auto">
+                                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                    <!-- Left Column -->
+                                                    <div class="space-y-5">
+                                                        <!-- Box: Evidence Photos -->
+                                                        <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                                            <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                                                <i class="fas fa-image text-blue-500"></i> Finding Attachment
+                                                            </h4>
+
+                                                            <div class="grid grid-cols-2 gap-3" x-show="!isReadOnly">
+                                                                <div class="relative group">
+                                                                    <input type="file" id="cameraInput_{{ $itemId }}" accept="image/*" capture="environment"
+                                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                                        @change="handleFileUpload($event, {{ $itemId }})">
+                                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
+                                                                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                                            <i class="fas fa-camera text-sm"></i>
+                                                                        </div>
+                                                                        <span class="text-xs font-semibold text-blue-600">Take Photo</span>
+                                                                    </div>
                                                                 </div>
-                                                                <span class="text-xs font-semibold text-blue-600">Take Photo</span>
-                                                            </div>
-                                                        </div>
 
-                                                        <div class="relative group">
-                                                            <input type="file" id="uploadInput_{{ $itemId }}" accept="image/*"
-                                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                                @change="handleFileUpload($event, {{ $itemId }})">
-                                                            <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
-                                                                <div class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                                    <i class="fas fa-images text-sm"></i>
+                                                                <div class="relative group">
+                                                                    <input type="file" id="uploadInput_{{ $itemId }}" accept="image/*"
+                                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                                        @change="handleFileUpload($event, {{ $itemId }})">
+                                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
+                                                                        <div class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                                            <i class="fas fa-images text-sm"></i>
+                                                                        </div>
+                                                                        <span class="text-xs font-semibold text-slate-600">Upload Photo</span>
+                                                                    </div>
                                                                 </div>
-                                                                <span class="text-xs font-semibold text-slate-600">Upload Photo</span>
                                                             </div>
+
+                                                            <div class="mt-4 flex justify-center" id="preview_container_{{ $itemId }}"></div>
                                                         </div>
                                                     </div>
 
-                                                    <div class="mt-4 flex justify-center" id="preview_container_{{ $itemId }}"></div>
+                                                    <!-- Right Column -->
+                                                    <div class="space-y-5">
+                                                        <!-- Box: Finding / Comments -->
+                                                        <div class="bg-white p-5 rounded-xl border border-slate-200">
+                                                            <label class="block text-sm font-semibold text-slate-700 mb-2">Findings / Observation Comments <span class="text-red-500">*</span></label>
+                                                            <textarea id="findings_{{ $itemId }}" rows="5" 
+                                                                class="w-full border border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3 rounded-lg" 
+                                                                placeholder="Describe the issue..."
+                                                                :disabled="isReadOnly"></textarea>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Right Column -->
-                                            <div class="space-y-5">
-                                                <!-- Box: Finding / Comments -->
-                                                <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Findings / Observation Comments <span class="text-red-500">*</span></label>
-                                                    <textarea id="findings_{{ $itemId }}" rows="5" 
-                                                        class="w-full border border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3 rounded-lg" 
-                                                        placeholder="Describe the issue..."
-                                                        :disabled="isReadOnly"></textarea>
-                                                </div>
+                                            <!-- Modal Footer -->
+                                            <div class="bg-white border-t border-slate-200 px-8 py-4 flex justify-end gap-3 flex-shrink-0">
+                                                <button @click="closeModal()" type="button" class="px-5 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium" x-text="isReadOnly ? 'Close' : 'Cancel'">
+                                                </button>
+                                                <button @click="saveEvidence({{ $itemId }})" type="button" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium" x-show="!isReadOnly">
+                                                    Save Details
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Modal Footer -->
-                                    <div class="bg-white border-t border-slate-200 px-8 py-4 flex justify-end gap-3 flex-shrink-0">
-                                        <button @click="closeModal()" type="button" class="px-5 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium" x-text="isReadOnly ? 'Close' : 'Cancel'">
-                                        </button>
-                                        <button @click="saveEvidence({{ $itemId }})" type="button" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium" x-show="!isReadOnly">
-                                            Save Details
-                                        </button>
-                                    </div>
                                 </div>
+                                @endforeach
                             </div>
                         </div>
                         @endforeach
@@ -297,7 +322,7 @@
                 @foreach ($items as $item)
                 @php
                     $detail = $details[$item->id] ?? null;
-                    $judgment = $detail ? $detail->judgment : 'OK';
+                    $judgment = $detail ? $detail->judgment : '';
                     $evidence = $detail && $detail->evidence ? $detail->evidence : '';
                     $photo = $detail && $detail->finding_photo_path ? asset($detail->finding_photo_path) : null;
                 @endphp
@@ -316,6 +341,33 @@
 
             updateAnswer(itemId, val) {
                 this.answers[itemId] = val;
+
+                if (this.isReadOnly) return;
+
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch("{{ route('internal_audit.save_judgment') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({
+                        _token: token,
+                        schedule_id: {{ $schedule->id }},
+                        checksheet_item_id: itemId,
+                        judgment: val
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving judgment:', err);
+                    showToast('Failed to auto-save judgment.', 'error');
+                });
             },
 
             openModal(itemId) {
@@ -389,15 +441,24 @@
             submitForm() {
                 let isValid = true;
                 let errorMsgs = [];
-                for (const itemId in this.answers) {
-                    if (this.answers[itemId] !== 'OK') {
+                @php $globalIteration = 1; @endphp
+                @foreach ($items as $item)
+                {
+                    const itemId = {{ $item->id }};
+                    const ans = this.answers[itemId];
+                    if (!ans || ans === '') {
+                        isValid = false;
+                        errorMsgs.push("Item {{ $globalIteration }} must be judged.");
+                    } else if (ans !== 'OK') {
                         const data = this.evidenceData[itemId];
                         if (!data || !data.evidence || data.evidence.trim() === '') {
                             isValid = false;
-                            errorMsgs.push(`Clause #${itemId} requires finding comments.`);
+                            errorMsgs.push("Item {{ $globalIteration }} requires finding comments.");
                         }
                     }
                 }
+                @php $globalIteration++; @endphp
+                @endforeach
 
                 if (!isValid) {
                     showToast(errorMsgs.join(' '), 'error');

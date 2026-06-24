@@ -231,22 +231,31 @@ class InternalAuditController extends Controller
         if ($count === 0) {
             DB::table('CsChecksheetItem')->insert([
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.1',
-                    'requirement_desc' => 'Is the production equipment maintained and calibrated according to customer specifications?',
+                    'check_item_idn' => 'Apakah peralatan produksi dipelihara dan dikalibrasi sesuai dengan spesifikasi pelanggan?',
+                    'check_item_en' => 'Is the production equipment maintained and calibrated according to customer specifications?',
+                    'department' => 'ICT',
+                    'scope_id' => 1,
+                    'scope_item' => 'Equipment calibration',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.2',
-                    'requirement_desc' => 'Is traceability established throughout the assembly and packing lines?',
+                    'check_item_idn' => 'Apakah ketertelusuran ditetapkan di seluruh lini perakitan dan pengepakan?',
+                    'check_item_en' => 'Is traceability established throughout the assembly and packing lines?',
+                    'department' => 'ICT',
+                    'scope_id' => 1,
+                    'scope_item' => 'Traceability',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.1.1',
-                    'requirement_desc' => 'Are setup verifications conducted using representative parts or limit samples?',
+                    'check_item_idn' => 'Apakah verifikasi penyetelan dilakukan menggunakan komponen representatif atau sampel batas?',
+                    'check_item_en' => 'Are setup verifications conducted using representative parts or limit samples?',
+                    'department' => 'ICT',
+                    'scope_id' => 2,
+                    'scope_item' => 'Setup verification',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
@@ -254,7 +263,10 @@ class InternalAuditController extends Controller
             ]);
         }
 
-        $items = DB::table('CsChecksheetItem')->where('is_active', 1)->get();
+        $items = DB::table('CsChecksheetItem')
+            ->where('is_active', 1)
+            ->where('department', $schedule->auditee_dept)
+            ->get();
 
         $details = DB::table('CsAuditDetail')
             ->where('audit_header_id', $schedule->id)
@@ -298,22 +310,31 @@ class InternalAuditController extends Controller
         if ($count === 0) {
             DB::table('CsChecksheetItem')->insert([
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.1',
-                    'requirement_desc' => 'Is the production equipment maintained and calibrated according to customer specifications?',
+                    'check_item_idn' => 'Apakah peralatan produksi dipelihara dan dikalibrasi sesuai dengan spesifikasi pelanggan?',
+                    'check_item_en' => 'Is the production equipment maintained and calibrated according to customer specifications?',
+                    'department' => 'ICT',
+                    'scope_id' => 1,
+                    'scope_item' => 'Equipment calibration',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.2',
-                    'requirement_desc' => 'Is traceability established throughout the assembly and packing lines?',
+                    'check_item_idn' => 'Apakah ketertelusuran ditetapkan di seluruh lini perakitan dan pengepakan?',
+                    'check_item_en' => 'Is traceability established throughout the assembly and packing lines?',
+                    'department' => 'ICT',
+                    'scope_id' => 1,
+                    'scope_item' => 'Traceability',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
-                    'clause_number' => 'IATF 16949 - 8.5.1.1',
-                    'requirement_desc' => 'Are setup verifications conducted using representative parts or limit samples?',
+                    'check_item_idn' => 'Apakah verifikasi penyetelan dilakukan menggunakan komponen representatif atau sampel batas?',
+                    'check_item_en' => 'Are setup verifications conducted using representative parts or limit samples?',
+                    'department' => 'ICT',
+                    'scope_id' => 2,
+                    'scope_item' => 'Setup verification',
                     'is_active' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
@@ -354,6 +375,12 @@ class InternalAuditController extends Controller
                 $evidence = $itemData['evidence'] ?? null;
                 $photoPath = null;
 
+                // Fetch existing detail for this checksheet item under this header
+                $existingDetail = DB::table('CsAuditDetail')
+                    ->where('audit_header_id', $headerId)
+                    ->where('checksheet_item_id', $itemId)
+                    ->first();
+
                 // Handle base64 image upload if provided
                 if (!empty($itemData['photo'])) {
                     $imageData = $itemData['photo'];
@@ -373,32 +400,66 @@ class InternalAuditController extends Controller
                             file_put_contents($publicPath, $imageData);
                             $photoPath = 'uploads/cs_audit/' . $fileName;
                         }
+                    } elseif (is_string($imageData) && strpos($imageData, 'uploads/cs_audit') !== false) {
+                        // Preserve the existing photo path
+                        $pos = strpos($imageData, 'uploads/cs_audit');
+                        $photoPath = substr($imageData, $pos);
                     }
                 }
 
-                $detailId = DB::table('CsAuditDetail')->insertGetId([
-                    'audit_header_id' => $headerId,
-                    'checksheet_item_id' => $itemId,
-                    'judgment' => $judgment,
-                    'evidence' => $evidence,
-                    'finding_photo_path' => $photoPath,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]);
-
-                // Create CAR if judgment is not OK (OFI, Mayor, Minor)
-                if ($judgment !== 'OK') {
-                    $docSeq = DB::table('CsAuditCar')->count() + 1;
-                    $carNumber = 'CAR/CS/' . Carbon::parse($request->audit_date)->format('dMMyy') . '/' . sprintf('%03d', $docSeq);
-
-                    DB::table('CsAuditCar')->insert([
-                        'audit_detail_id' => $detailId,
-                        'car_number' => $carNumber,
-                        'finding_desc' => $evidence ?? 'Finding observed during clause evaluation.',
-                        'status' => 'Open',
+                if ($existingDetail) {
+                    DB::table('CsAuditDetail')
+                        ->where('id', $existingDetail->id)
+                        ->update([
+                            'judgment' => $judgment,
+                            'evidence' => $evidence,
+                            'finding_photo_path' => $photoPath,
+                            'updated_at' => Carbon::now()
+                        ]);
+                    $detailId = $existingDetail->id;
+                } else {
+                    $detailId = DB::table('CsAuditDetail')->insertGetId([
+                        'audit_header_id' => $headerId,
+                        'checksheet_item_id' => $itemId,
+                        'judgment' => $judgment,
+                        'evidence' => $evidence,
+                        'finding_photo_path' => $photoPath,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
+                }
+
+                // Create or update CAR if judgment is not OK (OFI, Mayor, Minor)
+                if ($judgment !== 'OK') {
+                    $existingCar = DB::table('CsAuditCar')
+                        ->where('audit_detail_id', $detailId)
+                        ->first();
+
+                    if ($existingCar) {
+                        DB::table('CsAuditCar')
+                            ->where('id', $existingCar->id)
+                            ->update([
+                                'finding_desc' => $evidence ?? 'Finding observed during clause evaluation.',
+                                'updated_at' => Carbon::now()
+                            ]);
+                    } else {
+                        $docSeq = DB::table('CsAuditCar')->count() + 1;
+                        $carNumber = 'CAR/CS/' . Carbon::parse($request->audit_date)->format('dMMyy') . '/' . sprintf('%03d', $docSeq);
+
+                        DB::table('CsAuditCar')->insert([
+                            'audit_detail_id' => $detailId,
+                            'car_number' => $carNumber,
+                            'finding_desc' => $evidence ?? 'Finding observed during clause evaluation.',
+                            'status' => 'Open',
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ]);
+                    }
+                } else {
+                    // Delete CAR if judgment changed back to OK
+                    DB::table('CsAuditCar')
+                        ->where('audit_detail_id', $detailId)
+                        ->delete();
                 }
             }
 
@@ -541,6 +602,83 @@ class InternalAuditController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Approval signature submitted successfully.']);
         } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function saveJudgment(Request $request)
+    {
+        $request->validate([
+            'schedule_id' => 'required|integer',
+            'checksheet_item_id' => 'required|integer',
+            'judgment' => 'required|string|in:OK,OFI,Minor,Mayor'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $headerId = $request->schedule_id;
+            $itemId = $request->checksheet_item_id;
+            $judgment = $request->judgment;
+
+            $header = DB::table('CsAuditHeader')->where('id', $headerId)->first();
+            if (!$header) {
+                return response()->json(['success' => false, 'message' => 'Schedule not found.']);
+            }
+
+            $existingDetail = DB::table('CsAuditDetail')
+                ->where('audit_header_id', $headerId)
+                ->where('checksheet_item_id', $itemId)
+                ->first();
+
+            if ($existingDetail) {
+                DB::table('CsAuditDetail')
+                    ->where('id', $existingDetail->id)
+                    ->update([
+                        'judgment' => $judgment,
+                        'updated_at' => Carbon::now()
+                    ]);
+                $detailId = $existingDetail->id;
+            } else {
+                $detailId = DB::table('CsAuditDetail')->insertGetId([
+                    'audit_header_id' => $headerId,
+                    'checksheet_item_id' => $itemId,
+                    'judgment' => $judgment,
+                    'evidence' => null,
+                    'finding_photo_path' => null,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+
+            if ($judgment !== 'OK') {
+                $existingCar = DB::table('CsAuditCar')
+                    ->where('audit_detail_id', $detailId)
+                    ->first();
+
+                if (!$existingCar) {
+                    $docSeq = DB::table('CsAuditCar')->count() + 1;
+                    $carNumber = 'CAR/CS/' . Carbon::parse($header->audit_date)->format('dMMyy') . '/' . sprintf('%03d', $docSeq);
+
+                    DB::table('CsAuditCar')->insert([
+                        'audit_detail_id' => $detailId,
+                        'car_number' => $carNumber,
+                        'finding_desc' => 'Finding observed during clause evaluation.',
+                        'status' => 'Open',
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ]);
+                }
+            } else {
+                DB::table('CsAuditCar')
+                    ->where('audit_detail_id', $detailId)
+                    ->delete();
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Judgment updated.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }

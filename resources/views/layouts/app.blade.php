@@ -48,7 +48,9 @@
 <body class="font-sans antialiased bg-gray-100 text-gray-900 preload">
     @yield('content')
 
-    @include('components.central-toast')
+    @if(!isset($hideCentralToast) || !$hideCentralToast)
+        @include('components.central-toast')
+    @endif
 
     <!-- jQuery and DataTables must load before @stack('scripts') -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
