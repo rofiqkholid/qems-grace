@@ -99,14 +99,26 @@
                     </div>
 
                     <div class="p-6 space-y-6 flex-1 overflow-y-auto">
-                        @php
-                            $groupedItems = $items->groupBy(function($item) {
-                                return $item->scope_item ?: 'General';
-                            });
-                            $globalIteration = 1;
-                        @endphp
+                        @if($items->isEmpty())
+                            <div class="flex flex-col items-center justify-center py-16 px-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                                    <i class="fa-solid fa-clipboard-question text-slate-400 text-xl"></i>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-800">Tidak ada item checksheet</h3>
+                                <p class="text-xs text-slate-500 mt-1.5 text-center leading-relaxed">
+                                    Belum ada item checksheet untuk departemen ini.<br>
+                                    <span class="text-slate-400 italic">No checksheet items available for this department.</span>
+                                </p>
+                            </div>
+                        @else
+                            @php
+                                $groupedItems = $items->groupBy(function($item) {
+                                    return $item->scope_item ?: 'General';
+                                });
+                                $globalIteration = 1;
+                            @endphp
 
-                        @foreach ($groupedItems as $scopeName => $scopeGroup)
+                            @foreach ($groupedItems as $scopeName => $scopeGroup)
                         <div class="mb-8 last:mb-0">
                             <div class="flex items-center justify-between mb-4 px-1">
                                 <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -293,6 +305,7 @@
                             </div>
                         </div>
                         @endforeach
+                        @endif
                     </div>
                 </div>
             </div>
