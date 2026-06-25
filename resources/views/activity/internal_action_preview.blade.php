@@ -146,7 +146,7 @@
                     <div class="flex flex-col gap-1.5">
                         <label class="text-slate-500 font-semibold text-xs tracking-wider">Finding Evidence Details</label>
                         <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm leading-relaxed h-full">
-                            {{ $car->evidence ?? '-' }}
+                            {{ $car->finding ?? '-' }}
                         </div>
                     </div>
                 </div>
