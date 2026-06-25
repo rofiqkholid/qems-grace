@@ -1,3 +1,6 @@
+@php
+    $hideCentralToast = true;
+@endphp
 @extends('layouts.app')
 
 @section('title', 'Department Master')
