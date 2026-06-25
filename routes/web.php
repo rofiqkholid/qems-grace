@@ -36,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('genba_management');
 
     Route::get('/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
+    Route::get('/internal-action-report', [InternalAuditController::class, 'actionReport'])->name('internal_audit.action_report');
+    Route::get('/internal-action-report/preview/{id}', [InternalAuditController::class, 'actionReportPreview'])->name('internal_audit.action_report.preview');
     Route::post('/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
     Route::post('/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
     Route::get('/internal-audit/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');
@@ -44,12 +46,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
     Route::get('/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
     Route::get('/internal-audit/conduct/{schedule_id}/car/{item_id}', [InternalAuditController::class, 'carForm'])->name('internal_audit.car_form');
-    Route::post('/internal-audit/conduct/{schedule_id}/car/{item_id}/store', [InternalAuditController::class, 'storeCarForm'])->name('internal_audit.car_form.store');
+    Route::post('/internal-audit/conduct/{schedule_id}/car/{item_id}/send-draft', [InternalAuditController::class, 'sendDraftCarForm'])->name('internal_audit.car_form.send_draft');
     Route::post('/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
     Route::post('/internal-audit/save-judgment', [InternalAuditController::class, 'saveJudgment'])->name('internal_audit.save_judgment');
     Route::post('/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
     Route::post('/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
     Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
+    Route::post('/internal-audit/cars/delete', [InternalAuditController::class, 'deleteCar'])->name('internal_audit.cars.delete');
     Route::post('/internal-audit/get-requirements', [InternalAuditController::class, 'getRequirements'])->name('internal_audit.get_requirements');
     Route::post('/internal-audit/get-clause-titles', [InternalAuditController::class, 'getClauseTitles'])->name('internal_audit.get_clause_titles');
 

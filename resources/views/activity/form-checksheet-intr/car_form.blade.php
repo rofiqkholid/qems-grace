@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <form action="{{ route('internal_audit.car_form.store', ['schedule_id' => $schedule->hash_id, 'item_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
+        <form id="car-form" action="{{ route('internal_audit.car_form.send_draft', ['schedule_id' => $schedule->hash_id, 'item_id' => $item->id]) }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <!-- Audit Metadata Card -->
@@ -194,11 +194,11 @@
                             @php
                                 $currentJudgment = old('judgment', $detail->judgment ?? 'OFI');
                             @endphp
-                            @foreach([
-                                'Mayor' => 'NC (Major)',
-                                'Minor' => 'Area of Consent/Minor',
-                                'Observation' => 'Observation',
-                                'OFI' => 'Opportunity to Improve'
+                             @foreach([
+                                'OFI' => 'OFI',
+                                'Minor' => 'Minor',
+                                'Mayor' => 'Mayor',
+                                'Observation' => 'Observation'
                             ] as $val => $label)
                             <label class="relative flex items-center gap-3 p-1.5 bg-transparent hover:bg-slate-50 cursor-pointer rounded-lg transition-all">
                                 <input type="radio" name="judgment" value="{{ $val }}" class="peer sr-only" {{ $currentJudgment === $val ? 'checked' : '' }}>
@@ -210,6 +210,23 @@
                                 <span class="text-sm text-slate-700">{{ $label }}</span>
                             </label>
                             @endforeach
+                        </div>
+                    </div>
+                </div>
+                <!-- Finding, Auditor & Auditee -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding</label>
+                        <textarea name="finding" rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Auditor</label>
+                            <input type="text" name="auditor" value="{{ old('auditor', $car->auditor ?? $schedule->auditor_names ?? '') }}" readonly class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed outline-none transition-all text-sm" placeholder="Enter auditor...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Auditee</label>
+                            <input type="text" name="auditee" value="{{ old('auditee', $car->auditee ?? $schedule->auditee ?? '') }}" readonly class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed outline-none transition-all text-sm" placeholder="Enter auditee...">
                         </div>
                     </div>
                 </div>
@@ -319,6 +336,51 @@
                         name: matchedClause.clause_name
                     }
                 }));
+            }
+        });
+        // Auto-save draft logic
+        const form = document.getElementById('car-form');
+        let autoSaveTimeout = null;
+
+        function saveDraft() {
+            const formData = new FormData(form);
+            formData.append('draft', '1');
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Draft auto-saved:', data);
+            })
+            .catch(error => {
+                console.error('Error saving draft:', error);
+            });
+        }
+
+        form.addEventListener('input', function(e) {
+            if (e.target.tagName === 'TEXTAREA' || e.target.type === 'text') {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(saveDraft, 1000);
+            }
+        });
+
+        form.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' || e.target.type === 'radio' || e.target.type === 'hidden') {
+                saveDraft();
+            }
+        });
+
+        // Trigger change for searchable selects
+        ['car_department', 'car_requirement_no', 'car_clause_title'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', saveDraft);
             }
         });
     });

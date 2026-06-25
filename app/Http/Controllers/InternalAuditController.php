@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use App\Models\UserMenuPermission;
 
@@ -24,6 +25,42 @@ class InternalAuditController extends Controller
                 ];
             });
         return view('activity.internal_audit', compact('departments'));
+    }
+
+    public function actionReport()
+    {
+        return view('activity.internal_action_report');
+    }
+
+    public function actionReportPreview($id)
+    {
+        try {
+            $decryptedId = Crypt::decryptString($id);
+            $carId = explode('_', $decryptedId)[0];
+
+            $car = DB::table('CsAuditCar as a')
+                ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                ->where('a.id', $carId)
+                ->select(
+                    'a.*', 
+                    'b.checksheet_item_id', 
+                    'c.hash_id as schedule_hash_id', 
+                    'b.evidence', 
+                    'b.finding_photo_path'
+                )
+                ->first();
+
+            if (!$car) {
+                return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
+            }
+
+            $car->formatted_date = $car->created_at ? Carbon::parse($car->created_at)->format('d F Y') : '-';
+
+            return view('activity.internal_action_preview', compact('car'));
+        } catch (\Exception $e) {
+            return redirect()->route('internal_audit.action_report')->with('error', $e->getMessage());
+        }
     }
 
     public function getSchedules(Request $request)
@@ -478,18 +515,39 @@ class InternalAuditController extends Controller
         $query = DB::table('CsAuditCar as a')
             ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
             ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-            ->select('a.*', 'c.auditee_dept', 'c.auditor_names');
+            ->whereNotNull('a.department')
+            ->where('a.department', '<>', '')
+            ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id');
 
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
             $query->where(function($q) use ($searchValue) {
                 $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.check_item', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%");
+                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
             });
         }
 
-        $totalData = DB::table('CsAuditCar')->count();
+        // Apply filters if any
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('a.created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('a.created_at', '<=', $request->date_to);
+        }
+        if ($request->has('dept') && !empty($request->dept)) {
+            $query->where('a.department', $request->dept);
+        }
+        if ($request->has('finding_category') && !empty($request->finding_category)) {
+            $query->where('a.finding_category', $request->finding_category);
+        }
+
+        $totalData = DB::table('CsAuditCar')
+            ->whereNotNull('department')
+            ->where('department', '<>', '')
+            ->count();
         $totalFiltered = $query->count();
 
         $limit = $request->input('length', 10);
@@ -501,22 +559,52 @@ class InternalAuditController extends Controller
             ->get();
 
         $data = [];
+        $no = $start + 1;
+        $hasDeletePermission = UserMenuPermission::canDelete(110);
         foreach ($posts as $post) {
-            $deptName = $post->department ?? $post->auditee_dept;
+            $statusBadge = $post->finding_category ?? 'OFI';
 
-            $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">' . ($post->finding_category ?? 'OFI') . '</span>';
+            $trc_id = Crypt::encryptString($post->id);
+            $sys_id = "'" . str_replace("=", "-", $trc_id) . '_' . $no . "'";
 
-            $action = '<button type="button" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors">
-                        Details
-                       </button>';
+            $action = '<div class="flex items-center justify-start gap-2">';
+            $action .= '
+                <button type="button" title="Preview" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_form_view_doc_' . $no . '" onclick="document_preview(' . $sys_id . ',' . $no . ')">
+                    <span id="svg_form_view_doc_' . $no . '" class="flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
+                            <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
+                            <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
+                            <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
+                        </svg>
+                    </span>
+                    <span id="spinner_form_view_doc_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                </button>';
+
+            if ($hasDeletePermission) {
+                $action .= '
+                    <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" id="btn_f_genba_conform_delete_' . $no . '" onclick="f_genba_conform_delete(' . $sys_id . ',' . $no . ')">
+                        <span id="icon_f_genba_conform_delete_' . $no . '" class="flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none">
+                                <path opacity="0.3" d="M5 9C5 8.44772 5.44772 8 6 8H18C18.5523 8 19 8.44772 19 9V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V9Z" fill="currentColor"/>
+                                <path d="M5 5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V7H5V5Z" fill="currentColor"/>
+                                <path d="M9 4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V4H9V4Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                        <span id="loader_f_genba_conform_delete_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                    </button>';
+            }
+            $action .= '</div>';
 
             $data[] = [
-                'car_number' => $post->req_number ?? '-',
-                'finding_desc' => $post->check_item ?? '-',
-                'auditee_dept' => $deptName,
-                'due_date' => '-',
-                'status' => $statusBadge,
-                'action' => $action
+                'no' => $no++,
+                'req_number' => $post->req_number ?? '-',
+                'department' => $post->department ?? '-',
+                'finding_category' => $statusBadge,
+                'auditor' => $post->auditor ?? '-',
+                'auditee' => $post->auditee ?? '-',
+                'action' => $action,
+                'schedule_hash_id' => $post->schedule_hash_id,
+                'checksheet_item_id' => $post->checksheet_item_id
             ];
         }
 
@@ -526,6 +614,40 @@ class InternalAuditController extends Controller
             "recordsFiltered" => intval($totalFiltered),
             "data" => $data
         ]);
+    }
+
+    public function deleteCar(Request $request)
+    {
+        $request->validate([
+            'sys_id' => 'required|string'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $sysIdStr = Crypt::decryptString($request->sys_id);
+            $carId = explode('_', $sysIdStr)[0];
+
+            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            if ($car) {
+                DB::table('CsAuditDetail')
+                    ->where('id', $car->audit_detail_id)
+                    ->update([
+                        'judgment' => 'OK',
+                        'evidence' => null,
+                        'finding_photo_path' => null,
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                DB::table('CsAuditCar')->where('id', $carId)->delete();
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'CAR Action Report deleted successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     public function updateCarPlan(Request $request)
@@ -713,6 +835,8 @@ class InternalAuditController extends Controller
                 'req_number' => $schedule->req_number ?? null,
                 'check_item' => $item->check_item_idn ?? null,
                 'finding_category' => $detail->judgment ?? 'OFI',
+                'auditor' => $schedule->auditor_names ?? null,
+                'auditee' => $schedule->auditee ?? null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -751,13 +875,13 @@ class InternalAuditController extends Controller
         return view('activity.form-checksheet-intr.car_form', compact('schedule', 'item', 'detail', 'car', 'departments', 'requirements', 'clauseTitles'));
     }
 
-    public function storeCarForm(Request $request, $schedule_id, $item_id)
+    public function sendDraftCarForm(Request $request, $schedule_id, $item_id)
     {
         $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
         if (!$schedule) abort(404);
 
         $request->validate([
-            'judgment' => 'nullable|string|in:OFI,Minor,Mayor,Observation',
+            'judgment' => 'nullable|string|in:OK,OFI,Minor,Mayor,Observation',
             'finding_desc' => 'nullable|string',
             'audit_source' => 'nullable|array',
             'audit_category' => 'nullable|array',
@@ -771,6 +895,9 @@ class InternalAuditController extends Controller
             'requirement_no' => 'nullable|string',
             'clause_title' => 'nullable|string',
             'clause_text' => 'nullable|string',
+            'finding' => 'nullable|string',
+            'auditor' => 'nullable|string',
+            'auditee' => 'nullable|string',
         ]);
 
         try {
@@ -804,7 +931,7 @@ class InternalAuditController extends Controller
             $auditSourceStr = implode(', ', $finalSources);
 
             $judgmentVal = $request->judgment ?? ($detail ? $detail->judgment : 'OFI');
-            $findingDescVal = $request->finding_desc ?? ($detail ? $detail->evidence : '');
+            $findingDescVal = $request->finding ?? $request->finding_desc ?? ($detail ? $detail->evidence : '');
 
             if ($detail) {
                 DB::table('CsAuditDetail')
@@ -850,6 +977,9 @@ class InternalAuditController extends Controller
                         'clause_title' => $request->clause_title,
                         'clause_text' => $request->clause_text,
                         'finding_category' => $judgmentVal,
+                        'finding' => $request->finding,
+                        'auditor' => $request->auditor,
+                        'auditee' => $request->auditee,
                         'updated_at' => Carbon::now()
                     ]);
             } else {
@@ -865,6 +995,9 @@ class InternalAuditController extends Controller
                     'clause_title' => $request->clause_title,
                     'clause_text' => $request->clause_text,
                     'finding_category' => $judgmentVal,
+                    'finding' => $request->finding,
+                    'auditor' => $request->auditor,
+                    'auditee' => $request->auditee,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);
@@ -872,10 +1005,17 @@ class InternalAuditController extends Controller
 
             DB::commit();
 
+            if ($request->has('draft') || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Draft saved successfully.']);
+            }
+
             return redirect()->route('internal_audit.conduct', $schedule_id)
-                ->with('success', 'CAR details saved successfully.');
+                ->with('toast_success', 'CAR details saved successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->has('draft') || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()]);
+            }
             return back()->withInput()->with('error', $e->getMessage());
         }
     }

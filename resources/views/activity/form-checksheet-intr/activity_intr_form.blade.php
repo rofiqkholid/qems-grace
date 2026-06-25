@@ -185,12 +185,12 @@
 
                                             <!-- Camera/Evidences Trigger -->
                                             <div :class="answers[{{ $itemId }}] !== 'OK' && answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-                                                class="flex-1 w-full transition-all duration-200">
+                                                class="w-full sm:w-44 transition-all duration-200">
                                                 <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
-                                                    class="w-full flex items-center justify-center gap-2 px-3 h-[52px] bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 group-hover:border-blue-200"
-                                                    :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : ''">
+                                                    class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
+                                                    :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
                                                     <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
-                                                    <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Evidence Added' : 'Add Finding Evidence')"></span>
+                                                    <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Report Added' : 'Add Report')"></span>
                                                 </a>
                                             </div>
                                         </div>
