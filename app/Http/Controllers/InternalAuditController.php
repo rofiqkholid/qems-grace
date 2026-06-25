@@ -35,21 +35,61 @@ class InternalAuditController extends Controller
     public function actionReportPreview($id)
     {
         try {
-            $decryptedId = Crypt::decryptString($id);
-            $carId = explode('_', $decryptedId)[0];
+            $carId = $this->decryptCarId($id);
+            $car = null;
 
-            $car = DB::table('CsAuditCar as a')
-                ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-                ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-                ->where('a.id', $carId)
-                ->select(
-                    'a.*', 
-                    'b.checksheet_item_id', 
-                    'c.hash_id as schedule_hash_id', 
-                    'b.evidence', 
-                    'b.finding_photo_path'
-                )
-                ->first();
+            if ($carId) {
+                $car = DB::table('CsAuditCar as a')
+                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.id', $carId)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
+
+            // Fallback for database hash_id, legacy Crypt, or direct ID lookup
+            if (!$car) {
+                $car = DB::table('CsAuditCar as a')
+                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.hash_id', $id)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
+
+            if (!$car) {
+                try {
+                    $decryptedId = Crypt::decryptString($id);
+                    $carId = explode('_', $decryptedId)[0];
+                } catch (\Exception $e) {
+                    $carId = $id;
+                }
+
+                $car = DB::table('CsAuditCar as a')
+                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.id', $carId)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
 
             if (!$car) {
                 return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
@@ -564,8 +604,7 @@ class InternalAuditController extends Controller
         foreach ($posts as $post) {
             $statusBadge = $post->finding_category ?? 'OFI';
 
-            $trc_id = Crypt::encryptString($post->id);
-            $sys_id = "'" . str_replace("=", "-", $trc_id) . '_' . $no . "'";
+            $sys_id = "'" . $this->encryptCarId($post->id) . "'";
 
             $action = '<div class="flex items-center justify-start gap-2">';
             $action .= '
@@ -625,10 +664,22 @@ class InternalAuditController extends Controller
         try {
             DB::beginTransaction();
 
-            $sysIdStr = Crypt::decryptString($request->sys_id);
-            $carId = explode('_', $sysIdStr)[0];
+            $sysId = $request->sys_id;
+            
+            // First try to look up by hash_id
+            $car = DB::table('CsAuditCar')->where('hash_id', $sysId)->first();
 
-            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            // Fallback for legacy decryption
+            if (!$car) {
+                try {
+                    $sysIdStr = Crypt::decryptString($sysId);
+                    $carId = explode('_', $sysIdStr)[0];
+                    $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+                } catch (\Exception $e) {
+                    $car = DB::table('CsAuditCar')->where('id', $sysId)->first();
+                }
+            }
+
             if ($car) {
                 DB::table('CsAuditDetail')
                     ->where('id', $car->audit_detail_id)
@@ -639,7 +690,7 @@ class InternalAuditController extends Controller
                         'updated_at' => Carbon::now()
                     ]);
 
-                DB::table('CsAuditCar')->where('id', $carId)->delete();
+                DB::table('CsAuditCar')->where('id', $car->id)->delete();
             }
 
             DB::commit();
@@ -1089,5 +1140,61 @@ class InternalAuditController extends Controller
                 'more' => $results->hasMorePages(),
             ]
         ]);
+    }
+
+    private function encryptCarId($id)
+    {
+        $s1 = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $s2 = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $mid = str_pad($id, 6, '0', STR_PAD_LEFT);
+        $plain = $s1 . $mid . $s2;
+        
+        $appKey = config('app.key', 'qms_secret_fallback_key_123');
+        $key = substr(md5($appKey), 0, 16);
+        
+        $encrypted = '';
+        for ($i = 0; $i < 16; $i++) {
+            $encrypted .= chr(ord($plain[$i]) ^ ord($key[$i]));
+        }
+        
+        $hex = bin2hex($encrypted);
+        
+        return sprintf('%s-%s-%s-%s-%s',
+            substr($hex, 0, 8),
+            substr($hex, 8, 4),
+            substr($hex, 12, 4),
+            substr($hex, 16, 4),
+            substr($hex, 20, 12)
+        );
+    }
+
+    private function decryptCarId($uuid)
+    {
+        try {
+            $hex = str_replace('-', '', $uuid);
+            if (strlen($hex) !== 32) return null;
+            
+            $encrypted = @hex2bin($hex);
+            if ($encrypted === false) return null;
+            
+            $appKey = config('app.key', 'qms_secret_fallback_key_123');
+            $key = substr(md5($appKey), 0, 16);
+            
+            $plain = '';
+            for ($i = 0; $i < 16; $i++) {
+                $plain .= chr(ord($encrypted[$i]) ^ ord($key[$i]));
+            }
+            
+            $s1 = substr($plain, 0, 5);
+            $mid = substr($plain, 5, 6);
+            $s2 = substr($plain, 11, 5);
+            
+            if (is_numeric($s1) && is_numeric($mid) && is_numeric($s2)) {
+                return (int)$mid;
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+        return null;
     }
 }
