@@ -34,100 +34,101 @@
                 <h2 class="text-base font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
                     Finding Information
                 </h2>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
                     <!-- CAR Number -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">CAR / Request Number</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">CAR / Request Number</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->req_number ?? '-' }}
                         </div>
                     </div>
 
                     <!-- Finding Category -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Finding Category</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Finding Category</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->finding_category ?? 'OFI' }}
                         </div>
                     </div>
 
                     <!-- Department -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Auditee Department</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditee Department</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->department ?? '-' }}
                         </div>
                     </div>
 
                     <!-- Date Created -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Report Date</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Report Date</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->formatted_date }}
                         </div>
                     </div>
 
                     <!-- Auditor -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Auditor</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditor</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->auditor ?? '-' }}
                         </div>
                     </div>
 
                     <!-- Auditee -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Auditee</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditee</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
                             {{ $car->auditee ?? '-' }}
                         </div>
                     </div>
 
                     <!-- Surveillance -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Surveillance</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm min-h-[40px]">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Surveillance</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate min-h-[32px] sm:min-h-[40px]">
                             {{ $car->surveillance ?? '' }}
                         </div>
                     </div>
 
                     <!-- External -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">External</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm min-h-[40px]">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">External</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate min-h-[32px] sm:min-h-[40px]">
                             {{ $car->external ?? '' }}
                         </div>
                     </div>
 
                     <!-- Internal Audit -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 text-xs tracking-wider">Internal Audit</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-600 font-semibold text-sm min-h-[40px]">
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Internal Audit</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate min-h-[32px] sm:min-h-[40px]">
                             {{ $car->internal_audit ?? '' }}
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Section 2: Requirement & Clause Standards -->
             <div class="border-t border-slate-100 pt-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 font-semibold text-xs tracking-wider">Requirement No.</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
+                    <!-- Requirement No -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Requirement No.</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm">
                             {{ $car->requirement_no ?? '-' }}
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1.5 sm:col-span-2">
-                        <label class="text-slate-500 font-semibold text-xs tracking-wider">Clause Title</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm">
+                    <!-- Clause Title -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Clause Title</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm">
                             {{ $car->clause_title ?? '-' }}
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1.5 sm:col-span-3">
-                        <label class="text-slate-500 font-semibold text-xs tracking-wider">Check Item</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm leading-relaxed">
+                    <!-- Check Item -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5 col-span-2 sm:col-span-3">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Check Item</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm leading-relaxed">
                             {{ $car->check_item ?? '-' }}
                         </div>
                     </div>
@@ -136,16 +137,18 @@
 
             <!-- Section 3: Clause Description & Finding Evidence Details side-by-side -->
             <div class="border-t border-slate-100 pt-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 font-semibold text-xs tracking-wider">Clause Description / Klausul</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm leading-relaxed h-full">
+                <div class="grid grid-cols-2 gap-3 sm:gap-6">
+                    <!-- Clause Description -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Clause Description / Klausul</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm leading-relaxed h-full">
                             {{ $car->clause_text ?? '-' }}
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-slate-500 font-semibold text-xs tracking-wider">Finding Evidence Details</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-[9px] text-slate-800 text-sm leading-relaxed h-full">
+                    <!-- Finding Evidence Details -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Finding Evidence Details</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm leading-relaxed h-full">
                             {{ $car->finding ?? '-' }}
                         </div>
                     </div>
