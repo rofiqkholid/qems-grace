@@ -444,7 +444,7 @@ $isClosed = $genba->status === 'Close';
 
         const totalImages = existingImages.length + newImages.length + files.length;
         if (totalImages > 5) {
-            showToast('Maksimal 5 foto bukti allowed', 'error');
+            showToast('Maximum of 5 evidence photos allowed.', 'error');
             event.target.value = ''; // Reset input
             return;
         }
@@ -582,7 +582,7 @@ $isClosed = $genba->status === 'Close';
     // Open camera stream (kept mostly same, just check limit)
     async function openCameraStream() {
         if (existingImages.length + newImages.length >= 5) {
-            showToast('Maksimal 5 foto. Hapus beberapa untuk mengambil foto baru.', 'warning');
+            showToast('Maximum of 5 photos reached. Please delete some before capturing new ones.', 'warning');
             return;
         }
         try {
@@ -602,7 +602,7 @@ $isClosed = $genba->status === 'Close';
             document.getElementById('btnCapture').classList.remove('hidden');
         } catch (err) {
             console.error('Error accessing camera:', err);
-            alert('Tidak dapat mengakses kamera.');
+            alert('Unable to access camera.');
         }
     }
 
@@ -629,7 +629,7 @@ $isClosed = $genba->status === 'Close';
 
     function capturePhotoFromStream() {
         if (existingImages.length + newImages.length >= 5) {
-            showToast('Maksimal 5 foto reached', 'error');
+            showToast('Maximum of 5 photos reached.', 'error');
             return;
         }
 

@@ -597,16 +597,16 @@
                 $('#loader_f_genba_header_delete_' + no).addClass('hidden');
 
                 if (response.success) {
-                    showToast('Data berhasil dihapus', 'success');
+                    showToast('Data deleted successfully.', 'success');
                     $('#genbaFormTable').DataTable().ajax.reload();
                 } else {
-                    showToast('Gagal menghapus data', 'error');
+                    showToast('Failed to delete data.', 'error');
                 }
             },
             error: function() {
                 $('#icon_f_genba_header_delete_' + no).removeClass('hidden');
                 $('#loader_f_genba_header_delete_' + no).addClass('hidden');
-                showToast('Terjadi kesalahan', 'error');
+                showToast('An error occurred', 'error');
             }
         });
     }

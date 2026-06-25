@@ -121,9 +121,9 @@ class MasterController extends Controller
                 'Area_name' => $request->area_name,
             ]);
 
-            return redirect()->route('master.line_checked')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.line_checked')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -143,9 +143,9 @@ class MasterController extends Controller
                     'Area_name' => $request->area_name,
                 ]);
 
-            return redirect()->route('master.line_checked')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.line_checked')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 
@@ -250,9 +250,9 @@ class MasterController extends Controller
                 'Description' => $request->description,
             ]);
 
-            return redirect()->route('master.category')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.category')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -272,9 +272,9 @@ class MasterController extends Controller
                     'Description' => $request->description,
                 ]);
 
-            return redirect()->route('master.category')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.category')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 
@@ -381,9 +381,9 @@ class MasterController extends Controller
                 'Checkbox01' => '1',
             ]);
 
-            return redirect()->route('master.department')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.department')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -401,9 +401,9 @@ class MasterController extends Controller
                     'Desc' => $request->desc,
                 ]);
 
-            return redirect()->route('master.department')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.department')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 
@@ -515,9 +515,9 @@ class MasterController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return redirect()->route('master.clauses')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.clauses')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -540,9 +540,9 @@ class MasterController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            return redirect()->route('master.clauses')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.clauses')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 
@@ -666,9 +666,9 @@ class MasterController extends Controller
                 'Check_item_eng' => $request->check_item_eng,
             ]);
 
-            return redirect()->route('master.check_item')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.check_item')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -694,9 +694,9 @@ class MasterController extends Controller
                     'Check_item_eng' => $request->check_item_eng,
                 ]);
 
-            return redirect()->route('master.check_item')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.check_item')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 
@@ -821,9 +821,9 @@ class MasterController extends Controller
                 'updated_at' => \Carbon\Carbon::now()
             ]);
 
-            return redirect()->route('master.intr_check_item')->with('success', 'Data berhasil ditambahkan');
+            return redirect()->route('master.intr_check_item')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
 
@@ -848,9 +848,9 @@ class MasterController extends Controller
                     'updated_at' => \Carbon\Carbon::now()
                 ]);
 
-            return redirect()->route('master.intr_check_item')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('master.intr_check_item')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
 

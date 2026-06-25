@@ -183,7 +183,7 @@ class GenbaManagementController extends Controller
     public function delete(Request $request)
     {
         if (!UserMenuPermission::canDelete(91)) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menghapus data.']);
+            return response()->json(['success' => false, 'message' => 'You do not have permission to delete this data.']);
         }
 
         try {
@@ -192,9 +192,9 @@ class GenbaManagementController extends Controller
 
             DB::connection('sqlsrv')->table('GenbaProcAuditDtl')->where('SysID', $sysId)->delete();
 
-            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+            return response()->json(['success' => true, 'message' => 'Data deleted successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal menghapus data: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete data: ' . $e->getMessage()]);
         }
     }
 
@@ -438,7 +438,7 @@ class GenbaManagementController extends Controller
     public function genbaHeaderDelete(Request $request)
     {
         if (!UserMenuPermission::canDelete(90)) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menghapus data.']);
+            return response()->json(['success' => false, 'message' => 'You do not have permission to delete this data.']);
         }
 
         try {
@@ -448,9 +448,9 @@ class GenbaManagementController extends Controller
             // Soft delete by setting IsDelete to 1
             DB::connection('sqlsrv')->table('GenbaProcAudit')->where('SysID', $sysId)->update(['IsDelete' => 1]);
 
-            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+            return response()->json(['success' => true, 'message' => 'Data deleted successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal menghapus data: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete data: ' . $e->getMessage()]);
         }
     }
 
@@ -897,12 +897,12 @@ class GenbaManagementController extends Controller
         if ($insert) {
             $data['code'] = 200;
             $data['check_item_id'] = $check_item_id;
-            $data['message'] = 'Data berhasil disimpan';
+            $data['message'] = 'Data saved successfully.';
             $data['result'] = $result;
         } else {
             $data['code'] = 500;
             $data['check_item_id'] = $check_item_id;
-            $data['message'] = 'Data gagal disimpan';
+            $data['message'] = 'Failed to save data.';
             $data['result'] = '';
         }
         return json_encode($data);
@@ -1076,7 +1076,7 @@ class GenbaManagementController extends Controller
         }
 
         if (count($photoPaths) > 5) {
-            $errors[] = 'Maksimal 5 foto';
+            $errors[] = 'Maximum 5 photos';
         }
 
         // Return validation errors if any
@@ -1163,12 +1163,12 @@ class GenbaManagementController extends Controller
 
         if ($updates) {
             return response()->json([
-                'message' => 'Foto berhasil disimpan.',
+                'message' => 'Photos saved successfully.',
                 'photos' => $photoPaths
             ]);
         } else {
             return response()->json([
-                'message' => 'Foto berhasil disimpan (no changes detected).',
+                'message' => 'Photos saved successfully (no changes detected).',
                 'photos' => $photoPaths
             ]);
         }
@@ -1185,10 +1185,10 @@ class GenbaManagementController extends Controller
             ]);
         if ($insert) {
             $data['code'] = 200;
-            $data['message'] = 'Data berhasil disimpan';
+            $data['message'] = 'Data saved successfully.';
         } else {
             $data['code'] = 500;
-            $data['message'] = 'Data gagal disimpan';
+            $data['message'] = 'Failed to save data.';
         }
         return response()->json($data);
     }
@@ -1290,7 +1290,7 @@ class GenbaManagementController extends Controller
         if (count($photoPaths) > 5) {
             return response()->json([
                 'code' => 400,
-                'message' => 'Maksimal 5 foto bukti',
+                'message' => 'Maximum 5 evidence photos',
             ]);
         }
 

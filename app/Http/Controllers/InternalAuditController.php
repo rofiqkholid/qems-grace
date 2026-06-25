@@ -749,15 +749,19 @@ class InternalAuditController extends Controller
 
             $sysId = $request->sys_id;
             
-            // First try to look up by hash_id
-            $car = DB::table('CsAuditCar')->where('hash_id', $sysId)->first();
+            // Decrypt custom encrypted ID
+            $carId = $this->decryptCarId($sysId);
+            $car = null;
+            if ($carId) {
+                $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            }
 
             // Fallback for legacy decryption
             if (!$car) {
                 try {
                     $sysIdStr = Crypt::decryptString($sysId);
-                    $carId = explode('_', $sysIdStr)[0];
-                    $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+                    $carIdLegacy = explode('_', $sysIdStr)[0];
+                    $car = DB::table('CsAuditCar')->where('id', $carIdLegacy)->first();
                 } catch (\Exception $e) {
                     $car = DB::table('CsAuditCar')->where('id', $sysId)->first();
                 }
