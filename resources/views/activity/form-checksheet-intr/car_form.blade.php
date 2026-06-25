@@ -30,20 +30,22 @@
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Left: Metadata -->
-                    <div class="space-y-4 col-span-1 md:border-r md:border-slate-100 md:pr-6 flex flex-col justify-center">
-                        <div class="flex flex-wrap gap-x-6 gap-y-4">
+                    <div class="col-span-1 md:border-r md:border-slate-100 md:pr-6 grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                        <!-- Left sub-column: CAR Req. Number & Audit Date -->
+                        <div class="space-y-4">
                             <div>
-                                <span class="block text-sm text-slate-400">Req. Number</span>
-                                <span class="text-sm font-semibold text-slate-700 mt-1 block">{{ $schedule->req_number ?? '-' }}</span>
+                                <span class="block text-[12px]  text-slate-400 tracking-wider">Req. Number</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block">{{ $car->req_number ?? '-' }}</span>
                             </div>
-                            <div class="flex-1 min-w-[150px]">
-                                <span class="block text-sm text-slate-400">Auditee</span>
-                                <span class="text-sm font-semibold text-slate-700 mt-1 block break-words">{{ $schedule->auditee ?? '-' }}</span>
+                            <div>
+                                <span class="block text-[12px]  text-slate-400 tracking-wider">Audit Date</span>
+                                <span class="text-sm  text-slate-700 mt-1 block">{{ $schedule->formatted_date ?? '-' }}</span>
                             </div>
                         </div>
-                        <div>
-                            <span class="block text-sm text-slate-400">Audit Date</span>
-                            <span class="text-sm font-semibold text-slate-700 mt-1 block">{{\Carbon\Carbon::parse($schedule->audit_date)->format('d M Y')}}</span>
+                        <!-- Right sub-column: Auditee -->
+                        <div class="h-full flex flex-col justify-start">
+                            <span class="block text-[12px] font-semibold text-slate-400 tracking-wider">Auditee</span>
+                            <span class="text-sm font-semibold text-slate-700 mt-1 block break-words leading-relaxed">{{ $schedule->auditee ?? '-' }}</span>
                         </div>
                     </div>
                     

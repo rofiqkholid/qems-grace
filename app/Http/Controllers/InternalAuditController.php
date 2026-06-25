@@ -304,13 +304,9 @@ class InternalAuditController extends Controller
                     return response()->json(['success' => false, 'message' => 'Schedule not found.']);
                 }
 
-                $dateFormatted = Carbon::parse($request->schedule_date)->format('dmY');
-                $reqNumber = $dateFormatted . $schedule->id;
-
                 DB::table('CsAuditHeader')
                     ->where('hash_id', $scheduleId)
                     ->update([
-                        'req_number' => $reqNumber,
                         'auditee' => $request->agenda_name,
                         'audit_date' => $request->schedule_date,
                         'auditor_names' => $request->auditor_niks,
@@ -323,9 +319,8 @@ class InternalAuditController extends Controller
                 // Insert
                 $hash = strtolower(\Illuminate\Support\Str::random(3) . '-' . \Illuminate\Support\Str::random(3) . '-' . \Illuminate\Support\Str::random(3));
                 
-                $id = DB::table('CsAuditHeader')->insertGetId([
+                DB::table('CsAuditHeader')->insert([
                     'hash_id' => $hash,
-                    'req_number' => '', // placeholder
                     'auditee' => $request->agenda_name,
                     'audit_date' => $request->schedule_date,
                     'auditor_names' => $request->auditor_niks,
@@ -334,13 +329,6 @@ class InternalAuditController extends Controller
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);
-
-                $dateFormatted = Carbon::parse($request->schedule_date)->format('dmY');
-                $reqNumber = $dateFormatted . $id;
-
-                DB::table('CsAuditHeader')
-                    ->where('id', $id)
-                    ->update(['req_number' => $reqNumber]);
             }
 
             DB::commit();
@@ -611,15 +599,17 @@ class InternalAuditController extends Controller
                         DB::table('CsAuditCar')
                             ->where('id', $existingCar->id)
                             ->update([
-                                'req_number' => $header->req_number ?? null,
                                 'check_item' => $item->check_item_idn ?? null,
                                 'finding_category' => $judgment,
                                 'updated_at' => Carbon::now()
                             ]);
                     } else {
+                        $dept = $header ? $header->auditee_dept : null;
+                        $reqNumber = $dept ? $this->generateCarReqNumber($dept) : null;
                         DB::table('CsAuditCar')->insert([
                             'audit_detail_id' => $detailId,
-                            'req_number' => $header->req_number ?? null,
+                            'req_number' => $reqNumber,
+                            'department' => $dept,
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
                             'created_at' => Carbon::now(),
@@ -926,9 +916,12 @@ class InternalAuditController extends Controller
                 $item = DB::table('CsChecksheetItem')->where('id', $itemId)->first();
 
                 if (!$existingCar) {
+                    $dept = $header ? $header->auditee_dept : null;
+                    $reqNumber = $dept ? $this->generateCarReqNumber($dept) : null;
                     DB::table('CsAuditCar')->insert([
                         'audit_detail_id' => $detailId,
-                        'req_number' => $header->req_number ?? null,
+                        'req_number' => $reqNumber,
+                        'department' => $dept,
                         'check_item' => $item->check_item_idn ?? null,
                         'finding_category' => $judgment,
                         'created_at' => Carbon::now(),
@@ -938,7 +931,6 @@ class InternalAuditController extends Controller
                     DB::table('CsAuditCar')
                         ->where('id', $existingCar->id)
                         ->update([
-                            'req_number' => $header->req_number ?? null,
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
                             'updated_at' => Carbon::now()
@@ -962,6 +954,7 @@ class InternalAuditController extends Controller
     {
         $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
         if (!$schedule) abort(404);
+        $schedule->formatted_date = $schedule->audit_date ? Carbon::parse($schedule->audit_date)->format('d M Y') : '-';
 
         $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
         if (!$item) abort(404);
@@ -984,9 +977,12 @@ class InternalAuditController extends Controller
 
         $car = DB::table('CsAuditCar')->where('audit_detail_id', $detail->id)->first();
         if (!$car) {
+            $dept = $schedule ? $schedule->auditee_dept : null;
+            $reqNumber = $dept ? $this->generateCarReqNumber($dept) : null;
             $carId = DB::table('CsAuditCar')->insertGetId([
                 'audit_detail_id' => $detail->id,
-                'req_number' => $schedule->req_number ?? null,
+                'req_number' => $reqNumber,
+                'department' => $dept,
                 'check_item' => $item->check_item_idn ?? null,
                 'finding_category' => $detail->judgment ?? 'OFI',
                 'auditor' => $schedule->auditor_names ?? null,
@@ -996,7 +992,6 @@ class InternalAuditController extends Controller
             ]);
             $car = DB::table('CsAuditCar')->where('id', $carId)->first();
         }
-
         $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
         $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
 
@@ -1117,16 +1112,21 @@ class InternalAuditController extends Controller
             $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
 
             $car = DB::table('CsAuditCar')->where('audit_detail_id', $detailId)->first();
+            $department = $request->department;
             if ($car) {
+                $reqNumber = $car->req_number;
+                if (!$reqNumber || $car->department !== $department) {
+                    $reqNumber = $this->generateCarReqNumber($department);
+                }
                 DB::table('CsAuditCar')
                     ->where('id', $car->id)
                     ->update([
-                        'req_number' => $schedule->req_number ?? null,
+                        'req_number' => $reqNumber,
                         'check_item' => $item->check_item_idn ?? null,
                         'surveillance' => $surveillance,
                         'external' => $external,
                         'internal_audit' => $internalAudit,
-                        'department' => $request->department,
+                        'department' => $department,
                         'requirement_no' => $request->requirement_no,
                         'clause_title' => $request->clause_title,
                         'clause_text' => $request->clause_text,
@@ -1137,14 +1137,15 @@ class InternalAuditController extends Controller
                         'updated_at' => Carbon::now()
                     ]);
             } else {
+                $reqNumber = $this->generateCarReqNumber($department);
                 DB::table('CsAuditCar')->insert([
                     'audit_detail_id' => $detailId,
-                    'req_number' => $schedule->req_number ?? null,
+                    'req_number' => $reqNumber,
                     'check_item' => $item->check_item_idn ?? null,
                     'surveillance' => $surveillance,
                     'external' => $external,
                     'internal_audit' => $internalAudit,
-                    'department' => $request->department,
+                    'department' => $department,
                     'requirement_no' => $request->requirement_no,
                     'clause_title' => $request->clause_title,
                     'clause_text' => $request->clause_text,
@@ -1299,5 +1300,30 @@ class InternalAuditController extends Controller
             return null;
         }
         return null;
+    }
+
+    private function generateCarReqNumber($department)
+    {
+        if (empty($department)) {
+            return null;
+        }
+
+        $latestCar = DB::table('CsAuditCar')
+            ->where('department', $department)
+            ->whereNotNull('req_number')
+            ->where('req_number', 'LIKE', "SAI - INT - {$department} - %")
+            ->orderBy('req_number', 'desc')
+            ->first();
+
+        $nextNum = 1;
+        if ($latestCar) {
+            $parts = explode('-', $latestCar->req_number);
+            $lastPart = trim(end($parts));
+            if (is_numeric($lastPart)) {
+                $nextNum = intval($lastPart) + 1;
+            }
+        }
+
+        return "SAI - INT - " . strtoupper($department) . " - " . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
 }

@@ -44,23 +44,19 @@
                     </div>
                     <div class="p-6 grid grid-cols-2 gap-x-6 gap-y-4 content-start flex-1 overflow-y-auto">
                         <div>
-                            <div class="text-[12px] text-slate-400">Request Number</div>
-                            <div class="text-sm font-semibold text-slate-800 mt-1">{{ $schedule->req_number ?? '-' }}</div>
-                        </div>
-                        <div>
                             <div class="text-[12px] text-slate-400">Audit Date</div>
                             <div class="text-sm font-semibold text-slate-800 mt-1">{{\Carbon\Carbon::parse($schedule->schedule_date)->format('d M Y')}}</div>
-                        </div>
-                        
-                        <div class="col-span-2 border-t border-slate-100 my-1"></div>
-                        
-                        <div>
-                            <div class="text-[12px] text-slate-400">Auditee</div>
-                            <div class="text-sm font-semibold text-slate-800 mt-1">{{ $schedule->auditee }}</div>
                         </div>
                         <div>
                             <div class="text-[12px] text-slate-400">Auditor</div>
                             <div class="text-sm font-semibold text-slate-800 mt-1">{{ $schedule->auditor_niks }}</div>
+                        </div>
+                        
+                        <div class="col-span-2 border-t border-slate-100 my-1"></div>
+                        
+                        <div class="col-span-2">
+                            <div class="text-[12px] text-slate-400">Auditee</div>
+                            <div class="text-sm font-semibold text-slate-800 mt-1">{{ $schedule->auditee }}</div>
                         </div>
                         
                         <div class="col-span-2 border-t border-slate-100 my-1"></div>
@@ -317,19 +313,14 @@
                 @php
                     $detail = $details[$item->id] ?? null;
                     $judgment = $detail ? $detail->judgment : '';
-                    $evidence = '';
-                    if ($detail) {
-                        if ($detail->judgment === 'OK' || $detail->judgment === 'OFI') {
-                            $evidence = $detail->note ?: ($detail->evidence ?? '');
-                        } else {
-                            $evidence = $detail->car_finding ?? '';
-                        }
-                    }
+                    $evidence = $detail ? ($detail->note ?: ($detail->evidence ?? '')) : '';
+                    $car_finding = $detail ? ($detail->car_finding ?? '') : '';
                     $photo = $detail && $detail->finding_photo_path ? asset($detail->finding_photo_path) : null;
                 @endphp
                 this.answers[{{ $item->id }}] = '{{ $judgment }}';
                 this.evidenceData[{{ $item->id }}] = {
                     evidence: {!! json_encode($evidence) !!},
+                    car_finding: {!! json_encode($car_finding) !!},
                     photo: {!! json_encode($photo) !!}
                 };
                 @endforeach
@@ -341,7 +332,7 @@
 
             hasFinding(itemId) {
                 const data = this.evidenceData[itemId];
-                return data && ((data.evidence && data.evidence.trim() !== '') || data.photo !== null);
+                return data && ((data.car_finding && data.car_finding.trim() !== '') || data.photo !== null);
             },
 
             hasNote(itemId) {
