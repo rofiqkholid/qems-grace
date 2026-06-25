@@ -435,22 +435,24 @@ class InternalAuditController extends Controller
                         ->where('audit_detail_id', $detailId)
                         ->first();
 
+                    $header = DB::table('CsAuditHeader')->where('id', $headerId)->first();
+                    $item = DB::table('CsChecksheetItem')->where('id', $itemId)->first();
+
                     if ($existingCar) {
                         DB::table('CsAuditCar')
                             ->where('id', $existingCar->id)
                             ->update([
-                                'finding_desc' => $evidence ?? 'Finding observed during clause evaluation.',
+                                'req_number' => $header->req_number ?? null,
+                                'check_item' => $item->check_item_idn ?? null,
+                                'finding_category' => $judgment,
                                 'updated_at' => Carbon::now()
                             ]);
                     } else {
-                        $docSeq = DB::table('CsAuditCar')->count() + 1;
-                        $carNumber = 'CAR/CS/' . Carbon::parse($request->audit_date)->format('dMMyy') . '/' . sprintf('%03d', $docSeq);
-
                         DB::table('CsAuditCar')->insert([
                             'audit_detail_id' => $detailId,
-                            'car_number' => $carNumber,
-                            'finding_desc' => $evidence ?? 'Finding observed during clause evaluation.',
-                            'status' => 'Open',
+                            'req_number' => $header->req_number ?? null,
+                            'check_item' => $item->check_item_idn ?? null,
+                            'finding_category' => $judgment,
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now()
                         ]);
@@ -481,9 +483,9 @@ class InternalAuditController extends Controller
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
             $query->where(function($q) use ($searchValue) {
-                $q->where('a.car_number', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.finding_desc', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('c.auditee_dept', 'LIKE', "%{$searchValue}%");
+                $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.check_item', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%");
             });
         }
 
@@ -500,31 +502,19 @@ class InternalAuditController extends Controller
 
         $data = [];
         foreach ($posts as $post) {
-            $dept = DB::table('GenbaDept')->where('Key1', $post->auditee_dept)->first();
-            $deptName = $dept ? "{$dept->Key1} ({$dept->Desc})" : $post->auditee_dept;
+            $deptName = $post->department ?? $post->auditee_dept;
 
-            $statusBadge = '';
-            switch ($post->status) {
-                case 'Closed':
-                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Closed</span>';
-                    break;
-                case 'Under Review':
-                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">Under Review</span>';
-                    break;
-                default:
-                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Open</span>';
-                    break;
-            }
+            $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">' . ($post->finding_category ?? 'OFI') . '</span>';
 
-            $action = '<button type="button" onclick="viewCarDetail(' . $post->id . ', \'' . htmlspecialchars($post->car_number, ENT_QUOTES) . '\', \'' . htmlspecialchars($post->finding_desc, ENT_QUOTES) . '\', \'' . htmlspecialchars($deptName, ENT_QUOTES) . '\', \'' . $post->status . '\', \'' . htmlspecialchars($post->corrective_action, ENT_QUOTES) . '\', \'' . htmlspecialchars($post->preventive_action, ENT_QUOTES) . '\', \'' . $post->due_date . '\', \'' . ($post->dept_head_approved_at ? 'Approved' : 'Pending') . '\', \'' . ($post->auditor_verified_at ? 'Verified' : 'Pending') . '\', \'' . ($post->qmr_approved_at ? 'Closed' : 'Pending') . '\')" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors">
-                        Open Details
+            $action = '<button type="button" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors">
+                        Details
                        </button>';
 
             $data[] = [
-                'car_number' => $post->car_number,
-                'finding_desc' => $post->finding_desc,
+                'car_number' => $post->req_number ?? '-',
+                'finding_desc' => $post->check_item ?? '-',
                 'auditee_dept' => $deptName,
-                'due_date' => $post->due_date ?? '-',
+                'due_date' => '-',
                 'status' => $statusBadge,
                 'action' => $action
             ];
@@ -656,18 +646,27 @@ class InternalAuditController extends Controller
                     ->where('audit_detail_id', $detailId)
                     ->first();
 
-                if (!$existingCar) {
-                    $docSeq = DB::table('CsAuditCar')->count() + 1;
-                    $carNumber = 'CAR/CS/' . Carbon::parse($header->audit_date)->format('dMMyy') . '/' . sprintf('%03d', $docSeq);
+                $header = DB::table('CsAuditHeader')->where('id', $headerId)->first();
+                $item = DB::table('CsChecksheetItem')->where('id', $itemId)->first();
 
+                if (!$existingCar) {
                     DB::table('CsAuditCar')->insert([
                         'audit_detail_id' => $detailId,
-                        'car_number' => $carNumber,
-                        'finding_desc' => 'Finding observed during clause evaluation.',
-                        'status' => 'Open',
+                        'req_number' => $header->req_number ?? null,
+                        'check_item' => $item->check_item_idn ?? null,
+                        'finding_category' => $judgment,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
+                } else {
+                    DB::table('CsAuditCar')
+                        ->where('id', $existingCar->id)
+                        ->update([
+                            'req_number' => $header->req_number ?? null,
+                            'check_item' => $item->check_item_idn ?? null,
+                            'finding_category' => $judgment,
+                            'updated_at' => Carbon::now()
+                        ]);
                 }
             } else {
                 DB::table('CsAuditCar')
@@ -683,6 +682,204 @@ class InternalAuditController extends Controller
         }
     }
 
+    public function carForm($schedule_id, $item_id)
+    {
+        $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
+        if (!$schedule) abort(404);
+
+        $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
+        if (!$item) abort(404);
+
+        $detail = DB::table('CsAuditDetail')
+            ->where('audit_header_id', $schedule->id)
+            ->where('checksheet_item_id', $item_id)
+            ->first();
+
+        if (!$detail) {
+            $detailId = DB::table('CsAuditDetail')->insertGetId([
+                'audit_header_id' => $schedule->id,
+                'checksheet_item_id' => $item_id,
+                'judgment' => request('judgment', 'OFI'),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+            $detail = DB::table('CsAuditDetail')->where('id', $detailId)->first();
+        }
+
+        $car = DB::table('CsAuditCar')->where('audit_detail_id', $detail->id)->first();
+        if (!$car) {
+            $carId = DB::table('CsAuditCar')->insertGetId([
+                'audit_detail_id' => $detail->id,
+                'req_number' => $schedule->req_number ?? null,
+                'check_item' => $item->check_item_idn ?? null,
+                'finding_category' => $detail->judgment ?? 'OFI',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+        }
+
+        $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
+        $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
+
+        $departments = DB::table('GenbaDept')
+            ->where('CheckBox01', 1)
+            ->get();
+
+        $requirements = DB::table('CsKlausul')
+            ->select('clause_no')
+            ->distinct()
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'id' => $r->clause_no,
+                    'name' => $r->clause_no
+                ];
+            });
+
+        $clauseTitles = DB::table('CsKlausul')
+            ->select('clause_name')
+            ->distinct()
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'id' => $r->clause_name,
+                    'name' => $r->clause_name
+                ];
+            });
+
+        return view('activity.form-checksheet-intr.car_form', compact('schedule', 'item', 'detail', 'car', 'departments', 'requirements', 'clauseTitles'));
+    }
+
+    public function storeCarForm(Request $request, $schedule_id, $item_id)
+    {
+        $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
+        if (!$schedule) abort(404);
+
+        $request->validate([
+            'judgment' => 'nullable|string|in:OFI,Minor,Mayor,Observation',
+            'finding_desc' => 'nullable|string',
+            'audit_source' => 'nullable|array',
+            'audit_category' => 'nullable|array',
+            'observation_number' => 'nullable|string',
+            'observation_date' => 'nullable|date',
+            'corrective_action' => 'nullable|string',
+            'preventive_action' => 'nullable|string',
+            'due_date' => 'nullable|date',
+            'photo' => 'nullable|image|max:5120',
+            'department' => 'nullable|string',
+            'requirement_no' => 'nullable|string',
+            'clause_title' => 'nullable|string',
+            'clause_text' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $detail = DB::table('CsAuditDetail')
+                ->where('audit_header_id', $schedule->id)
+                ->where('checksheet_item_id', $item_id)
+                ->first();
+
+            $photoPath = $detail ? $detail->finding_photo_path : null;
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = 'finding_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/cs_audit'), $fileName);
+                $photoPath = 'uploads/cs_audit/' . $fileName;
+            }
+
+            $sources = $request->audit_source ?? [];
+            $finalSources = [];
+            foreach ($sources as $src) {
+                if ($src === 'Surveillance') {
+                    $finalSources[] = 'Surveillance: ' . ($request->audit_source_surveillance_text ?? '');
+                } elseif ($src === 'External') {
+                    $finalSources[] = 'External: ' . ($request->audit_source_external_text ?? '');
+                } else {
+                    $finalSources[] = $src;
+                }
+            }
+            $auditSourceStr = implode(', ', $finalSources);
+
+            $judgmentVal = $request->judgment ?? ($detail ? $detail->judgment : 'OFI');
+            $findingDescVal = $request->finding_desc ?? ($detail ? $detail->evidence : '');
+
+            if ($detail) {
+                DB::table('CsAuditDetail')
+                    ->where('id', $detail->id)
+                    ->update([
+                        'judgment' => $judgmentVal,
+                        'evidence' => $findingDescVal,
+                        'finding_photo_path' => $photoPath,
+                        'updated_at' => Carbon::now()
+                    ]);
+                $detailId = $detail->id;
+            } else {
+                $detailId = DB::table('CsAuditDetail')->insertGetId([
+                    'audit_header_id' => $schedule->id,
+                    'checksheet_item_id' => $item_id,
+                    'judgment' => $judgmentVal,
+                    'evidence' => $findingDescVal,
+                    'finding_photo_path' => $photoPath,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+
+            $categories = $request->audit_category ?? [];
+            $surveillance = in_array('Surveillance', $sources) ? ($request->audit_source_surveillance_text ?? '') : null;
+            $external = in_array('External', $sources) ? ($request->audit_source_external_text ?? '') : null;
+            $internalAudit = in_array('Internal Audit', $sources) ? implode(', ', $categories) : null;
+
+            $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
+
+            $car = DB::table('CsAuditCar')->where('audit_detail_id', $detailId)->first();
+            if ($car) {
+                DB::table('CsAuditCar')
+                    ->where('id', $car->id)
+                    ->update([
+                        'req_number' => $schedule->req_number ?? null,
+                        'check_item' => $item->check_item_idn ?? null,
+                        'surveillance' => $surveillance,
+                        'external' => $external,
+                        'internal_audit' => $internalAudit,
+                        'department' => $request->department,
+                        'requirement_no' => $request->requirement_no,
+                        'clause_title' => $request->clause_title,
+                        'clause_text' => $request->clause_text,
+                        'finding_category' => $judgmentVal,
+                        'updated_at' => Carbon::now()
+                    ]);
+            } else {
+                DB::table('CsAuditCar')->insert([
+                    'audit_detail_id' => $detailId,
+                    'req_number' => $schedule->req_number ?? null,
+                    'check_item' => $item->check_item_idn ?? null,
+                    'surveillance' => $surveillance,
+                    'external' => $external,
+                    'internal_audit' => $internalAudit,
+                    'department' => $request->department,
+                    'requirement_no' => $request->requirement_no,
+                    'clause_title' => $request->clause_title,
+                    'clause_text' => $request->clause_text,
+                    'finding_category' => $judgmentVal,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('internal_audit.conduct', $schedule_id)
+                ->with('success', 'CAR details saved successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
     public function deleteSchedule($id)
     {
         if (!UserMenuPermission::canDelete(108)) {
@@ -694,5 +891,63 @@ class InternalAuditController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    public function getRequirements(Request $request)
+    {
+        $search = $request->search;
+        $page = $request->post('page', 1);
+        $pageSize = 10;
+
+        $query = DB::table('CsKlausul')
+            ->select('clause_no')
+            ->distinct();
+
+        if ($search) {
+            $query->where('clause_no', 'LIKE', '%' . $search . '%');
+        }
+
+        $results = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'items' => collect($results->items())->map(function ($r) {
+                return [
+                    'id' => $r->clause_no,
+                    'name' => $r->clause_no
+                ];
+            })->values(),
+            'pagination' => [
+                'more' => $results->hasMorePages(),
+            ]
+        ]);
+    }
+
+    public function getClauseTitles(Request $request)
+    {
+        $search = $request->search;
+        $page = $request->post('page', 1);
+        $pageSize = 10;
+
+        $query = DB::table('CsKlausul')
+            ->select('clause_name')
+            ->distinct();
+
+        if ($search) {
+            $query->where('clause_name', 'LIKE', '%' . $search . '%');
+        }
+
+        $results = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'items' => collect($results->items())->map(function ($r) {
+                return [
+                    'id' => $r->clause_name,
+                    'name' => $r->clause_name
+                ];
+            })->values(),
+            'pagination' => [
+                'more' => $results->hasMorePages(),
+            ]
+        ]);
     }
 }

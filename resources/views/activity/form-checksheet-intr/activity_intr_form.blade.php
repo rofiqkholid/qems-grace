@@ -186,117 +186,12 @@
                                             <!-- Camera/Evidences Trigger -->
                                             <div :class="answers[{{ $itemId }}] !== 'OK' && answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
                                                 class="flex-1 w-full transition-all duration-200">
-                                                <button @click="openModal({{ $itemId }})"
+                                                <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
                                                     class="w-full flex items-center justify-center gap-2 px-3 h-[52px] bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 group-hover:border-blue-200"
                                                     :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : ''">
                                                     <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
                                                     <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Evidence Added' : 'Add Finding Evidence')"></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Modal for Item {{ $itemId }} -->
-                                <div x-show="activeModal === {{ $itemId }}"
-                                    style="display: none;"
-                                    class="fixed inset-0 z-[60] overflow-hidden"
-                                    aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                    <div class="fixed inset-0 flex items-center justify-center p-0 md:p-4">
-                                        <div x-show="activeModal === {{ $itemId }}"
-                                            x-transition:enter="ease-out duration-300"
-                                            x-transition:enter-start="opacity-0"
-                                            x-transition:enter-end="opacity-100"
-                                            x-transition:leave="ease-in duration-200"
-                                            x-transition:leave-start="opacity-100"
-                                            x-transition:leave-end="opacity-0"
-                                            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                                            @click="closeModal()"></div>
-
-                                        <div x-show="activeModal === {{ $itemId }}"
-                                            x-transition:enter="ease-out duration-300"
-                                            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                                            x-transition:leave="ease-in duration-200"
-                                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                                            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                            class="relative bg-white text-left overflow-hidden transform transition-all flex flex-col w-full h-full rounded-none md:w-[95vw] md:max-w-4xl md:max-h-[85vh] md:rounded-2xl shadow-xl">
-
-                                            <!-- Modal Header -->
-                                            <div class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center flex-shrink-0">
-                                                <div>
-                                                    <h3 class="text-lg font-bold text-gray-800">Finding & Evidence Details</h3>
-                                                    <p class="text-slate-500 text-xs mt-0.5">Scope: {{ $item->scope_item ?: 'General' }}</p>
-                                                </div>
-                                                <button @click="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
-                                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            <!-- Modal Body - 2 Column Layout -->
-                                            <div class="px-8 py-6 bg-slate-50 flex-1 overflow-y-auto">
-                                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                    <!-- Left Column -->
-                                                    <div class="space-y-5">
-                                                        <!-- Box: Evidence Photos -->
-                                                        <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                            <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                                                <i class="fas fa-image text-blue-500"></i> Finding Attachment
-                                                            </h4>
-
-                                                            <div class="grid grid-cols-2 gap-3" x-show="!isReadOnly">
-                                                                <div class="relative group">
-                                                                    <input type="file" id="cameraInput_{{ $itemId }}" accept="image/*" capture="environment"
-                                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                                        @change="handleFileUpload($event, {{ $itemId }})">
-                                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all">
-                                                                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                                            <i class="fas fa-camera text-sm"></i>
-                                                                        </div>
-                                                                        <span class="text-xs font-semibold text-blue-600">Take Photo</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="relative group">
-                                                                    <input type="file" id="uploadInput_{{ $itemId }}" accept="image/*"
-                                                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                                        @change="handleFileUpload($event, {{ $itemId }})">
-                                                                    <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50 group-hover:bg-slate-50 transition-all">
-                                                                        <div class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                                            <i class="fas fa-images text-sm"></i>
-                                                                        </div>
-                                                                        <span class="text-xs font-semibold text-slate-600">Upload Photo</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="mt-4 flex justify-center" id="preview_container_{{ $itemId }}"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Right Column -->
-                                                    <div class="space-y-5">
-                                                        <!-- Box: Finding / Comments -->
-                                                        <div class="bg-white p-5 rounded-xl border border-slate-200">
-                                                            <label class="block text-sm font-semibold text-slate-700 mb-2">Findings / Observation Comments <span class="text-red-500">*</span></label>
-                                                            <textarea id="findings_{{ $itemId }}" rows="5" 
-                                                                class="w-full border border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm outline-none p-3 rounded-lg" 
-                                                                placeholder="Describe the issue..."
-                                                                :disabled="isReadOnly"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Modal Footer -->
-                                            <div class="bg-white border-t border-slate-200 px-8 py-4 flex justify-end gap-3 flex-shrink-0">
-                                                <button @click="closeModal()" type="button" class="px-5 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium" x-text="isReadOnly ? 'Close' : 'Cancel'">
-                                                </button>
-                                                <button @click="saveEvidence({{ $itemId }})" type="button" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium" x-show="!isReadOnly">
-                                                    Save Details
-                                                </button>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>

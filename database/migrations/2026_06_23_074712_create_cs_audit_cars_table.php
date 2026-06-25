@@ -19,6 +19,12 @@ return new class extends Migration
             $table->string('car_number')->unique(); // CAR document number
             $table->text('finding_desc'); // Finding description from audit details
             
+            // New audit reference fields
+            $table->string('audit_source')->default('Internal Audit'); // 'Surveillance', 'External', 'Internal Audit'
+            $table->string('audit_category')->default('System'); // 'Product', 'Process', 'System', 'Environment'
+            $table->string('observation_number')->nullable();
+            $table->date('observation_date')->nullable();
+            
             // Auditee fields
             $table->text('corrective_action')->nullable();
             $table->text('preventive_action')->nullable();

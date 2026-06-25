@@ -43,11 +43,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/internal-audit/checksheet', [InternalAuditController::class, 'getChecksheet'])->name('internal_audit.checksheet');
     Route::post('/internal-audit/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
     Route::get('/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
+    Route::get('/internal-audit/conduct/{schedule_id}/car/{item_id}', [InternalAuditController::class, 'carForm'])->name('internal_audit.car_form');
+    Route::post('/internal-audit/conduct/{schedule_id}/car/{item_id}/store', [InternalAuditController::class, 'storeCarForm'])->name('internal_audit.car_form.store');
     Route::post('/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
     Route::post('/internal-audit/save-judgment', [InternalAuditController::class, 'saveJudgment'])->name('internal_audit.save_judgment');
     Route::post('/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
     Route::post('/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
     Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
+    Route::post('/internal-audit/get-requirements', [InternalAuditController::class, 'getRequirements'])->name('internal_audit.get_requirements');
+    Route::post('/internal-audit/get-clause-titles', [InternalAuditController::class, 'getClauseTitles'])->name('internal_audit.get_clause_titles');
 
     Route::get('/team', function () {
         return view('activity.setup.genba_team');
