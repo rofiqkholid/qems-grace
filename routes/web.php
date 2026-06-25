@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
     Route::get('/internal-action-report', [InternalAuditController::class, 'actionReport'])->name('internal_audit.action_report');
     Route::get('/internal-action-report/preview/{id}', [InternalAuditController::class, 'actionReportPreview'])->name('internal_audit.action_report.preview');
+    Route::post('/internal-action-report/preview/{id}/save-action', [InternalAuditController::class, 'saveActionReportDetails'])->name('internal_audit.action_report.save_action');
     Route::post('/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
     Route::post('/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
     Route::get('/internal-audit/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');
@@ -142,7 +143,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/department/store', [MasterController::class, 'store_department'])->name('master.department.store');
         Route::post('/department/update', [MasterController::class, 'update_department'])->name('master.department.update');
         Route::post('/department/delete', [MasterController::class, 'delete_department'])->name('master.department.delete');
-        Route::post('/department/delete', [MasterController::class, 'delete_department'])->name('master.department.delete');
+
+        Route::get('/clauses', [MasterController::class, 'clauses'])->name('master.clauses');
+        Route::post('/clauses/table', [MasterController::class, 'clauses_table'])->name('master.clauses.table');
+        Route::post('/clauses/store', [MasterController::class, 'store_clauses'])->name('master.clauses.store');
+        Route::post('/clauses/update', [MasterController::class, 'update_clauses'])->name('master.clauses.update');
+        Route::post('/clauses/delete', [MasterController::class, 'delete_clauses'])->name('master.clauses.delete');
 
         Route::get('/check-item', [MasterController::class, 'check_item'])->name('master.check_item');
         Route::post('/check-item/table', [MasterController::class, 'check_item_table'])->name('master.check_item.table');

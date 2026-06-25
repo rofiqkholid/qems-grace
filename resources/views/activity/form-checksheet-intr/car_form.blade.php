@@ -185,7 +185,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
                     <div class="col-span-1 md:col-span-2">
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">Klausul</label>
-                        <textarea name="clause_text" rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Clause text...">{{ old('clause_text', $car->clause_text ?? '') }}</textarea>
+                        <textarea name="clause_text" id="clause_text" readonly rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed outline-none transition-all text-sm" placeholder="Clause text...">{{ old('clause_text', $car->clause_text ?? '') }}</textarea>
                     </div>
 
                     <div>
@@ -327,15 +327,21 @@
         // Listen to requirement changed event
         window.addEventListener('car-requirement-changed', function(e) {
             const clauseNo = e.detail.value;
-            const clauses = {!! json_encode(DB::table('CsKlausul')->select('clause_no', 'clause_name')->get()->toArray()) !!};
+            const clauses = {!! json_encode(DB::table('CsKlausul')->select('clause_no', 'clause_title', 'clauses')->get()->toArray()) !!};
             const matchedClause = clauses.find(c => c.clause_no === clauseNo);
             if (matchedClause) {
                 window.dispatchEvent(new CustomEvent('update-car-clause-title', {
                     detail: {
-                        id: matchedClause.clause_name,
-                        name: matchedClause.clause_name
+                        id: matchedClause.clause_title,
+                        name: matchedClause.clause_title
                     }
                 }));
+                const clauseTextarea = document.querySelector('textarea[name="clause_text"]');
+                if (clauseTextarea) {
+                    clauseTextarea.value = matchedClause.clauses || '';
+                    // Trigger input event to fire the draft auto-save
+                    clauseTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             }
         });
         // Auto-save draft logic

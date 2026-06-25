@@ -97,9 +97,92 @@ class InternalAuditController extends Controller
 
             $car->formatted_date = $car->created_at ? Carbon::parse($car->created_at)->format('d F Y') : '-';
 
-            return view('activity.internal_action_preview', compact('car'));
+            $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+
+            return view('activity.internal_action_preview', compact('car', 'action'));
         } catch (\Exception $e) {
             return redirect()->route('internal_audit.action_report')->with('error', $e->getMessage());
+        }
+    }
+
+    public function saveActionReportDetails($id, Request $request)
+    {
+        try {
+            $carId = $this->decryptCarId($id);
+            if (!$carId) {
+                $car = DB::table('CsAuditCar')->where('hash_id', $id)->first();
+                if (!$car) {
+                    try {
+                        $decryptedId = Crypt::decryptString($id);
+                        $carId = explode('_', $decryptedId)[0];
+                    } catch (\Exception $e) {
+                        $carId = $id;
+                    }
+                } else {
+                    $carId = $car->id;
+                }
+            }
+
+            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            if (!$car) {
+                return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
+            }
+
+             $request->validate([
+                'causal_factor' => 'nullable|string',
+                'analyzed_by' => 'nullable|string',
+                'corrective_action' => 'nullable|string',
+                'preventive_action' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'auditee_name' => 'nullable|string',
+                'auditee_superior_name' => 'nullable|string',
+            ]);
+
+            $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+            if ($existingAction) {
+                DB::table('CsAuditAction')
+                    ->where('id', $existingAction->id)
+                    ->update([
+                        'causal_factor' => $request->causal_factor,
+                        'analyzed_by' => $request->analyzed_by,
+                        'corrective_action' => $request->corrective_action,
+                        'preventive_action' => $request->preventive_action,
+                        'notes' => $request->notes,
+                        'auditee_name' => $request->auditee_name,
+                        'auditee_superior_name' => $request->auditee_superior_name,
+                        'updated_at' => Carbon::now()
+                    ]);
+            } else {
+                DB::table('CsAuditAction')->insert([
+                    'audit_car_id' => $car->id,
+                    'causal_factor' => $request->causal_factor,
+                    'analyzed_by' => $request->analyzed_by,
+                    'corrective_action' => $request->corrective_action,
+                    'preventive_action' => $request->preventive_action,
+                    'notes' => $request->notes,
+                    'auditee_name' => $request->auditee_name,
+                    'auditee_superior_name' => $request->auditee_superior_name,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Action Plan details saved successfully.'
+                ]);
+            }
+
+            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'Action Plan details saved successfully.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -913,13 +996,13 @@ class InternalAuditController extends Controller
             });
 
         $clauseTitles = DB::table('CsKlausul')
-            ->select('clause_name')
+            ->select('clause_title')
             ->distinct()
             ->get()
             ->map(function ($r) {
                 return [
-                    'id' => $r->clause_name,
-                    'name' => $r->clause_name
+                    'id' => $r->clause_title,
+                    'name' => $r->clause_title
                 ];
             });
 
@@ -1120,11 +1203,11 @@ class InternalAuditController extends Controller
         $pageSize = 10;
 
         $query = DB::table('CsKlausul')
-            ->select('clause_name')
+            ->select('clause_title')
             ->distinct();
 
         if ($search) {
-            $query->where('clause_name', 'LIKE', '%' . $search . '%');
+            $query->where('clause_title', 'LIKE', '%' . $search . '%');
         }
 
         $results = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -1132,8 +1215,8 @@ class InternalAuditController extends Controller
         return response()->json([
             'items' => collect($results->items())->map(function ($r) {
                 return [
-                    'id' => $r->clause_name,
-                    'name' => $r->clause_name
+                    'id' => $r->clause_title,
+                    'name' => $r->clause_title
                 ];
             })->values(),
             'pagination' => [
