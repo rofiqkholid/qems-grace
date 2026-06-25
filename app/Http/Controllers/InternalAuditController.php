@@ -428,8 +428,10 @@ class InternalAuditController extends Controller
             ->where('department', $schedule->auditee_dept)
             ->get();
 
-        $details = DB::table('CsAuditDetail')
-            ->where('audit_header_id', $schedule->id)
+        $details = DB::table('CsAuditDetail as d')
+            ->leftJoin('CsAuditCar as c', 'c.audit_detail_id', '=', 'd.id')
+            ->where('d.audit_header_id', $schedule->id)
+            ->select('d.*', 'c.finding as car_finding')
             ->get()
             ->keyBy('checksheet_item_id');
 
@@ -532,7 +534,12 @@ class InternalAuditController extends Controller
 
             foreach ($request->results as $itemId => $itemData) {
                 $judgment = $itemData['judgment'] ?? 'OK';
-                $evidence = $itemData['evidence'] ?? null;
+                $rawEvidence = $itemData['evidence'] ?? null;
+                $evidence = null;
+                $note = null;
+                if ($judgment === 'OK' || $judgment === 'OFI') {
+                    $note = $rawEvidence;
+                }
                 $photoPath = null;
 
                 // Fetch existing detail for this checksheet item under this header
@@ -573,6 +580,7 @@ class InternalAuditController extends Controller
                         ->update([
                             'judgment' => $judgment,
                             'evidence' => $evidence,
+                            'note' => $note,
                             'finding_photo_path' => $photoPath,
                             'updated_at' => Carbon::now()
                         ]);
@@ -583,14 +591,15 @@ class InternalAuditController extends Controller
                         'checksheet_item_id' => $itemId,
                         'judgment' => $judgment,
                         'evidence' => $evidence,
+                        'note' => $note,
                         'finding_photo_path' => $photoPath,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
                 }
 
-                // Create or update CAR if judgment is not OK (OFI, Mayor, Minor)
-                if ($judgment !== 'OK') {
+                // Create or update CAR if judgment is Minor or Mayor
+                if ($judgment === 'Minor' || $judgment === 'Mayor') {
                     $existingCar = DB::table('CsAuditCar')
                         ->where('audit_detail_id', $detailId)
                         ->first();
@@ -618,7 +627,7 @@ class InternalAuditController extends Controller
                         ]);
                     }
                 } else {
-                    // Delete CAR if judgment changed back to OK
+                    // Delete CAR if judgment changed back to OK or OFI
                     DB::table('CsAuditCar')
                         ->where('audit_detail_id', $detailId)
                         ->delete();
@@ -861,7 +870,8 @@ class InternalAuditController extends Controller
         $request->validate([
             'schedule_id' => 'required|integer',
             'checksheet_item_id' => 'required|integer',
-            'judgment' => 'required|string|in:OK,OFI,Minor,Mayor'
+            'judgment' => 'required|string|in:OK,OFI,Minor,Mayor',
+            'note' => 'nullable|string'
         ]);
 
         try {
@@ -870,6 +880,7 @@ class InternalAuditController extends Controller
             $headerId = $request->schedule_id;
             $itemId = $request->checksheet_item_id;
             $judgment = $request->judgment;
+            $note = $request->note;
 
             $header = DB::table('CsAuditHeader')->where('id', $headerId)->first();
             if (!$header) {
@@ -882,18 +893,23 @@ class InternalAuditController extends Controller
                 ->first();
 
             if ($existingDetail) {
+                $updateData = [
+                    'judgment' => $judgment,
+                    'updated_at' => Carbon::now()
+                ];
+                if ($request->exists('note')) {
+                    $updateData['note'] = $note;
+                }
                 DB::table('CsAuditDetail')
                     ->where('id', $existingDetail->id)
-                    ->update([
-                        'judgment' => $judgment,
-                        'updated_at' => Carbon::now()
-                    ]);
+                    ->update($updateData);
                 $detailId = $existingDetail->id;
             } else {
                 $detailId = DB::table('CsAuditDetail')->insertGetId([
                     'audit_header_id' => $headerId,
                     'checksheet_item_id' => $itemId,
                     'judgment' => $judgment,
+                    'note' => $note ?? null,
                     'evidence' => null,
                     'finding_photo_path' => null,
                     'created_at' => Carbon::now(),
@@ -901,7 +917,7 @@ class InternalAuditController extends Controller
                 ]);
             }
 
-            if ($judgment !== 'OK') {
+            if ($judgment === 'Minor' || $judgment === 'Mayor') {
                 $existingCar = DB::table('CsAuditCar')
                     ->where('audit_detail_id', $detailId)
                     ->first();
@@ -1076,7 +1092,7 @@ class InternalAuditController extends Controller
                     ->where('id', $detail->id)
                     ->update([
                         'judgment' => $judgmentVal,
-                        'evidence' => $findingDescVal,
+                        'evidence' => null,
                         'finding_photo_path' => $photoPath,
                         'updated_at' => Carbon::now()
                     ]);
@@ -1086,7 +1102,7 @@ class InternalAuditController extends Controller
                     'audit_header_id' => $schedule->id,
                     'checksheet_item_id' => $item_id,
                     'judgment' => $judgmentVal,
-                    'evidence' => $findingDescVal,
+                    'evidence' => null,
                     'finding_photo_path' => $photoPath,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()

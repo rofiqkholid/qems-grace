@@ -183,15 +183,29 @@
                                                 @endforeach
                                             </div>
 
-                                            <!-- Camera/Evidences Trigger -->
-                                            <div :class="answers[{{ $itemId }}] !== 'OK' && answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+                                            <!-- Camera/Evidences/Note Trigger -->
+                                            <div :class="answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
                                                 class="w-full sm:w-44 transition-all duration-200">
-                                                <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
-                                                    class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
-                                                    :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
-                                                    <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
-                                                    <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Report Added' : 'Add Report')"></span>
-                                                </a>
+                                                
+                                                <!-- For Minor and Mayor: Link to CAR Form -->
+                                                <template x-if="answers[{{ $itemId }}] === 'Minor' || answers[{{ $itemId }}] === 'Mayor'">
+                                                    <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
+                                                        class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
+                                                        :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
+                                                        <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
+                                                        <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Report Added' : 'Add Report')"></span>
+                                                    </a>
+                                                </template>
+
+                                                <!-- For OK and OFI: Open Note/Evidence Modal -->
+                                                <template x-if="answers[{{ $itemId }}] === 'OK' || answers[{{ $itemId }}] === 'OFI'">
+                                                    <button type="button" @click="openNoteModal({{ $itemId }})"
+                                                        class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
+                                                        :class="hasNote({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
+                                                        <i class="fas" :class="hasNote({{ $itemId }}) ? 'fa-check-circle' : 'fa-sticky-note'"></i>
+                                                        <span class="font-medium text-xs whitespace-nowrap" x-text="hasNote({{ $itemId }}) ? 'Evidence Added' : 'Add Evidence'"></span>
+                                                    </button>
+                                                </template>
                                             </div>
                                         </div>
                                     </div>
@@ -211,6 +225,78 @@
 
     @include('layouts.footer')
     <div class="h-20 sm:hidden"></div>
+
+    <!-- Note Modal -->
+    <div x-show="noteModalOpen" 
+         style="display: none;" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         role="dialog" 
+         aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background Overlay -->
+            <div x-show="noteModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-slate-900/60 transition-opacity" 
+                 @click="closeNoteModal()"></div>
+
+            <!-- Trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal Panel -->
+            <div x-show="noteModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-200">
+                
+                <div class="bg-white px-6 pt-6 pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-50 text-blue-600 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fa-solid fa-sticky-note text-lg"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg font-bold text-slate-800 leading-6" id="modal-title">
+                                Add Evidence
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">
+                                Sebagai menu untuk input saran dan dokumen yang sudah berjalan.
+                            </p>
+                            
+                            <div class="mt-4">
+                                <textarea x-model="noteModalText" 
+                                          rows="4" 
+                                          class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                          placeholder="Tulis saran atau dokumen yang berjalan di sini..."
+                                          :disabled="isReadOnly"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 px-6 py-4 flex flex-row-reverse gap-2">
+                    <button type="button" 
+                            @click="saveNote()" 
+                            x-show="!isReadOnly"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors">
+                        Save Evidence
+                    </button>
+                    <button type="button" 
+                            @click="closeNoteModal()" 
+                            class="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Mobile Sidebar Overlay -->
@@ -231,7 +317,14 @@
                 @php
                     $detail = $details[$item->id] ?? null;
                     $judgment = $detail ? $detail->judgment : '';
-                    $evidence = $detail && $detail->evidence ? $detail->evidence : '';
+                    $evidence = '';
+                    if ($detail) {
+                        if ($detail->judgment === 'OK' || $detail->judgment === 'OFI') {
+                            $evidence = $detail->note ?: ($detail->evidence ?? '');
+                        } else {
+                            $evidence = $detail->car_finding ?? '';
+                        }
+                    }
                     $photo = $detail && $detail->finding_photo_path ? asset($detail->finding_photo_path) : null;
                 @endphp
                 this.answers[{{ $item->id }}] = '{{ $judgment }}';
@@ -242,9 +335,74 @@
                 @endforeach
             },
 
+            noteModalOpen: false,
+            noteModalItemId: null,
+            noteModalText: '',
+
             hasFinding(itemId) {
                 const data = this.evidenceData[itemId];
                 return data && ((data.evidence && data.evidence.trim() !== '') || data.photo !== null);
+            },
+
+            hasNote(itemId) {
+                const data = this.evidenceData[itemId];
+                return data && data.evidence && data.evidence.trim() !== '';
+            },
+
+            openNoteModal(itemId) {
+                this.noteModalItemId = itemId;
+                const data = this.evidenceData[itemId];
+                this.noteModalText = data ? (data.evidence || '') : '';
+                this.noteModalOpen = true;
+                document.body.style.overflow = 'hidden';
+            },
+
+            closeNoteModal() {
+                this.noteModalOpen = false;
+                this.noteModalItemId = null;
+                this.noteModalText = '';
+                document.body.style.overflow = '';
+            },
+
+            saveNote() {
+                const itemId = this.noteModalItemId;
+                if (!itemId) return;
+
+                if (!this.evidenceData[itemId]) {
+                    this.evidenceData[itemId] = { evidence: '', photo: null };
+                }
+                this.evidenceData[itemId].evidence = this.noteModalText;
+
+                if (!this.isReadOnly) {
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    fetch("{{ route('internal_audit.save_judgment') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token
+                        },
+                        body: JSON.stringify({
+                            _token: token,
+                            schedule_id: {{ $schedule->id }},
+                            checksheet_item_id: itemId,
+                            judgment: this.answers[itemId],
+                            note: this.noteModalText
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.success) {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error saving note:', err);
+                        showToast('Failed to auto-save evidence.', 'error');
+                    });
+                }
+
+                this.closeNoteModal();
+                showToast('Evidence saved successfully.', 'success');
             },
 
             updateAnswer(itemId, val) {
