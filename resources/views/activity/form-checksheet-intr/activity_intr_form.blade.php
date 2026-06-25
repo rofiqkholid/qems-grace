@@ -506,9 +506,15 @@
                     if (!ans || ans === '') {
                         isValid = false;
                         errorMsgs.push("Item {{ $globalIteration }} must be judged.");
-                    } else if (ans !== 'OK') {
+                    } else if (ans === 'OFI') {
                         const data = this.evidenceData[itemId];
                         if (!data || !data.evidence || data.evidence.trim() === '') {
+                            isValid = false;
+                            errorMsgs.push("Item {{ $globalIteration }} requires finding comments.");
+                        }
+                    } else if (ans === 'Minor' || ans === 'Mayor') {
+                        const data = this.evidenceData[itemId];
+                        if (!data || !data.car_finding || data.car_finding.trim() === '') {
                             isValid = false;
                             errorMsgs.push("Item {{ $globalIteration }} requires finding comments.");
                         }
