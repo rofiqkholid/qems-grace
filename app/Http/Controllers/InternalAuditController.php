@@ -21,7 +21,7 @@ class InternalAuditController extends Controller
                     'Key1' => $item->Key1,
                     'Desc' => $item->Desc,
                     'id' => $item->Key1,
-                    'name' => $item->Key1 . ' - ' . $item->Desc
+                    'name' => $item->Desc
                 ];
             });
         return view('activity.internal_audit', compact('departments'));
@@ -286,7 +286,7 @@ class InternalAuditController extends Controller
     public function storeSchedule(Request $request)
     {
         $request->validate([
-            'agenda_name' => 'required|string|max:255',
+            'agenda_name' => 'required|string|max:1000',
             'schedule_date' => 'required|date',
             'auditor_niks' => 'required|string',
             'auditee_dept' => 'required|string',
@@ -360,7 +360,7 @@ class InternalAuditController extends Controller
         }
 
         $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
-        $schedule->auditee_dept_name = $dept ? "{$dept->Key1} - {$dept->Desc}" : $schedule->auditee_dept;
+        $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
 
         // Override id to be hash_id for the form input
         $schedule->id = $schedule->hash_id;

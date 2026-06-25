@@ -11,7 +11,9 @@
 'dependencyParam' => null,
 'initialOptions' => [],
 'valueField' => 'id',
-'hideLabel' => false
+'hideLabel' => false,
+'multiple' => true,
+'maxItems' => 5
 ])
 
 <div class="@if(!$hideLabel) grid grid-cols-3 gap-4 items-center @else w-full @endif">
@@ -23,6 +25,9 @@
         search: '',
         selectedName: '',
         selectedId: '',
+        selectedItems: [],
+        multiple: {{ $multiple ? 'true' : 'false' }},
+        maxItems: {{ $maxItems }},
         items: {{ json_encode($initialOptions) }},
         page: 1,
         hasMore: false,
@@ -33,26 +38,40 @@
             // Listen for external value updates
             @if($updateEvent)
             window.addEventListener('{{ $updateEvent }}', (e) => {
-                // Handle different event detail structures
-                if (typeof e.detail === 'object' && e.detail !== null) {
-                    if ('id' in e.detail && 'name' in e.detail) {
-                        this.selectedId = e.detail.id;
-                        this.selectedName = e.detail.name;
-                    } else if ('value' in e.detail) {
-                        this.selectedId = e.detail.value;
-                        this.selectedName = e.detail.value;
+                if (this.multiple) {
+                    let val = '';
+                    if (typeof e.detail === 'object' && e.detail !== null) {
+                        val = e.detail.name || e.detail.value || e.detail.id || '';
                     } else {
-                        // Fallback if keys are missing (should not happen with our events)
-                        console.warn('Unexpected event detail structure', e.detail);
+                        val = e.detail || '';
                     }
+                    if (val) {
+                        this.selectedItems = val.split(',').map(s => s.trim()).filter(Boolean).map(s => ({ id: s, name: s }));
+                    } else {
+                        this.selectedItems = [];
+                    }
+                    const combinedVal = this.selectedItems.map(item => item.id).join(', ');
+                    $('#{{ $id }}').val(combinedVal);
+                    this.search = '';
                 } else {
-                     // Fallback/Direct primitive value
-                    this.selectedId = e.detail;
-                    this.selectedName = e.detail;
+                    if (typeof e.detail === 'object' && e.detail !== null) {
+                        if ('id' in e.detail && 'name' in e.detail) {
+                            this.selectedId = e.detail.id;
+                            this.selectedName = e.detail.name;
+                        } else if ('value' in e.detail) {
+                            this.selectedId = e.detail.value;
+                            this.selectedName = e.detail.value;
+                        } else {
+                            console.warn('Unexpected event detail structure', e.detail);
+                        }
+                    } else {
+                        this.selectedId = e.detail;
+                        this.selectedName = e.detail;
+                    }
+                    
+                    this.search = this.selectedName || '';
+                    $('#{{ $id }}').val(this.selectedId || '');
                 }
-                
-                this.search = this.selectedName || '';
-                $('#{{ $id }}').val(this.selectedId || '');
             });
             @endif
 
@@ -72,6 +91,7 @@
                 this.items = [];
                 this.selectedName = '';
                 this.selectedId = '';
+                this.selectedItems = [];
                 this.search = '';
                 this.page = 1;
                 this.hasMore = false;
@@ -87,8 +107,8 @@
 
             this.loading = true;
             try {
-                // If search matches selectedName, treat as empty search to show all options
-                const searchTerm = (this.search === this.selectedName) ? '' : this.search;
+                // Ignore matching string if we are in multiple mode since search is only for filtering single inputs
+                const searchTerm = (this.multiple) ? this.search : ((this.search === this.selectedName) ? '' : this.search);
 
                 const body = {
                     search: searchTerm,
@@ -133,18 +153,9 @@
             if (this.dependencyValue === '') return;
             @endif
             this.page = 1;
-            // If no API, filter local items? Not implemented for now as requirement implies API or static-only.
-            // But for Process (static), search might be needed locally? 
-            // The current Process dropdown didn't implement search in the previous code, only Line Checked and Category did.
-            // But wait, the user wants 'searchable-select'. 
-            // If it's static items (Process), we should filter this.items locally if no API.
             
             @if($apiUrl)
                 this.fetchItems();
-            @else
-                // Local search logic could be added here if needed, 
-                // but for now relying on API for search or assuming Process doesn't need search or handled elsewhere.
-                // However, the component UI has a search input.
             @endif
             
             this.open = true;
@@ -158,33 +169,81 @@
         },
 
         select(item) {
-            this.selectedName = item.name;
-            this.selectedId = item.id;
-            this.search = item.name;
-            this.open = false;
-            
-            // Determine value to set based on valueField prop
-            let val = item.id;
-            @if(isset($valueField) && $valueField === 'name')
-                val = item.name;
-            @endif
-            
-            $('#{{ $id }}').val(val);
+            if (this.multiple) {
+                const idx = this.selectedItems.findIndex(i => i.id === item.id);
+                if (idx > -1) {
+                    // Already selected, remove it
+                    this.selectedItems.splice(idx, 1);
+                } else {
+                    // Check max items limit
+                    if (this.selectedItems.length >= this.maxItems) {
+                        if (typeof showToast === 'function') {
+                            showToast('You can select a maximum of ' + this.maxItems + ' items.', 'error');
+                        } else {
+                            alert('You can select a maximum of ' + this.maxItems + ' items.');
+                        }
+                        return;
+                    }
+                    this.selectedItems.push(item);
+                }
+                
+                this.search = '';
+                let combinedVal = this.selectedItems.map(i => i.name).join(', ');
+                $('#{{ $id }}').val(combinedVal);
 
-            @if($changeEvent)
-            window.dispatchEvent(new CustomEvent('{{ $changeEvent }}', { 
-                detail: { 
-                    id: item.id,
-                    name: item.name,
-                    {{ $dependencyParam ? $dependencyParam : 'value' }}: val 
-                } 
-            }));
-            @endif
+                @if($changeEvent)
+                window.dispatchEvent(new CustomEvent('{{ $changeEvent }}', { 
+                    detail: { 
+                        selected: this.selectedItems,
+                        value: combinedVal
+                    } 
+                }));
+                @endif
+            } else {
+                this.selectedName = item.name;
+                this.selectedId = item.id;
+                this.search = item.name;
+                this.open = false;
+                
+                // Determine value to set based on valueField prop
+                let val = item.id;
+                @if(isset($valueField) && $valueField === 'name')
+                    val = item.name;
+                @endif
+                
+                $('#{{ $id }}').val(val);
+
+                @if($changeEvent)
+                window.dispatchEvent(new CustomEvent('{{ $changeEvent }}', { 
+                    detail: { 
+                        id: item.id,
+                        name: item.name,
+                        {{ $dependencyParam ? $dependencyParam : 'value' }}: val 
+                    } 
+                }));
+                @endif
+            }
 
             // Trigger standard change event on hidden input
             document.getElementById('{{ $id }}').dispatchEvent(new Event('change'));
         },
 
+        removeItem(item) {
+            this.selectedItems = this.selectedItems.filter(i => i.id !== item.id);
+            let combinedVal = this.selectedItems.map(i => i.name).join(', ');
+            $('#{{ $id }}').val(combinedVal);
+
+            @if($changeEvent)
+            window.dispatchEvent(new CustomEvent('{{ $changeEvent }}', { 
+                detail: { 
+                    selected: this.selectedItems,
+                    value: combinedVal
+                } 
+            }));
+            @endif
+
+            document.getElementById('{{ $id }}').dispatchEvent(new Event('change'));
+        },
 
         toggle() {
             @if($dependencyEvent)
@@ -197,31 +256,31 @@
                 
                 @if($apiUrl)
                     this.page = 1;
-                    // Always try to fetch if API is present.
-                    // If dependency is missing/empty, fetchItems checks or backend handles it.
                     this.fetchItems();
                 @endif
             }
         },
 
         validate() {
+            if (this.multiple) {
+                this.search = '';
+                return;
+            }
             if (this.search === null || this.search.trim() === '') {
                 if (this.selectedId !== '') {
                     this.selectedId = '';
                     this.selectedName = '';
                     this.search = '';
                     $('#{{ $id }}').val('');
-                    // Trigger change only if it was not empty before
                     document.getElementById('{{ $id }}').dispatchEvent(new Event('change'));
                 } else {
-                    // Just clear the display search if it had some partial text but no ID
                     this.search = '';
                 }
             } else if (this.search !== this.selectedName) {
                 this.search = this.selectedName || '';
             }
         }
-        }">
+    }">
         <input type="hidden" id="{{ $id }}" name="{{ $name }}" required>
 
         <!-- Trigger/Input -->
@@ -242,6 +301,20 @@
             </div>
         </div>
 
+        <!-- Selected Items List displayed underneath -->
+        <template x-if="multiple && selectedItems.length > 0">
+            <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <template x-for="item in selectedItems" :key="item.id">
+                    <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 gap-2">
+                        <span x-text="item.name" class="font-medium truncate" :title="item.name"></span>
+                        <button type="button" @click.stop="removeItem(item)" class="text-slate-400 hover:text-red-600 font-medium text-xs focus:outline-none flex items-center gap-1.5 transition-colors shrink-0">
+                            <i class="fa-solid fa-trash-can text-red-500 text-xs"></i> Remove
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </template>
+
         <!-- Dropdown Menu -->
         <div x-show="open"
             x-transition:enter="transition ease-out duration-100"
@@ -258,11 +331,14 @@
             </template>
 
             <template x-for="item in items" :key="item.id">
-                <div x-show="!search || search === selectedName || item.name.toLowerCase().includes(search.toLowerCase())"
+                <div x-show="!search || item.name.toLowerCase().includes(search.toLowerCase())"
                     @click="select(item)"
-                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50"
-                    :class="selectedId === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700'">
+                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50 flex items-center justify-between"
+                    :class="multiple ? (selectedItems.some(i => i.id === item.id) ? 'text-blue-600 bg-blue-50 font-semibold' : 'text-slate-700') : (selectedId === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700')">
                     <span x-text="item.name"></span>
+                    <template x-if="multiple && selectedItems.some(i => i.id === item.id)">
+                        <i class="fa-solid fa-check text-blue-500 text-xs"></i>
+                    </template>
                 </div>
             </template>
 

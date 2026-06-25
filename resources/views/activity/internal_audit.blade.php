@@ -68,10 +68,10 @@
                         <thead>
                             <tr>
                                 <th class="w-[5%] text-center">No</th>
-                                <th class="w-[15%]">Audit Date</th>
-                                <th class="w-[20%]">Auditee</th>
+                                <th class="w-[10%]">Audit Date</th>
+                                <th class="w-[30%]">Auditee</th>
                                 <th class="w-[20%]">Auditor</th>
-                                <th class="w-[20%]">Departemen Auditee</th>
+                                <th class="w-[15%]">Departemen Auditee</th>
                                 <th class="w-[10%]">Status</th>
                                 <th class="w-[10%]">Action</th>
                             </tr>
@@ -129,7 +129,7 @@
                             <!-- Auditee -->
                             <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Auditee <span class="text-red-500">*</span></label>
-                                <x-searchable-select
+                                <x-searchable-select-multi
                                     name="auditee"
                                     id="formAuditee"
                                     label="Auditee"
@@ -137,7 +137,9 @@
                                     apiUrl="{{ route('internal_audit.get_users') }}"
                                     updateEvent="update-auditee"
                                     changeEvent="auditee-changed"
-                                    hideLabel="true" />
+                                    hideLabel="true"
+                                    multiple="true"
+                                    maxItems="5" />
                             </div>
 
                             <!-- Auditor -->
