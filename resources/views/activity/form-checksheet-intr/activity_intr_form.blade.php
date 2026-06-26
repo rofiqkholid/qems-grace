@@ -120,14 +120,6 @@
                                 <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
                                     {{ $scopeName }}
                                 </h3>
-                                @php
-                                    $firstItem = $scopeGroup->first();
-                                @endphp
-                                @if($firstItem && $firstItem->scope_id)
-                                    <div class="text-slate-400 hover:text-slate-600 transition-colors cursor-help" title="Scope ID: {{ $firstItem->scope_id }}">
-                                        <i class="fa-solid fa-circle-info text-base sm:text-lg"></i>
-                                    </div>
-                                @endif
                             </div>
                             <div class="space-y-4">
                                 @foreach ($scopeGroup as $item)

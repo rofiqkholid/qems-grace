@@ -760,7 +760,6 @@ class MasterController extends Controller
                     "check_item_idn" => $item->check_item_idn,
                     "check_item_en" => $item->check_item_en,
                     "department" => $item->department,
-                    "scope_id" => $item->scope_id,
                     "scope_item" => $item->scope_item,
                     "is_active" => $item->is_active,
                     "action" => '<div class="flex items-center justify-start gap-2">
@@ -770,7 +769,6 @@ class MasterController extends Controller
                                     data-check_item_idn="' . htmlspecialchars($item->check_item_idn, ENT_QUOTES) . '"
                                     data-check_item_en="' . htmlspecialchars($item->check_item_en, ENT_QUOTES) . '"
                                     data-department="' . htmlspecialchars($item->department, ENT_QUOTES) . '"
-                                    data-scope_id="' . $item->scope_id . '"
                                     data-scope_item="' . htmlspecialchars($item->scope_item, ENT_QUOTES) . '"
                                     data-is_active="' . $item->is_active . '">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -814,7 +812,6 @@ class MasterController extends Controller
                 'check_item_idn' => $request->check_item_idn,
                 'check_item_en' => $request->check_item_en,
                 'department' => $request->department,
-                'scope_id' => $request->scope_id,
                 'scope_item' => $request->scope_item,
                 'is_active' => 1,
                 'created_at' => \Carbon\Carbon::now(),
@@ -843,7 +840,6 @@ class MasterController extends Controller
                     'check_item_idn' => $request->check_item_idn,
                     'check_item_en' => $request->check_item_en,
                     'department' => $request->department,
-                    'scope_id' => $request->scope_id,
                     'scope_item' => $request->scope_item,
                     'updated_at' => \Carbon\Carbon::now()
                 ]);
