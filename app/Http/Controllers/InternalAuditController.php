@@ -629,8 +629,8 @@ class InternalAuditController extends Controller
     public function getCars(Request $request)
     {
         $query = DB::table('CsAuditCar as a')
-            ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->whereNotNull('a.department')
             ->where('a.department', '<>', '')
             ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id');
