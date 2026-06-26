@@ -115,7 +115,7 @@
                             <!-- Target Auditee Department -->
                             <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Departemen Auditee <span class="text-red-500">*</span></label>
-                                <x-searchable-select-multi
+                                <x-searchable-select
                                     name="auditee_dept"
                                     id="formAuditeeDept"
                                     label="Department"
@@ -123,9 +123,7 @@
                                     apiUrl="{{ route('genba.get_section') }}"
                                     updateEvent="update-auditee-dept"
                                     changeEvent="auditee-dept-changed"
-                                    hideLabel="true"
-                                    multiple="true"
-                                    maxItems="5" />
+                                    hideLabel="true" />
                             </div>
 
                             <!-- Auditee -->
