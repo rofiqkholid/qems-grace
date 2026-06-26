@@ -180,7 +180,7 @@
                     render: function(data) {
                         return `
                             <div class="flex items-center justify-start w-full">
-                                <button onclick="document_preview(${data})" class="w-9 h-9 inline-flex items-center justify-center text-blue-500 bg-blue-50 hover:bg-blue-100 hover:text-blue-600 transition-colors ring-1 ring-blue-100" title="Preview CAR Report">
+                                <button onclick="document_preview('${data}')" class="w-9 h-9 inline-flex items-center justify-center text-blue-500 bg-blue-50 hover:bg-blue-100 hover:text-blue-600 transition-colors ring-1 ring-blue-100" title="Preview CAR Report">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
                                         <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
                                         <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>

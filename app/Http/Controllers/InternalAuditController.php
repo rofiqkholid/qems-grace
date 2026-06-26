@@ -1056,7 +1056,7 @@ class InternalAuditController extends Controller
 
             $data[] = [
                 'no' => $no++,
-                'id' => $post->id,
+                'id' => $this->encryptCarId($post->id),
                 'req_number' => $post->req_number ?? '-',
                 'audit_date' => $post->audit_date ? Carbon::parse($post->audit_date)->format('d M Y') : '-',
                 'department' => $post->department ?? '-',

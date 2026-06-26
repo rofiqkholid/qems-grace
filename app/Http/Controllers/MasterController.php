@@ -803,7 +803,7 @@ class MasterController extends Controller
     {
         $request->validate([
             'check_item_idn' => 'required',
-            'check_item_en' => 'required',
+            'check_item_en' => 'nullable',
             'department' => 'required',
         ]);
 
@@ -829,7 +829,7 @@ class MasterController extends Controller
         $request->validate([
             'id' => 'required',
             'check_item_idn' => 'required',
-            'check_item_en' => 'required',
+            'check_item_en' => 'nullable',
             'department' => 'required',
         ]);
 
