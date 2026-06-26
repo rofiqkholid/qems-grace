@@ -985,6 +985,7 @@ class InternalAuditController extends Controller
         $defaultDept = !empty($depts[0]) ? $depts[0] : null;
         if (!$car) {
             $reqNumber = $defaultDept ? $this->generateCarReqNumber($defaultDept) : null;
+            $auditDate = $schedule->audit_date ?? $schedule->schedule_date ?? null;
             $carId = DB::table('CsAuditCar')->insertGetId([
                 'audit_detail_id' => $detail->id,
                 'req_number' => $reqNumber,
@@ -993,7 +994,7 @@ class InternalAuditController extends Controller
                 'finding_category' => $detail->judgment ?? 'OFI',
                 'auditor' => $schedule->auditor_names ?? null,
                 'auditee' => $schedule->auditee ?? null,
-                'due_date' => $schedule && $schedule->audit_date ? Carbon::parse($schedule->audit_date)->addWeeks(2)->toDateString() : null,
+                'due_date' => $auditDate ? Carbon::parse($auditDate)->addWeeks(2)->toDateString() : null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -1001,12 +1002,26 @@ class InternalAuditController extends Controller
         } elseif (empty($car->department) && $defaultDept) {
             // Existing CAR with no department — auto-fill it
             $reqNumber = $this->generateCarReqNumber($defaultDept);
+            $auditDate = $schedule->audit_date ?? $schedule->schedule_date ?? null;
             DB::table('CsAuditCar')->where('id', $car->id)->update([
                 'department' => $defaultDept,
                 'req_number' => $reqNumber,
+                'due_date' => $car->due_date ?? ($auditDate ? Carbon::parse($auditDate)->addWeeks(2)->toDateString() : null),
                 'updated_at' => Carbon::now()
             ]);
             $car = DB::table('CsAuditCar')->where('id', $car->id)->first();
+        }
+        // Auto-fill due_date if still missing (existing old records)
+        if (empty($car->due_date)) {
+            $auditDate = $schedule->audit_date ?? $schedule->schedule_date ?? null;
+            $autoDueDate = $auditDate ? Carbon::parse($auditDate)->addWeeks(2)->toDateString() : null;
+            if ($autoDueDate) {
+                DB::table('CsAuditCar')->where('id', $car->id)->update([
+                    'due_date' => $autoDueDate,
+                    'updated_at' => Carbon::now()
+                ]);
+                $car = DB::table('CsAuditCar')->where('id', $car->id)->first();
+            }
         }
         $deptNames = DB::table('GenbaDept')->whereIn('Key1', $depts)->pluck('Desc')->toArray();
         $schedule->auditee_dept_name = !empty($deptNames) ? implode(', ', $deptNames) : $schedule->auditee_dept;
