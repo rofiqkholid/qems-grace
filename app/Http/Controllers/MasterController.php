@@ -810,7 +810,7 @@ class MasterController extends Controller
         try {
             DB::table('CsChecksheetItem')->insert([
                 'check_item_idn' => $request->check_item_idn,
-                'check_item_en' => $request->check_item_en,
+                'check_item_en' => $request->check_item_en ?? '',
                 'department' => $request->department,
                 'scope_item' => $request->scope_item,
                 'is_active' => 1,
@@ -838,7 +838,7 @@ class MasterController extends Controller
                 ->where('id', $request->id)
                 ->update([
                     'check_item_idn' => $request->check_item_idn,
-                    'check_item_en' => $request->check_item_en,
+                    'check_item_en' => $request->check_item_en ?? '',
                     'department' => $request->department,
                     'scope_item' => $request->scope_item,
                     'updated_at' => \Carbon\Carbon::now()
