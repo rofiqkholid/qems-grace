@@ -206,6 +206,8 @@
                     </div>
                     
                     <input type="hidden" name="auditee" value="{{ old('auditee', $car->auditee ?? $schedule->auditee ?? '') }}">
+                    @php $carDueDateRaw = $car->due_date ? \Carbon\Carbon::parse($car->due_date)->format('Y-m-d') : ''; @endphp
+                    <input type="hidden" name="due_date" id="hidden_due_date" value="{{ $carDueDateRaw }}">
                 </div>
             </div>
 

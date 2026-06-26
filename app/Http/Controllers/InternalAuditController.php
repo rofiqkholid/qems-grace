@@ -97,6 +97,24 @@ class InternalAuditController extends Controller
 
             $car->formatted_date = $car->created_at ? Carbon::parse($car->created_at)->format('d F Y') : '-';
 
+            // Auto-fill due_date if missing
+            if (empty($car->due_date)) {
+                $schedule = DB::table('CsAuditHeader')
+                    ->join('CsAuditDetail as d', 'd.audit_header_id', '=', 'CsAuditHeader.id')
+                    ->where('d.id', $car->audit_detail_id)
+                    ->select('CsAuditHeader.audit_date', 'CsAuditHeader.schedule_date')
+                    ->first();
+                $auditDate = $schedule->audit_date ?? $schedule->schedule_date ?? null;
+                if ($auditDate) {
+                    $autoDueDate = Carbon::parse($auditDate)->addWeeks(2)->toDateString();
+                    DB::table('CsAuditCar')->where('id', $car->id)->update([
+                        'due_date' => $autoDueDate,
+                        'updated_at' => Carbon::now()
+                    ]);
+                    $car->due_date = $autoDueDate;
+                }
+            }
+
             $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
 
             return view('activity.internal_action_preview', compact('car', 'action'));
