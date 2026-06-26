@@ -639,6 +639,8 @@ class InternalAuditController extends Controller
             ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->whereNotNull('a.department')
             ->where('a.department', '<>', '')
+            ->whereNotNull('a.finding')
+            ->where('a.finding', '<>', '')
             ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id');
 
         if ($request->has('search') && !empty($request->search['value'])) {
@@ -669,6 +671,8 @@ class InternalAuditController extends Controller
         $totalData = DB::table('CsAuditCar')
             ->whereNotNull('department')
             ->where('department', '<>', '')
+            ->whereNotNull('finding')
+            ->where('finding', '<>', '')
             ->count();
         $totalFiltered = $query->count();
 
@@ -1137,7 +1141,6 @@ class InternalAuditController extends Controller
                         'check_item' => $item->check_item_idn ?? null,
                         'surveillance' => $surveillance,
                         'external' => $external,
-                        'internal_audit' => $internalAudit,
                         'department' => $department,
                         'requirement_no' => $request->requirement_no,
                         'clause_title' => $request->clause_title,
@@ -1146,6 +1149,7 @@ class InternalAuditController extends Controller
                         'finding' => $request->finding,
                         'auditor' => $request->auditor,
                         'auditee' => $request->auditee,
+                        'due_date' => $request->due_date,
                         'updated_at' => Carbon::now()
                     ]);
             } else {
@@ -1156,7 +1160,6 @@ class InternalAuditController extends Controller
                     'check_item' => $item->check_item_idn ?? null,
                     'surveillance' => $surveillance,
                     'external' => $external,
-                    'internal_audit' => $internalAudit,
                     'department' => $department,
                     'requirement_no' => $request->requirement_no,
                     'clause_title' => $request->clause_title,
@@ -1165,6 +1168,7 @@ class InternalAuditController extends Controller
                     'finding' => $request->finding,
                     'auditor' => $request->auditor,
                     'auditee' => $request->auditee,
+                    'due_date' => $request->due_date,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);

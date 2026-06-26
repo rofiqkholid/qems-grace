@@ -125,6 +125,13 @@
                             {{ $car->clause_title ?? '-' }}
                         </div>
                     </div>
+                    <!-- Due Date -->
+                    <div class="flex flex-col gap-1 sm:gap-1.5">
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Due Date</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm">
+                            {{ $car->due_date ? \Carbon\Carbon::parse($car->due_date)->format('d M Y') : '-' }}
+                        </div>
+                    </div>
                     <!-- Check Item -->
                     <div class="flex flex-col gap-1 sm:gap-1.5 col-span-2 sm:col-span-3">
                         <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Check Item</label>

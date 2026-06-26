@@ -31,9 +31,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Left: Metadata -->
                     <div class="col-span-1 md:border-r md:border-slate-100 md:pr-6 grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                        <!-- Left sub-column: CAR Req. Number & Audit Date -->
-                        <div class="space-y-4">
-                            <div>
+                        <!-- Left sub-column: CAR Req. Number, Audit Date & Due Date -->
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-4">
+                            <div class="col-span-2">
                                 <span class="block text-[12px]  text-slate-400 tracking-wider">Req. Number</span>
                                 <span class="text-sm font-bold text-slate-800 mt-1 block" id="car-req-number-display">{{ $car->req_number ?? '-' }}</span>
                             </div>
@@ -41,11 +41,18 @@
                                 <span class="block text-[12px]  text-slate-400 tracking-wider">Audit Date</span>
                                 <span class="text-sm  text-slate-700 mt-1 block">{{ $schedule->formatted_date ?? '-' }}</span>
                             </div>
+                            <div>
+                                <span class="block text-[12px] text-slate-400 tracking-wider">Due Date</span>
+                                @php $carDueDate = $car->due_date ? \Carbon\Carbon::parse($car->due_date)->format('d M Y') : '-'; @endphp
+                                <span class="text-sm text-slate-700 mt-1 block">{{ $carDueDate }}</span>
+                            </div>
                         </div>
                         <!-- Right sub-column: Auditee -->
                         <div class="h-full flex flex-col justify-start">
-                            <span class="block text-[12px] font-semibold text-slate-400 tracking-wider">Auditee</span>
-                            <span class="text-sm font-semibold text-slate-700 mt-1 block break-words leading-relaxed">{{ $schedule->auditee ?? '-' }}</span>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-start h-full">
+                                <span class="block text-sm font-semibold text-slate-400">Auditee</span>
+                                <span class="text-sm text-slate-800 mt-1 block break-words leading-relaxed">{{ $schedule->auditee ?? '-' }}</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -349,7 +356,7 @@
         });
 
         form.addEventListener('change', function(e) {
-            if (e.target.type === 'checkbox' || e.target.type === 'radio' || e.target.type === 'hidden') {
+            if (e.target.type === 'checkbox' || e.target.type === 'radio' || e.target.type === 'hidden' || e.target.type === 'date') {
                 saveDraft();
             }
         });
