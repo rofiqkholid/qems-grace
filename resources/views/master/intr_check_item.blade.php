@@ -88,14 +88,16 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Department <span class="text-red-500">*</span></label>
-                        <x-searchable-select
+                        <x-searchable-select-multi
                             id="create_department"
                             name="department"
                             label="Department"
                             required="true"
                             hideLabel="true"
                             apiUrl="{{ route('genba.get_section') }}"
-                            updateEvent="create-department-event" />
+                            updateEvent="create-department-event"
+                            multiple="true"
+                            maxItems="10" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (IDN) <span class="text-red-500">*</span></label>
@@ -137,14 +139,16 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Department <span class="text-red-500">*</span></label>
-                        <x-searchable-select
+                        <x-searchable-select-multi
                             id="edit_department"
                             name="department"
                             label="Department"
                             required="true"
                             hideLabel="true"
                             apiUrl="{{ route('genba.get_section') }}"
-                            updateEvent="edit-department-event" />
+                            updateEvent="edit-department-event"
+                            multiple="true"
+                            maxItems="10" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (IDN) <span class="text-red-500">*</span></label>
@@ -279,13 +283,18 @@
         $('#edit_check_item_idn').val(checkItemIdn);
         $('#edit_check_item_en').val(checkItemEn);
         
-        const depts = {!! json_encode($departments->keyBy('Key1')->map(fn($d) => $d->Key1 . ' - ' . $d->Desc)->toArray()) !!};
-        const deptName = depts[department] ? (department + ' - ' + depts[department].split(' - ')[1]) : department;
+        const depts = {!! json_encode($departments->keyBy('Key1')->map(fn($d) => $d->Desc)->toArray()) !!};
+        let deptNameArr = [];
+        if (department) {
+            const deptKeys = department.split(',').map(s => s.trim()).filter(Boolean);
+            deptNameArr = deptKeys.map(k => depts[k] || k);
+        }
+        const deptNames = deptNameArr.join(', ');
 
         window.dispatchEvent(new CustomEvent('edit-department-event', {
             detail: {
                 id: department,
-                name: deptName
+                name: deptNames
             }
         }));
 
