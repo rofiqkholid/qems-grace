@@ -233,6 +233,18 @@ class InternalAuditController extends Controller
                 return response()->json(['success' => false, 'message' => 'This Action Plan has already been verified and closed. It cannot be rolled back.'], 403);
             }
 
+            $user = Auth::user();
+            $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+            $isAuditee = strcasecmp(trim($user->full_name), trim($car->auditee ?? '')) === 0;
+            $isAuditeeSuperior = $action && $action->analyzed_by && strcasecmp(trim($user->full_name), trim($action->analyzed_by)) === 0;
+
+            if (!$isAuditee && !$isAuditeeSuperior) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to perform this action. Only the Auditee or the designated Auditee Superior is authorized.'
+                ]);
+            }
+
             DB::table('CsAuditAction')->where('audit_car_id', $car->id)->delete();
 
             DB::table('CsAuditCar')
@@ -1079,6 +1091,18 @@ class InternalAuditController extends Controller
             $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
             if (!$car) {
                 return response()->json(['success' => false, 'message' => 'CAR Action Report not found.']);
+            }
+
+            $user = Auth::user();
+            $action = DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->first();
+            if ($action && $action->analyzed_by) {
+                if (strcasecmp(trim($user->full_name), trim($action->analyzed_by)) !== 0) {
+                    $actionText = ($car->status === 'Closed') ? 'rollback' : 'reject';
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You are not authorized to ' . $actionText . ' this CAR. Only Auditee Superior: ' . $action->analyzed_by . ' is authorized.'
+                    ]);
+                }
             }
 
             if ($car->status === 'Closed') {
