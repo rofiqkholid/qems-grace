@@ -169,7 +169,7 @@
                         <!-- Causal Factor -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Causal Factor (Why-why Analysis, Fish bone) :</label>
-                            <input type="text" name="causal_factor" value="{{ old('causal_factor', $action->causal_factor ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter causal factors or analysis...">
+                            <textarea name="causal_factor" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden" placeholder="Enter causal factors or analysis...">{{ old('causal_factor', $action->causal_factor ?? '') }}</textarea>
                         </div>
                         
                         <!-- Analized by: Auditee Superior -->
@@ -195,14 +195,14 @@
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                            <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                            <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                            <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -213,7 +213,7 @@
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Notes for A & B</label>
-                            <input type="text" name="notes" value="{{ old('notes', $action->notes ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter notes...">
+                            <textarea name="notes" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden" placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
                         </div>
                         
                         <!-- Auditee -->
@@ -245,6 +245,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Auto-resize textareas
+        const textareas = document.querySelectorAll('#actionPlanForm textarea');
+        textareas.forEach(textarea => {
+            const isSingleLine = textarea.name === 'causal_factor' || textarea.name === 'notes';
+            const minHeight = isSingleLine ? 40 : 110;
+            
+            function resize() {
+                textarea.style.height = 'auto';
+                textarea.style.height = (textarea.scrollHeight > minHeight ? textarea.scrollHeight : minHeight) + 'px';
+            }
+            
+            // Initial resize on load
+            resize();
+            
+            // Resize on input
+            textarea.addEventListener('input', resize);
+        });
+
         @if(isset($action) && !empty($action->analyzed_by))
             window.dispatchEvent(new CustomEvent('update-analyzed-by', { 
                 detail: { 
