@@ -55,18 +55,20 @@ class InternalAuditController extends Controller
 
             // Fallback for database hash_id, legacy Crypt, or direct ID lookup
             if (!$car) {
-                $car = DB::table('CsAuditCar as a')
-                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-                    ->where('a.hash_id', $id)
-                    ->select(
-                        'a.*', 
-                        'b.checksheet_item_id', 
-                        'c.hash_id as schedule_hash_id', 
-                        'b.evidence', 
-                        'b.finding_photo_path'
-                    )
-                    ->first();
+                if (is_numeric($id)) {
+                    $car = DB::table('CsAuditCar as a')
+                        ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                        ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                        ->where('a.id', $id)
+                        ->select(
+                            'a.*', 
+                            'b.checksheet_item_id', 
+                            'c.hash_id as schedule_hash_id', 
+                            'b.evidence', 
+                            'b.finding_photo_path'
+                        )
+                        ->first();
+                }
             }
 
             if (!$car) {
@@ -110,7 +112,7 @@ class InternalAuditController extends Controller
         try {
             $carId = $this->decryptCarId($id);
             if (!$carId) {
-                $car = DB::table('CsAuditCar')->where('hash_id', $id)->first();
+                $car = is_numeric($id) ? DB::table('CsAuditCar')->where('id', $id)->first() : null;
                 if (!$car) {
                     try {
                         $decryptedId = Crypt::decryptString($id);
@@ -126,6 +128,16 @@ class InternalAuditController extends Controller
             $car = DB::table('CsAuditCar')->where('id', $carId)->first();
             if (!$car) {
                 return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
+            }
+
+            if ($car->status !== 'Open') {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Action Plan has already been saved/submitted and cannot be edited.'
+                    ], 403);
+                }
+                return redirect()->back()->with('error', 'Action Plan has already been saved/submitted and cannot be edited.');
             }
 
              $request->validate([
@@ -167,6 +179,14 @@ class InternalAuditController extends Controller
                 ]);
             }
 
+            // Update status in CsAuditCar table to 'Under Review'
+            DB::table('CsAuditCar')
+                ->where('id', $car->id)
+                ->update([
+                    'status' => 'Under Review',
+                    'updated_at' => Carbon::now()
+                ]);
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -185,6 +205,55 @@ class InternalAuditController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function rollbackActionPlan($id, Request $request)
+    {
+        try {
+            $carId = $this->decryptCarId($id);
+            if (!$carId) {
+                $car = is_numeric($id) ? DB::table('CsAuditCar')->where('id', $id)->first() : null;
+                if (!$car) {
+                    try {
+                        $decryptedId = Crypt::decryptString($id);
+                        $carId = explode('_', $decryptedId)[0];
+                    } catch (\Exception $e) {
+                        $carId = $id;
+                    }
+                } else {
+                    $carId = $car->id;
+                }
+            }
+
+            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            if (!$car) {
+                return response()->json(['success' => false, 'message' => 'CAR Action Report not found.'], 404);
+            }
+
+            if ($car->status === 'Closed') {
+                return response()->json(['success' => false, 'message' => 'This Action Plan has already been verified and closed. It cannot be rolled back.'], 403);
+            }
+
+            DB::table('CsAuditAction')->where('audit_car_id', $car->id)->delete();
+
+            DB::table('CsAuditCar')
+                ->where('id', $car->id)
+                ->update([
+                    'status' => 'Open',
+                    'updated_at' => Carbon::now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Action Plan rolled back to Open status successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function getSchedules(Request $request)
     {
@@ -606,6 +675,7 @@ class InternalAuditController extends Controller
                             'department' => $dept,
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
+                            'due_date' => $header && $header->audit_date ? Carbon::parse($header->audit_date)->addWeeks(2)->toDateString() : null,
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now()
                         ]);
@@ -827,16 +897,38 @@ class InternalAuditController extends Controller
             $role = $request->role;
             $updateData = [];
 
+            $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
+            if (!$car) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CAR Action Report not found.'
+                ]);
+            }
+
+            if ($car->status !== 'Under Review') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This Action Plan is not ready for verification or has already been closed.'
+                ]);
+            }
+
             if ($role === 'dept') {
-                $updateData['dept_head_nik'] = $user->username;
-                $updateData['dept_head_approved_at'] = Carbon::now();
-            } elseif ($role === 'auditor') {
-                $updateData['auditor_nik'] = $user->username;
-                $updateData['auditor_verified_at'] = Carbon::now();
-                $updateData['auditor_comments'] = $request->comments;
-            } elseif ($role === 'qmr') {
-                $updateData['qmr_nik'] = $user->username;
-                $updateData['qmr_approved_at'] = Carbon::now();
+                $action = DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->first();
+                if (!$action || !$action->analyzed_by) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No Auditee Superior has been selected for this CAR.'
+                    ]);
+                }
+
+                if (strcasecmp(trim($user->full_name), trim($action->analyzed_by)) !== 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You are not authorized to verify this CAR. Only Auditee Superior: ' . $action->analyzed_by . ' is authorized.'
+                    ]);
+                }
+
+                $updateData['approved_by_superior'] = 1;
                 $updateData['status'] = 'Closed';
                 $updateData['completion_date'] = Carbon::now()->toDateString();
             }
@@ -844,6 +936,178 @@ class InternalAuditController extends Controller
             DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
 
             return response()->json(['success' => true, 'message' => 'Approval signature submitted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function verificationTable(Request $request)
+    {
+        $search = $request->search;
+        $date_from = $request->date_from;
+        $date_to = $request->date_to;
+        $dept = $request->dept;
+
+        // Auto-fix any status of CsAuditCar that has an action plan saved but status is still 'Open'
+        DB::table('CsAuditCar')
+            ->where('status', 'Open')
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('CsAuditAction')
+                    ->whereColumn('CsAuditAction.audit_car_id', 'CsAuditCar.id');
+            })
+            ->update(['status' => 'Under Review']);
+
+        // Auto-fix any CsAuditCar due_date that is still NULL by setting it to 2 weeks from audit_date
+        DB::table('CsAuditCar as a')
+            ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->whereNull('a.due_date')
+            ->whereNotNull('c.audit_date')
+            ->update([
+                'a.due_date' => DB::raw("DATEADD(week, 2, c.audit_date)")
+            ]);
+
+        $query = DB::table('CsAuditCar as a')
+            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->whereNotNull('a.department')
+            ->where('a.department', '<>', '')
+            ->whereIn('a.status', ['Under Review', 'Closed'])
+            ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.audit_date as audit_date', 'd.causal_factor', 'd.corrective_action', 'd.preventive_action');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('a.req_number', 'LIKE', "%{$search}%")
+                  ->orWhere('a.department', 'LIKE', "%{$search}%")
+                  ->orWhere('a.auditor', 'LIKE', "%{$search}%")
+                  ->orWhere('a.auditee', 'LIKE', "%{$search}%")
+                  ->orWhere('a.finding_category', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($date_from) {
+            $query->whereDate('a.created_at', '>=', $date_from);
+        }
+        if ($date_to) {
+            $query->whereDate('a.created_at', '<=', $date_to);
+        }
+        if ($dept) {
+            $query->where('a.department', $dept);
+        }
+
+        $totalData = $query->count();
+        $totalFiltered = $totalData;
+
+        $limit = $request->input('length', 10);
+        $start = $request->input('start', 0);
+        
+        $posts = $query->offset($start)
+            ->limit($limit)
+            ->orderBy('a.created_at', 'desc')
+            ->get();
+
+        $data = [];
+        $no = $start + 1;
+        
+        foreach ($posts as $post) {
+            $status = $post->status ?? 'Open';
+            
+            $button = '<div class="flex items-center justify-start gap-1.5">';
+            if ($status === 'Under Review') {
+                $button .= '
+                    <button type="button" onclick="openApproveModal(' . $post->id . ')" class="w-8 h-8 flex items-center justify-center bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors" title="Approve">
+                        <i class="fa-solid fa-check text-sm"></i>
+                    </button>';
+                $button .= '
+                    <button type="button" onclick="rollbackCar(' . $post->id . ', true)" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors" title="Reject (Rollback to Open)">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>';
+            } elseif ($status === 'Closed') {
+                $button .= '
+                    <button type="button" onclick="rollbackCar(' . $post->id . ', false)" class="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-600 hover:text-white rounded-lg transition-colors" title="Rollback to Under Review">
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                    </button>';
+            }
+            $button .= '</div>';
+
+            $statusHtml = '<div class="flex flex-col items-start gap-1">';
+            $statusHtml .= '<span class="px-2 py-0.5 text-[11px] font-bold rounded-full ' . 
+                ($status === 'Closed' ? 'bg-green-100 text-green-800' : 
+                ($status === 'Under Review' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800')) . '">' . $status . '</span>';
+            
+            $statusHtml .= '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500">';
+            $statusHtml .= '<span class="flex items-center gap-0.5 ' . ($post->approved_by_superior ? 'text-green-600' : 'text-slate-400') . '"><i class="fa-solid ' . ($post->approved_by_superior ? 'fa-circle-check' : 'fa-circle') . '"></i> Auditee Superior</span>';
+            $statusHtml .= '</div>';
+            $statusHtml .= '</div>';
+
+            $data[] = [
+                'no' => $no++,
+                'id' => $post->id,
+                'req_number' => $post->req_number ?? '-',
+                'audit_date' => $post->audit_date ? Carbon::parse($post->audit_date)->format('d M Y') : '-',
+                'department' => $post->department ?? '-',
+                'clause_title' => $post->clause_title ?? '-',
+                'check_item' => $post->check_item ?? '-',
+                'finding_category' => $post->finding_category ?? 'OFI',
+                'auditor' => $post->auditor ?? '-',
+                'auditee' => $post->auditee ?? '-',
+                'causal_factor' => $post->causal_factor ?? '-',
+                'corrective_action' => $post->corrective_action ?? '-',
+                'preventive_action' => $post->preventive_action ?? '-',
+                'status' => $statusHtml,
+                'action' => $button
+            ];
+        }
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalData,
+            "recordsFiltered" => $totalFiltered,
+            "data" => $data
+        ]);
+    }
+
+    public function rollbackCar(Request $request)
+    {
+        $request->validate([
+            'car_id' => 'required|integer'
+        ]);
+
+        try {
+            $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
+            if (!$car) {
+                return response()->json(['success' => false, 'message' => 'CAR Action Report not found.']);
+            }
+
+            if ($car->status === 'Closed') {
+                DB::table('CsAuditCar')
+                    ->where('id', $request->car_id)
+                    ->update([
+                        'approved_by_superior' => 0,
+                        'status' => 'Under Review',
+                        'completion_date' => null,
+                        'evidence_file_path' => null,
+                        'updated_at' => Carbon::now()
+                    ]);
+                $message = 'CAR Action Report rolled back to Under Review successfully.';
+            } else {
+                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->delete();
+
+                DB::table('CsAuditCar')
+                    ->where('id', $request->car_id)
+                    ->update([
+                        'approved_by_superior' => 0,
+                        'status' => 'Open',
+                        'completion_date' => null,
+                        'evidence_file_path' => null,
+                        'updated_at' => Carbon::now()
+                    ]);
+                $message = 'CAR Action Report rejected and rolled back to Open successfully.';
+            }
+
+            return response()->json(['success' => true, 'message' => $message]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -918,6 +1182,7 @@ class InternalAuditController extends Controller
                         'department' => $dept,
                         'check_item' => $item->check_item_idn ?? null,
                         'finding_category' => $judgment,
+                        'due_date' => $header && $header->audit_date ? Carbon::parse($header->audit_date)->addWeeks(2)->toDateString() : null,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
@@ -981,6 +1246,7 @@ class InternalAuditController extends Controller
                 'finding_category' => $detail->judgment ?? 'OFI',
                 'auditor' => $schedule->auditor_names ?? null,
                 'auditee' => $schedule->auditee ?? null,
+                'due_date' => $schedule && $schedule->audit_date ? Carbon::parse($schedule->audit_date)->addWeeks(2)->toDateString() : null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -1147,6 +1413,7 @@ class InternalAuditController extends Controller
                     'finding' => $request->finding,
                     'auditor' => $request->auditor,
                     'auditee' => $request->auditee,
+                    'due_date' => $schedule && $schedule->audit_date ? Carbon::parse($schedule->audit_date)->addWeeks(2)->toDateString() : null,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);

@@ -37,8 +37,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
     Route::get('/internal-action-report', [InternalAuditController::class, 'actionReport'])->name('internal_audit.action_report');
+    Route::get('/verifikasi-internal-audit', function () {
+        return view('approvals.verifkasi_internal_audit');
+    })->name('internal_audit.verification');
     Route::get('/internal-action-report/preview/{id}', [InternalAuditController::class, 'actionReportPreview'])->name('internal_audit.action_report.preview');
     Route::post('/internal-action-report/preview/{id}/save-action', [InternalAuditController::class, 'saveActionReportDetails'])->name('internal_audit.action_report.save_action');
+    Route::post('/internal-action-report/preview/{id}/rollback', [InternalAuditController::class, 'rollbackActionPlan'])->name('internal_audit.action_report.rollback');
     Route::post('/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
     Route::post('/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
     Route::get('/internal-audit/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');
@@ -53,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/cars', [InternalAuditController::class, 'getCars'])->name('internal_audit.cars');
     Route::post('/internal-audit/cars/update', [InternalAuditController::class, 'updateCarPlan'])->name('internal_audit.cars.update');
     Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
+    Route::post('/internal-audit/cars/rollback', [InternalAuditController::class, 'rollbackCar'])->name('internal_audit.cars.rollback');
+    Route::post('/internal-audit/verification/table', [InternalAuditController::class, 'verificationTable'])->name('internal_audit.verification.table');
     Route::post('/internal-audit/cars/delete', [InternalAuditController::class, 'deleteCar'])->name('internal_audit.cars.delete');
     Route::post('/internal-audit/get-requirements', [InternalAuditController::class, 'getRequirements'])->name('internal_audit.get_requirements');
     Route::post('/internal-audit/get-clause-titles', [InternalAuditController::class, 'getClauseTitles'])->name('internal_audit.get_clause_titles');

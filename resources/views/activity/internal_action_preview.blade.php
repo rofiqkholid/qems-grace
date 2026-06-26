@@ -2,6 +2,8 @@
 
 @php
     $hideCentralToast = true;
+    $isSaved = isset($car) && in_array($car->status, ['Under Review', 'Closed']);
+    $isAuditeeSuperior = Auth::check() && isset($action) && strcasecmp(trim(Auth::user()->full_name), trim($action->analyzed_by ?? '')) === 0;
 @endphp
 
 @section('title', 'Action Report Preview')
@@ -169,21 +171,25 @@
                         <!-- Causal Factor -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Causal Factor (Why-why Analysis, Fish bone) :</label>
-                            <textarea name="causal_factor" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden" placeholder="Enter causal factors or analysis...">{{ old('causal_factor', $action->causal_factor ?? '') }}</textarea>
+                            <textarea name="causal_factor" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden {{ $isSaved ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" {{ $isSaved ? 'disabled' : '' }} placeholder="Enter causal factors or analysis...">{{ old('causal_factor', $action->causal_factor ?? '') }}</textarea>
                         </div>
                         
                         <!-- Analized by: Auditee Superior -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Analized by Auditee Superior</label>
-                            <x-searchable-select
-                                id="analyzed_by"
-                                name="analyzed_by"
-                                label="Analized by: Auditee Superior"
-                                required="false"
-                                hideLabel="true"
-                                apiUrl="{{ route('internal_audit.get_users') }}"
-                                updateEvent="update-analyzed-by"
-                                changeEvent="analyzed-by-changed" />
+                            @if($isSaved)
+                                <input type="text" value="{{ $action->analyzed_by ?? '' }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate">
+                            @else
+                                <x-searchable-select
+                                    id="analyzed_by"
+                                    name="analyzed_by"
+                                    label="Analized by: Auditee Superior"
+                                    required="false"
+                                    hideLabel="true"
+                                    apiUrl="{{ route('internal_audit.get_users') }}"
+                                    updateEvent="update-analyzed-by"
+                                    changeEvent="analyzed-by-changed" />
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -195,14 +201,14 @@
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                            <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                            <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden {{ $isSaved ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" {{ $isSaved ? 'disabled' : '' }} placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                            <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden {{ $isSaved ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" {{ $isSaved ? 'disabled' : '' }} placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -213,7 +219,7 @@
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Notes for A & B</label>
-                            <textarea name="notes" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden" placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
+                            <textarea name="notes" rows="1" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden {{ $isSaved ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" {{ $isSaved ? 'disabled' : '' }} placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
                         </div>
                         
                         <!-- Auditee -->
@@ -230,17 +236,90 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
-                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
-                        Save Action Plan
-                    </button>
+                <!-- Submit / Rollback / Verify / Reject Button -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-slate-100 pt-6">
+                    <div>
+                        @if($isSaved)
+                            @if($car->status === 'Under Review')
+                                <div class="text-left">
+                                    <span class="text-xs font-semibold text-emerald-600 block">
+                                        <i class="fa-solid fa-circle-info mr-1"></i> CAR has been saved, waiting for Auditee Superior to analyze
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 block italic mt-0.5">
+                                        CAR telah disimpan, menunggu Auditee Superior untuk melakukan analisis
+                                    </span>
+                                </div>
+                            @elseif($car->status === 'Closed')
+                                <div class="text-left">
+                                    <span class="text-xs font-semibold text-emerald-600 block">
+                                        <i class="fa-solid fa-circle-check mr-1"></i> Action Plan has been verified and closed
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 block italic mt-0.5">
+                                        Action Plan telah diverifikasi dan selesai (Closed)
+                                    </span>
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                    <div class="flex gap-3 w-full sm:w-auto justify-end">
+                        @if($isSaved)
+                            @if($isAuditeeSuperior)
+                                @if($car->status === 'Under Review')
+                                    <button type="button" id="btnVerify" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-check"></i> Verify Action Plan
+                                    </button>
+                                    <button type="button" id="btnRollback" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-xmark"></i> Reject Action Plan
+                                    </button>
+                                @endif
+                            @else
+                                @if($car->status === 'Under Review')
+                                    <button type="button" id="btnRollback" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-rotate-left"></i> Rollback Action Plan
+                                    </button>
+                                @endif
+                            @endif
+                        @else
+                            <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
+                                Save Action Plan
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
         </form>
     </main>
 
     @include('layouts.footer')
+</div>
+
+<!-- Generic Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 z-[60] hidden">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeConfirmationModal()"></div>
+
+    <!-- Modal -->
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md transform transition-all p-6 text-center border border-slate-100">
+            <div id="modalIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5">
+                <!-- Icon injected by JS -->
+            </div>
+
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
+            <p id="modalMessage" class="text-base text-slate-600 mb-6 leading-relaxed"></p>
+
+            <div class="flex gap-3 justify-center">
+                <button type="button" onclick="closeConfirmationModal()"
+                    class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors text-sm">
+                    Cancel
+                </button>
+                <button type="button" id="confirmBtn"
+                    class="px-5 py-2.5 text-white font-medium rounded-xl transition-colors text-sm">
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -310,6 +389,9 @@
                 .then(data => {
                     if (data.success) {
                         showToast(data.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         showToast(data.message || 'An error occurred.', 'error');
                     }
@@ -322,6 +404,154 @@
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
                 });
+            });
+        }
+
+        let activeAction = null; // 'verify' or 'rollback'
+
+        window.closeConfirmationModal = function() {
+            document.getElementById('confirmationModal').classList.add('hidden');
+            activeAction = null;
+        }
+
+        // Rollback / Reject AJAX Action
+        const rollbackBtn = document.getElementById('btnRollback');
+        if (rollbackBtn) {
+            rollbackBtn.addEventListener('click', function() {
+                const isReject = rollbackBtn.classList.contains('bg-red-600');
+                activeAction = 'rollback';
+                
+                const title = isReject ? 'Reject Action Plan' : 'Rollback Action Plan';
+                const message = isReject 
+                    ? 'Are you sure you want to reject this action plan? This will allow the auditee to edit it again.' 
+                    : 'Are you sure you want to rollback this action plan? This will allow editing again.';
+                
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalMessage').innerText = message;
+                
+                const modalIcon = document.getElementById('modalIcon');
+                const confirmBtn = document.getElementById('confirmBtn');
+                
+                if (isReject) {
+                    modalIcon.className = 'w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-5';
+                    modalIcon.innerHTML = '<i class="fa-solid fa-xmark text-2xl"></i>';
+                    confirmBtn.className = 'px-5 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors text-sm';
+                    confirmBtn.innerText = 'Yes, Reject';
+                } else {
+                    modalIcon.className = 'w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-5';
+                    modalIcon.innerHTML = '<i class="fa-solid fa-rotate-left text-2xl"></i>';
+                    confirmBtn.className = 'px-5 py-2.5 bg-orange-500 text-white font-medium rounded-xl hover:bg-orange-600 transition-colors text-sm';
+                    confirmBtn.innerText = 'Yes, Rollback';
+                }
+                
+                document.getElementById('confirmationModal').classList.remove('hidden');
+            });
+        }
+
+        // Verify AJAX Action
+        const verifyBtn = document.getElementById('btnVerify');
+        if (verifyBtn) {
+            verifyBtn.addEventListener('click', function() {
+                activeAction = 'verify';
+                
+                document.getElementById('modalTitle').innerText = 'Verify Action Plan';
+                document.getElementById('modalMessage').innerText = 'Are you sure you want to verify and close this action plan?';
+                
+                const modalIcon = document.getElementById('modalIcon');
+                const confirmBtn = document.getElementById('confirmBtn');
+                
+                modalIcon.className = 'w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5';
+                modalIcon.innerHTML = '<i class="fa-solid fa-check text-2xl"></i>';
+                confirmBtn.className = 'px-5 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors text-sm';
+                confirmBtn.innerText = 'Yes, Verify';
+                
+                document.getElementById('confirmationModal').classList.remove('hidden');
+            });
+        }
+
+        // Confirm Button click inside modal
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            if (activeAction === 'rollback') {
+                closeConfirmationModal();
+                executeRollback();
+            } else if (activeAction === 'verify') {
+                closeConfirmationModal();
+                executeVerification();
+            }
+        });
+
+        function executeRollback() {
+            const isReject = rollbackBtn.classList.contains('bg-red-600');
+            const originalText = rollbackBtn.innerHTML;
+            const loadingText = isReject ? 'Rejecting...' : 'Rolling back...';
+            
+            rollbackBtn.disabled = true;
+            rollbackBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> ${loadingText}`;
+            
+            fetch('{{ route("internal_audit.action_report.rollback", request()->route("id")) }}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'An error occurred.', 'error');
+                    rollbackBtn.disabled = false;
+                    rollbackBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMsg = isReject ? 'An error occurred while rejecting.' : 'An error occurred while performing rollback.';
+                showToast(errorMsg, 'error');
+                rollbackBtn.disabled = false;
+                rollbackBtn.innerHTML = originalText;
+            });
+        }
+
+        function executeVerification() {
+            const originalText = verifyBtn.innerHTML;
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying...';
+            
+            fetch('{{ route("internal_audit.cars.approve") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                },
+                body: JSON.stringify({
+                    car_id: {{ $car->id }},
+                    role: 'dept'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'An error occurred.', 'error');
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while performing verification.', 'error');
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = originalText;
             });
         }
     });
