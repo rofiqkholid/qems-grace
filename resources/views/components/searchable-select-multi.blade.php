@@ -39,18 +39,27 @@
             @if($updateEvent)
             window.addEventListener('{{ $updateEvent }}', (e) => {
                 if (this.multiple) {
-                    let val = '';
+                    let ids = '';
+                    let names = '';
                     if (typeof e.detail === 'object' && e.detail !== null) {
-                        val = e.detail.name || e.detail.value || e.detail.id || '';
+                        ids = e.detail.id || e.detail.value || '';
+                        names = e.detail.name || ids;
                     } else {
-                        val = e.detail || '';
+                        ids = e.detail || '';
+                        names = ids;
                     }
-                    if (val) {
-                        this.selectedItems = val.split(',').map(s => s.trim()).filter(Boolean).map(s => ({ id: s, name: s }));
+                    if (ids) {
+                        let idArr = ids.split(',').map(s => s.trim()).filter(Boolean);
+                        let nameArr = names.split(',').map(s => s.trim()).filter(Boolean);
+                        this.selectedItems = idArr.map((id, idx) => ({
+                            id: id,
+                            name: nameArr[idx] || id
+                        }));
                     } else {
                         this.selectedItems = [];
                     }
-                    const combinedVal = this.selectedItems.map(item => item.id).join(', ');
+                    let valField = '{{ $valueField }}';
+                    const combinedVal = this.selectedItems.map(item => item[valField] || item.id).join(', ');
                     $('#{{ $id }}').val(combinedVal);
                     this.search = '';
                 } else {
@@ -188,7 +197,8 @@
                 }
                 
                 this.search = '';
-                let combinedVal = this.selectedItems.map(i => i.name).join(', ');
+                let valField = '{{ $valueField }}';
+                let combinedVal = this.selectedItems.map(i => i[valField] || i.id).join(', ');
                 $('#{{ $id }}').val(combinedVal);
 
                 @if($changeEvent)
@@ -230,7 +240,8 @@
 
         removeItem(item) {
             this.selectedItems = this.selectedItems.filter(i => i.id !== item.id);
-            let combinedVal = this.selectedItems.map(i => i.name).join(', ');
+            let valField = '{{ $valueField }}';
+            let combinedVal = this.selectedItems.map(i => i[valField] || i.id).join(', ');
             $('#{{ $id }}').val(combinedVal);
 
             @if($changeEvent)

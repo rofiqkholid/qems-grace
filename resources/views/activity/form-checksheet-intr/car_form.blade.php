@@ -291,8 +291,8 @@
 
         // Dispatch initial department values
         @php
-            $initialDeptId = old('department', $car->department ?? $schedule->auditee_dept);
-            $initialDept = $departments->firstWhere('Key1', $initialDeptId);
+            $initialDeptId = old('department', $car->department ?? '');
+            $initialDept = $initialDeptId ? $departments->firstWhere('Key1', $initialDeptId) : null;
             $initialDeptName = $initialDept ? $initialDept->Desc : $initialDeptId;
         @endphp
         window.dispatchEvent(new CustomEvent('update-car-department', {

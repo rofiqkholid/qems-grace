@@ -303,8 +303,9 @@ class InternalAuditController extends Controller
             $no++;
             
             // Fetch department name
-            $dept = DB::table('GenbaDept')->where('Key1', $post->auditee_dept)->first();
-            $deptName = $dept ? $dept->Desc : $post->auditee_dept;
+            $depts = array_map('trim', explode(',', $post->auditee_dept));
+            $deptNames = DB::table('GenbaDept')->whereIn('Key1', $depts)->pluck('Desc')->toArray();
+            $deptName = !empty($deptNames) ? implode(', ', $deptNames) : $post->auditee_dept;
 
             $action = '<div class="flex items-center justify-start gap-2">';
             if ($post->status === 'Scheduled') {
@@ -428,8 +429,9 @@ class InternalAuditController extends Controller
             return response()->json(['success' => false, 'message' => 'Schedule not found.']);
         }
 
-        $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
-        $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
+        $depts = array_map('trim', explode(',', $schedule->auditee_dept));
+        $deptNames = DB::table('GenbaDept')->whereIn('Key1', $depts)->pluck('Desc')->toArray();
+        $schedule->auditee_dept_name = !empty($deptNames) ? implode(', ', $deptNames) : $schedule->auditee_dept;
 
         // Override id to be hash_id for the form input
         $schedule->id = $schedule->hash_id;
@@ -452,8 +454,9 @@ class InternalAuditController extends Controller
         $schedule->schedule_date = $schedule->audit_date;
 
         // Fetch department description
-        $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
-        $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
+        $depts = array_map('trim', explode(',', $schedule->auditee_dept));
+        $deptNames = DB::table('GenbaDept')->whereIn('Key1', $depts)->pluck('Desc')->toArray();
+        $schedule->auditee_dept_name = !empty($deptNames) ? implode(', ', $deptNames) : $schedule->auditee_dept;
 
         // Seed default checksheet items if empty
         $count = DB::table('CsChecksheetItem')->count();
@@ -491,7 +494,7 @@ class InternalAuditController extends Controller
 
         $items = DB::table('CsChecksheetItem')
             ->where('is_active', 1)
-            ->where('department', $schedule->auditee_dept)
+            ->whereIn('department', $depts)
             ->get();
 
         $details = DB::table('CsAuditDetail as d')
@@ -1260,8 +1263,8 @@ class InternalAuditController extends Controller
 
         $car = DB::table('CsAuditCar')->where('audit_detail_id', $detail->id)->first();
         if (!$car) {
-            $dept = $schedule ? $schedule->auditee_dept : null;
-            $reqNumber = $dept ? $this->generateCarReqNumber($dept) : null;
+            $dept = null;
+            $reqNumber = null;
             $carId = DB::table('CsAuditCar')->insertGetId([
                 'audit_detail_id' => $detail->id,
                 'req_number' => $reqNumber,
@@ -1276,8 +1279,9 @@ class InternalAuditController extends Controller
             ]);
             $car = DB::table('CsAuditCar')->where('id', $carId)->first();
         }
-        $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
-        $schedule->auditee_dept_name = $dept ? $dept->Desc : $schedule->auditee_dept;
+        $depts = array_map('trim', explode(',', $schedule->auditee_dept));
+        $deptNames = DB::table('GenbaDept')->whereIn('Key1', $depts)->pluck('Desc')->toArray();
+        $schedule->auditee_dept_name = !empty($deptNames) ? implode(', ', $deptNames) : $schedule->auditee_dept;
 
         $departments = DB::table('GenbaDept')
             ->where('CheckBox01', 1)
