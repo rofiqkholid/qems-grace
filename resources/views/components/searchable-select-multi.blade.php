@@ -58,8 +58,7 @@
                     } else {
                         this.selectedItems = [];
                     }
-                    let valField = '{{ $valueField }}';
-                    const combinedVal = this.selectedItems.map(item => item[valField] || item.id).join(', ');
+                    const combinedVal = this.selectedItems.map(item => item.id).join(', ');
                     $('#{{ $id }}').val(combinedVal);
                     this.search = '';
                 } else {
@@ -197,8 +196,7 @@
                 }
                 
                 this.search = '';
-                let valField = '{{ $valueField }}';
-                let combinedVal = this.selectedItems.map(i => i[valField] || i.id).join(', ');
+                let combinedVal = this.selectedItems.map(i => i.id).join(', ');
                 $('#{{ $id }}').val(combinedVal);
 
                 @if($changeEvent)
@@ -240,8 +238,7 @@
 
         removeItem(item) {
             this.selectedItems = this.selectedItems.filter(i => i.id !== item.id);
-            let valField = '{{ $valueField }}';
-            let combinedVal = this.selectedItems.map(i => i[valField] || i.id).join(', ');
+            let combinedVal = this.selectedItems.map(i => i.id).join(', ');
             $('#{{ $id }}').val(combinedVal);
 
             @if($changeEvent)

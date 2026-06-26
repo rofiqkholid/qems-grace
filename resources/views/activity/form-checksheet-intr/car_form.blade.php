@@ -35,7 +35,7 @@
                         <div class="space-y-4">
                             <div>
                                 <span class="block text-[12px]  text-slate-400 tracking-wider">Req. Number</span>
-                                <span class="text-sm font-bold text-slate-800 mt-1 block">{{ $car->req_number ?? '-' }}</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" id="car-req-number-display">{{ $car->req_number ?? '-' }}</span>
                             </div>
                             <div>
                                 <span class="block text-[12px]  text-slate-400 tracking-wider">Audit Date</span>
@@ -68,15 +68,13 @@
 
                 <!-- Audit Source Selection (Surveillance, External, Internal Audit) -->
                 <div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @php
                             $surveillanceText = old('audit_source_surveillance_text', $car->surveillance ?? '');
                             $isSurveillanceChecked = old('audit_source') ? in_array('Surveillance', old('audit_source')) : !is_null($car->surveillance ?? null);
                             
                             $externalText = old('audit_source_external_text', $car->external ?? '');
                             $isExternalChecked = old('audit_source') ? in_array('External', old('audit_source')) : !is_null($car->external ?? null);
-                            
-                            $isInternalChecked = old('audit_source') ? in_array('Internal Audit', old('audit_source')) : !is_null($car->internal_audit ?? null);
                         @endphp
 
                         <!-- Column 1: Surveillance -->
@@ -108,41 +106,6 @@
                             </label>
                             <div class="pt-1 pl-1.5">
                                 <input type="text" name="audit_source_external_text" id="external_input" value="{{ old('audit_source_external_text', $externalText) }}" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm disabled:bg-slate-50 disabled:text-slate-400" placeholder="" {{ $isExternalChecked ? '' : 'disabled' }}>
-                            </div>
-                        </div>
-
-                        <!-- Column 3: Internal Audit -->
-                        <div class="space-y-2">
-                            <label class="relative flex items-center gap-3 p-1.5 bg-transparent hover:bg-slate-50 cursor-pointer rounded-lg transition-all">
-                                <input type="checkbox" name="audit_source[]" value="Internal Audit" class="peer sr-only audit-source-checkbox" {{ $isInternalChecked ? 'checked' : '' }} onchange="toggleAuditSourceInputs()">
-                                <div class="w-5 h-5 rounded-md border border-slate-300 flex items-center justify-center peer-checked:border-sky-400 peer-checked:bg-sky-50 peer-checked:[&_svg]:scale-100 transition-all shrink-0">
-                                    <svg class="w-3 h-3 text-sky-400 scale-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm font-bold text-slate-700">Internal Audit</span>
-                            </label>
-                            
-                            <!-- Audit Category checkboxes nested here -->
-                            <div class="pl-8 pt-1.5 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-100 min-h-[50px] items-center">
-                                @php
-                                    $rawCategory = old('audit_category', $car->internal_audit ?? '');
-                                    $selectedCategories = is_array($rawCategory) ? $rawCategory : (empty($rawCategory) ? [] : explode(', ', $rawCategory));
-                                @endphp
-                                @foreach(['Product', 'Process', 'System', 'Environment'] as $catVal)
-                                @php
-                                    $isCatChecked = in_array($catVal, $selectedCategories);
-                                @endphp
-                                <label class="relative flex items-center gap-2 cursor-pointer transition-all">
-                                    <input type="checkbox" name="audit_category[]" value="{{ $catVal }}" class="peer sr-only category-checkbox" {{ $isCatChecked ? 'checked' : '' }} {{ $isInternalChecked ? '' : 'disabled' }}>
-                                    <div class="w-4 h-4 rounded-md border border-slate-300 flex items-center justify-center peer-checked:border-sky-400 peer-checked:bg-sky-50 peer-checked:[&_svg]:scale-100 transition-all shrink-0 peer-disabled:bg-slate-50 peer-disabled:opacity-50">
-                                        <svg class="w-2.5 h-2.5 text-sky-400 scale-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </div>
-                                    <span class="text-xs font-semibold text-slate-600 peer-disabled:text-slate-400">{{ $catVal }}</span>
-                                </label>
-                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -367,6 +330,11 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Draft auto-saved:', data);
+                // Update req_number display if returned
+                if (data.req_number) {
+                    const reqDisplay = document.getElementById('car-req-number-display');
+                    if (reqDisplay) reqDisplay.textContent = data.req_number;
+                }
             })
             .catch(error => {
                 console.error('Error saving draft:', error);

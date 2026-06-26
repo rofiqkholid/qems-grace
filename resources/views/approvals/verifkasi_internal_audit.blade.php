@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Internal Audit Verification')
+@section('title', 'Execution Genba')
 
 @section('content')
 @include('layouts.sidebar')
@@ -14,8 +14,8 @@
     <main class="flex-1 p-6">
         <!-- Page Title -->
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-800">Internal Audit Verification</h1>
-            <p class="text-slate-500 mt-1">Verifikasi Audit Internal (Approval)</p>
+            <h1 class="text-2xl font-bold text-slate-800">Execution Genba</h1>
+            <p class="text-slate-500 mt-1">Verifikasi Genba (Approval)</p>
         </div>
 
         <!-- Main Card -->
@@ -26,7 +26,7 @@
                     <!-- Search -->
                     <div class="col-span-2 lg:col-span-auto lg:flex-1 lg:min-w-[200px]">
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search CAR Number, Department, Auditor, Category..."
+                            <input type="text" id="searchInput" placeholder="Search findings..."
                                 class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         </div>
@@ -57,7 +57,7 @@
                     </div>
 
                     <!-- Department Filter -->
-                    <div class="col-span-2 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
@@ -65,6 +65,19 @@
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
                             hideLabel="true" />
+                    </div>
+
+                    <!-- Detail Area Filter -->
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
+                        <x-searchable-select
+                            name="detail_area"
+                            id="detailAreaFilter"
+                            label="Detail Area"
+                            :initialOptions="$detail_areas"
+                            valueField="id"
+                            updateEvent="updateDetailAreaFilter"
+                            hideLabel="true"
+                            placeholder="Select Detail Area..." />
                     </div>
 
                     <!-- Reset Button -->
@@ -84,14 +97,26 @@
                     <thead>
                         <tr>
                             <th class="w-[4%] text-center">No</th>
-                            <th class="w-[15%]">CAR Number</th>
-                            <th class="w-[6%] text-left">Preview</th>
-                            <th class="w-[12%]">Audit Date</th>
-                            <th class="w-[13%]">Department</th>
-                            <th class="w-[15%]">Clause</th>
-                            <th class="w-[14%]">Auditor</th>
-                            <th class="w-[14%]">Auditee</th>
-                            <th class="w-[7%]">Approve</th>
+                            <th class="w-[8%]">DocNum</th>
+                            <th class="w-[10%]">Genba Date</th>
+                            <th class="w-[12%]">Line Checked</th>
+                            <th class="w-[12%]">Area Detail</th>
+                            <th class="w-[5%]">Pict</th>
+                            <th class="w-[9%]">Asign to Dept</th>
+                            <th class="w-[12%]">Auditor</th>
+                            <th class="w-[14%]">
+                                <div class="flex flex-col items-center gap-1.5">
+                                    <span>Status</span>
+                                    <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
+                                        <span>Action</span>
+                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
+                                        <span>Evidence</span>
+                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
+                                        <span>Close</span>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="w-[8%]">Approve</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -103,43 +128,107 @@
         </div>
     </main>
     @include('layouts.footer')
+
 </div>
 
 <!-- Mobile Sidebar Overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
 
-<!-- Generic Confirmation Modal -->
-<div id="confirmationModal" class="fixed inset-0 z-[60] hidden">
+<!-- Image Preview Modal -->
+<div id="imagePreviewModal" class="fixed inset-0 z-50 hidden">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeConfirmationModal()"></div>
+    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeImageModal()"></div>
 
     <!-- Modal -->
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md transform transition-all p-6 text-center border border-slate-100">
-            <div id="modalIcon" class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                <!-- Icon injected by JS -->
+        <div class="bg-white rounded-2xl w-full max-w-4xl transform transition-all h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Findings & Evidence</h3>
+                <button type="button" onclick="closeImageModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
-            <p id="modalMessage" class="text-base text-slate-600 mb-6 leading-relaxed"></p>
+            <!-- Content -->
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                    <!-- Before Section -->
+                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
 
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">Before Condition</h4>
+                            </div>
+                        </div>
 
+                        <!-- Findings Text -->
+                        <div class="mb-4">
+                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
+                                <p id="modalCaptionBefore" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
+                            </div>
+                        </div>
 
-            <input type="hidden" id="confirmationId">
+                        <!-- Images -->
+                        <div id="imageContainerBefore" class="grid grid-cols-2 gap-3 content-start"></div>
 
-            <div class="flex gap-3 justify-center">
-                <button type="button" onclick="closeConfirmationModal()"
-                    class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors">
-                    Cancel
-                </button>
-                <button type="button" id="confirmBtn" onclick="submitConfirmation()"
-                    class="px-5 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors">
-                    Yes, Approve
+                        <!-- Empty State -->
+                        <div id="noImageBefore" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
+                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
+                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-medium text-slate-400">No finding images</span>
+                        </div>
+                    </div>
+
+                    <!-- After Section -->
+                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
+
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">After Condition</h4>
+                            </div>
+                        </div>
+
+                        <!-- Evidence Text -->
+                        <div class="mb-4">
+                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
+                                <p id="modalCaptionAfter" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
+                                <!-- Simple arrow decoration -->
+                            </div>
+                        </div>
+
+                        <!-- Images -->
+                        <div id="imageContainerAfter" class="grid grid-cols-2 gap-3 content-start"></div>
+
+                        <!-- Empty State -->
+                        <div id="noImageAfter" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
+                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
+                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-medium text-slate-400">No evidence images</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+                <button type="button" onclick="closeImageModal()"
+                    class="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors">
+                    Close Preview
                 </button>
             </div>
         </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
@@ -150,88 +239,110 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('internal_audit.verification.table') }}",
+                url: "{{ route('execution_genba.table') }}",
                 type: 'POST',
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
-                    d.search = $('#searchInput').val();
+                    d.search = $('#searchInput').val(); // Corrected param name for controller
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.detail_area = $('#detailAreaFilter').val();
                 }
             },
-            columns: [
-                {
+            columns: [{
                     data: 'no',
                     orderable: false,
-                    className: 'text-center font-base text-slate-700'
-                },
-                {
-                    data: 'req_number',
-                    className: 'font-base text-slate-900 text-sm',
-                    render: function(data) {
-                        return data || '-';
+                    className: 'text-center font-base text-slate-700',
+                    render: function(data, type, row) {
+                        return data;
                     }
                 },
                 {
-                    data: 'id',
+                    data: 'DocNum',
+                    className: 'font-base text-slate-900',
+                    render: function(data, type, row) {
+                        return '<span class="inline-flex items-center rounded-md text-sm font-base text-slate-800 font-mono">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'date',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'area_checked',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + (data || ' ') + '</span>';
+                    }
+                },
+                {
+                    data: 'area_detail',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + (data || ' ') + '</span>';
+                    }
+                },
+                {
+                    data: 'path', // Using path as the data source, but accessing other fields in render
                     orderable: false,
                     className: 'text-left',
-                    render: function(data) {
-                        return `
-                            <div class="flex items-center justify-start w-full">
-                                <button onclick="document_preview('${data}')" class="w-9 h-9 inline-flex items-center justify-center text-blue-500 bg-blue-50 hover:bg-blue-100 hover:text-blue-600 transition-colors ring-1 ring-blue-100" title="Preview CAR Report">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-                                        <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
-                                        <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
-                                        <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                    }
-                },
-                {
-                    data: 'audit_date',
-                    className: 'text-slate-700',
-                    render: function(data) {
-                        return '<span class="text-sm">' + data + '</span>';
-                    }
-                },
-                {
-                    data: 'department',
-                    className: 'text-slate-700',
-                    render: function(data) {
-                        return '<span class="text-sm">' + data + '</span>';
-                    }
-                },
-                {
-                    data: 'clause_title',
-                    className: 'text-slate-700',
-                    render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
-                    }
-                },
+                    render: function(data, type, row) {
+                        const hasBefore = row.path ? true : false;
+                        const hasAfter = row.execution_path ? true : false;
 
+                        if (hasBefore || hasAfter) {
+                            const findings = encodeURIComponent(row.findings || '').replace(/'/g, "%27");
+                            const comment = encodeURIComponent(row.execution_comment || '').replace(/'/g, "%27");
+                            const pathBefore = row.path || '';
+                            const pathAfter = row.execution_path || '';
+
+                            return `
+                                <div class="flex items-center justify-start w-full">
+                                    <button class="w-9 h-9 inline-flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors ring-1 ring-slate-200" 
+                                        onclick="viewGenbaImages('${pathBefore}', '${pathAfter}', '${findings}', '${comment}')" 
+                                        title="View Images">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        return '<span class="text-slate-300">-</span>';
+                    }
+                },
+                {
+                    data: 'asign_to_dept',
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return '<span class="text-sm">' + data + '</span>';
+                    }
+                },
                 {
                     data: 'auditor',
                     className: 'text-slate-700',
-                    render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
+                    render: function(data, type, row) {
+                        return data || '';
                     }
                 },
                 {
-                    data: 'auditee',
-                    className: 'text-slate-700',
-                    render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
-                    }
+                    data: 'status',
+                    orderable: true,
+                    className: 'text-center',
                 },
-
                 {
                     data: 'action',
                     orderable: false,
-                    className: 'text-left'
+                    className: 'text-left',
+                    render: function(data, type, row) {
+                        return '<div class="flex items-center gap-2">' + data + '</div>';
+                    }
                 }
             ],
             order: [
@@ -260,9 +371,11 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #detailAreaFilter').on('change', function() {
             table.ajax.reload();
         });
+
+
 
         // Reset button
         $('#btnReset').click(function() {
@@ -270,6 +383,13 @@
             $('#dateFrom').val('').removeAttr('data-has-value');
             $('#dateTo').val('').removeAttr('data-has-value');
             $('#deptFilter').val('');
+            $('#detailAreaFilter').val('');
+            window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
             table.ajax.reload();
         });
 
@@ -286,65 +406,207 @@
             table.ajax.reload();
         }, 500));
 
+        // Handle initial date values (if any)
         if ($('#dateFrom').val()) $('#dateFrom').attr('data-has-value', 'true');
         if ($('#dateTo').val()) $('#dateTo').attr('data-has-value', 'true');
     });
 
-    function document_preview(id) {
-        window.location.href = "{{ route('internal_audit.action_report.preview', '') }}/" + id;
+    function document_preview(id, no) {
+        window.location.href = "{{ route('genba.preview', '') }}/" + id;
     }
 
+    var galleryViewer = null;
+
+    const findingPhotoBaseUrl = "{{ asset('findings-photo') }}";
+    const evidencePhotoBaseUrl = "{{ asset('evidence-photo') }}";
+
+    function viewGenbaImages(pathBefore, pathAfter, captionBefore, captionAfter) {
+        $('#imageContainerBefore, #imageContainerAfter').empty();
+        $('#noImageBefore, #noImageAfter').addClass('hidden');
+
+        $('#modalCaptionBefore').text(decodeURIComponent(captionBefore));
+        $('#modalCaptionAfter').text(decodeURIComponent(captionAfter));
+
+        // Logic to Populate BEFORE Images
+        if (pathBefore && pathBefore.trim() !== '') {
+            const paths = pathBefore.split(',');
+            paths.forEach(imgName => {
+                imgName = imgName.trim();
+                if (imgName) {
+                    const fullPath = findingPhotoBaseUrl + '/' + imgName;
+                    const imgHtml = `
+                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
+                            <img src="${fullPath}" 
+                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                 alt="Before Image"
+                                 onerror="this.parentElement.style.display='none'">
+                        </div>
+                     `;
+                    $('#imageContainerBefore').append(imgHtml);
+                }
+            });
+        } else {
+            $('#noImageBefore').removeClass('hidden').addClass('flex');
+        }
+
+        // Logic to Populate AFTER Images
+        if (pathAfter && pathAfter.trim() !== '') {
+            const paths = pathAfter.split(',');
+            paths.forEach(imgName => {
+                imgName = imgName.trim();
+                if (imgName) {
+                    const fullPath = evidencePhotoBaseUrl + '/' + imgName;
+                    const imgHtml = `
+                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
+                            <img src="${fullPath}" 
+                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                 alt="After Image"
+                                 onerror="this.parentElement.style.display='none'">
+                        </div>
+                     `;
+                    $('#imageContainerAfter').append(imgHtml);
+                }
+            });
+        } else {
+            $('#noImageAfter').removeClass('hidden').addClass('flex');
+        }
+
+        // Initialize Viewer
+        if (galleryViewer) {
+            galleryViewer.destroy();
+        }
+
+        // We can create a viewer for the whole modal content wrapper so it picks up all images
+        // Or we can just create one for the whole .p-6 container
+        var container = document.querySelector('#imagePreviewModal .p-6');
+
+        galleryViewer = new Viewer(container, {
+            toolbar: {
+                zoomIn: 1,
+                zoomOut: 1,
+                oneToOne: 1,
+                reset: 1,
+                prev: 1,
+                play: 1,
+                next: 1,
+                rotateLeft: 1,
+                rotateRight: 1,
+                flipHorizontal: 1,
+                flipVertical: 1,
+            },
+            title: false, // Hide title to avoid clutter
+            transition: true,
+        });
+
+        // Show modal
+        $('#imagePreviewModal').removeClass('hidden');
+    }
+
+    function closeImageModal() {
+        $('#imagePreviewModal').addClass('hidden');
+        // Clear logic if needed
+        if (galleryViewer) {
+            galleryViewer.destroy();
+            galleryViewer = null;
+        }
+    }
+</script>
+<script>
     let currentAction = ''; // 'approve' or 'rollback'
 
-    function openApproveModal(id) {
+    function approveGenba(id) {
         currentAction = 'approve';
         document.getElementById('confirmationId').value = id;
 
+        // Update Modal UI for Approval
         const modal = document.getElementById('confirmationModal');
-        modal.querySelector('#modalTitle').innerText = 'Auditee Superior Verification';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify this corrective action report as Auditee Superior?<br>This action will sign off the report.';
+        modal.querySelector('#modalTitle').innerText = 'Verification Decision?';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify this finding?<br>This action cannot be undone.';
 
         // Icon
         const iconContainer = modal.querySelector('#modalIcon');
-        iconContainer.className = 'w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.className='w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
+
+        // Show file input for approval
+        document.getElementById('approvalFileInputContainer').classList.remove('hidden');
+
         iconContainer.innerHTML = `<svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
 
+        // Confirm Button (Green)
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.className = 'px-5 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors';
-        confirmBtn.innerText = 'Yes, Verify';
+        confirmBtn.className='px-5 py-2.5 bg-emerald-50 text-emerald-600 font-medium rounded-xl hover:bg-emerald-700 hover:text-white transition-colors border border-emerald-200';
+        confirmBtn.innerText = 'Yes, Approve';
         confirmBtn.disabled = false;
+        confirmBtn.classList.remove('hidden');
+
+        // Reject Button (Red)
+        const rejectBtn = document.getElementById('rejectBtn');
+        rejectBtn.className='px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200';
+        rejectBtn.innerText = 'Yes, Reject';
+        rejectBtn.disabled = false;
+        rejectBtn.classList.remove('hidden');
 
         modal.classList.remove('hidden');
     }
 
-    function rollbackCar(id, isReject = false) {
+    function rollbackGenba(id, imagePath = null) {
         currentAction = 'rollback';
         document.getElementById('confirmationId').value = id;
 
+        // Update Modal UI for Rollback
         const modal = document.getElementById('confirmationModal');
-        const iconContainer = modal.querySelector('#modalIcon');
-        const confirmBtn = document.getElementById('confirmBtn');
+        modal.querySelector('#modalTitle').innerText = 'Rollback Finding?';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback this finding?<br>The status will be reset and verification evidence will be deleted.';
 
-        if (isReject) {
-            modal.querySelector('#modalTitle').innerText = 'Reject CAR Action Plan?';
-            modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to reject this CAR Action Plan?<br>Status will be set back to Open so the auditee can edit it again.';
-            
-            iconContainer.className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5';
-            iconContainer.innerHTML = `<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`;
-            
-            confirmBtn.className = 'px-5 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors';
-            confirmBtn.innerText = 'Yes, Reject';
+        // Show image if exists
+        if (imagePath && imagePath !== 'null' && imagePath !== '') {
+            const rollbackImg = document.getElementById('rollbackImage');
+            rollbackImg.src = "{{ asset('verif-photo') }}/" + imagePath;
+            document.getElementById('rollbackImageContainer').classList.remove('hidden');
+
+            // Initialize Viewer for Rollback
+            if (rollbackViewer) {
+                rollbackViewer.destroy();
+            }
+            rollbackViewer = new Viewer(rollbackImg, {
+                toolbar: {
+                    zoomIn: 1,
+                    zoomOut: 1,
+                    oneToOne: 1,
+                    reset: 1,
+                    rotateLeft: 1,
+                    rotateRight: 1,
+                    flipHorizontal: 1,
+                    flipVertical: 1,
+                },
+                title: false,
+                navbar: false,
+                tooltip: false,
+            });
+
         } else {
-            modal.querySelector('#modalTitle').innerText = 'Rollback CAR Approval?';
-            modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback all approvals for this CAR?<br>All approval signatures will be cleared and status set back to Under Review.';
-            
-            iconContainer.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
-            iconContainer.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
-            
-            confirmBtn.className = 'px-5 py-2.5 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors';
-            confirmBtn.innerText = 'Yes, Rollback';
+            document.getElementById('rollbackImageContainer').classList.add('hidden');
         }
+
+        // Icon (Amber Undo/Refresh)
+        const iconContainer = modal.querySelector('#modalIcon');
+        iconContainer.className='w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
+
+        // Hide file input for rollback
+        document.getElementById('approvalFileInputContainer').classList.add('hidden');
+
+        // Confirm Button (Amber)
+        const confirmBtn = document.getElementById('confirmBtn');
+        confirmBtn.className='px-5 py-2.5 bg-amber-50 text-amber-600 font-medium rounded-xl hover:bg-amber-700 hover:text-white transition-colors border border-amber-200';
+        confirmBtn.innerText = 'Yes, Rollback';
         confirmBtn.disabled = false;
+        confirmBtn.classList.remove('hidden');
+
+        // Hide reject button for rollback flow
+        const rejectBtn = document.getElementById('rejectBtn');
+        rejectBtn.classList.add('hidden');
+        rejectBtn.disabled = false;
 
         modal.classList.remove('hidden');
     }
@@ -352,41 +614,138 @@
     function closeConfirmationModal() {
         document.getElementById('confirmationModal').classList.add('hidden');
         document.getElementById('confirmationId').value = '';
+        // Reset file input/ui
+        resetSelection();
+        $('#approvalFileInputContainer').addClass('hidden');
+        $('#rollbackImageContainer').addClass('hidden');
+        $('#rollbackImage').attr('src', '');
+
+        if (rollbackViewer) {
+            rollbackViewer.destroy();
+            rollbackViewer = null;
+        }
+
+        // Reset action buttons to default state
+        const confirmBtn = document.getElementById('confirmBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
+        confirmBtn.disabled = false;
+        rejectBtn.disabled = false;
+        rejectBtn.classList.add('hidden');
     }
 
-    function submitConfirmation() {
+    let selectedVerificationFile = null;
+    let approvalPreviewViewer = null;
+    let rollbackViewer = null;
+
+    function triggerCamera() {
+        document.getElementById('cameraInput').click();
+    }
+
+    function triggerGallery() {
+        document.getElementById('galleryInput').click();
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedVerificationFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewImg = document.getElementById('previewImage');
+                previewImg.src = e.target.result;
+                document.getElementById('previewContainer').classList.remove('hidden');
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+
+                // Initialize Viewer
+                if (approvalPreviewViewer) {
+                    approvalPreviewViewer.destroy();
+                }
+                approvalPreviewViewer = new Viewer(previewImg, {
+                    toolbar: {
+                        zoomIn: 1,
+                        zoomOut: 1,
+                        oneToOne: 1,
+                        reset: 1,
+                        rotateLeft: 1,
+                        rotateRight: 1,
+                        flipHorizontal: 1,
+                        flipVertical: 1,
+                    },
+                    title: false,
+                    navbar: false,
+                    tooltip: false,
+                });
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function resetSelection() {
+        selectedVerificationFile = null;
+        document.getElementById('cameraInput').value = '';
+        document.getElementById('galleryInput').value = '';
+        document.getElementById('previewContainer').classList.add('hidden');
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
+
+        if (approvalPreviewViewer) {
+            approvalPreviewViewer.destroy();
+            approvalPreviewViewer = null;
+        }
+    }
+
+    function submitConfirmation(verificationResult = 1) {
         const id = document.getElementById('confirmationId').value;
         const confirmBtn = document.getElementById('confirmBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
         const originalConfirmText = confirmBtn.innerText;
+        const originalRejectText = rejectBtn.innerText;
+        const normalizedVerificationResult = verificationResult == 2 ? 2 : 1;
+        let activeBtn = confirmBtn;
 
         let url = '';
-        let data = {
-            _token: "{{ csrf_token() }}",
-            car_id: id
-        };
+        if (currentAction === 'approve') {
+            url = "{{ route('execution_genba.approve') }}";
+            activeBtn = normalizedVerificationResult === 2 ? rejectBtn : confirmBtn;
+        } else if (currentAction === 'rollback') {
+            url = "{{ route('execution_genba.rollback') }}";
+            activeBtn = confirmBtn;
+        }
+
+        // Create FormData
+        let formData = new FormData();
+        formData.append('_token', "{{ csrf_token() }}");
+        formData.append('id', id);
 
         if (currentAction === 'approve') {
-            url = "{{ route('internal_audit.cars.approve') }}";
-            data.role = 'dept'; // Always approve as Auditee Superior (dept)
-        } else if (currentAction === 'rollback') {
-            url = "{{ route('internal_audit.cars.rollback') }}";
+            if (selectedVerificationFile) {
+                formData.append('verif_img', selectedVerificationFile);
+            } else {
+                showToast('Please take a photo or upload an image for verification.', 'warning');
+                return;
+            }
+            formData.append('verification_result', normalizedVerificationResult);
         }
 
         // Show loading state
         confirmBtn.disabled = true;
-        confirmBtn.innerText = 'Processing...';
+        rejectBtn.disabled = true;
+        activeBtn.innerText = 'Processing...';
 
         $.ajax({
             url: url,
             type: "POST",
-            data: data,
+            data: formData,
+            processData: false, // Important for FormData
+            contentType: false, // Important for FormData
             success: function(response) {
                 closeConfirmationModal();
-                if (response.success) {
+                if (response.status === 'success') {
                     showToast(response.message, 'success');
                     $('#findingsTable').DataTable().ajax.reload();
                 } else {
-                    showToast(response.message || 'Verification failed.', 'error');
+                    showToast(response.message, 'error');
                 }
             },
             error: function(xhr) {
@@ -395,9 +754,95 @@
             },
             complete: function() {
                 confirmBtn.disabled = false;
+                rejectBtn.disabled = false;
                 confirmBtn.innerText = originalConfirmText;
+                rejectBtn.innerText = originalRejectText;
             }
         });
     }
 </script>
+<!-- Generic Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 z-[60] hidden">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeConfirmationModal()"></div>
+
+    <!-- Modal -->
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md transform transition-all p-6 text-center border border-slate-100">
+
+            <div id="modalIcon" class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                <!-- Icon injected by JS -->
+            </div>
+
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
+            <p id="modalMessage" class="text-base text-slate-600 mb-6 leading-relaxed"></p>
+
+            <!-- File Input / Camera UI for Approval -->
+            <div id="approvalFileInputContainer" class="hidden mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Verification Evidence</label>
+
+                <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 text-center hover:bg-slate-100 transition-colors">
+
+                    <!-- Hidden Inputs -->
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(event)">
+                    <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+
+                    <!-- Placeholder / Buttons -->
+                    <div id="uploadPlaceholder" class="flex flex-col items-center gap-3 py-4">
+                        <div class="flex gap-4">
+                            <button onclick="triggerCamera()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
+                                <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span class="text-xs font-semibold">Camera</span>
+                            </button>
+                            <button onclick="triggerGallery()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
+                                <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="text-xs font-semibold">Gallery</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Take a photo or upload from gallery</p>
+                    </div>
+
+                    <!-- Preview Container -->
+                    <div id="previewContainer" class="hidden relative">
+                        <img id="previewImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
+                        <button onclick="resetSelection()" class="absolute top-[-10px] right-[-10px] bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Rollback Image Display -->
+            <div id="rollbackImageContainer" class="hidden mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Verification Evidence to Delete</label>
+                <img id="rollbackImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
+            </div>
+
+            <input type="hidden" id="confirmationId">
+
+            <div class="flex gap-3 justify-center">
+                <button type="button" onclick="closeConfirmationModal()"
+                    class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors">
+                    Cancel
+                </button>
+                <button type="button" id="rejectBtn" onclick="submitConfirmation(2)"
+                    class="hidden px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200">
+                    Yes, Reject
+                </button>
+                <button type="button" id="confirmBtn" onclick="submitConfirmation(1)"
+                    class="px-5 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors">
+                    Yes, Approve
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endpush
