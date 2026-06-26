@@ -429,9 +429,16 @@ class InternalAuditController extends Controller
             ]);
         }
 
+        $scheduleDepts = array_map('trim', explode(',', $schedule->auditee_dept ?? ''));
         $items = DB::table('CsChecksheetItem')
             ->where('is_active', 1)
-            ->where('department', $schedule->auditee_dept)
+            ->where(function($q) use ($scheduleDepts) {
+                foreach ($scheduleDepts as $dept) {
+                    if ($dept) {
+                        $q->orWhere('department', 'LIKE', '%' . $dept . '%');
+                    }
+                }
+            })
             ->get();
 
         $details = DB::table('CsAuditDetail as d')
