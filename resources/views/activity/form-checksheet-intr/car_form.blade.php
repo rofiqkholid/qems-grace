@@ -132,7 +132,7 @@
                     </div>
 
                      <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">IATF/ISO Requirement No.</label>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">IATF/ISO Requirement No. <span class="text-red-500">*</span></label>
                         <x-searchable-select
                             id="car_requirement_no"
                             name="requirement_no"
@@ -143,10 +143,11 @@
                             :initialOptions="$requirements->toArray()"
                             updateEvent="update-car-requirement"
                             changeEvent="car-requirement-changed" />
+                        <p id="err_requirement_no" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Clause Title</label>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Clause Title <span class="text-red-500">*</span></label>
                         <x-searchable-select
                             id="car_clause_title"
                             name="clause_title"
@@ -156,6 +157,7 @@
                             apiUrl="{{ route('internal_audit.get_clause_titles') }}"
                             :initialOptions="$clauseTitles->toArray()"
                             updateEvent="update-car-clause-title" />
+                        <p id="err_clause_title" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
                 </div>
 
@@ -194,8 +196,9 @@
                 <!-- Finding & Auditor -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
                     <div class="col-span-1 md:col-span-2">
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding</label>
-                        <textarea name="finding" rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding <span class="text-red-500">*</span></label>
+                        <textarea name="finding" id="finding_textarea" rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
+                        <p id="err_finding" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">Auditor</label>
@@ -211,7 +214,7 @@
                 <a href="{{ route('internal_audit.conduct', $schedule->hash_id) }}" class="px-5 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 font-bold transition-all text-sm">
                     Cancel
                 </a>
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
+                <button type="button" id="btn_save_car" onclick="validateAndSubmitCar()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
                     Save CAR Details
                 </button>
             </div>
@@ -222,6 +225,70 @@
 </div>
 
 <script>
+    function validateAndSubmitCar() {
+        let isValid = true;
+
+        // Helper: show/hide error and highlight border
+        function setError(inputEl, errEl, hasError) {
+            if (hasError) {
+                errEl.classList.remove('hidden');
+                if (inputEl) {
+                    inputEl.classList.add('!border-red-400');
+                    inputEl.classList.remove('border-slate-200');
+                }
+            } else {
+                errEl.classList.add('hidden');
+                if (inputEl) {
+                    inputEl.classList.remove('!border-red-400');
+                    inputEl.classList.add('border-slate-200');
+                }
+            }
+        }
+
+        // Validate IATF/ISO Requirement No.
+        const reqNoInput = document.getElementById('car_requirement_no');
+        const reqNoErr   = document.getElementById('err_requirement_no');
+        const reqNoVal   = reqNoInput ? reqNoInput.value.trim() : '';
+        if (!reqNoVal) {
+            setError(reqNoInput ? reqNoInput.closest('.relative')?.querySelector('input[type="text"]') : null, reqNoErr, true);
+            isValid = false;
+        } else {
+            setError(null, reqNoErr, false);
+        }
+
+        // Validate Clause Title
+        const clauseInput = document.getElementById('car_clause_title');
+        const clauseErr   = document.getElementById('err_clause_title');
+        const clauseVal   = clauseInput ? clauseInput.value.trim() : '';
+        if (!clauseVal) {
+            setError(clauseInput ? clauseInput.closest('.relative')?.querySelector('input[type="text"]') : null, clauseErr, true);
+            isValid = false;
+        } else {
+            setError(null, clauseErr, false);
+        }
+
+        // Validate Finding
+        const findingTextarea = document.getElementById('finding_textarea');
+        const findingErr      = document.getElementById('err_finding');
+        const findingVal      = findingTextarea ? findingTextarea.value.trim() : '';
+        if (!findingVal) {
+            setError(findingTextarea, findingErr, true);
+            isValid = false;
+        } else {
+            setError(findingTextarea, findingErr, false);
+        }
+
+        if (!isValid) {
+            // Scroll to first error
+            const firstErr = document.querySelector('[id^="err_"]:not(.hidden)');
+            if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // All valid — submit
+        document.getElementById('car-form').submit();
+    }
+
     function toggleAuditSourceInputs() {
         const surveillanceCheckbox = document.querySelector('.audit-source-checkbox[value="Surveillance"]');
         const externalCheckbox = document.querySelector('.audit-source-checkbox[value="External"]');
