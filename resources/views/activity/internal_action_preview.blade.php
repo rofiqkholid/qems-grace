@@ -31,7 +31,7 @@
             
             <!-- Section 1: Finding General Information -->
             <div>
-                <h2 class="text-base font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
                     Finding Information
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
@@ -161,20 +161,20 @@
             @csrf
             <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-8 space-y-8">
                 <div>
-                    <h2 class="text-base font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
+                    <h2 class="text-lg font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
                         Action Plan & Analysis
                     </h2>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                         <!-- Causal Factor -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">Causal Factor (Why-why Analysis, Fish bone) :</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Causal Factor (Why-why Analysis, Fish bone) :</label>
                             <input type="text" name="causal_factor" value="{{ old('causal_factor', $action->causal_factor ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter causal factors or analysis...">
                         </div>
                         
                         <!-- Analized by: Auditee Superior -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">Analized by Auditee Superior</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Analized by Auditee Superior</label>
                             <x-searchable-select
                                 id="analyzed_by"
                                 name="analyzed_by"
@@ -193,14 +193,14 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <!-- A. Corrective Action -->
                         <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">A. Corrective Action</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
                             <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">B. Preventive Action</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
                             <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
                         </div>
@@ -212,19 +212,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">Notes for A & B</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Notes for A & B</label>
                             <input type="text" name="notes" value="{{ old('notes', $action->notes ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter notes...">
                         </div>
                         
                         <!-- Auditee -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">Auditee</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Auditee</label>
                             <input type="text" name="auditee_name" value="{{ old('auditee_name', $action->auditee_name ?? $car->auditee ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee...">
                         </div>
 
                         <!-- Auditee Superior -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
-                            <label class="text-slate-500 font-semibold text-xs tracking-wider">Auditee Superior</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Auditee Superior</label>
                             <input type="text" name="auditee_superior_name" id="auditee_superior_name" value="{{ old('auditee_superior_name', $action->auditee_superior_name ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee Superior...">
                         </div>
                     </div>
