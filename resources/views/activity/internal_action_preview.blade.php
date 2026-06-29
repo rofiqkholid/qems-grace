@@ -274,12 +274,20 @@
                 <!-- Submit Button / Rollback -->
                 <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
                     @if($isComplete)
-                        <button type="button" id="btnRollback" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-sm">
-                            Rollback
+                        @if(isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0 && ($car->status ?? '') !== 'Closed')
+                            <button type="button" id="btnApproveAction" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-check text-base"></i> Approve
+                            </button>
+                            <button type="button" id="btnRejectAction" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-xmark text-base"></i> Reject
+                            </button>
+                        @endif
+                        <button type="button" id="btnRollback" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left text-base"></i> Rollback
                         </button>
                     @else
-                        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
-                            Save Action Plan
+                        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-base"></i> Save Action Plan
                         </button>
                     @endif
                 </div>
@@ -287,21 +295,25 @@
         </form>
     </main>
 
-    <!-- Rollback Confirmation Modal -->
-    <div id="rollbackModal" class="fixed inset-0 z-50 hidden">
-        <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeRollbackModal()"></div>
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeConfirmationModal()"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl w-full max-w-sm transform transition-all shadow-xl">
-                <div class="p-6 text-center">
-                    <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-rotate-left text-2xl text-amber-600"></i>
+            <div class="bg-white rounded-2xl w-full max-w-md transform transition-all shadow-2xl p-6">
+                <div class="text-center">
+                    <div id="modalIcon" class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                        <!-- Icon will be injected via JS -->
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Rollback</h3>
-                    <p class="text-slate-500 text-sm">Are you sure you want to rollback this action plan to draft? This will make all fields editable again.</p>
-                </div>
-                <div class="p-6 pt-0 flex gap-3">
-                    <button type="button" onclick="closeRollbackModal()" class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors text-sm">Cancel</button>
-                    <button type="button" onclick="executeRollback()" class="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors text-sm">Rollback</button>
+                    <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2">Confirm Action</h3>
+                    <p id="modalMessage" class="text-slate-500 text-sm mb-6">Are you sure you want to proceed?</p>
+                    <div class="flex justify-center gap-3">
+                        <button type="button" onclick="closeConfirmationModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm">
+                            Cancel
+                        </button>
+                        <button type="button" id="confirmBtn" onclick="submitConfirmation()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-sm">
+                            Confirm
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -316,47 +328,107 @@
         element.style.height = (element.scrollHeight) + "px";
     }
 
-    function openRollbackModal() {
-        document.getElementById('rollbackModal').classList.remove('hidden');
+    let currentAction = '';
+
+    function closeConfirmationModal() {
+        document.getElementById('confirmationModal').classList.add('hidden');
+        currentAction = '';
     }
 
-    function closeRollbackModal() {
-        document.getElementById('rollbackModal').classList.add('hidden');
+    function openConfirmationModal(action) {
+        currentAction = action;
+        const modal = document.getElementById('confirmationModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalIcon = document.getElementById('modalIcon');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        if (action === 'approve') {
+            modalTitle.innerText = 'Confirm Approval';
+            modalMessage.innerHTML = 'Are you sure you want to approve this Action Plan?<br>This will mark the CAR as Closed.';
+            modalIcon.className = 'w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
+            modalIcon.innerHTML = `<svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            confirmBtn.className = 'px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors text-sm';
+            confirmBtn.innerText = 'Yes, Approve';
+        } else if (action === 'reject') {
+            modalTitle.innerText = 'Confirm Rejection';
+            modalMessage.innerHTML = 'Are you sure you want to reject this Action Plan?<br>This will return the action plan to draft status for correction.';
+            modalIcon.className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5';
+            modalIcon.innerHTML = `<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            confirmBtn.className = 'px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors text-sm';
+            confirmBtn.innerText = 'Yes, Reject';
+        } else if (action === 'rollback') {
+            modalTitle.innerText = 'Confirm Rollback';
+            modalMessage.innerHTML = 'Are you sure you want to rollback this action plan to draft?<br>This will make all fields editable again.';
+            modalIcon.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
+            modalIcon.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
+            confirmBtn.className = 'px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-colors text-sm';
+            confirmBtn.innerText = 'Yes, Rollback';
+        }
+
+        modal.classList.remove('hidden');
     }
 
-    function executeRollback() {
-        const btnRollback = document.getElementById('btnRollback');
-        if (!btnRollback) return;
-        const originalText = btnRollback.innerHTML;
-        btnRollback.disabled = true;
-        btnRollback.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Rolling back...';
-        closeRollbackModal();
-        
-        fetch('{{ route("internal_audit.action_report.rollback", request()->route("id")) }}', {
+    function submitConfirmation() {
+        if (!currentAction) return;
+
+        const confirmBtn = document.getElementById('confirmBtn');
+        const originalText = confirmBtn.innerText;
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = 'Processing...';
+
+        let url = '';
+        let payload = {};
+
+        if (currentAction === 'approve') {
+            url = "{{ route('internal_audit.cars.approve') }}";
+            payload = {
+                _token: "{{ csrf_token() }}",
+                car_id: {{ $car->id }},
+                role: 'qmr'
+            };
+        } else if (currentAction === 'reject') {
+            url = "{{ route('internal_audit.cars.reject') }}";
+            payload = {
+                _token: "{{ csrf_token() }}",
+                car_id: {{ $car->id }}
+            };
+        } else if (currentAction === 'rollback') {
+            url = "{{ route('internal_audit.action_report.rollback', request()->route('id')) }}";
+            payload = {
+                _token: "{{ csrf_token() }}"
+            };
+        }
+
+        fetch(url, {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            }
+            },
+            body: JSON.stringify(payload)
         })
         .then(response => response.json())
         .then(data => {
+            closeConfirmationModal();
             if (data.success) {
                 showToast(data.message, 'success');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
             } else {
-                showToast(data.message || 'An error occurred.', 'error');
-                btnRollback.disabled = false;
-                btnRollback.innerHTML = originalText;
+                showToast(data.message || 'Action failed.', 'warning');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('An error occurred during rollback.', 'error');
-            btnRollback.disabled = false;
-            btnRollback.innerHTML = originalText;
+            closeConfirmationModal();
+            showToast('Something went wrong. Please try again.', 'warning');
+        })
+        .finally(() => {
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = originalText;
         });
     }
 
@@ -390,7 +462,23 @@
         const btnRollback = document.getElementById('btnRollback');
         if (btnRollback) {
             btnRollback.addEventListener('click', function() {
-                openRollbackModal();
+                openConfirmationModal('rollback');
+            });
+        }
+
+        // Approve Action Plan Handler
+        const btnApprove = document.getElementById('btnApproveAction');
+        if (btnApprove) {
+            btnApprove.addEventListener('click', function() {
+                openConfirmationModal('approve');
+            });
+        }
+
+        // Reject Action Plan Handler
+        const btnReject = document.getElementById('btnRejectAction');
+        if (btnReject) {
+            btnReject.addEventListener('click', function() {
+                openConfirmationModal('reject');
             });
         }
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Execution Genba')
+@section('title', 'Verification External Audit')
 
 @section('content')
 @include('layouts.sidebar')
@@ -14,26 +14,26 @@
     <main class="flex-1 p-6">
         <!-- Page Title -->
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-800">Execution Genba</h1>
-            <p class="text-slate-500 mt-1">Verifikasi Genba (Approval)</p>
+            <h1 class="text-2xl font-bold text-slate-800">Verification External Audit</h1>
+            <p class="text-slate-500 mt-1">Verifikasi Temuan Audit External (QMR Approval)</p>
         </div>
 
         <!-- Main Card -->
         <div class="bg-white rounded-lg border border-slate-200">
             <!-- Filter Section -->
             <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="grid grid-cols-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center gap-3">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                     <!-- Search -->
-                    <div class="col-span-2 lg:col-span-auto lg:flex-1 lg:min-w-[200px]">
+                    <div class="flex-1 min-w-[200px]">
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search findings..."
-                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                            <input type="text" id="searchInput" placeholder="Search by DocNum, finding, dept..."
+                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         </div>
                     </div>
 
                     <!-- Date From -->
-                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
+                    <div class="w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
                             <input type="date" id="dateFrom" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- Date To -->
-                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto">
+                    <div class="w-full lg:w-auto">
                         <div class="date-input-container w-full lg:w-auto">
                             <input type="date" id="dateTo" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                 class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
@@ -57,33 +57,21 @@
                     </div>
 
                     <!-- Department Filter -->
-                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
+                    <div class="w-full lg:w-[200px]">
                         <x-searchable-select
                             name="dept"
                             id="deptFilter"
                             label="Department"
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
-                            hideLabel="true" />
-                    </div>
-
-                    <!-- Detail Area Filter -->
-                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
-                        <x-searchable-select
-                            name="detail_area"
-                            id="detailAreaFilter"
-                            label="Detail Area"
-                            :initialOptions="$detail_areas"
-                            valueField="id"
-                            updateEvent="updateDetailAreaFilter"
                             hideLabel="true"
-                            placeholder="Select Detail Area..." />
+                            placeholder="Select Department..." />
                     </div>
 
                     <!-- Reset Button -->
-                    <div class="col-span-2 lg:col-span-auto">
+                    <div class="w-full lg:w-auto">
                         <button type="button" id="btnReset"
-                            class="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-base transition-colors">
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
                             <i class="fa-solid fa-rotate-right text-sm"></i>
                             Reset
                         </button>
@@ -93,30 +81,16 @@
 
             <!-- Table Section -->
             <div class="overflow-x-auto p-6">
-                <table id="findingsTable" class="qms-table w-full min-w-[1500px]">
+                <table id="findingsTable" class="qms-table w-full min-w-[1200px]">
                     <thead>
                         <tr>
-                            <th class="w-[4%] text-center">No</th>
-                            <th class="w-[8%]">DocNum</th>
-                            <th class="w-[10%]">Genba Date</th>
-                            <th class="w-[12%]">Line Checked</th>
-                            <th class="w-[12%]">Area Detail</th>
-                            <th class="w-[5%]">Pict</th>
-                            <th class="w-[9%]">Asign to Dept</th>
-                            <th class="w-[12%]">Auditor</th>
-                            <th class="w-[14%]">
-                                <div class="flex flex-col items-center gap-1.5">
-                                    <span>Status</span>
-                                    <div class="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-wider leading-none normal-case">
-                                        <span>Action</span>
-                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
-                                        <span>Evidence</span>
-                                        <span class="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
-                                        <span>Close</span>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="w-[8%]">Approve</th>
+                            <th class="w-[5%] text-center">No</th>
+                            <th class="w-[15%] text-left">Req Number</th>
+                            <th class="w-[12%] text-left">Department</th>
+                            <th class="w-[15%] text-left">Finding Category</th>
+                            <th class="w-[18%] text-left">Auditor</th>
+                            <th class="w-[18%] text-left">Auditee</th>
+                            <th class="w-[12%] text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -128,229 +102,105 @@
         </div>
     </main>
     @include('layouts.footer')
-
 </div>
 
-<!-- Mobile Sidebar Overlay -->
-<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
-
-<!-- Image Preview Modal -->
-<div id="imagePreviewModal" class="fixed inset-0 z-50 hidden">
+<!-- Generic Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 z-[60] hidden">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeImageModal()"></div>
+    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeConfirmationModal()"></div>
 
     <!-- Modal -->
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-4xl transform transition-all h-[90vh] flex flex-col">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Findings & Evidence</h3>
-                <button type="button" onclick="closeImageModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+        <div class="bg-white rounded-2xl w-full max-w-md transform transition-all p-6 text-center border border-slate-100 shadow-xl">
+            <div id="modalIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5">
+                <!-- Icon injected by JS -->
+            </div>
+
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
+            <p id="modalMessage" class="text-base text-slate-600 mb-6 leading-relaxed"></p>
+
+            <input type="hidden" id="confirmationId">
+
+            <div class="flex gap-3 justify-center">
+                <button type="button" onclick="closeConfirmationModal()"
+                    class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors text-sm">
+                    Cancel
                 </button>
-            </div>
-
-            <!-- Content -->
-            <div class="p-6 overflow-y-auto flex-1">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                    <!-- Before Section -->
-                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
-                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
-
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-800">Before Condition</h4>
-                            </div>
-                        </div>
-
-                        <!-- Findings Text -->
-                        <div class="mb-4">
-                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
-                                <p id="modalCaptionBefore" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
-                            </div>
-                        </div>
-
-                        <!-- Images -->
-                        <div id="imageContainerBefore" class="grid grid-cols-2 gap-3 content-start"></div>
-
-                        <!-- Empty State -->
-                        <div id="noImageBefore" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
-                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-medium text-slate-400">No finding images</span>
-                        </div>
-                    </div>
-
-                    <!-- After Section -->
-                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 h-full flex flex-col">
-                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200/60">
-
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-800">After Condition</h4>
-                            </div>
-                        </div>
-
-                        <!-- Evidence Text -->
-                        <div class="mb-4">
-                            <div class="relative bg-white p-3.5 rounded-xl border border-slate-200">
-                                <p id="modalCaptionAfter" class="text-slate-600 font-medium text-sm leading-relaxed"></p>
-                                <!-- Simple arrow decoration -->
-                            </div>
-                        </div>
-
-                        <!-- Images -->
-                        <div id="imageContainerAfter" class="grid grid-cols-2 gap-3 content-start"></div>
-
-                        <!-- Empty State -->
-                        <div id="noImageAfter" class="hidden flex-1 flex flex-col items-center justify-center min-h-[140px] bg-slate-100/50 rounded-xl border border-dashed border-slate-300/60 mt-auto">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 border border-slate-100">
-                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-medium text-slate-400">No evidence images</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex justify-end p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
-                <button type="button" onclick="closeImageModal()"
-                    class="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors">
-                    Close Preview
+                <button type="button" id="confirmBtn" onclick="submitConfirmation()"
+                    class="px-5 py-2.5 text-white font-medium rounded-xl transition-colors text-sm">
+                    Confirm
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-@endsection
-
 @push('scripts')
 <script>
+    let currentAction = ''; 
+    let currentCarId = null;
+
     $(document).ready(function() {
         var table = $('#findingsTable').DataTable({
             dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('execution_genba.table') }}",
+                url: "{{ route('internal_audit.verification.table') }}",
                 type: 'POST',
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
-                    d.search = $('#searchInput').val(); // Corrected param name for controller
+                    d.search.value = $('#searchInput').val();
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
-                    d.detail_area = $('#detailAreaFilter').val();
                 }
             },
-            columns: [{
+            columns: [
+                {
                     data: 'no',
                     orderable: false,
-                    className: 'text-center font-base text-slate-700',
-                    render: function(data, type, row) {
-                        return data;
-                    }
+                    className: 'text-center font-base text-slate-700'
                 },
                 {
-                    data: 'DocNum',
+                    data: 'req_number',
                     className: 'font-base text-slate-900',
-                    render: function(data, type, row) {
-                        return '<span class="inline-flex items-center rounded-md text-sm font-base text-slate-800 font-mono">' + data + '</span>';
+                    render: function(data) {
+                        return data ? `<span class="font-semibold text-slate-800">${data}</span>` : '-';
                     }
                 },
-                {
-                    data: 'date',
-                    className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return '<span class="text-sm">' + data + '</span>';
-                    }
-                },
-                {
-                    data: 'area_checked',
-                    className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || ' ') + '</span>';
-                    }
-                },
-                {
-                    data: 'area_detail',
-                    className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return '<span class="text-sm">' + (data || ' ') + '</span>';
-                    }
-                },
-                {
-                    data: 'path', // Using path as the data source, but accessing other fields in render
-                    orderable: false,
-                    className: 'text-left',
-                    render: function(data, type, row) {
-                        const hasBefore = row.path ? true : false;
-                        const hasAfter = row.execution_path ? true : false;
 
-                        if (hasBefore || hasAfter) {
-                            const findings = encodeURIComponent(row.findings || '').replace(/'/g, "%27");
-                            const comment = encodeURIComponent(row.execution_comment || '').replace(/'/g, "%27");
-                            const pathBefore = row.path || '';
-                            const pathAfter = row.execution_path || '';
-
-                            return `
-                                <div class="flex items-center justify-start w-full">
-                                    <button class="w-9 h-9 inline-flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors ring-1 ring-slate-200" 
-                                        onclick="viewGenbaImages('${pathBefore}', '${pathAfter}', '${findings}', '${comment}')" 
-                                        title="View Images">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21 15 16 10 5 21"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                            `;
-                        }
-                        return '<span class="text-slate-300">-</span>';
-                    }
+                {
+                    data: 'department',
+                    className: 'text-slate-700 font-semibold',
                 },
                 {
-                    data: 'asign_to_dept',
+                    data: 'finding_category',
                     className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return '<span class="text-sm">' + data + '</span>';
+                    render: function(data) {
+                        return data || '-';
                     }
                 },
                 {
                     data: 'auditor',
                     className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return data || '';
-                    }
                 },
                 {
-                    data: 'status',
-                    orderable: true,
-                    className: 'text-center',
+                    data: 'auditee',
+                    className: 'text-slate-700',
                 },
                 {
                     data: 'action',
                     orderable: false,
                     className: 'text-left',
-                    render: function(data, type, row) {
-                        return '<div class="flex items-center gap-2">' + data + '</div>';
-                    }
                 }
             ],
             order: [
-                [2, 'desc']
+                [1, 'desc']
             ],
             pageLength: 10,
             language: {
-                emptyTable: '<div class="text-center py-8 text-slate-500">No data available</div>',
+                emptyTable: '<div class="text-center py-8 text-slate-500">No external audit data ready for verification</div>',
                 info: 'Showing _START_ to _END_ of _TOTAL_ entries',
                 paginate: {
                     previous: '<i class="fa-solid fa-chevron-left"></i>',
@@ -371,11 +221,9 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #detailAreaFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
             table.ajax.reload();
         });
-
-
 
         // Reset button
         $('#btnReset').click(function() {
@@ -383,12 +231,8 @@
             $('#dateFrom').val('').removeAttr('data-has-value');
             $('#dateTo').val('').removeAttr('data-has-value');
             $('#deptFilter').val('');
-            $('#detailAreaFilter').val('');
-            window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
-                detail: {
-                    id: '',
-                    name: ''
-                }
+            window.dispatchEvent(new CustomEvent('update-dept', {
+                detail: { id: '', name: '' }
             }));
             table.ajax.reload();
         });
@@ -411,341 +255,116 @@
         if ($('#dateTo').val()) $('#dateTo').attr('data-has-value', 'true');
     });
 
-    function document_preview(id, no) {
-        window.location.href = "{{ route('genba.preview', '') }}/" + id;
+    function previewCar(encryptedId) {
+        window.location.href = "{{ route('internal_audit.action_report.preview', '') }}/" + encryptedId;
     }
 
-    var galleryViewer = null;
-
-    const findingPhotoBaseUrl = "{{ asset('findings-photo') }}";
-    const evidencePhotoBaseUrl = "{{ asset('evidence-photo') }}";
-
-    function viewGenbaImages(pathBefore, pathAfter, captionBefore, captionAfter) {
-        $('#imageContainerBefore, #imageContainerAfter').empty();
-        $('#noImageBefore, #noImageAfter').addClass('hidden');
-
-        $('#modalCaptionBefore').text(decodeURIComponent(captionBefore));
-        $('#modalCaptionAfter').text(decodeURIComponent(captionAfter));
-
-        // Logic to Populate BEFORE Images
-        if (pathBefore && pathBefore.trim() !== '') {
-            const paths = pathBefore.split(',');
-            paths.forEach(imgName => {
-                imgName = imgName.trim();
-                if (imgName) {
-                    const fullPath = findingPhotoBaseUrl + '/' + imgName;
-                    const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
-                            <img src="${fullPath}" 
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                 alt="Before Image"
-                                 onerror="this.parentElement.style.display='none'">
-                        </div>
-                     `;
-                    $('#imageContainerBefore').append(imgHtml);
-                }
-            });
-        } else {
-            $('#noImageBefore').removeClass('hidden').addClass('flex');
-        }
-
-        // Logic to Populate AFTER Images
-        if (pathAfter && pathAfter.trim() !== '') {
-            const paths = pathAfter.split(',');
-            paths.forEach(imgName => {
-                imgName = imgName.trim();
-                if (imgName) {
-                    const fullPath = evidencePhotoBaseUrl + '/' + imgName;
-                    const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 border border-slate-200 aspect-[4/3]">
-                            <img src="${fullPath}" 
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                 alt="After Image"
-                                 onerror="this.parentElement.style.display='none'">
-                        </div>
-                     `;
-                    $('#imageContainerAfter').append(imgHtml);
-                }
-            });
-        } else {
-            $('#noImageAfter').removeClass('hidden').addClass('flex');
-        }
-
-        // Initialize Viewer
-        if (galleryViewer) {
-            galleryViewer.destroy();
-        }
-
-        // We can create a viewer for the whole modal content wrapper so it picks up all images
-        // Or we can just create one for the whole .p-6 container
-        var container = document.querySelector('#imagePreviewModal .p-6');
-
-        galleryViewer = new Viewer(container, {
-            toolbar: {
-                zoomIn: 1,
-                zoomOut: 1,
-                oneToOne: 1,
-                reset: 1,
-                prev: 1,
-                play: 1,
-                next: 1,
-                rotateLeft: 1,
-                rotateRight: 1,
-                flipHorizontal: 1,
-                flipVertical: 1,
-            },
-            title: false, // Hide title to avoid clutter
-            transition: true,
-        });
-
-        // Show modal
-        $('#imagePreviewModal').removeClass('hidden');
-    }
-
-    function closeImageModal() {
-        $('#imagePreviewModal').addClass('hidden');
-        // Clear logic if needed
-        if (galleryViewer) {
-            galleryViewer.destroy();
-            galleryViewer = null;
-        }
-    }
-</script>
-<script>
-    let currentAction = ''; // 'approve' or 'rollback'
-
-    function approveGenba(id) {
+    function approveCarAction(id) {
         currentAction = 'approve';
-        document.getElementById('confirmationId').value = id;
+        currentCarId = id;
 
-        // Update Modal UI for Approval
         const modal = document.getElementById('confirmationModal');
-        modal.querySelector('#modalTitle').innerText = 'Verification Decision?';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify this finding?<br>This action cannot be undone.';
+        modal.querySelector('#modalTitle').innerText = 'Verify & Approve CAR';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify and sign off this External Audit CAR as QMR?<br>This will lock the action plan and mark it as Closed.';
 
-        // Icon
         const iconContainer = modal.querySelector('#modalIcon');
-        iconContainer.className='w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
-
-        // Show file input for approval
-        document.getElementById('approvalFileInputContainer').classList.remove('hidden');
-
+        iconContainer.className = 'w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
         iconContainer.innerHTML = `<svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
 
-        // Confirm Button (Green)
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.className='px-5 py-2.5 bg-emerald-50 text-emerald-600 font-medium rounded-xl hover:bg-emerald-700 hover:text-white transition-colors border border-emerald-200';
+        confirmBtn.className = 'px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors text-sm';
         confirmBtn.innerText = 'Yes, Approve';
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('hidden');
-
-        // Reject Button (Red)
-        const rejectBtn = document.getElementById('rejectBtn');
-        rejectBtn.className='px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200';
-        rejectBtn.innerText = 'Yes, Reject';
-        rejectBtn.disabled = false;
-        rejectBtn.classList.remove('hidden');
 
         modal.classList.remove('hidden');
     }
 
-    function rollbackGenba(id, imagePath = null) {
+    function rollbackCarAction(id) {
         currentAction = 'rollback';
-        document.getElementById('confirmationId').value = id;
+        currentCarId = id;
 
-        // Update Modal UI for Rollback
         const modal = document.getElementById('confirmationModal');
-        modal.querySelector('#modalTitle').innerText = 'Rollback Finding?';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback this finding?<br>The status will be reset and verification evidence will be deleted.';
+        modal.querySelector('#modalTitle').innerText = 'Rollback CAR Approval';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback the QMR approval for this CAR?<br>This will change the status back to Under Review.';
 
-        // Show image if exists
-        if (imagePath && imagePath !== 'null' && imagePath !== '') {
-            const rollbackImg = document.getElementById('rollbackImage');
-            rollbackImg.src = "{{ asset('verif-photo') }}/" + imagePath;
-            document.getElementById('rollbackImageContainer').classList.remove('hidden');
-
-            // Initialize Viewer for Rollback
-            if (rollbackViewer) {
-                rollbackViewer.destroy();
-            }
-            rollbackViewer = new Viewer(rollbackImg, {
-                toolbar: {
-                    zoomIn: 1,
-                    zoomOut: 1,
-                    oneToOne: 1,
-                    reset: 1,
-                    rotateLeft: 1,
-                    rotateRight: 1,
-                    flipHorizontal: 1,
-                    flipVertical: 1,
-                },
-                title: false,
-                navbar: false,
-                tooltip: false,
-            });
-
-        } else {
-            document.getElementById('rollbackImageContainer').classList.add('hidden');
-        }
-
-        // Icon (Amber Undo/Refresh)
         const iconContainer = modal.querySelector('#modalIcon');
-        iconContainer.className='w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
         iconContainer.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
 
-        // Hide file input for rollback
-        document.getElementById('approvalFileInputContainer').classList.add('hidden');
-
-        // Confirm Button (Amber)
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.className='px-5 py-2.5 bg-amber-50 text-amber-600 font-medium rounded-xl hover:bg-amber-700 hover:text-white transition-colors border border-amber-200';
+        confirmBtn.className = 'px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-colors text-sm';
         confirmBtn.innerText = 'Yes, Rollback';
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('hidden');
 
-        // Hide reject button for rollback flow
-        const rejectBtn = document.getElementById('rejectBtn');
-        rejectBtn.classList.add('hidden');
-        rejectBtn.disabled = false;
+        modal.classList.remove('hidden');
+    }
+
+    function rejectCarAction(id) {
+        currentAction = 'reject';
+        currentCarId = id;
+
+        const modal = document.getElementById('confirmationModal');
+        modal.querySelector('#modalTitle').innerText = 'Reject & Rollback CAR';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to reject this CAR Action Plan?<br>This will return the action plan to draft status for correction.';
+
+        const iconContainer = modal.querySelector('#modalIcon');
+        iconContainer.className = 'w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5';
+        iconContainer.innerHTML = `<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+        const confirmBtn = document.getElementById('confirmBtn');
+        confirmBtn.className = 'px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors text-sm';
+        confirmBtn.innerText = 'Yes, Reject';
 
         modal.classList.remove('hidden');
     }
 
     function closeConfirmationModal() {
         document.getElementById('confirmationModal').classList.add('hidden');
-        document.getElementById('confirmationId').value = '';
-        // Reset file input/ui
-        resetSelection();
-        $('#approvalFileInputContainer').addClass('hidden');
-        $('#rollbackImageContainer').addClass('hidden');
-        $('#rollbackImage').attr('src', '');
+        currentCarId = null;
+        currentAction = '';
+    }
 
-        if (rollbackViewer) {
-            rollbackViewer.destroy();
-            rollbackViewer = null;
-        }
+    function submitConfirmation() {
+        if (!currentCarId) return;
 
-        // Reset action buttons to default state
         const confirmBtn = document.getElementById('confirmBtn');
-        const rejectBtn = document.getElementById('rejectBtn');
-        confirmBtn.disabled = false;
-        rejectBtn.disabled = false;
-        rejectBtn.classList.add('hidden');
-    }
-
-    let selectedVerificationFile = null;
-    let approvalPreviewViewer = null;
-    let rollbackViewer = null;
-
-    function triggerCamera() {
-        document.getElementById('cameraInput').click();
-    }
-
-    function triggerGallery() {
-        document.getElementById('galleryInput').click();
-    }
-
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            selectedVerificationFile = file;
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const previewImg = document.getElementById('previewImage');
-                previewImg.src = e.target.result;
-                document.getElementById('previewContainer').classList.remove('hidden');
-                document.getElementById('uploadPlaceholder').classList.add('hidden');
-
-                // Initialize Viewer
-                if (approvalPreviewViewer) {
-                    approvalPreviewViewer.destroy();
-                }
-                approvalPreviewViewer = new Viewer(previewImg, {
-                    toolbar: {
-                        zoomIn: 1,
-                        zoomOut: 1,
-                        oneToOne: 1,
-                        reset: 1,
-                        rotateLeft: 1,
-                        rotateRight: 1,
-                        flipHorizontal: 1,
-                        flipVertical: 1,
-                    },
-                    title: false,
-                    navbar: false,
-                    tooltip: false,
-                });
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function resetSelection() {
-        selectedVerificationFile = null;
-        document.getElementById('cameraInput').value = '';
-        document.getElementById('galleryInput').value = '';
-        document.getElementById('previewContainer').classList.add('hidden');
-        document.getElementById('uploadPlaceholder').classList.remove('hidden');
-
-        if (approvalPreviewViewer) {
-            approvalPreviewViewer.destroy();
-            approvalPreviewViewer = null;
-        }
-    }
-
-    function submitConfirmation(verificationResult = 1) {
-        const id = document.getElementById('confirmationId').value;
-        const confirmBtn = document.getElementById('confirmBtn');
-        const rejectBtn = document.getElementById('rejectBtn');
-        const originalConfirmText = confirmBtn.innerText;
-        const originalRejectText = rejectBtn.innerText;
-        const normalizedVerificationResult = verificationResult == 2 ? 2 : 1;
-        let activeBtn = confirmBtn;
+        const originalText = confirmBtn.innerText;
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = 'Processing...';
 
         let url = '';
+        let payload = {};
+
         if (currentAction === 'approve') {
-            url = "{{ route('execution_genba.approve') }}";
-            activeBtn = normalizedVerificationResult === 2 ? rejectBtn : confirmBtn;
+            url = "{{ route('internal_audit.cars.approve') }}";
+            payload = {
+                _token: "{{ csrf_token() }}",
+                car_id: currentCarId,
+                role: 'qmr'
+            };
         } else if (currentAction === 'rollback') {
-            url = "{{ route('execution_genba.rollback') }}";
-            activeBtn = confirmBtn;
+            url = "{{ route('internal_audit.cars.rollback') }}";
+            payload = {
+                _token: "{{ csrf_token() }}",
+                car_id: currentCarId
+            };
+        } else if (currentAction === 'reject') {
+            url = "{{ route('internal_audit.cars.reject') }}";
+            payload = {
+                _token: "{{ csrf_token() }}",
+                car_id: currentCarId
+            };
         }
-
-        // Create FormData
-        let formData = new FormData();
-        formData.append('_token', "{{ csrf_token() }}");
-        formData.append('id', id);
-
-        if (currentAction === 'approve') {
-            if (selectedVerificationFile) {
-                formData.append('verif_img', selectedVerificationFile);
-            } else {
-                showToast('Please take a photo or upload an image for verification.', 'warning');
-                return;
-            }
-            formData.append('verification_result', normalizedVerificationResult);
-        }
-
-        // Show loading state
-        confirmBtn.disabled = true;
-        rejectBtn.disabled = true;
-        activeBtn.innerText = 'Processing...';
 
         $.ajax({
             url: url,
             type: "POST",
-            data: formData,
-            processData: false, // Important for FormData
-            contentType: false, // Important for FormData
+            data: payload,
             success: function(response) {
                 closeConfirmationModal();
-                if (response.status === 'success') {
+                if (response.success) {
                     showToast(response.message, 'success');
-                    $('#findingsTable').DataTable().ajax.reload();
+                    $('#findingsTable').DataTable().ajax.reload(null, false);
                 } else {
-                    showToast(response.message, 'error');
+                    showToast(response.message || 'Verification failed.', 'warning');
                 }
             },
             error: function(xhr) {
@@ -754,95 +373,10 @@
             },
             complete: function() {
                 confirmBtn.disabled = false;
-                rejectBtn.disabled = false;
-                confirmBtn.innerText = originalConfirmText;
-                rejectBtn.innerText = originalRejectText;
+                confirmBtn.innerText = originalText;
             }
         });
     }
 </script>
-<!-- Generic Confirmation Modal -->
-<div id="confirmationModal" class="fixed inset-0 z-[60] hidden">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeConfirmationModal()"></div>
-
-    <!-- Modal -->
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md transform transition-all p-6 text-center border border-slate-100">
-
-            <div id="modalIcon" class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                <!-- Icon injected by JS -->
-            </div>
-
-            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
-            <p id="modalMessage" class="text-base text-slate-600 mb-6 leading-relaxed"></p>
-
-            <!-- File Input / Camera UI for Approval -->
-            <div id="approvalFileInputContainer" class="hidden mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Verification Evidence</label>
-
-                <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 text-center hover:bg-slate-100 transition-colors">
-
-                    <!-- Hidden Inputs -->
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(event)">
-                    <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-
-                    <!-- Placeholder / Buttons -->
-                    <div id="uploadPlaceholder" class="flex flex-col items-center gap-3 py-4">
-                        <div class="flex gap-4">
-                            <button onclick="triggerCamera()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
-                                <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold">Camera</span>
-                            </button>
-                            <button onclick="triggerGallery()" class="flex flex-col items-center justify-center w-24 h-24 bg-white border border-slate-200 rounded-xl hover:border-blue-500 hover:text-blue-500 transition-all group">
-                                <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span class="text-xs font-semibold">Gallery</span>
-                            </button>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-2">Take a photo or upload from gallery</p>
-                    </div>
-
-                    <!-- Preview Container -->
-                    <div id="previewContainer" class="hidden relative">
-                        <img id="previewImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
-                        <button onclick="resetSelection()" class="absolute top-[-10px] right-[-10px] bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Rollback Image Display -->
-            <div id="rollbackImageContainer" class="hidden mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Verification Evidence to Delete</label>
-                <img id="rollbackImage" src="" class="max-h-[200px] mx-auto rounded-lg border border-slate-200">
-            </div>
-
-            <input type="hidden" id="confirmationId">
-
-            <div class="flex gap-3 justify-center">
-                <button type="button" onclick="closeConfirmationModal()"
-                    class="px-5 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors">
-                    Cancel
-                </button>
-                <button type="button" id="rejectBtn" onclick="submitConfirmation(2)"
-                    class="hidden px-5 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-700 hover:text-white transition-colors border border-red-200">
-                    Yes, Reject
-                </button>
-                <button type="button" id="confirmBtn" onclick="submitConfirmation(1)"
-                    class="px-5 py-2.5 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors">
-                    Yes, Approve
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 @endpush
+@endsection
