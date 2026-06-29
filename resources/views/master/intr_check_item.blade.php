@@ -81,7 +81,7 @@
             </div>
             <form action="{{ route('master.intr_check_item.store') }}" method="POST">
                 @csrf
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                     <input type="hidden" name="is_active" value="1">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Internal Audit <span class="text-red-500">*</span></label>
@@ -149,7 +149,7 @@
                 @csrf
                 <input type="hidden" name="id" id="edit_id">
                 <input type="hidden" name="is_active" id="edit_is_active" value="1">
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Internal Audit <span class="text-red-500">*</span></label>
                         <x-searchable-select
