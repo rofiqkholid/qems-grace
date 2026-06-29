@@ -71,7 +71,7 @@
 <div id="createModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeCreateModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-md transform transition-all">
+        <div class="bg-white rounded-xl w-full max-w-3xl transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Add Clause</h3>
                 <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600">
@@ -92,7 +92,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Clauses</label>
-                        <textarea name="clauses" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Enter clauses description/text" rows="3"></textarea>
+                        <textarea name="clauses" style="min-height: 42px;" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none overflow-hidden autogrow-textarea" placeholder="Enter clauses description/text" rows="1"></textarea>
                     </div>
                 </div>
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 rounded-b-xl">
@@ -108,7 +108,7 @@
 <div id="editModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeEditModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-md transform transition-all">
+        <div class="bg-white rounded-xl w-full max-w-3xl transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Edit Clause</h3>
                 <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
@@ -129,7 +129,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Clauses</label>
-                        <textarea name="clauses" id="edit_clauses" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" rows="3"></textarea>
+                        <textarea name="clauses" id="edit_clauses" style="min-height: 42px;" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none overflow-hidden autogrow-textarea" rows="1"></textarea>
                     </div>
                 </div>
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 rounded-b-xl">
@@ -163,7 +163,25 @@
 
 @push('scripts')
 <script>
+    function autoGrow(element) {
+        if (!element || element.scrollHeight === 0) return;
+        element.style.height = "auto";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
     $(document).ready(function() {
+        // Auto-grow textareas on input
+        $(document).on('input', '.autogrow-textarea', function() {
+            autoGrow(this);
+        });
+
+        // Initialize autogrow on load
+        $('.autogrow-textarea').each(function() {
+            var self = this;
+            setTimeout(function() {
+                autoGrow(self);
+            }, 10);
+        });
         var table = $('#clausesTable').DataTable({
             processing: true,
             serverSide: true,
@@ -227,6 +245,12 @@
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
+        const ta = document.querySelector('#createModal .autogrow-textarea');
+        if (ta) {
+            setTimeout(function() {
+                autoGrow(ta);
+            }, 50);
+        }
     }
 
     // Reset create modal fields
@@ -246,6 +270,14 @@
         $('#edit_clause_title').val(clause_title);
         $('#edit_clauses').val(clauses);
         $('#editModal').removeClass('hidden');
+        
+        // Trigger auto-grow for edit clauses textarea after value is loaded
+        const editClauses = document.getElementById('edit_clauses');
+        if (editClauses) {
+            setTimeout(() => {
+                autoGrow(editClauses);
+            }, 50);
+        }
     }
 
     function closeEditModal() {
