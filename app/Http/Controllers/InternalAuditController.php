@@ -129,17 +129,54 @@ class InternalAuditController extends Controller
     public function verification()
     {
         $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->pluck('Key1');
-        return view('approvals.verifkasi_internal_audit', compact('departments'));
-    }
-
-    public function verificationTable(Request $request)
-    {
-        $query = DB::table('CsAuditCar as a')
+        
+        $superiorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
             ->whereNotNull('a.external')
             ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete')
-            ->select('a.*', 'd.action_status', 'd.id as action_id');
+            ->where('a.status', 'Under Review')
+            ->count();
+
+        $auditorCount = DB::table('CsAuditCar as a')
+            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->whereNotNull('a.external')
+            ->where('a.external', '<>', '')
+            ->where('d.action_status', 'complete')
+            ->where('a.status', 'Need Verification')
+            ->count();
+
+        $closedCount = DB::table('CsAuditCar as a')
+            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->whereNotNull('a.external')
+            ->where('a.external', '<>', '')
+            ->where('d.action_status', 'complete')
+            ->where('a.status', 'Closed')
+            ->count();
+
+        return view('approvals.verifkasi_internal_audit', compact('departments', 'superiorCount', 'auditorCount', 'closedCount'));
+    }
+
+    public function verificationTable(Request $request)
+    {
+        $role = $request->role ?? 'superior';
+
+        $query = DB::table('CsAuditCar as a')
+            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->whereNotNull('a.external')
+            ->where('a.external', '<>', '')
+            ->where('d.action_status', 'complete');
+
+        // Apply role filter (show all CARs at this stage)
+        if ($role === 'superior') {
+            $query->where('a.status', 'Under Review');
+        } elseif ($role === 'auditor') {
+            $query->where('a.status', 'Need Verification');
+        } elseif ($role === 'closed') {
+            $query->where('a.status', 'Closed');
+        }
+
+        $totalRecords = $query->count();
 
         // Search
         if ($request->has('search') && !empty($request->search['value'])) {
@@ -163,13 +200,6 @@ class InternalAuditController extends Controller
             $query->where('a.department', $request->dept);
         }
 
-        $totalRecords = DB::table('CsAuditCar as a')
-            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->whereNotNull('a.external')
-            ->where('a.external', '<>', '')
-            ->where('d.action_status', 'complete')
-            ->count();
-
         $filteredRecords = $query->count();
 
         // Pagination
@@ -177,7 +207,9 @@ class InternalAuditController extends Controller
             $query->skip($request->start)->take($request->length);
         }
 
-        $data = $query->orderBy('a.id', 'desc')->get();
+        $data = $query->select('a.*', 'd.action_status', 'd.id as action_id', 'd.auditee_superior_name')
+            ->orderBy('a.id', 'desc')
+            ->get();
 
         $response = [
             "draw" => intval($request->draw),
@@ -202,16 +234,56 @@ class InternalAuditController extends Controller
                         <span id="spinner_form_view_doc_' . $rowNo . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
                     </button>';
 
+                $user = Auth::user();
+                $canAction = false;
+                $role = $request->role ?? 'superior';
+
+                if ($role === 'superior') {
+                    if (!empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0) {
+                        $canAction = true;
+                    }
+                } elseif ($role === 'auditor') {
+                    if (!empty($item->auditor)) {
+                        $auditors = array_map('trim', explode(',', $item->auditor));
+                        foreach ($auditors as $auditorName) {
+                            if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                                $canAction = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $isUserAuditor = false;
+                if (!empty($item->auditor)) {
+                    $auditors = array_map('trim', explode(',', $item->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                            $isUserAuditor = true;
+                            break;
+                        }
+                    }
+                }
+
+                $isUserSuperior = !empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0;
+
                 $actionBtn = '';
                 if ($isApproved) {
-                    $actionBtn = '
-                        <div class="flex items-center justify-start gap-2">
-                            ' . $previewBtn . '
-                            <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
-                                <i class="fa-solid fa-rotate-left text-sm"></i>
-                            </button>
-                        </div>';
-                } else {
+                    if ($isUserAuditor) {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                                <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
+                                    <i class="fa-solid fa-rotate-left text-sm"></i>
+                                </button>
+                            </div>';
+                    } else {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                            </div>';
+                    }
+                } elseif ($canAction) {
                     $actionBtn = '
                         <div class="flex items-center justify-start gap-2">
                             ' . $previewBtn . '
@@ -222,6 +294,21 @@ class InternalAuditController extends Controller
                                 <i class="fa-solid fa-xmark text-sm"></i>
                             </button>
                         </div>';
+                } else {
+                    if ($role === 'auditor' && $isUserSuperior) {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                                <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
+                                    <i class="fa-solid fa-rotate-left text-sm"></i>
+                                </button>
+                            </div>';
+                    } else {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                            </div>';
+                    }
                 }
 
                 return [
@@ -239,7 +326,28 @@ class InternalAuditController extends Controller
                     "action_status" => $item->action_status,
                     "action" => $actionBtn
                 ];
-            })
+            }),
+            "superiorCount" => DB::table('CsAuditCar as a')
+                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+                ->whereNotNull('a.external')
+                ->where('a.external', '<>', '')
+                ->where('d.action_status', 'complete')
+                ->where('a.status', 'Under Review')
+                ->count(),
+            "auditorCount" => DB::table('CsAuditCar as a')
+                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+                ->whereNotNull('a.external')
+                ->where('a.external', '<>', '')
+                ->where('d.action_status', 'complete')
+                ->where('a.status', 'Need Verification')
+                ->count(),
+            "closedCount" => DB::table('CsAuditCar as a')
+                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+                ->whereNotNull('a.external')
+                ->where('a.external', '<>', '')
+                ->where('d.action_status', 'complete')
+                ->where('a.status', 'Closed')
+                ->count()
         ];
 
         return response()->json($response);
@@ -253,26 +361,61 @@ class InternalAuditController extends Controller
 
         try {
             $user = Auth::user();
+            
+            $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
+            if (!$car) {
+                return response()->json(['success' => false, 'message' => 'CAR not found.']);
+            }
+
             $action = DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->first();
             if (!$action) {
                 return response()->json(['success' => false, 'message' => 'Action Plan not found for this CAR.']);
             }
 
-            if (empty($action->auditee_superior_name)) {
-                return response()->json(['success' => false, 'message' => 'Auditee Superior Name is not set for this Action Plan.']);
+            $carStatus = $car->status ?? 'Under Review';
+
+            if ($carStatus === 'Closed') {
+                // Verify that the user is the Auditor
+                $isAuditor = false;
+                if (!empty($car->auditor)) {
+                    $auditors = array_map('trim', explode(',', $car->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                            $isAuditor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAuditor) {
+                    return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.']);
+                }
+
+                DB::table('CsAuditCar')
+                    ->where('id', $request->car_id)
+                    ->update([
+                        'status' => 'Need Verification',
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                return response()->json(['success' => true, 'message' => 'CAR Action Report rolled back to Auditor verification queue successfully.']);
+            } elseif ($carStatus === 'Need Verification') {
+                // Verify that the user is the Auditee Superior
+                if (empty($action->auditee_superior_name) || strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
+                    return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') is allowed to rollback approval at this stage.']);
+                }
+
+                DB::table('CsAuditCar')
+                    ->where('id', $request->car_id)
+                    ->update([
+                        'status' => 'Under Review',
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                return response()->json(['success' => true, 'message' => 'CAR Action Report rolled back to Superior review stage successfully.']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Rollback is not allowed at the current CAR stage (' . $carStatus . ').']);
             }
-
-            if (strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
-                return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . $action->auditee_superior_name . ') is allowed to rollback this approval.']);
-            }
-
-            DB::table('CsAuditCar')
-                ->where('id', $request->car_id)
-                ->update([
-                    'status' => 'Under Review'
-                ]);
-
-            return response()->json(['success' => true, 'message' => 'CAR Action Report rolled back successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -286,17 +429,39 @@ class InternalAuditController extends Controller
 
         try {
             $user = Auth::user();
+            $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
+            if (!$car) {
+                return response()->json(['success' => false, 'message' => 'CAR not found.']);
+            }
+
             $action = DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->first();
             if (!$action) {
                 return response()->json(['success' => false, 'message' => 'Action Plan not found for this CAR.']);
             }
 
-            if (empty($action->auditee_superior_name)) {
-                return response()->json(['success' => false, 'message' => 'Auditee Superior Name is not set for this Action Plan.']);
-            }
+            $carStatus = $car->status ?? 'Under Review';
 
-            if (strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
-                return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . $action->auditee_superior_name . ') is allowed to reject this CAR.']);
+            if ($carStatus === 'Under Review') {
+                if (empty($action->auditee_superior_name) || strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
+                    return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') is allowed to reject at this stage.']);
+                }
+            } elseif ($carStatus === 'Need Verification') {
+                $isAuditor = false;
+                if (!empty($car->auditor)) {
+                    $auditors = array_map('trim', explode(',', $car->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                            $isAuditor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAuditor) {
+                    return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to reject at this stage.']);
+                }
+            } else {
+                return response()->json(['success' => false, 'message' => 'Rejection is not allowed at the current CAR stage (' . $carStatus . ').']);
             }
 
             DB::beginTransaction();
@@ -316,7 +481,7 @@ class InternalAuditController extends Controller
                 ]);
 
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'CAR Action Plan rejected and rolled back to draft successfully.']);
+            return response()->json(['success' => true, 'message' => 'CAR Action Plan rejected and returned to draft successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
@@ -402,6 +567,12 @@ class InternalAuditController extends Controller
                 ]);
             }
 
+            // Update CAR status to Under Review
+            DB::table('CsAuditCar')->where('id', $car->id)->update([
+                'status' => 'Under Review',
+                'updated_at' => Carbon::now()
+            ]);
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -444,12 +615,47 @@ class InternalAuditController extends Controller
                 return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
             }
 
+            $user = Auth::user();
+            if (($car->status ?? '') === 'Closed') {
+                $isAuditor = false;
+                if (!empty($car->auditor)) {
+                    $auditors = array_map('trim', explode(',', $car->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                            $isAuditor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAuditor) {
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.'
+                        ]);
+                    }
+                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.');
+                }
+            }
+
+            DB::beginTransaction();
+
             DB::table('CsAuditAction')
                 ->where('audit_car_id', $car->id)
                 ->update([
                     'action_status' => 'draft',
                     'updated_at' => Carbon::now()
                 ]);
+
+            DB::table('CsAuditCar')
+                ->where('id', $car->id)
+                ->update([
+                    'status' => 'Draft',
+                    'updated_at' => Carbon::now()
+                ]);
+
+            DB::commit();
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -1131,30 +1337,60 @@ class InternalAuditController extends Controller
 
         try {
             $user = Auth::user();
-            $role = $request->role;
+            $role = $request->role; // 'superior' or 'auditor'
+            if ($role === 'qmr') {
+                $role = 'superior';
+            }
 
-            // Fetch the action record to check auditee_superior_name
+            $car = DB::table('CsAuditCar')->where('id', $request->car_id)->first();
+            if (!$car) {
+                return response()->json(['success' => false, 'message' => 'CAR not found.']);
+            }
+
             $action = DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->first();
             if (!$action) {
                 return response()->json(['success' => false, 'message' => 'Action Plan not found for this CAR.']);
             }
 
-            if (empty($action->auditee_superior_name)) {
-                return response()->json(['success' => false, 'message' => 'Auditee Superior Name is not set for this Action Plan.']);
+            if ($role === 'superior') {
+                if (empty($action->auditee_superior_name) || strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
+                    return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') is allowed to approve at this stage.']);
+                }
+
+                $updateData = [
+                    'status' => 'Need Verification',
+                    'updated_at' => Carbon::now()
+                ];
+                DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
+
+                return response()->json(['success' => true, 'message' => 'Action Plan approved by Superior. Now waiting for Auditor verification.']);
+            } elseif ($role === 'auditor') {
+                // Verify the user is the Auditor
+                $isAuditor = false;
+                if (!empty($car->auditor)) {
+                    $auditors = array_map('trim', explode(',', $car->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                            $isAuditor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAuditor) {
+                    return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to verify and close this CAR.']);
+                }
+
+                $updateData = [
+                    'status' => 'Closed',
+                    'updated_at' => Carbon::now()
+                ];
+                DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
+
+                return response()->json(['success' => true, 'message' => 'CAR verified and Closed successfully by Auditor.']);
             }
 
-            if (strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
-                return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . $action->auditee_superior_name . ') is allowed to approve this CAR.']);
-            }
-
-            $updateData = [
-                'status' => 'Closed',
-                'updated_at' => Carbon::now()
-            ];
-
-            DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
-
-            return response()->json(['success' => true, 'message' => 'Approval submitted successfully.']);
+            return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') or Auditor (' . ($car->auditor ?? '-') . ') is allowed to approve this CAR.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }

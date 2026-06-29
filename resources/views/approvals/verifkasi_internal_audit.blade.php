@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Verification External Audit')
+@section('title', 'Verifikasi CAR Audit Internal')
 
 @section('content')
 @include('layouts.sidebar')
@@ -12,10 +12,28 @@
 
     <!-- Page Content -->
     <main class="flex-1 p-6">
-        <!-- Page Title -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-800">Verification External Audit</h1>
-            <p class="text-slate-500 mt-1">Verifikasi Temuan Audit External (QMR Approval)</p>
+        <!-- Page Title & Tabs -->
+        <div class="mb-6 flex flex-col md:flex-row justify-between md:items-end gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Verifikasi CAR Audit Internal</h1>
+                <p class="text-slate-500 mt-1">Verifikasi CAR Audit Internal (Superior and Auditor Approval)</p>
+            </div>
+            
+            <!-- Selector Tabs -->
+            <div class="flex border-b border-slate-200 md:mr-24">
+                <button type="button" onclick="setRoleTab('superior')" id="tab-superior" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-all duration-200 outline-none flex items-center">
+                    Verif by Superior
+                    <span id="count-superior" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $superiorCount ?? 0 }}</span>
+                </button>
+                <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
+                    Verif by Auditor or QMS
+                    <span id="count-auditor" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
+                </button>
+                <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
+                    Audit Closed
+                    <span id="count-closed" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $closedCount ?? 0 }}</span>
+                </button>
+            </div>
         </div>
 
         <!-- Main Card -->
@@ -139,6 +157,27 @@
 <script>
     let currentAction = ''; 
     let currentCarId = null;
+    let currentRole = 'superior';
+
+    function setRoleTab(role) {
+        currentRole = role;
+        
+        // Reset all tabs
+        $('#tab-superior, #tab-auditor, #tab-closed').removeClass('border-blue-500 text-blue-600 border-emerald-600 text-emerald-600').addClass('border-transparent text-slate-500 hover:text-slate-800');
+        $('#count-superior, #count-auditor, #count-closed').removeClass('bg-blue-100 text-blue-600 bg-emerald-100 text-emerald-600').addClass('bg-slate-100 text-slate-600');
+
+        // Set active tab
+        if (role === 'closed') {
+            $('#tab-closed').removeClass('border-transparent text-slate-500 hover:text-slate-800').addClass('border-emerald-600 text-emerald-600');
+            $('#count-closed').removeClass('bg-slate-100 text-slate-600').addClass('bg-emerald-100 text-emerald-600');
+        } else {
+            $('#tab-' + role).removeClass('border-transparent text-slate-500 hover:text-slate-800').addClass('border-blue-500 text-blue-600');
+            $('#count-' + role).removeClass('bg-slate-100 text-slate-600').addClass('bg-blue-100 text-blue-600');
+        }
+
+        // Reload table
+        $('#findingsTable').DataTable().ajax.reload();
+    }
 
     $(document).ready(function() {
         var table = $('#findingsTable').DataTable({
@@ -154,6 +193,13 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.role = currentRole;
+                },
+                dataSrc: function(json) {
+                    $('#count-superior').text(json.superiorCount || 0);
+                    $('#count-auditor').text(json.auditorCount || 0);
+                    $('#count-closed').text(json.closedCount || 0);
+                    return json.data;
                 }
             },
             columns: [
@@ -338,7 +384,7 @@
             payload = {
                 _token: "{{ csrf_token() }}",
                 car_id: currentCarId,
-                role: 'qmr'
+                role: currentRole
             };
         } else if (currentAction === 'rollback') {
             url = "{{ route('internal_audit.cars.rollback') }}";

@@ -16,7 +16,14 @@
     <main class="flex-1 p-3 sm:p-6">
         <!-- Page Title & Back Button -->
         <div class="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
-            <a href="{{ route('internal_audit.action_report') }}"
+            @php
+                $backUrl = route('internal_audit.action_report');
+                $previousUrl = url()->previous();
+                if ($previousUrl && (str_contains($previousUrl, 'verification') || str_contains($previousUrl, 'verifkasi') || str_contains($previousUrl, 'verifikasi'))) {
+                    $backUrl = route('internal_audit.verification');
+                }
+            @endphp
+            <a href="{{ $backUrl }}"
                 class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
@@ -274,7 +281,27 @@
                 <!-- Submit Button / Rollback -->
                 <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
                     @if($isComplete)
-                        @if(isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0 && ($car->status ?? '') !== 'Closed')
+                        @php
+                            $isAuditor = false;
+                            if (!empty($car->auditor)) {
+                                $auditors = array_map('trim', explode(',', $car->auditor));
+                                foreach ($auditors as $auditorName) {
+                                    if (strcasecmp(Auth::user()->full_name, $auditorName) === 0) {
+                                        $isAuditor = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            $isSuperior = isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0;
+                            
+                            $showActionButtons = false;
+                            if ($isSuperior && ($car->status ?? '') === 'Under Review') {
+                                $showActionButtons = true;
+                            } elseif ($isAuditor && ($car->status ?? '') === 'Need Verification') {
+                                $showActionButtons = true;
+                            }
+                        @endphp
+                        @if($showActionButtons)
                             <button type="button" id="btnApproveAction" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-check text-base"></i> Approve
                             </button>
@@ -282,9 +309,19 @@
                                 <i class="fa-solid fa-xmark text-base"></i> Reject
                             </button>
                         @endif
-                        <button type="button" id="btnRollback" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-rotate-left text-base"></i> Rollback
-                        </button>
+                        @php
+                            $showRollback = true;
+                            if (($car->status ?? '') === 'Closed') {
+                                if (!$isAuditor) {
+                                    $showRollback = false;
+                                }
+                            }
+                        @endphp
+                        @if($showRollback)
+                            <button type="button" id="btnRollback" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-left text-base"></i> Rollback
+                            </button>
+                        @endif
                     @else
                         <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk text-base"></i> Save Action Plan
@@ -385,7 +422,7 @@
             payload = {
                 _token: "{{ csrf_token() }}",
                 car_id: {{ $car->id }},
-                role: 'qmr'
+                role: "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : 'superior' }}"
             };
         } else if (currentAction === 'reject') {
             url = "{{ route('internal_audit.cars.reject') }}";
