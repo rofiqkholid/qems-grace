@@ -287,6 +287,26 @@
         </form>
     </main>
 
+    <!-- Rollback Confirmation Modal -->
+    <div id="rollbackModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeRollbackModal()"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl w-full max-w-sm transform transition-all shadow-xl">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-rotate-left text-2xl text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Rollback</h3>
+                    <p class="text-slate-500 text-sm">Are you sure you want to rollback this action plan to draft? This will make all fields editable again.</p>
+                </div>
+                <div class="p-6 pt-0 flex gap-3">
+                    <button type="button" onclick="closeRollbackModal()" class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors text-sm">Cancel</button>
+                    <button type="button" onclick="executeRollback()" class="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors text-sm">Rollback</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('layouts.footer')
 </div>
 
@@ -294,6 +314,50 @@
     function autoGrow(element) {
         element.style.height = "auto";
         element.style.height = (element.scrollHeight) + "px";
+    }
+
+    function openRollbackModal() {
+        document.getElementById('rollbackModal').classList.remove('hidden');
+    }
+
+    function closeRollbackModal() {
+        document.getElementById('rollbackModal').classList.add('hidden');
+    }
+
+    function executeRollback() {
+        const btnRollback = document.getElementById('btnRollback');
+        if (!btnRollback) return;
+        const originalText = btnRollback.innerHTML;
+        btnRollback.disabled = true;
+        btnRollback.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Rolling back...';
+        closeRollbackModal();
+        
+        fetch('{{ route("internal_audit.action_report.rollback", request()->route("id")) }}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast(data.message || 'An error occurred.', 'error');
+                btnRollback.disabled = false;
+                btnRollback.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred during rollback.', 'error');
+            btnRollback.disabled = false;
+            btnRollback.innerHTML = originalText;
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -326,38 +390,7 @@
         const btnRollback = document.getElementById('btnRollback');
         if (btnRollback) {
             btnRollback.addEventListener('click', function() {
-                if (confirm('Are you sure you want to rollback this action plan to draft?')) {
-                    const originalText = btnRollback.innerHTML;
-                    btnRollback.disabled = true;
-                    btnRollback.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Rolling back...';
-                    
-                    fetch('{{ route("internal_audit.action_report.rollback", request()->route("id")) }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            showToast(data.message || 'An error occurred.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showToast('An error occurred during rollback.', 'error');
-                    })
-                    .finally(() => {
-                        btnRollback.disabled = false;
-                        btnRollback.innerHTML = originalText;
-                    });
-                }
+                openRollbackModal();
             });
         }
 
