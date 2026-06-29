@@ -1,6 +1,6 @@
 @php
     $hideCentralToast = true;
-    $deptOptions = $departments->map(fn($d) => ['id' => $d->Key1, 'name' => $d->Desc . ' (' . $d->Key1 . ')'])->toArray();
+    $deptOptions = $departments->map(fn($d) => ['id' => $d->Key1, 'name' => $d->Key1])->toArray();
 @endphp
 @extends('layouts.app')
 
