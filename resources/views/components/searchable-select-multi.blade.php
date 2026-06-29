@@ -184,7 +184,7 @@
                     this.selectedItems.splice(idx, 1);
                 } else {
                     // Check max items limit
-                    if (this.selectedItems.length >= this.maxItems) {
+                    if (this.maxItems > 0 && this.selectedItems.length >= this.maxItems) {
                         if (typeof showToast === 'function') {
                             showToast('You can select a maximum of ' + this.maxItems + ' items.', 'error');
                         } else {

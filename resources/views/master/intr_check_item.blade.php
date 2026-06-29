@@ -97,7 +97,7 @@
                             apiUrl="{{ route('genba.get_section') }}"
                             updateEvent="create-department-event"
                             multiple="true"
-                            maxItems="10" />
+                            maxItems="0" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (IDN) <span class="text-red-500">*</span></label>
@@ -148,7 +148,7 @@
                             apiUrl="{{ route('genba.get_section') }}"
                             updateEvent="edit-department-event"
                             multiple="true"
-                            maxItems="10" />
+                            maxItems="0" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Check Item (IDN) <span class="text-red-500">*</span></label>
