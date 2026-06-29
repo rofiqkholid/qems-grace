@@ -832,8 +832,21 @@ class MasterController extends Controller
                 'updated_at' => \Carbon\Carbon::now()
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.intr_check_item')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -860,8 +873,21 @@ class MasterController extends Controller
                     'updated_at' => \Carbon\Carbon::now()
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.intr_check_item')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }

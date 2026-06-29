@@ -106,7 +106,7 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <form action="{{ route('master.intr_check_item.store') }}" method="POST">
+            <form id="createForm" action="{{ route('master.intr_check_item.store') }}" method="POST">
                 @csrf
                 <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                     <input type="hidden" name="is_active" value="1">
@@ -172,7 +172,7 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <form action="{{ route('master.intr_check_item.update') }}" method="POST">
+            <form id="editForm" action="{{ route('master.intr_check_item.update') }}" method="POST">
                 @csrf
                 <input type="hidden" name="id" id="edit_id">
                 <input type="hidden" name="is_active" id="edit_is_active" value="1">
@@ -334,6 +334,61 @@
         });
         window.addEventListener('filter-department-changed', function() {
             table.draw();
+        });
+
+        // AJAX Form Submission for Create
+        $('#createForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = $(form).find('button[type="submit"]');
+            const originalText = submitBtn.html();
+            
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...');
+            
+            $.ajax({
+                url: form.action,
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(response) {
+                    closeCreateModal();
+                    showToast('Data added successfully.', 'success');
+                    table.ajax.reload(); // Go to page 1 to see the new item
+                    form.reset();
+                },
+                error: function(xhr) {
+                    showToast(xhr.responseJSON?.message || 'Failed to add data.', 'error');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+
+        // AJAX Form Submission for Edit
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = $(form).find('button[type="submit"]');
+            const originalText = submitBtn.html();
+            
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Updating...');
+            
+            $.ajax({
+                url: form.action,
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(response) {
+                    closeEditModal();
+                    showToast('Data updated successfully.', 'success');
+                    table.ajax.reload(null, false); // Reload table KEEPING the current page!
+                },
+                error: function(xhr) {
+                    showToast(xhr.responseJSON?.message || 'Failed to update data.', 'error');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
         });
     });
 
