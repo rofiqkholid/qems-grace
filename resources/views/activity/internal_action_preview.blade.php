@@ -395,6 +395,9 @@
                 .then(data => {
                     if (data.success) {
                         showToast(data.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         showToast(data.message || 'An error occurred.', 'error');
                     }
