@@ -121,8 +121,21 @@ class MasterController extends Controller
                 'Area_name' => $request->area_name,
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.line_checked')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -143,8 +156,21 @@ class MasterController extends Controller
                     'Area_name' => $request->area_name,
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.line_checked')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
@@ -250,8 +276,21 @@ class MasterController extends Controller
                 'Description' => $request->description,
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.category')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -272,8 +311,21 @@ class MasterController extends Controller
                     'Description' => $request->description,
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.category')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
@@ -381,8 +433,21 @@ class MasterController extends Controller
                 'Checkbox01' => '1',
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.department')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -401,8 +466,21 @@ class MasterController extends Controller
                     'Desc' => $request->desc,
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.department')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
@@ -515,8 +593,21 @@ class MasterController extends Controller
                 'updated_at' => now(),
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.clauses')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -540,8 +631,21 @@ class MasterController extends Controller
                     'updated_at' => now(),
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.clauses')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }
@@ -666,8 +770,21 @@ class MasterController extends Controller
                 'Check_item_eng' => $request->check_item_eng,
             ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data added successfully.'
+                ]);
+            }
+
             return redirect()->route('master.check_item')->with('success', 'Data added successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to add data: ' . $e->getMessage());
         }
     }
@@ -694,8 +811,21 @@ class MasterController extends Controller
                     'Check_item_eng' => $request->check_item_eng,
                 ]);
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data updated successfully.'
+                ]);
+            }
+
             return redirect()->route('master.check_item')->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update data: ' . $e->getMessage()
+                ], 500);
+            }
             return redirect()->back()->with('error', 'Failed to update data: ' . $e->getMessage());
         }
     }

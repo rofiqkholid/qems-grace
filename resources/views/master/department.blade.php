@@ -76,7 +76,7 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <form action="{{ route('master.department.store') }}" method="POST">
+            <form id="createForm" action="{{ route('master.department.store') }}" method="POST">
                 @csrf
                 <div class="p-6 space-y-4">
                     <div>
@@ -109,7 +109,7 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <form action="{{ route('master.department.update') }}" method="POST">
+            <form id="editForm" action="{{ route('master.department.update') }}" method="POST">
                 @csrf
                 <!-- Key1 is the primary key/identifier -->
                 <div class="p-6 space-y-4">
@@ -200,19 +200,75 @@
             }
         });
 
-        // Search on keyup (debounce)
-        var searchTimer;
-        $('#searchInput').on('keyup', function() {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(function() {
-                table.search($('#searchInput').val()).draw();
-            }, 500);
+        // AJAX Form Submission for Create
+        $('#createForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = $(form).find('button[type="submit"]');
+            const originalText = submitBtn.html();
+            
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...');
+            
+            $.ajax({
+                url: form.action,
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(response) {
+                    closeCreateModal();
+                    showToast('Data added successfully.', 'success');
+                    table.ajax.reload();
+                    form.reset();
+                },
+                error: function(xhr) {
+                    showToast(xhr.responseJSON?.message || 'Failed to add data.', 'error');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+
+        // AJAX Form Submission for Edit
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = $(form).find('button[type="submit"]');
+            const originalText = submitBtn.html();
+            
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Updating...');
+            
+            $.ajax({
+                url: form.action,
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(response) {
+                    closeEditModal();
+                    showToast('Data updated successfully.', 'success');
+                    table.ajax.reload(null, false); // Reload KEEPING page
+                },
+                error: function(xhr) {
+                    showToast(xhr.responseJSON?.message || 'Failed to update data.', 'error');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
         });
     });
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
     }
+
+    // Search on keyup (debounce)
+    var searchTimer;
+    $(document).on('keyup', '#searchInput', function() {
+        clearTimeout(searchTimer);
+        const self = this;
+        searchTimer = setTimeout(function() {
+            $('#departmentTable').DataTable().search($(self).val()).draw();
+        }, 500);
+    });
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
