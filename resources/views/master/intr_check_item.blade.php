@@ -46,11 +46,12 @@
                     <thead>
                         <tr>
                             <th class="w-[5%] text-center">No</th>
+                            <th class="w-[15%] text-left">Internal Audit</th>
                             <th class="w-[15%] text-left">Scope Item</th>
                             <th class="w-[15%] text-left">Department</th>
-                            <th class="w-[25%] text-left">Check Item (IDN)</th>
-                            <th class="w-[25%] text-left">Check Item (EN)</th>
-                            <th class="w-[15%] text-left">Action</th>
+                            <th class="w-[20%] text-left">Check Item (IDN)</th>
+                            <th class="w-[20%] text-left">Check Item (EN)</th>
+                            <th class="w-[10%] text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -82,6 +83,22 @@
                 @csrf
                 <div class="p-6 space-y-4">
                     <input type="hidden" name="is_active" value="1">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Internal Audit <span class="text-red-500">*</span></label>
+                        <x-searchable-select
+                            id="create_audit_type"
+                            name="audit_type"
+                            label="Internal Audit"
+                            required="true"
+                            hideLabel="true"
+                            updateEvent="create-audit-type-event"
+                            :initialOptions="[
+                                ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                            ]" />
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item</label>
                         <input type="text" name="scope_item" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="e.g. Equipment calibration">
@@ -133,6 +150,22 @@
                 <input type="hidden" name="id" id="edit_id">
                 <input type="hidden" name="is_active" id="edit_is_active" value="1">
                 <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Internal Audit <span class="text-red-500">*</span></label>
+                        <x-searchable-select
+                            id="edit_audit_type"
+                            name="audit_type"
+                            label="Internal Audit"
+                            required="true"
+                            hideLabel="true"
+                            updateEvent="edit-audit-type-event"
+                            :initialOptions="[
+                                ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                            ]" />
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Scope Item</label>
                         <input type="text" name="scope_item" id="edit_scope_item" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
@@ -211,6 +244,18 @@
                     className: 'text-center font-base text-slate-700'
                 },
                 {
+                    data: 'audit_type',
+                    name: 'audit_type',
+                    className: 'text-slate-700 text-left font-semibold',
+                    render: function(data) {
+                        if (data === 'Product') return 'Audit Quality - Product';
+                        if (data === 'Process') return 'Audit Quality - Process';
+                        if (data === 'System') return 'Audit Quality - System';
+                        if (data === 'Environment') return 'Audit Lingkungan - Environment';
+                        return data || '-';
+                    }
+                },
+                {
                     data: 'scope_item',
                     name: 'scope_item',
                     className: 'text-slate-700 text-left'
@@ -258,6 +303,13 @@
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
         
+        window.dispatchEvent(new CustomEvent('create-audit-type-event', {
+            detail: {
+                id: '',
+                name: ''
+            }
+        }));
+        
         // Reset department select in create modal
         window.dispatchEvent(new CustomEvent('create-department-event', {
             detail: {
@@ -277,9 +329,24 @@
         const checkItemEn = btn.getAttribute('data-check_item_en');
         const department = btn.getAttribute('data-department');
         const scopeItem = btn.getAttribute('data-scope_item');
+        const auditType = btn.getAttribute('data-audit_type');
         const isActive = btn.getAttribute('data-is_active');
-
+ 
         $('#edit_id').val(id);
+        
+        let auditTypeName = '';
+        if (auditType === 'Product') auditTypeName = 'Audit Quality - Product';
+        else if (auditType === 'Process') auditTypeName = 'Audit Quality - Process';
+        else if (auditType === 'System') auditTypeName = 'Audit Quality - System';
+        else if (auditType === 'Environment') auditTypeName = 'Audit Lingkungan - Environment';
+
+        window.dispatchEvent(new CustomEvent('edit-audit-type-event', {
+            detail: {
+                id: auditType,
+                name: auditTypeName
+            }
+        }));
+
         $('#edit_check_item_idn').val(checkItemIdn);
         $('#edit_check_item_en').val(checkItemEn);
         

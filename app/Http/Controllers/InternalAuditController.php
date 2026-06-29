@@ -506,6 +506,7 @@ class InternalAuditController extends Controller
         $scheduleDepts = array_map('trim', explode(',', $schedule->auditee_dept ?? ''));
         $items = DB::table('CsChecksheetItem')
             ->where('is_active', 1)
+            ->where('audit_type', $schedule->audit_type)
             ->where(function($q) use ($scheduleDepts) {
                 foreach ($scheduleDepts as $dept) {
                     if ($dept) {

@@ -761,6 +761,7 @@ class MasterController extends Controller
                     "check_item_en" => $item->check_item_en,
                     "department" => $item->department,
                     "scope_item" => $item->scope_item,
+                    "audit_type" => $item->audit_type,
                     "is_active" => $item->is_active,
                     "action" => '<div class="flex items-center justify-start gap-2">
                                 <button type="button" title="Edit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
@@ -770,6 +771,7 @@ class MasterController extends Controller
                                     data-check_item_en="' . htmlspecialchars($item->check_item_en, ENT_QUOTES) . '"
                                     data-department="' . htmlspecialchars($item->department, ENT_QUOTES) . '"
                                     data-scope_item="' . htmlspecialchars($item->scope_item, ENT_QUOTES) . '"
+                                    data-audit_type="' . htmlspecialchars($item->audit_type, ENT_QUOTES) . '"
                                     data-is_active="' . $item->is_active . '">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
@@ -805,6 +807,7 @@ class MasterController extends Controller
             'check_item_idn' => 'required',
             'check_item_en' => 'nullable',
             'department' => 'required',
+            'audit_type' => 'nullable|string',
         ]);
 
         try {
@@ -813,6 +816,7 @@ class MasterController extends Controller
                 'check_item_en' => $request->check_item_en ?? '',
                 'department' => $request->department,
                 'scope_item' => $request->scope_item,
+                'audit_type' => $request->audit_type,
                 'is_active' => 1,
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now()
@@ -831,6 +835,7 @@ class MasterController extends Controller
             'check_item_idn' => 'required',
             'check_item_en' => 'nullable',
             'department' => 'required',
+            'audit_type' => 'nullable|string',
         ]);
 
         try {
@@ -841,6 +846,7 @@ class MasterController extends Controller
                     'check_item_en' => $request->check_item_en ?? '',
                     'department' => $request->department,
                     'scope_item' => $request->scope_item,
+                    'audit_type' => $request->audit_type,
                     'updated_at' => \Carbon\Carbon::now()
                 ]);
 
