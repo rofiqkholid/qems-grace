@@ -165,7 +165,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
                     <div class="col-span-1 md:col-span-2">
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">Klausul</label>
-                        <textarea name="clause_text" id="clause_text" readonly rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed outline-none transition-all text-sm" placeholder="Clause text...">{{ old('clause_text', $car->clause_text ?? '') }}</textarea>
+                        <textarea name="clause_text" id="clause_text" readonly rows="1" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed outline-none transition-all text-sm resize-none overflow-hidden autogrow-textarea" placeholder="Clause text...">{{ old('clause_text', $car->clause_text ?? '') }}</textarea>
                     </div>
 
                     <div>
@@ -197,7 +197,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
                     <div class="col-span-1 md:col-span-2">
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding <span class="text-red-500">*</span></label>
-                        <textarea name="finding" id="finding_textarea" rows="3.5" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
+                        <textarea name="finding" id="finding_textarea" rows="1" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden autogrow-textarea" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
                         <p id="err_finding" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
                     <div>
@@ -227,6 +227,11 @@
 </div>
 
 <script>
+    function autoGrow(element) {
+        element.style.height = "auto";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
     function validateAndSubmitCar() {
         let isValid = true;
 
@@ -366,6 +371,17 @@
                 name: "{{ $initialClauseTitleName }}"
             }
         }));
+
+        // Auto-grow textareas on load and input
+        const textareas = document.querySelectorAll('.autogrow-textarea');
+        textareas.forEach(textarea => {
+            setTimeout(() => {
+                autoGrow(textarea);
+            }, 10);
+            textarea.addEventListener('input', function() {
+                autoGrow(this);
+            });
+        });
 
         // Listen to requirement changed event
         window.addEventListener('car-requirement-changed', function(e) {
