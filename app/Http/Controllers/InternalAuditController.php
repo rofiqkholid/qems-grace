@@ -323,6 +323,7 @@ class InternalAuditController extends Controller
                     "finding_category" => $item->finding_category,
                     "auditor" => $item->auditor ?? '-',
                     "auditee" => $item->auditee ?? '-',
+                    "superior" => $item->auditee_superior_name ?? '-',
                     "action_status" => $item->action_status,
                     "action" => $actionBtn
                 ];

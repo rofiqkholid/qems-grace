@@ -105,10 +105,11 @@
                             <th class="w-[5%] text-center">No</th>
                             <th class="w-[15%] text-left">Req Number</th>
                             <th class="w-[12%] text-left">Department</th>
-                            <th class="w-[15%] text-left">Finding Category</th>
-                            <th class="w-[18%] text-left">Auditor</th>
-                            <th class="w-[18%] text-left">Auditee</th>
-                            <th class="w-[12%] text-left">Action</th>
+                            <th class="w-[12%] text-left">Finding Category</th>
+                            <th class="w-[15%] text-left">Auditor</th>
+                            <th class="w-[15%] text-left">Auditee</th>
+                            <th class="w-[15%] text-left">Superior</th>
+                            <th class="w-[11%] text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -157,10 +158,11 @@
 <script>
     let currentAction = ''; 
     let currentCarId = null;
-    let currentRole = 'superior';
+    let currentRole = sessionStorage.getItem('activeVerificationTab') || 'superior';
 
     function setRoleTab(role) {
         currentRole = role;
+        sessionStorage.setItem('activeVerificationTab', role);
         
         // Reset all tabs
         $('#tab-superior, #tab-auditor, #tab-closed').removeClass('border-blue-500 text-blue-600 border-emerald-600 text-emerald-600').addClass('border-transparent text-slate-500 hover:text-slate-800');
@@ -175,11 +177,16 @@
             $('#count-' + role).removeClass('bg-slate-100 text-slate-600').addClass('bg-blue-100 text-blue-600');
         }
 
-        // Reload table
-        $('#findingsTable').DataTable().ajax.reload();
+        // Reload table if initialized
+        if ($.fn.DataTable.isDataTable('#findingsTable')) {
+            $('#findingsTable').DataTable().ajax.reload();
+        }
     }
 
     $(document).ready(function() {
+        // Initialize tab styles
+        setRoleTab(currentRole);
+
         var table = $('#findingsTable').DataTable({
             dom: '<"overflow-x-auto"t>ip',
             processing: true,
@@ -233,6 +240,10 @@
                 },
                 {
                     data: 'auditee',
+                    className: 'text-slate-700',
+                },
+                {
+                    data: 'superior',
                     className: 'text-slate-700',
                 },
                 {
