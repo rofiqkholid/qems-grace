@@ -737,6 +737,16 @@ class MasterController extends Controller
             });
         }
 
+        // Filter by Audit Type
+        if ($request->filled('filter_audit_type')) {
+            $query->where('audit_type', $request->filter_audit_type);
+        }
+
+        // Filter by Department
+        if ($request->filled('filter_department')) {
+            $query->where('department', 'LIKE', "%{$request->filter_department}%");
+        }
+
         // Total records
         $totalRecords = DB::table('CsChecksheetItem')->count();
         $filteredRecords = $query->count();

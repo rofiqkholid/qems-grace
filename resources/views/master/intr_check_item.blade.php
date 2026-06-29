@@ -1,5 +1,6 @@
 @php
     $hideCentralToast = true;
+    $deptOptions = $departments->map(fn($d) => ['id' => $d->Key1, 'name' => $d->Desc . ' (' . $d->Key1 . ')'])->toArray();
 @endphp
 @extends('layouts.app')
 
@@ -22,19 +23,45 @@
 
         <!-- Main Card -->
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <!-- Filter Section -->
             <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
                     <!-- Search -->
                     <div class="flex-1">
                         <div class="relative">
                             <input type="text" id="searchInput" placeholder="Search Check Item, Department, Scope..."
-                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none">
+                                class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         </div>
                     </div>
+                    <!-- Filter Internal Audit -->
+                    <div class="w-full lg:w-60">
+                        <x-searchable-select
+                            id="filter_audit_type"
+                            name="filter_audit_type"
+                            label="Internal Audit"
+                            required="false"
+                            hideLabel="true"
+                            changeEvent="filter-audit-type-changed"
+                            :initialOptions="[
+                                ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                            ]" />
+                    </div>
+                    <!-- Filter Department -->
+                    <div class="w-full lg:w-60">
+                        <x-searchable-select
+                            id="filter_department"
+                            name="filter_department"
+                            label="Department"
+                            required="false"
+                            hideLabel="true"
+                            changeEvent="filter-department-changed"
+                            :initialOptions="$deptOptions" />
+                    </div>
                     <!-- Add Button -->
-                    <button onclick="openCreateModal()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm font-medium">
+                    <button onclick="openCreateModal()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm font-medium h-[38px]">
                         <i class="fa-solid fa-plus text-[10px] sm:text-xs"></i>
                         <span>Add Check Item</span>
                     </button>
@@ -233,6 +260,8 @@
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
                     d.search.value = $('#searchInput').val();
+                    d.filter_audit_type = $('#filter_audit_type').val();
+                    d.filter_department = $('#filter_department').val();
                 }
             },
             columns: [
@@ -297,6 +326,14 @@
             searchTimer = setTimeout(function() {
                 table.search($('#searchInput').val()).draw();
             }, 500);
+        });
+
+        // Redraw on filter change
+        window.addEventListener('filter-audit-type-changed', function() {
+            table.draw();
+        });
+        window.addEventListener('filter-department-changed', function() {
+            table.draw();
         });
     });
 
