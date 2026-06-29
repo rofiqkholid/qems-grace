@@ -40,13 +40,14 @@ class InternalAuditController extends Controller
 
             if ($carId) {
                 $car = DB::table('CsAuditCar as a')
-                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
                     ->where('a.id', $carId)
                     ->select(
                         'a.*', 
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
@@ -56,13 +57,14 @@ class InternalAuditController extends Controller
             // Fallback for database hash_id, legacy Crypt, or direct ID lookup
             if (!$car) {
                 $car = DB::table('CsAuditCar as a')
-                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
                     ->where('a.hash_id', $id)
                     ->select(
                         'a.*', 
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
@@ -78,13 +80,14 @@ class InternalAuditController extends Controller
                 }
 
                 $car = DB::table('CsAuditCar as a')
-                    ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-                    ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
                     ->where('a.id', $carId)
                     ->select(
                         'a.*', 
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
@@ -147,7 +150,12 @@ class InternalAuditController extends Controller
             }
 
              $request->validate([
-                'causal_factor' => 'nullable|string',
+                'why_one' => 'nullable|string',
+                'why_two' => 'nullable|string',
+                'why_three' => 'nullable|string',
+                'why_four' => 'nullable|string',
+                'why_five' => 'nullable|string',
+                'root_cause' => 'nullable|string',
                 'analyzed_by' => 'nullable|string',
                 'corrective_action' => 'nullable|string',
                 'preventive_action' => 'nullable|string',
@@ -161,7 +169,12 @@ class InternalAuditController extends Controller
                 DB::table('CsAuditAction')
                     ->where('id', $existingAction->id)
                     ->update([
-                        'causal_factor' => $request->causal_factor,
+                        'why_one' => $request->why_one,
+                        'why_two' => $request->why_two,
+                        'why_three' => $request->why_three,
+                        'why_four' => $request->why_four,
+                        'why_five' => $request->why_five,
+                        'root_cause' => $request->root_cause,
                         'analyzed_by' => $request->analyzed_by,
                         'corrective_action' => $request->corrective_action,
                         'preventive_action' => $request->preventive_action,
@@ -173,7 +186,12 @@ class InternalAuditController extends Controller
             } else {
                 DB::table('CsAuditAction')->insert([
                     'audit_car_id' => $car->id,
-                    'causal_factor' => $request->causal_factor,
+                    'why_one' => $request->why_one,
+                    'why_two' => $request->why_two,
+                    'why_three' => $request->why_three,
+                    'why_four' => $request->why_four,
+                    'why_five' => $request->why_five,
+                    'root_cause' => $request->root_cause,
                     'analyzed_by' => $request->analyzed_by,
                     'corrective_action' => $request->corrective_action,
                     'preventive_action' => $request->preventive_action,
@@ -631,6 +649,7 @@ class InternalAuditController extends Controller
                             ->update([
                                 'check_item' => $item->check_item_idn ?? null,
                                 'finding_category' => $judgment,
+                                'internal_audit' => $header->audit_type ?? null,
                                 'updated_at' => Carbon::now()
                             ]);
                     } else {
@@ -642,6 +661,7 @@ class InternalAuditController extends Controller
                             'department' => $dept,
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
+                            'internal_audit' => $header->audit_type ?? null,
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now()
                         ]);
@@ -665,8 +685,8 @@ class InternalAuditController extends Controller
     public function getCars(Request $request)
     {
         $query = DB::table('CsAuditCar as a')
-            ->join('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->whereNotNull('a.department')
             ->where('a.department', '<>', '')
             ->whereNotNull('a.finding')
@@ -958,6 +978,7 @@ class InternalAuditController extends Controller
                         'department' => $dept,
                         'check_item' => $item->check_item_idn ?? null,
                         'finding_category' => $judgment,
+                        'internal_audit' => $header->audit_type ?? null,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
@@ -967,6 +988,7 @@ class InternalAuditController extends Controller
                         ->update([
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
+                            'internal_audit' => $header->audit_type ?? null,
                             'updated_at' => Carbon::now()
                         ]);
                 }
@@ -1025,6 +1047,7 @@ class InternalAuditController extends Controller
                 'auditor' => $schedule->auditor_names ?? null,
                 'auditee' => $schedule->auditee ?? null,
                 'due_date' => $auditDate ? Carbon::parse($auditDate)->addWeeks(2)->toDateString() : null,
+                'internal_audit' => $schedule->audit_type ?? null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -1169,6 +1192,9 @@ class InternalAuditController extends Controller
             $surveillance = in_array('Surveillance', $sources) ? ($request->audit_source_surveillance_text ?? '') : null;
             $external = in_array('External', $sources) ? ($request->audit_source_external_text ?? '') : null;
             $internalAudit = in_array('Internal Audit', $sources) ? implode(', ', $categories) : null;
+            if (empty($internalAudit) && $schedule) {
+                $internalAudit = $schedule->audit_type;
+            }
 
             $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
 
@@ -1186,6 +1212,7 @@ class InternalAuditController extends Controller
                         'check_item' => $item->check_item_idn ?? null,
                         'surveillance' => $surveillance,
                         'external' => $external,
+                        'internal_audit' => $internalAudit,
                         'department' => $department,
                         'requirement_no' => $request->requirement_no,
                         'clause_title' => $request->clause_title,
@@ -1205,6 +1232,7 @@ class InternalAuditController extends Controller
                     'check_item' => $item->check_item_idn ?? null,
                     'surveillance' => $surveillance,
                     'external' => $external,
+                    'internal_audit' => $internalAudit,
                     'department' => $department,
                     'requirement_no' => $request->requirement_no,
                     'clause_title' => $request->clause_title,

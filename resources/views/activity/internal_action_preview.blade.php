@@ -103,7 +103,7 @@
                     <div class="flex flex-col gap-1 sm:gap-1.5">
                         <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Internal Audit</label>
                         <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate min-h-[32px] sm:min-h-[40px]">
-                            {{ $car->internal_audit ?? '' }}
+                            {{ !empty($car->internal_audit) ? $car->internal_audit : (empty($car->schedule_hash_id) ? 'Header Deleted' : ($car->audit_type ?? '')) }}
                         </div>
                     </div>
                 </div>
@@ -172,25 +172,57 @@
                         Action Plan & Analysis
                     </h2>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                        <!-- Causal Factor -->
-                        <div class="flex flex-col gap-1.5 sm:col-span-2">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Causal Factor (Why-why Analysis, Fish bone) :</label>
-                            <input type="text" name="causal_factor" value="{{ old('causal_factor', $action->causal_factor ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter causal factors or analysis...">
+                    <div class="space-y-6">
+                        <!-- Row 1: Why 1 & Why 5 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 1 <span class="text-red-500">*</span></label>
+                                <textarea name="why_one" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 1...">{{ old('why_one', $action->why_one ?? '') }}</textarea>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 5</label>
+                                <textarea name="why_five" rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 5 (Optional)...">{{ old('why_five', $action->why_five ?? '') }}</textarea>
+                            </div>
                         </div>
-                        
-                        <!-- Analized by: Auditee Superior -->
-                        <div class="flex flex-col gap-1.5 sm:col-span-1">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">Analized by Auditee Superior</label>
-                            <x-searchable-select
-                                id="analyzed_by"
-                                name="analyzed_by"
-                                label="Analized by: Auditee Superior"
-                                required="false"
-                                hideLabel="true"
-                                apiUrl="{{ route('internal_audit.get_users') }}"
-                                updateEvent="update-analyzed-by"
-                                changeEvent="analyzed-by-changed" />
+
+                        <!-- Row 2: Why 2 & 3 (Left) and Root Cause (Right) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Left: Why 2 & Why 3 stacked -->
+                            <div class="space-y-4 flex flex-col justify-between">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 2 <span class="text-red-500">*</span></label>
+                                    <textarea name="why_two" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 2...">{{ old('why_two', $action->why_two ?? '') }}</textarea>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 3 <span class="text-red-500">*</span></label>
+                                    <textarea name="why_three" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 3...">{{ old('why_three', $action->why_three ?? '') }}</textarea>
+                                </div>
+                            </div>
+                            <!-- Right: Root Cause -->
+                            <div class="flex flex-col gap-1.5 justify-between">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
+                                <textarea name="root_cause" required rows="5" style="min-height: 120px;" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Why 4 (Left) and Analyzed by (Right) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 4</label>
+                                <textarea name="why_four" rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Analized by Auditee Superior</label>
+                                <x-searchable-select
+                                    id="analyzed_by"
+                                    name="analyzed_by"
+                                    label="Analized by: Auditee Superior"
+                                    required="false"
+                                    hideLabel="true"
+                                    apiUrl="{{ route('internal_audit.get_users') }}"
+                                    updateEvent="update-analyzed-by"
+                                    changeEvent="analyzed-by-changed" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,14 +234,14 @@
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                            <textarea name="corrective_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                             <textarea name="corrective_action" rows="3" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" rows="4" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                            <textarea name="preventive_action" rows="3" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -220,7 +252,7 @@
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Notes for A & B</label>
-                            <input type="text" name="notes" value="{{ old('notes', $action->notes ?? '') }}" class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate" placeholder="Enter notes...">
+                            <textarea name="notes" rows="1" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
                         </div>
                         
                         <!-- Auditee -->
@@ -251,7 +283,24 @@
 </div>
 
 <script>
+    function autoGrow(element) {
+        element.style.height = "auto";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Auto-grow textareas on load and input
+        const textareas = document.querySelectorAll('.autogrow-textarea');
+        textareas.forEach(textarea => {
+            // Initial call to set size based on loaded content
+            setTimeout(() => {
+                autoGrow(textarea);
+            }, 10);
+            
+            textarea.addEventListener('input', function() {
+                autoGrow(this);
+            });
+        });
         @if(isset($action) && !empty($action->analyzed_by))
             window.dispatchEvent(new CustomEvent('update-analyzed-by', { 
                 detail: { 
