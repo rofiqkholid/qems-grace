@@ -181,6 +181,7 @@ class InternalAuditController extends Controller
                         'notes' => $request->notes,
                         'auditee_name' => $request->auditee_name,
                         'auditee_superior_name' => $request->auditee_superior_name,
+                        'action_status' => 'complete',
                         'updated_at' => Carbon::now()
                     ]);
             } else {
@@ -198,6 +199,7 @@ class InternalAuditController extends Controller
                     'notes' => $request->notes,
                     'auditee_name' => $request->auditee_name,
                     'auditee_superior_name' => $request->auditee_superior_name,
+                    'action_status' => 'complete',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);
@@ -211,6 +213,55 @@ class InternalAuditController extends Controller
             }
 
             return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'Action Plan details saved successfully.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function rollbackActionPlan($id, Request $request)
+    {
+        try {
+            $carId = $this->decryptCarId($id);
+            if (!$carId) {
+                $car = DB::table('CsAuditCar')->where('hash_id', $id)->first();
+                if (!$car) {
+                    try {
+                        $decryptedId = Crypt::decryptString($id);
+                        $carId = explode('_', $decryptedId)[0];
+                    } catch (\Exception $e) {
+                        $carId = $id;
+                    }
+                } else {
+                    $carId = $car->id;
+                }
+            }
+
+            $car = DB::table('CsAuditCar')->where('id', $carId)->first();
+            if (!$car) {
+                return redirect()->route('internal_audit.action_report')->with('error', 'CAR Action Report not found.');
+            }
+
+            DB::table('CsAuditAction')
+                ->where('audit_car_id', $car->id)
+                ->update([
+                    'action_status' => 'draft',
+                    'updated_at' => Carbon::now()
+                ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Action Plan has been rolled back to draft successfully.'
+                ]);
+            }
+
+            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'Action Plan has been rolled back to draft.');
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([

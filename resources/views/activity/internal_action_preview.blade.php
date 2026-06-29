@@ -166,6 +166,7 @@
         <!-- Action Plan Form Card -->
         <form id="actionPlanForm" action="{{ route('internal_audit.action_report.save_action', request()->route('id')) }}" method="POST" class="mt-6">
             @csrf
+            @php $isComplete = isset($action) && $action->action_status === 'complete'; @endphp
             <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-8 space-y-8">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
@@ -177,11 +178,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 1 <span class="text-red-500">*</span></label>
-                                <textarea name="why_one" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 1...">{{ old('why_one', $action->why_one ?? '') }}</textarea>
+                                <textarea name="why_one" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 1...">{{ old('why_one', $action->why_one ?? '') }}</textarea>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 5</label>
-                                <textarea name="why_five" rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 5 (Optional)...">{{ old('why_five', $action->why_five ?? '') }}</textarea>
+                                <textarea name="why_five" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 5 (Optional)...">{{ old('why_five', $action->why_five ?? '') }}</textarea>
                             </div>
                         </div>
 
@@ -191,17 +192,17 @@
                             <div class="space-y-4 flex flex-col justify-between">
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 2 <span class="text-red-500">*</span></label>
-                                    <textarea name="why_two" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 2...">{{ old('why_two', $action->why_two ?? '') }}</textarea>
+                                    <textarea name="why_two" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 2...">{{ old('why_two', $action->why_two ?? '') }}</textarea>
                                 </div>
                                 <div class="flex flex-col gap-1.5">
                                     <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 3 <span class="text-red-500">*</span></label>
-                                    <textarea name="why_three" required rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 3...">{{ old('why_three', $action->why_three ?? '') }}</textarea>
+                                    <textarea name="why_three" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 3...">{{ old('why_three', $action->why_three ?? '') }}</textarea>
                                 </div>
                             </div>
                             <!-- Right: Root Cause -->
                             <div class="flex flex-col gap-1.5 justify-between">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
-                                <textarea name="root_cause" required rows="5" style="min-height: 120px;" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
+                                <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
                             </div>
                         </div>
 
@@ -209,7 +210,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 4</label>
-                                <textarea name="why_four" rows="1" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
+                                <textarea name="why_four" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Analized by Auditee Superior</label>
@@ -219,6 +220,7 @@
                                     label="Analized by: Auditee Superior"
                                     required="false"
                                     hideLabel="true"
+                                    disabled="{{ $isComplete ? 1 : 0 }}"
                                     apiUrl="{{ route('internal_audit.get_users') }}"
                                     updateEvent="update-analyzed-by"
                                     changeEvent="analyzed-by-changed" />
@@ -234,14 +236,14 @@
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                             <textarea name="corrective_action" rows="3" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                             <textarea name="corrective_action" rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" rows="3" class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                            <textarea name="preventive_action" rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -252,7 +254,7 @@
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Notes for A & B</label>
-                            <textarea name="notes" rows="1" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea" placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
+                            <textarea name="notes" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter notes...">{{ old('notes', $action->notes ?? '') }}</textarea>
                         </div>
                         
                         <!-- Auditee -->
@@ -269,11 +271,17 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Submit Button / Rollback -->
                 <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
-                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
-                        Save Action Plan
-                    </button>
+                    @if($isComplete)
+                        <button type="button" id="btnRollback" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-sm">
+                            Rollback
+                        </button>
+                    @else
+                        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm">
+                            Save Action Plan
+                        </button>
+                    @endif
                 </div>
             </div>
         </form>
@@ -313,6 +321,45 @@
                 superiorInput.value = '{{ $action->analyzed_by }}';
             }
         @endif
+
+        // Rollback Action Plan Handler
+        const btnRollback = document.getElementById('btnRollback');
+        if (btnRollback) {
+            btnRollback.addEventListener('click', function() {
+                if (confirm('Are you sure you want to rollback this action plan to draft?')) {
+                    const originalText = btnRollback.innerHTML;
+                    btnRollback.disabled = true;
+                    btnRollback.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Rolling back...';
+                    
+                    fetch('{{ route("internal_audit.action_report.rollback", request()->route("id")) }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            showToast(data.message || 'An error occurred.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred during rollback.', 'error');
+                    })
+                    .finally(() => {
+                        btnRollback.disabled = false;
+                        btnRollback.innerHTML = originalText;
+                    });
+                }
+            });
+        }
 
         window.addEventListener('analyzed-by-changed', function(e) {
             const name = e.detail.name || '';

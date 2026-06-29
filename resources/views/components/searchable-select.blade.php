@@ -11,7 +11,8 @@
 'dependencyParam' => null,
 'initialOptions' => [],
 'valueField' => 'id',
-'hideLabel' => false
+'hideLabel' => false,
+'disabled' => false
 ])
 
 <div class="@if(!$hideLabel) grid grid-cols-3 gap-4 items-center @else w-full @endif">
@@ -226,16 +227,14 @@
 
         <!-- Trigger/Input -->
         <div class="relative">
-            <input type="text" x-model="search" 
+             <input type="text" x-model="search" 
                 @input.debounce.300ms="onSearch" 
                 @click="toggle" 
                 @click.outside="open = false; validate()"
                 @keydown.enter.prevent="open = false; validate()"
                 placeholder="Select {{ $label }}..."
-                @if($dependencyEvent)
-                :disabled="dependencyValue === ''"
-                :class="dependencyValue === '' ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : ''"
-                @endif
+                :disabled="{{ $disabled ? 'true' : 'false' }} || @if($dependencyEvent) dependencyValue === '' @else false @endif"
+                :class="({{ $disabled ? 'true' : 'false' }} || @if($dependencyEvent) dependencyValue === '' @else false @endif) ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : ''"
                 class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 truncate">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                 <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
