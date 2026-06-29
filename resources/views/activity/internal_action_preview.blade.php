@@ -345,7 +345,7 @@
                 showToast(data.message, 'success');
                 setTimeout(() => {
                     window.location.reload();
-                }, 1000);
+                }, 500);
             } else {
                 showToast(data.message || 'An error occurred.', 'error');
                 btnRollback.disabled = false;
@@ -430,7 +430,7 @@
                         showToast(data.message, 'success');
                         setTimeout(() => {
                             window.location.reload();
-                        }, 1000);
+                        }, 500);
                     } else {
                         showToast(data.message || 'An error occurred.', 'error');
                     }
