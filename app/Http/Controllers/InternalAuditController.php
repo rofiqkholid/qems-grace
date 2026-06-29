@@ -218,7 +218,8 @@ class InternalAuditController extends Controller
             $query->where(function($q) use ($searchValue) {
                 $q->where('a.auditee', 'LIKE', "%{$searchValue}%")
                   ->orWhere('a.auditor_names', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.auditee_dept', 'LIKE', "%{$searchValue}%");
+                  ->orWhere('a.auditee_dept', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.audit_type', 'LIKE', "%{$searchValue}%");
             });
         }
 
@@ -286,6 +287,7 @@ class InternalAuditController extends Controller
                 'id' => $post->hash_id,
                 'agenda_name' => $post->auditee,
                 'schedule_date' => Carbon::parse($post->audit_date)->format('d M Y'),
+                'audit_type' => $post->audit_type ?? '-',
                 'auditor_niks' => $auditorHtml,
                 'auditee_dept' => $deptName,
                 'status' => $statusText,
@@ -308,6 +310,7 @@ class InternalAuditController extends Controller
             'schedule_date' => 'required|date',
             'auditor_niks' => 'required|string',
             'auditee_dept' => 'required|string',
+            'audit_type' => 'required|string',
         ]);
 
         try {
@@ -329,6 +332,7 @@ class InternalAuditController extends Controller
                         'audit_date' => $request->schedule_date,
                         'auditor_names' => $request->auditor_niks,
                         'auditee_dept' => $request->auditee_dept,
+                        'audit_type' => $request->audit_type,
                         'status' => 'Scheduled',
                         'updated_at' => Carbon::now()
                     ]);
@@ -343,6 +347,7 @@ class InternalAuditController extends Controller
                     'audit_date' => $request->schedule_date,
                     'auditor_names' => $request->auditor_niks,
                     'auditee_dept' => $request->auditee_dept,
+                    'audit_type' => $request->audit_type,
                     'status' => 'Scheduled',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()

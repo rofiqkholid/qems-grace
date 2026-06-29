@@ -112,6 +112,23 @@
                         <input type="hidden" id="formScheduleId" name="schedule_id">
 
                         <div class="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-6">
+                            <!-- Audit Type / Category -->
+                            <div class="col-span-2 lg:col-span-1">
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Internal Audit <span class="text-red-500">*</span></label>
+                                <x-searchable-select
+                                    name="audit_type"
+                                    id="formAuditType"
+                                    label="Internal Audit"
+                                    required="true"
+                                    hideLabel="true"
+                                    updateEvent="update-audit-type"
+                                    :initialOptions="[
+                                        ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                        ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                        ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                        ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                                    ]" />
+                            </div>
                             <!-- Target Auditee Department -->
                             <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Departemen Auditee <span class="text-red-500">*</span></label>
@@ -316,6 +333,15 @@
                 errors.push('Departemen Auditee is required');
             }
 
+            const typeVal = $('#formAuditType').val();
+            if (!typeVal) {
+                isValid = false;
+                errors.push('Internal Audit is required');
+                $('#formAuditType').addClass('border-red-500');
+            } else {
+                $('#formAuditType').removeClass('border-red-500');
+            }
+
             if (!isValid) {
                 showToast(errors.join(', '), 'error');
                 return false;
@@ -333,7 +359,8 @@
                     agenda_name: auditeeVal,
                     schedule_date: dateVal,
                     auditor_niks: auditorVal,
-                    auditee_dept: deptVal
+                    auditee_dept: deptVal,
+                    audit_type: typeVal
                 },
                 success: function(response) {
                     $('body').removeClass('data-loading');
@@ -383,6 +410,20 @@
                     
                     $('#formScheduleId').val(sched.id);
                     
+                    let auditTypeName = '';
+                    if (sched.audit_type === 'Product') auditTypeName = 'Audit Quality - Product';
+                    else if (sched.audit_type === 'Process') auditTypeName = 'Audit Quality - Process';
+                    else if (sched.audit_type === 'System') auditTypeName = 'Audit Quality - System';
+                    else if (sched.audit_type === 'Environment') auditTypeName = 'Audit Lingkungan - Environment';
+                    else auditTypeName = sched.audit_type || '';
+
+                    window.dispatchEvent(new CustomEvent('update-audit-type', { 
+                        detail: { 
+                            id: sched.audit_type || '', 
+                            name: auditTypeName 
+                        } 
+                    }));
+                    
                     // Format date to YYYY-MM-DD
                     var dateVal = sched.audit_date ? sched.audit_date.split(' ')[0].split('T')[0] : '';
                     $('#formScheduleDate').val(dateVal);
@@ -430,6 +471,7 @@
         // Reset inputs
         $('#createGenbaForm')[0].reset();
         $('#formScheduleId').val('');
+        window.dispatchEvent(new CustomEvent('update-audit-type', { detail: { id: '', name: '' } }));
         
         // Default Auditor and Date
         $('#formAuditorNiks').val('{{ Auth::user()->full_name ?? "" }}');
