@@ -701,7 +701,6 @@ class InternalAuditController extends Controller
                             ->update([
                                 'check_item' => $item->check_item_idn ?? null,
                                 'finding_category' => $judgment,
-                                'internal_audit' => $header->audit_type ?? null,
                                 'updated_at' => Carbon::now()
                             ]);
                     } else {
@@ -713,7 +712,6 @@ class InternalAuditController extends Controller
                             'department' => $dept,
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
-                            'internal_audit' => $header->audit_type ?? null,
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now()
                         ]);
@@ -1030,7 +1028,6 @@ class InternalAuditController extends Controller
                         'department' => $dept,
                         'check_item' => $item->check_item_idn ?? null,
                         'finding_category' => $judgment,
-                        'internal_audit' => $header->audit_type ?? null,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
@@ -1040,7 +1037,6 @@ class InternalAuditController extends Controller
                         ->update([
                             'check_item' => $item->check_item_idn ?? null,
                             'finding_category' => $judgment,
-                            'internal_audit' => $header->audit_type ?? null,
                             'updated_at' => Carbon::now()
                         ]);
                 }
@@ -1099,7 +1095,6 @@ class InternalAuditController extends Controller
                 'auditor' => $schedule->auditor_names ?? null,
                 'auditee' => $schedule->auditee ?? null,
                 'due_date' => $auditDate ? Carbon::parse($auditDate)->addWeeks(2)->toDateString() : null,
-                'internal_audit' => $schedule->audit_type ?? null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -1264,7 +1259,6 @@ class InternalAuditController extends Controller
                         'check_item' => $item->check_item_idn ?? null,
                         'surveillance' => $surveillance,
                         'external' => $external,
-                        'internal_audit' => $internalAudit,
                         'department' => $department,
                         'requirement_no' => $request->requirement_no,
                         'clause_title' => $request->clause_title,
@@ -1284,7 +1278,6 @@ class InternalAuditController extends Controller
                     'check_item' => $item->check_item_idn ?? null,
                     'surveillance' => $surveillance,
                     'external' => $external,
-                    'internal_audit' => $internalAudit,
                     'department' => $department,
                     'requirement_no' => $request->requirement_no,
                     'clause_title' => $request->clause_title,
