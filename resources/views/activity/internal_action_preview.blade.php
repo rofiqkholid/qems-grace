@@ -82,11 +82,11 @@
                         </div>
                     </div>
 
-                    <!-- Auditee -->
+                    <!-- Due Date -->
                     <div class="flex flex-col gap-1 sm:gap-1.5">
-                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditee</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate" title="{{ $car->header_auditee ?? $car->auditee ?? '-' }}">
-                            {{ $car->header_auditee ?? $car->auditee ?? '-' }}
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Due Date</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm">
+                            {{ $car->due_date ? \Carbon\Carbon::parse($car->due_date)->format('d M Y') : '-' }}
                         </div>
                     </div>
 
@@ -132,11 +132,11 @@
                             {{ $car->clause_title ?? '-' }}
                         </div>
                     </div>
-                    <!-- Due Date -->
+                    <!-- Auditee -->
                     <div class="flex flex-col gap-1 sm:gap-1.5">
-                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Due Date</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm">
-                            {{ $car->due_date ? \Carbon\Carbon::parse($car->due_date)->format('d M Y') : '-' }}
+                        <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditee</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm break-words whitespace-normal" title="{{ $car->header_auditee ?? $car->auditee ?? '-' }}">
+                            {{ $car->header_auditee ?? $car->auditee ?? '-' }}
                         </div>
                     </div>
                     <!-- Check Item -->
@@ -373,7 +373,10 @@
                         <!-- Auditee -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Auditee</label>
-                            <input type="text" name="auditee_name" value="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee..." title="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}">
+                            <div class="w-full px-4 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 text-sm break-words whitespace-normal min-h-[38px]" title="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}">
+                                {{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '-') }}
+                            </div>
+                            <input type="hidden" name="auditee_name" value="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}">
                         </div>
 
                         <!-- Auditee Superior -->

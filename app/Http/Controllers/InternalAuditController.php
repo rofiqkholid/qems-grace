@@ -166,6 +166,8 @@ class InternalAuditController extends Controller
 
         $query = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->whereNotNull('a.external')
             ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete');
@@ -210,7 +212,7 @@ class InternalAuditController extends Controller
             $query->skip($request->start)->take($request->length);
         }
 
-        $data = $query->select('a.*', 'd.action_status', 'd.id as action_id', 'd.auditee_superior_name')
+        $data = $query->select('a.*', 'd.action_status', 'd.id as action_id', 'd.auditee_superior_name', 'c.auditee as header_auditee')
             ->orderBy('a.id', 'desc')
             ->get();
 
@@ -325,7 +327,7 @@ class InternalAuditController extends Controller
                     "due_date" => $item->due_date ? \Carbon\Carbon::parse($item->due_date)->format('d M Y') : '-',
                     "finding_category" => $item->finding_category,
                     "auditor" => $item->auditor ?? '-',
-                    "auditee" => $item->auditee ?? '-',
+                    "auditee" => $item->header_auditee ?? $item->auditee ?? '-',
                     "superior" => $item->auditee_superior_name ?? '-',
                     "action_status" => $item->action_status,
                     "action" => $actionBtn
@@ -1192,7 +1194,7 @@ class InternalAuditController extends Controller
             ->where('a.department', '<>', '')
             ->whereNotNull('a.finding')
             ->where('a.finding', '<>', '')
-            ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id');
+            ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee');
 
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
@@ -1277,7 +1279,7 @@ class InternalAuditController extends Controller
                 'department' => $post->department ?? '-',
                 'finding_category' => $statusBadge,
                 'auditor' => $post->auditor ?? '-',
-                'auditee' => $post->auditee ?? '-',
+                'auditee' => $post->header_auditee ?? $post->auditee ?? '-',
                 'action' => $action,
                 'schedule_hash_id' => $post->schedule_hash_id,
                 'checksheet_item_id' => $post->checksheet_item_id
