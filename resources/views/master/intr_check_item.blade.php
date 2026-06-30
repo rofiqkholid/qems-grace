@@ -17,7 +17,7 @@
     <main class="flex-1 p-6">
         <!-- Page Title -->
         <div class="mb-6">
-            <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Internal Audit Check Item Master</h1>
+            <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Internal Audit Checksheet Master</h1>
             <p class="text-slate-500 text-xs sm:text-sm mt-1">Manage check items, departments, and scopes for Internal Audits</p>
         </div>
 

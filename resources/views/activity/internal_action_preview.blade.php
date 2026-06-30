@@ -85,8 +85,8 @@
                     <!-- Auditee -->
                     <div class="flex flex-col gap-1 sm:gap-1.5">
                         <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Auditee</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate">
-                            {{ $car->auditee ?? '-' }}
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-600 font-semibold text-[11px] sm:text-sm truncate" title="{{ $car->header_auditee ?? $car->auditee ?? '-' }}">
+                            {{ $car->header_auditee ?? $car->auditee ?? '-' }}
                         </div>
                     </div>
 
@@ -373,7 +373,7 @@
                         <!-- Auditee -->
                         <div class="flex flex-col gap-1.5 sm:col-span-1">
                             <label class="text-slate-700 font-semibold text-sm tracking-wider">Auditee</label>
-                            <input type="text" name="auditee_name" value="{{ old('auditee_name', $action->auditee_name ?? $car->auditee ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee...">
+                            <input type="text" name="auditee_name" value="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee..." title="{{ old('auditee_name', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '') }}">
                         </div>
 
                         <!-- Auditee Superior -->

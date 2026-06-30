@@ -48,6 +48,7 @@ class InternalAuditController extends Controller
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
                         'c.audit_type',
+                        'c.auditee as header_auditee',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
@@ -65,6 +66,7 @@ class InternalAuditController extends Controller
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
                         'c.audit_type',
+                        'c.auditee as header_auditee',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
@@ -88,6 +90,7 @@ class InternalAuditController extends Controller
                         'b.checksheet_item_id', 
                         'c.hash_id as schedule_hash_id', 
                         'c.audit_type',
+                        'c.auditee as header_auditee',
                         'b.evidence', 
                         'b.finding_photo_path'
                     )
