@@ -254,8 +254,8 @@
                             <h3 class="text-lg font-bold text-slate-800 leading-6" id="modal-title">
                                 Add Evidence
                             </h3>
-                            <p class="text-xs text-slate-400 mt-1">
-                                Sebagai menu untuk input saran dan dokumen yang sudah berjalan.
+                            <p class="text-sm text-slate-400 mt-1">
+                                Sebagai menu untuk input catatan hasil audit (aktual implementasi) beserta dengan evidencenya atau possitive findings yang ditemukan.
                             </p>
                             
                             <div class="mt-4">
