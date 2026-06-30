@@ -513,60 +513,104 @@ class InternalAuditController extends Controller
             }
 
              $request->validate([
-                'why_one' => 'nullable|string',
-                'why_two' => 'nullable|string',
-                'why_three' => 'nullable|string',
-                'why_four' => 'nullable|string',
-                'why_five' => 'nullable|string',
-                'root_cause' => 'nullable|string',
-                'analyzed_by' => 'nullable|string',
-                'corrective_action' => 'nullable|string',
-                'preventive_action' => 'nullable|string',
-                'notes' => 'nullable|string',
-                'auditee_name' => 'nullable|string',
-                'auditee_superior_name' => 'nullable|string',
-            ]);
+                  'why_one' => 'required|string',
+                  'why_two' => 'required|string',
+                  'why_three' => 'required|string',
+                  'why_four' => 'nullable|string',
+                  'why_five' => 'nullable|string',
+                  'root_cause' => 'required|string',
+                  'analyzed_by' => 'required|string',
+                  'corrective_action' => 'required|string',
+                  'preventive_action' => 'required|string',
+                  'notes' => 'nullable|string',
+                  'auditee_name' => 'nullable|string',
+                  'auditee_superior_name' => 'nullable|string',
+                  'corrective_photos' => 'nullable|array',
+                  'corrective_photos.*' => 'nullable|image|max:5120',
+                  'preventive_photos' => 'nullable|array',
+                  'preventive_photos.*' => 'nullable|image|max:5120',
+                  'existing_corrective_photos' => 'nullable|string',
+                  'existing_preventive_photos' => 'nullable|string',
+             ]);
 
-            $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
-            if ($existingAction) {
-                DB::table('CsAuditAction')
-                    ->where('id', $existingAction->id)
-                    ->update([
-                        'why_one' => $request->why_one,
-                        'why_two' => $request->why_two,
-                        'why_three' => $request->why_three,
-                        'why_four' => $request->why_four,
-                        'why_five' => $request->why_five,
-                        'root_cause' => $request->root_cause,
-                        'analyzed_by' => $request->analyzed_by,
-                        'corrective_action' => $request->corrective_action,
-                        'preventive_action' => $request->preventive_action,
-                        'notes' => $request->notes,
-                        'auditee_name' => $request->auditee_name,
-                        'auditee_superior_name' => $request->auditee_superior_name,
-                        'action_status' => 'complete',
-                        'updated_at' => Carbon::now()
-                    ]);
-            } else {
-                DB::table('CsAuditAction')->insert([
-                    'audit_car_id' => $car->id,
-                    'why_one' => $request->why_one,
-                    'why_two' => $request->why_two,
-                    'why_three' => $request->why_three,
-                    'why_four' => $request->why_four,
-                    'why_five' => $request->why_five,
-                    'root_cause' => $request->root_cause,
-                    'analyzed_by' => $request->analyzed_by,
-                    'corrective_action' => $request->corrective_action,
-                    'preventive_action' => $request->preventive_action,
-                    'notes' => $request->notes,
-                    'auditee_name' => $request->auditee_name,
-                    'auditee_superior_name' => $request->auditee_superior_name,
-                    'action_status' => 'complete',
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]);
-            }
+             // Process Corrective Photos
+             $correctivePhotoPath = $request->input('existing_corrective_photos', '');
+             if ($request->hasFile('corrective_photos')) {
+                 $files = $request->file('corrective_photos');
+                 $paths = [];
+                 foreach ($files as $file) {
+                     if ($file) {
+                         $fileName = 'evidence_corr_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                         $file->move(public_path('evidence-photo'), $fileName);
+                         $paths[] = 'evidence-photo/' . $fileName;
+                     }
+                 }
+                 $existingArray = array_filter(explode(',', $correctivePhotoPath));
+                 $allPaths = array_merge($existingArray, $paths);
+                 $correctivePhotoPath = implode(',', $allPaths);
+             }
+
+             // Process Preventive Photos
+             $preventivePhotoPath = $request->input('existing_preventive_photos', '');
+             if ($request->hasFile('preventive_photos')) {
+                 $files = $request->file('preventive_photos');
+                 $paths = [];
+                 foreach ($files as $file) {
+                     if ($file) {
+                         $fileName = 'evidence_prev_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                         $file->move(public_path('evidence-photo'), $fileName);
+                         $paths[] = 'evidence-photo/' . $fileName;
+                     }
+                 }
+                 $existingArray = array_filter(explode(',', $preventivePhotoPath));
+                 $allPaths = array_merge($existingArray, $paths);
+                 $preventivePhotoPath = implode(',', $allPaths);
+             }
+ 
+             $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+             if ($existingAction) {
+                 DB::table('CsAuditAction')
+                     ->where('id', $existingAction->id)
+                     ->update([
+                         'why_one' => $request->why_one,
+                         'why_two' => $request->why_two,
+                         'why_three' => $request->why_three,
+                         'why_four' => $request->why_four,
+                         'why_five' => $request->why_five,
+                         'root_cause' => $request->root_cause,
+                         'analyzed_by' => $request->analyzed_by,
+                         'corrective_action' => $request->corrective_action,
+                         'corrective_path' => $correctivePhotoPath,
+                         'preventive_action' => $request->preventive_action,
+                         'preventive_path' => $preventivePhotoPath,
+                         'notes' => $request->notes,
+                         'auditee_name' => $request->auditee_name,
+                         'auditee_superior_name' => $request->auditee_superior_name,
+                         'action_status' => 'complete',
+                         'updated_at' => Carbon::now()
+                     ]);
+             } else {
+                 DB::table('CsAuditAction')->insert([
+                     'audit_car_id' => $car->id,
+                     'why_one' => $request->why_one,
+                     'why_two' => $request->why_two,
+                     'why_three' => $request->why_three,
+                     'why_four' => $request->why_four,
+                     'why_five' => $request->why_five,
+                     'root_cause' => $request->root_cause,
+                     'analyzed_by' => $request->analyzed_by,
+                     'corrective_action' => $request->corrective_action,
+                     'corrective_path' => $correctivePhotoPath,
+                     'preventive_action' => $request->preventive_action,
+                     'preventive_path' => $preventivePhotoPath,
+                     'notes' => $request->notes,
+                     'auditee_name' => $request->auditee_name,
+                     'auditee_superior_name' => $request->auditee_superior_name,
+                     'action_status' => 'complete',
+                     'created_at' => Carbon::now(),
+                     'updated_at' => Carbon::now()
+                 ]);
+             }
 
             // Update CAR status to Under Review
             DB::table('CsAuditCar')->where('id', $car->id)->update([
@@ -1318,7 +1362,7 @@ class InternalAuditController extends Controller
                 $file = $request->file('evidence_file');
                 $fileName = 'evidence_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/cs_audit'), $fileName);
-                $updateData['evidence_file_path'] = 'uploads/cs_audit/' . $fileName;
+                $updateData['finding_file_path'] = 'uploads/cs_audit/' . $fileName;
             }
 
             DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
@@ -1609,6 +1653,9 @@ class InternalAuditController extends Controller
             'preventive_action' => 'nullable|string',
             'due_date' => 'nullable|date',
             'photo' => 'nullable|image|max:5120',
+            'finding_photo' => 'nullable|array',
+            'finding_photo.*' => 'nullable|image|max:5120',
+            'existing_photos' => 'nullable|string',
             'department' => 'nullable|string',
             'requirement_no' => 'nullable|string',
             'clause_title' => 'nullable|string',
@@ -1685,6 +1732,25 @@ class InternalAuditController extends Controller
 
             $car = DB::table('CsAuditCar')->where('audit_detail_id', $detailId)->first();
             $department = $request->department;
+            
+            // Read remaining existing photos sent from form
+            $findingPhotoPath = $request->input('existing_photos', '');
+
+            if ($request->hasFile('finding_photo')) {
+                $files = $request->file('finding_photo');
+                $paths = [];
+                foreach ($files as $file) {
+                    if ($file) {
+                        $fileName = 'finding_car_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path('findings-photo'), $fileName);
+                        $paths[] = 'findings-photo/' . $fileName;
+                    }
+                }
+                $existingArray = array_filter(explode(',', $findingPhotoPath));
+                $allPaths = array_merge($existingArray, $paths);
+                $findingPhotoPath = implode(',', $allPaths);
+            }
+
             if ($car) {
                 $reqNumber = $car->req_number;
                 if (!$reqNumber || $car->department !== $department) {
@@ -1706,6 +1772,7 @@ class InternalAuditController extends Controller
                         'auditor' => $request->auditor,
                         'auditee' => $request->auditee,
                         'due_date' => $request->due_date,
+                        'finding_file_path' => $findingPhotoPath,
                         'updated_at' => Carbon::now()
                     ]);
             } else {
@@ -1725,6 +1792,7 @@ class InternalAuditController extends Controller
                     'auditor' => $request->auditor,
                     'auditee' => $request->auditee,
                     'due_date' => $request->due_date,
+                    'finding_file_path' => $findingPhotoPath,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);

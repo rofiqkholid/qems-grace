@@ -196,9 +196,47 @@
                 <!-- Finding & Auditor -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
                     <div class="col-span-1 md:col-span-2">
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding <span class="text-red-500">*</span></label>
-                        <textarea name="finding" id="finding_textarea" rows="1" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden autogrow-textarea" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
-                        <p id="err_finding" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="col-span-1 sm:col-span-2">
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding <span class="text-red-500">*</span></label>
+                                <textarea name="finding" id="finding_textarea" rows="1" style="min-height: 70px;" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm resize-none overflow-hidden autogrow-textarea" placeholder="Enter finding details...">{{ old('finding', $car->finding ?? '') }}</textarea>
+                                <p id="err_finding" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Finding Photo Evidence</label>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="relative group">
+                                        <input type="file" id="camera_input" accept="image/*" capture="environment"
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="flex flex-row items-center justify-center gap-2 h-[70px] border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all text-center px-2">
+                                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                                                <i class="fas fa-camera text-[14px]"></i>
+                                            </div>
+                                            <span class="text-[14px] font-medium text-blue-600 whitespace-nowrap">Take Photo</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="relative group">
+                                        <input type="file" id="gallery_input" multiple accept="image/*"
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="flex flex-row items-center justify-center gap-2 h-[70px] border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 group-hover:bg-slate-50 transition-all text-center px-2">
+                                            <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                                                <i class="fas fa-images text-[14px]"></i>
+                                            </div>
+                                            <span class="text-[14px] font-medium text-slate-600 whitespace-nowrap">From Gallery</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="existing_photos" id="existing_photos" value="{{ $car->finding_file_path ?? '' }}">
+                                <input type="file" id="hidden_photos_input" name="finding_photo[]" multiple class="hidden">
+                                
+                                <div class="mt-2 flex flex-wrap gap-2 items-center">
+                                    <div id="photo_preview_container" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">Auditor</label>
@@ -223,6 +261,41 @@
         </form>
     </main>
 
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeImageModal()"></div>
+
+        <!-- Modal -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-3xl transform transition-all max-h-[85vh] flex flex-col">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                    <h3 class="text-lg font-semibold text-slate-800">Finding Photo Preview</h3>
+                    <button type="button" onclick="closeImageModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 overflow-y-auto flex-1 flex items-center justify-center bg-slate-50/50">
+                    <div id="imageContainer" class="max-w-full max-h-[60vh] rounded-lg overflow-hidden border border-slate-200 bg-white">
+                        <img id="modalPreviewImg" src="" class="max-w-full max-h-[60vh] object-contain">
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="flex justify-end p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+                    <button type="button" onclick="closeImageModal()"
+                        class="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors">
+                        Close Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     @include('layouts.footer')
 </div>
 
@@ -453,6 +526,144 @@
                 el.addEventListener('change', saveDraft);
             }
         });
+
+        // Photo Upload Handlers & Preview
+        let existingPhotos = {!! json_encode(!empty($car->finding_file_path) ? explode(',', $car->finding_file_path) : []) !!};
+        let uploadedFiles = [];
+        const cameraInput = document.getElementById('camera_input');
+        const galleryInput = document.getElementById('gallery_input');
+        const hiddenPhotosInput = document.getElementById('hidden_photos_input');
+        const existingPhotosInput = document.getElementById('existing_photos');
+        const previewContainer = document.getElementById('photo_preview_container');
+
+        function syncPhotos() {
+            if (existingPhotosInput) {
+                existingPhotosInput.value = existingPhotos.join(',');
+            }
+            if (hiddenPhotosInput) {
+                const dt = new DataTransfer();
+                uploadedFiles.forEach(file => dt.items.add(file));
+                hiddenPhotosInput.files = dt.files;
+            }
+        }
+
+        function renderPreviews() {
+            if (!previewContainer) return;
+            previewContainer.innerHTML = '';
+
+            // Render existing photos with red 'x' cancel button
+            existingPhotos.forEach((path, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                
+                const img = document.createElement('img');
+                img.src = '/' + path;
+                img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                img.onclick = function() { viewPhoto(img.src); };
+                
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                btn.innerHTML = "×";
+                btn.onclick = function(evt) {
+                    evt.stopPropagation();
+                    removeExistingPhoto(index);
+                };
+                
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                previewContainer.appendChild(wrapper);
+            });
+
+            // Render newly uploaded files
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                    img.onclick = function() { viewPhoto(e.target.result); };
+                    
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                    btn.innerHTML = "×";
+                    btn.onclick = function(evt) {
+                        evt.stopPropagation();
+                        removeNewPhoto(index);
+                    };
+                    
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    previewContainer.appendChild(wrapper);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.removeExistingPhoto = function(index) {
+            existingPhotos.splice(index, 1);
+            syncPhotos();
+            renderPreviews();
+            saveDraft();
+        };
+
+        window.removeNewPhoto = function(index) {
+            uploadedFiles.splice(index, 1);
+            syncPhotos();
+            renderPreviews();
+            saveDraft();
+        };
+
+        function handleFileSelection(files) {
+            const arr = Array.from(files);
+            if (existingPhotos.length + uploadedFiles.length + arr.length > 3) {
+                showToast('Maximum 3 photos allowed.', 'error');
+                return;
+            }
+            uploadedFiles.push(...arr);
+            syncPhotos();
+            renderPreviews();
+            saveDraft();
+        }
+
+        if (cameraInput) {
+            cameraInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+
+        if (galleryInput) {
+            galleryInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+
+        // Initial preview render
+        renderPreviews();
     });
+
+    window.viewPhoto = function(src) {
+        if (!src) return;
+        const img = document.getElementById('modalPreviewImg');
+        if (img) img.src = src;
+        
+        const modal = document.getElementById('imagePreviewModal');
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeImageModal = function() {
+        const modal = document.getElementById('imagePreviewModal');
+        if (modal) modal.classList.add('hidden');
+    };
 </script>
 @endsection

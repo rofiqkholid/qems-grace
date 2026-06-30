@@ -128,19 +128,31 @@
 
         // Realtime Clock
         function updateClock() {
-            const now = new Date();
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
             
-            const dayName = days[now.getDay()];
-            const date = now.getDate();
-            const monthName = months[now.getMonth()];
-            const year = now.getFullYear();
+            const options = {
+                timeZone: 'Asia/Jakarta',
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+                hour12: false
+            };
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const parts = formatter.formatToParts(new Date());
             
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-
+            const getVal = type => parts.find(p => p.type === type).value;
+            
+            const year = parseInt(getVal('year'), 10);
+            const month = parseInt(getVal('month'), 10) - 1;
+            const date = parseInt(getVal('day'), 10);
+            const hours = getVal('hour').padStart(2, '0');
+            const minutes = getVal('minute').padStart(2, '0');
+            const seconds = getVal('second').padStart(2, '0');
+            
+            const jakartaDate = new Date(year, month, date);
+            const dayName = days[jakartaDate.getDay()];
+            const monthName = months[month];
+            
             const dateEl = document.getElementById('realtime-date');
             const timeEl = document.getElementById('realtime-time');
             
@@ -151,7 +163,7 @@
                 timeEl.textContent = `${hours}:${minutes}:${seconds}`;
             }
         }
-
+ 
         updateClock();
         setInterval(updateClock, 1000);
     });

@@ -262,7 +262,7 @@
                                 <textarea x-model="noteModalText" 
                                           rows="4" 
                                           class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                                          placeholder="Tulis saran atau dokumen yang berjalan di sini..."
+                                          placeholder="Tulis evidence atau catatan hasil audit (baik nama, nomor dokumen, PIC yang diperiksa dan deskripsi implementasinya)."
                                           :disabled="isReadOnly"></textarea>
                             </div>
                         </div>

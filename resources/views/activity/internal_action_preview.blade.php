@@ -165,13 +165,25 @@
                         <div class="bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-4 py-1.5 sm:py-[9px] text-slate-800 text-[11px] sm:text-sm leading-relaxed h-full">
                             {{ $car->finding ?? '-' }}
                         </div>
+                        @if(!empty($car->finding_file_path))
+                            <div class="mt-2 flex flex-wrap gap-3">
+                                <div id="finding_images_container" class="flex flex-wrap gap-2">
+                                    @foreach(explode(',', $car->finding_file_path) as $path)
+                                        @if(!empty(trim($path)))
+                                            <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                        @endif
+                                    @endforeach
+                                </div>
+                                <span class="text-[10px] sm:text-xs text-slate-400 italic whitespace-nowrap mt-2"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Click to zoom / preview</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Action Plan Form Card -->
-        <form id="actionPlanForm" action="{{ route('internal_audit.action_report.save_action', request()->route('id')) }}" method="POST" class="mt-6">
+        <form id="actionPlanForm" action="{{ route('internal_audit.action_report.save_action', request()->route('id')) }}" method="POST" enctype="multipart/form-data" class="mt-6">
             @csrf
             @php $isComplete = isset($action) && $action->action_status === 'complete'; @endphp
             <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-8 space-y-8">
@@ -220,12 +232,12 @@
                                 <textarea name="why_four" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Analized by Auditee Superior</label>
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Analized by Auditee Superior <span class="text-red-500">*</span></label>
                                 <x-searchable-select
                                     id="analyzed_by"
                                     name="analyzed_by"
                                     label="Analized by: Auditee Superior"
-                                    required="false"
+                                    required="true"
                                     hideLabel="true"
                                     disabled="{{ $isComplete ? 1 : 0 }}"
                                     apiUrl="{{ route('internal_audit.get_users') }}"
@@ -241,16 +253,110 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <!-- A. Corrective Action -->
                         <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action <span class="text-red-500">*</span></label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                             <textarea name="corrective_action" rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                             <textarea name="corrective_action" required rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                             
+                              @if(!$isComplete)
+                                <div class="mt-3">
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Evidence Photos (Max 3)</label>
+                                    
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <div class="grid grid-cols-2 gap-2 w-full max-w-[280px] shrink-0">
+                                            <div class="relative group">
+                                                <input type="file" id="corr_camera_input" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-blue-200 rounded-lg bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center px-2">
+                                                    <div class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                                        <i class="fas fa-camera text-xs"></i>
+                                                    </div>
+                                                    <span class="text-xs font-medium text-blue-600">Take Photo</span>
+                                                </div>
+                                            </div>
+                                            <div class="relative group">
+                                                <input type="file" id="corr_gallery_input" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-slate-200 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-all text-center px-2">
+                                                    <div class="w-7 h-7 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center shrink-0">
+                                                        <i class="fas fa-images text-xs"></i>
+                                                    </div>
+                                                    <span class="text-xs font-medium text-slate-600">From Gallery</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Previews positioned to the right of buttons -->
+                                        <div id="corr_preview_container" class="flex flex-wrap gap-2 items-center"></div>
+                                    </div>
+                                    <input type="hidden" name="existing_corrective_photos" id="existing_corrective_photos" value="{{ $action->corrective_path ?? '' }}">
+                                    <input type="file" id="hidden_corr_input" name="corrective_photos[]" multiple class="hidden">
+                                </div>
+                            @endif
+
+                            @if($isComplete && !empty($action->corrective_path))
+                                <div class="mt-2 flex flex-wrap gap-3">
+                                    <div id="corr_readonly_container" class="flex flex-wrap gap-2">
+                                        @foreach(explode(',', $action->corrective_path) as $path)
+                                            @if(!empty(trim($path)))
+                                                <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    <span class="text-[10px] sm:text-xs text-slate-400 italic whitespace-nowrap mt-2"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Click to zoom / preview</span>
+                                </div>
+                            @endif
                         </div>
                         
                         <!-- B. Preventive Action -->
                         <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action</label>
+                            <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action <span class="text-red-500">*</span></label>
                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                            <textarea name="preventive_action" required rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+
+                            @if(!$isComplete)
+                                <div class="mt-3">
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Evidence Photos (Max 3)</label>
+                                    
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <div class="grid grid-cols-2 gap-2 w-full max-w-[280px] shrink-0">
+                                            <div class="relative group">
+                                                <input type="file" id="prev_camera_input" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-blue-200 rounded-lg bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center px-2">
+                                                    <div class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                                        <i class="fas fa-camera text-xs"></i>
+                                                    </div>
+                                                    <span class="text-xs font-medium text-blue-600">Take Photo</span>
+                                                </div>
+                                            </div>
+                                            <div class="relative group">
+                                                <input type="file" id="prev_gallery_input" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-slate-200 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-all text-center px-2">
+                                                    <div class="w-7 h-7 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center shrink-0">
+                                                        <i class="fas fa-images text-xs"></i>
+                                                    </div>
+                                                    <span class="text-xs font-medium text-slate-600">From Gallery</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Previews positioned to the right of buttons -->
+                                        <div id="prev_preview_container" class="flex flex-wrap gap-2 items-center"></div>
+                                    </div>
+                                    <input type="hidden" name="existing_preventive_photos" id="existing_preventive_photos" value="{{ $action->preventive_path ?? '' }}">
+                                    <input type="file" id="hidden_prev_input" name="preventive_photos[]" multiple class="hidden">
+                                </div>
+                            @endif
+
+                            @if($isComplete && !empty($action->preventive_path))
+                                <div class="mt-2 flex flex-wrap gap-3">
+                                    <div id="prev_readonly_container" class="flex flex-wrap gap-2">
+                                        @foreach(explode(',', $action->preventive_path) as $path)
+                                            @if(!empty(trim($path)))
+                                                <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    <span class="text-[10px] sm:text-xs text-slate-400 italic whitespace-nowrap mt-2"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Click to zoom / preview</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -358,6 +464,7 @@
 
     @include('layouts.footer')
 </div>
+
 
 <script>
     function autoGrow(element) {
@@ -532,6 +639,13 @@
         if (form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+
+                // Validate searchable-select (analyzed_by) manually since it is a hidden input
+                const analyzedBy = document.getElementById('analyzed_by');
+                if (!analyzedBy || !analyzedBy.value || analyzedBy.value.trim() === '') {
+                    showToast('Please select Analized by Auditee Superior.', 'error');
+                    return;
+                }
                 
                 // Get submit button and show loading state
                 const submitBtn = form.querySelector('button[type="submit"]');
@@ -568,6 +682,315 @@
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
                 });
+            });
+        }
+
+        // Corrective Photos state
+        let correctiveFiles = [];
+        let existingCorrective = {!! json_encode(array_filter(explode(',', $action->corrective_path ?? ''))) !!};
+        const corrPreviewContainer = document.getElementById('corr_preview_container');
+        const hiddenCorrInput = document.getElementById('hidden_corr_input');
+
+        // Preventive Photos state
+        let preventiveFiles = [];
+        let existingPreventive = {!! json_encode(array_filter(explode(',', $action->preventive_path ?? ''))) !!};
+        const prevPreviewContainer = document.getElementById('prev_preview_container');
+        const hiddenPrevInput = document.getElementById('hidden_prev_input');
+
+        function renderCorrectivePreviews() {
+            if (!corrPreviewContainer) return;
+            corrPreviewContainer.innerHTML = '';
+
+            // Render existing
+            existingCorrective.forEach((path, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                
+                const img = document.createElement('img');
+                img.src = '/' + path;
+                img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                btn.innerHTML = "×";
+                btn.onclick = function(evt) {
+                    evt.stopPropagation();
+                    existingCorrective.splice(index, 1);
+                    document.getElementById('existing_corrective_photos').value = existingCorrective.join(',');
+                    renderCorrectivePreviews();
+                };
+                
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                corrPreviewContainer.appendChild(wrapper);
+            });
+
+            // Render newly uploaded files
+            correctiveFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                    
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                    btn.innerHTML = "×";
+                    btn.onclick = function(evt) {
+                        evt.stopPropagation();
+                        correctiveFiles.splice(index, 1);
+                        syncCorrectiveFiles();
+                        renderCorrectivePreviews();
+                    };
+                    
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    corrPreviewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Set up ViewerJS on the container
+            setTimeout(() => {
+                if (typeof Viewer !== 'undefined' && corrPreviewContainer.children.length > 0) {
+                    if (corrPreviewContainer.viewer) {
+                        corrPreviewContainer.viewer.destroy();
+                    }
+                    corrPreviewContainer.viewer = new Viewer(corrPreviewContainer, {
+                        title: false,
+                        navbar: false,
+                        toolbar: {
+                            zoomIn: 1, zoomOut: 1, oneToOne: 1, reset: 1,
+                            prev: 0, play: 0, next: 0, rotateLeft: 1, rotateRight: 1,
+                            flipHorizontal: 1, flipVertical: 1
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function syncCorrectiveFiles() {
+            if (!hiddenCorrInput) return;
+            const dataTransfer = new DataTransfer();
+            correctiveFiles.forEach(file => dataTransfer.items.add(file));
+            hiddenCorrInput.files = dataTransfer.files;
+        }
+
+        function handleCorrectiveFileSelection(files) {
+            const totalCount = existingCorrective.length + correctiveFiles.length;
+            const remainingCount = 3 - totalCount;
+            if (remainingCount <= 0) {
+                showToast("You can only upload up to 3 photos max.", "error");
+                return;
+            }
+            
+            const filesToAppend = Array.from(files).slice(0, remainingCount);
+            if (filesToAppend.length < files.length) {
+                showToast("Limit exceeded. Only " + remainingCount + " photos added.", "warning");
+            }
+            
+            correctiveFiles = correctiveFiles.concat(filesToAppend);
+            syncCorrectiveFiles();
+            renderCorrectivePreviews();
+        }
+
+        function renderPreventivePreviews() {
+            if (!prevPreviewContainer) return;
+            prevPreviewContainer.innerHTML = '';
+
+            // Render existing
+            existingPreventive.forEach((path, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                
+                const img = document.createElement('img');
+                img.src = '/' + path;
+                img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                btn.innerHTML = "×";
+                btn.onclick = function(evt) {
+                    evt.stopPropagation();
+                    existingPreventive.splice(index, 1);
+                    document.getElementById('existing_preventive_photos').value = existingPreventive.join(',');
+                    renderPreventivePreviews();
+                };
+                
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                prevPreviewContainer.appendChild(wrapper);
+            });
+
+            // Render newly uploaded files
+            preventiveFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                    
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                    btn.innerHTML = "×";
+                    btn.onclick = function(evt) {
+                        evt.stopPropagation();
+                        preventiveFiles.splice(index, 1);
+                        syncPreventiveFiles();
+                        renderPreventivePreviews();
+                    };
+                    
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    prevPreviewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Set up ViewerJS on the container
+            setTimeout(() => {
+                if (typeof Viewer !== 'undefined' && prevPreviewContainer.children.length > 0) {
+                    if (prevPreviewContainer.viewer) {
+                        prevPreviewContainer.viewer.destroy();
+                    }
+                    prevPreviewContainer.viewer = new Viewer(prevPreviewContainer, {
+                        title: false,
+                        navbar: false,
+                        toolbar: {
+                            zoomIn: 1, zoomOut: 1, oneToOne: 1, reset: 1,
+                            prev: 0, play: 0, next: 0, rotateLeft: 1, rotateRight: 1,
+                            flipHorizontal: 1, flipVertical: 1
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function syncPreventiveFiles() {
+            if (!hiddenPrevInput) return;
+            const dataTransfer = new DataTransfer();
+            preventiveFiles.forEach(file => dataTransfer.items.add(file));
+            hiddenPrevInput.files = dataTransfer.files;
+        }
+
+        function handlePreventiveFileSelection(files) {
+            const totalCount = existingPreventive.length + preventiveFiles.length;
+            const remainingCount = 3 - totalCount;
+            if (remainingCount <= 0) {
+                showToast("You can only upload up to 3 photos max.", "error");
+                return;
+            }
+            
+            const filesToAppend = Array.from(files).slice(0, remainingCount);
+            if (filesToAppend.length < files.length) {
+                showToast("Limit exceeded. Only " + remainingCount + " photos added.", "warning");
+            }
+            
+            preventiveFiles = preventiveFiles.concat(filesToAppend);
+            syncPreventiveFiles();
+            renderPreventivePreviews();
+        }
+
+        // Corrective input hooks
+        const corrCameraInput = document.getElementById('corr_camera_input');
+        const corrGalleryInput = document.getElementById('corr_gallery_input');
+        if (corrCameraInput) {
+            corrCameraInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handleCorrectiveFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+        if (corrGalleryInput) {
+            corrGalleryInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handleCorrectiveFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+
+        // Preventive input hooks
+        const prevCameraInput = document.getElementById('prev_camera_input');
+        const prevGalleryInput = document.getElementById('prev_gallery_input');
+        if (prevCameraInput) {
+            prevCameraInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handlePreventiveFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+        if (prevGalleryInput) {
+            prevGalleryInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handlePreventiveFileSelection(this.files);
+                    this.value = '';
+                }
+            });
+        }
+
+        // Initial render
+        renderCorrectivePreviews();
+        renderPreventivePreviews();
+
+        // Readonly Viewers
+        const corrReadonly = document.getElementById('corr_readonly_container');
+        if (typeof Viewer !== 'undefined' && corrReadonly) {
+            new Viewer(corrReadonly, {
+                title: false,
+                navbar: false,
+                toolbar: {
+                    zoomIn: 1, zoomOut: 1, oneToOne: 1, reset: 1,
+                    prev: 0, play: 0, next: 0, rotateLeft: 1, rotateRight: 1,
+                    flipHorizontal: 1, flipVertical: 1
+                }
+            });
+        }
+
+        const prevReadonly = document.getElementById('prev_readonly_container');
+        if (typeof Viewer !== 'undefined' && prevReadonly) {
+            new Viewer(prevReadonly, {
+                title: false,
+                navbar: false,
+                toolbar: {
+                    zoomIn: 1, zoomOut: 1, oneToOne: 1, reset: 1,
+                    prev: 0, play: 0, next: 0, rotateLeft: 1, rotateRight: 1,
+                    flipHorizontal: 1, flipVertical: 1
+                }
+            });
+        }
+
+        // Initialize ViewerJS on the images container
+        const container = document.getElementById('finding_images_container');
+        if (typeof Viewer !== 'undefined' && container) {
+            new Viewer(container, {
+                title: false,
+                navbar: false,
+                toolbar: {
+                    zoomIn: 1,
+                    zoomOut: 1,
+                    oneToOne: 1,
+                    reset: 1,
+                    prev: 0,
+                    play: 0,
+                    next: 0,
+                    rotateLeft: 1,
+                    rotateRight: 1,
+                    flipHorizontal: 1,
+                    flipVertical: 1,
+                }
             });
         }
     });
