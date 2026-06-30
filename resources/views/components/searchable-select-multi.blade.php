@@ -322,7 +322,7 @@
 
             <!-- Custom option if search text doesn't exist exactly in database items or selected items -->
             <template x-if="search.trim().length > 0 && !items.some(i => i.name.toLowerCase() === search.toLowerCase().trim()) && (!multiple || !selectedItems.some(i => i.name.toLowerCase() === search.toLowerCase().trim()))">
-                <div @click="select({ id: search.trim().toUpperCase(), name: search.trim().toUpperCase() })"
+                <div @click="select({ id: search.trim().toUpperCase(), name: search.trim().toUpperCase() }); open = false;"
                     class="px-4 py-2.5 text-sm cursor-pointer transition-colors bg-blue-50/40 hover:bg-blue-50 text-blue-600 font-medium flex items-center justify-between border-b border-slate-100">
                     <div>
                         <span class="text-slate-400 text-[12px] block font-normal">User is not registered in the system. Use as custom free text:</span>

@@ -177,6 +177,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/user-setting', [MasterController::class, 'user_setting'])->name('master.user_setting');
     Route::post('/user-setting/update', [MasterController::class, 'update_user_setting'])->name('master.user_setting.update');
+    Route::post('/user-setting/store', [MasterController::class, 'store_user'])->name('master.user_setting.store');
 
     Route::get('/menu-management', [MasterController::class, 'menu_management'])->name('master.menu_management');
     Route::post('/menu-management/table', [MasterController::class, 'menu_management_table'])->name('master.menu_management.table');

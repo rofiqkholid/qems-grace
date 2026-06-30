@@ -9,12 +9,18 @@
     @include('layouts.header')
 
     <!-- Page Content Header -->
-    <div class="px-6 py-4 bg-white border-b border-slate-200 shrink-0">
+    <div class="px-6 py-4 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between gap-4">
         <!-- Page Title -->
         <div>
             <h1 class="text-lg sm:text-xl font-bold text-slate-800">User Setting</h1>
             <p class="text-slate-500 text-xs mt-0.5">Manage user account details, passwords, and profile pictures</p>
         </div>
+
+        <!-- Add User Button -->
+        <button type="button" onclick="initCreateUser()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5 shrink-0">
+            <i class="fa-solid fa-user-plus text-xs"></i>
+            <span>Add User</span>
+        </button>
     </div>
 
     <!-- Main Container -->
@@ -153,8 +159,8 @@
                                         </div>
 
                                         <div class="flex flex-col">
-                                            <label for="username" class="block text-xs font-bold text-slate-700 mb-1.5">Username</label>
-                                            <input type="text" id="username" disabled class="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-50 cursor-not-allowed text-slate-500 text-xs outline-none transition-all">
+                                            <label for="username" class="block text-xs font-bold text-slate-700 mb-1.5">Username/NIK <span class="text-red-500">*</span></label>
+                                            <input type="text" id="username" name="username" disabled class="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-50 cursor-not-allowed text-slate-500 text-xs outline-none transition-all">
                                         </div>
 
                                         <div class="flex flex-col sm:col-span-2">
@@ -287,6 +293,7 @@
                 success: function(response) {
                     if (response.success) {
                         updateSaveStatus(response.message, 'success');
+                        selectedUserId = response.user.id;
                         
                         // Clear password inputs
                         $('#password').val('');
@@ -447,6 +454,41 @@
         });
     }
 
+    function initCreateUser() {
+        $('[id^="user-card-"]').removeClass('border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-500/20').addClass('border-slate-100 hover:bg-slate-50 hover:border-slate-200');
+        selectedUserId = null;
+
+        $('#emptyStatePanel').addClass('hidden');
+        $('#userDetailPanel').removeClass('hidden');
+        
+        if (window.innerWidth < 1024) {
+            $('#userListSection').addClass('hidden');
+            $('#userDetailSection').removeClass('hidden').addClass('flex');
+        } else {
+            $('#userDetailSection').removeClass('hidden').addClass('flex');
+        }
+
+        // Setup form for creation
+        $('#form_user_id').val('');
+        $('#detailFullName').text('Create New User');
+        $('#detailEmail').text('Register new account credentials');
+        
+        $('#full_name').val('');
+        $('#username').val('').prop('disabled', false).removeClass('bg-slate-50 cursor-not-allowed text-slate-500');
+        $('#email').val('');
+        $('#password').val('').prop('required', true);
+        $('#password_confirmation').val('').prop('required', true);
+
+        const defaultAvatar = `{{ asset('image/blank.png') }}`;
+        $('#detailAvatar img').attr('src', defaultAvatar);
+        $('#avatar-preview').attr('src', defaultAvatar);
+
+        $('#userSettingsForm').attr('action', "{{ route('master.user_setting.store') }}");
+        $('#btnSaveProfile span').text('Create User');
+        
+        $('#btnUpdatePassword').parent().addClass('hidden');
+    }
+
     function selectUser(userId, isInitial = false) {
         $('[id^="user-card-"]').removeClass('border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-500/20').addClass('border-slate-100 hover:bg-slate-50 hover:border-slate-200');
         $(`#user-card-${userId}`).addClass('border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-500/20').removeClass('border-slate-100 hover:bg-slate-50 hover:border-slate-200');
@@ -454,6 +496,15 @@
         selectedUserId = userId;
         $('#bladeAlertsContainer').addClass('hidden');
         $('#ajaxAlertContainer').addClass('hidden').empty();
+
+        // Reset to Edit Mode
+        $('#username').prop('disabled', true).addClass('bg-slate-50 cursor-not-allowed text-slate-500');
+        $('#password').prop('required', false);
+        $('#password_confirmation').prop('required', false);
+        $('#btnUpdatePassword').parent().removeClass('hidden');
+        $('#btnUpdatePassword').parent().parent().removeClass('hidden');
+        $('#userSettingsForm').attr('action', "{{ route('master.user_setting.update') }}");
+        $('#btnSaveProfile span').text('Save Profile');
 
         $.ajax({
             url: `{{ route('master.user_management.get_permissions', ['id' => ':id']) }}`.replace(':id', userId),

@@ -1323,8 +1323,8 @@ class MasterController extends Controller
         }
 
         $data = [
-            'full_name' => $request->full_name,
-            'call_name' => $request->call_name,
+            'full_name' => strtoupper($request->full_name),
+            'call_name' => $request->filled('call_name') ? strtoupper($request->call_name) : null,
             'email' => $request->email,
         ];
 
@@ -1356,5 +1356,46 @@ class MasterController extends Controller
         }
 
         return redirect()->back()->with('success', 'Profile updated successfully.')->with('selected_user_id', $userId);
+    }
+
+    public function store_user(Request $request)
+    {
+        $request->validate([
+            'full_name' => 'required|string|max:255',
+            'username' => 'required|string|max:50|unique:users,username',
+            'email' => 'nullable|email|max:255',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $data = [
+            'full_name' => strtoupper($request->full_name),
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'avatar' => 'blank.png',
+            'role_id' => 1,
+            'created_at' => \Carbon\Carbon::now(),
+            'updated_at' => \Carbon\Carbon::now()
+        ];
+
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('image'), $filename);
+            $data['avatar'] = $filename;
+        }
+
+        $userId = DB::table('users')->insertGetId($data);
+        $user = DB::table('users')->where('id', $userId)->first();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully.',
+                'user' => $user
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'User created successfully.')->with('selected_user_id', $userId);
     }
 }
