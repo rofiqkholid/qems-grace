@@ -309,20 +309,6 @@
             </div>
         </div>
 
-        <!-- Selected Items List displayed underneath -->
-        <template x-if="multiple && selectedItems.length > 0">
-            <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <template x-for="item in selectedItems" :key="item.id">
-                    <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 gap-2">
-                        <span x-text="item.name" class="font-medium truncate" :title="item.name"></span>
-                        <button type="button" @click.stop="removeItem(item)" class="text-slate-400 hover:text-red-600 font-medium text-xs focus:outline-none flex items-center gap-1.5 transition-colors shrink-0">
-                            <i class="fa-solid fa-trash-can text-red-500 text-xs"></i> Remove
-                        </button>
-                    </div>
-                </template>
-            </div>
-        </template>
-
         <!-- Dropdown Menu -->
         <div x-show="open"
             x-transition:enter="transition ease-out duration-100"
@@ -334,7 +320,18 @@
             @scroll.passive="$el.scrollTop + $el.clientHeight >= $el.scrollHeight - 50 ? loadMore() : null"
             class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg max-h-60 overflow-y-auto shadow-lg">
 
-            <template x-if="items.length === 0 && !loading">
+            <!-- Custom option if search text doesn't exist exactly in database items or selected items -->
+            <template x-if="search.trim().length > 0 && !items.some(i => i.name.toLowerCase() === search.toLowerCase().trim()) && (!multiple || !selectedItems.some(i => i.name.toLowerCase() === search.toLowerCase().trim()))">
+                <div @click="select({ id: search.trim().toUpperCase(), name: search.trim().toUpperCase() })"
+                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors bg-blue-50/40 hover:bg-blue-50 text-blue-600 font-medium flex items-center justify-between border-b border-slate-100">
+                    <div>
+                        <span class="text-slate-400 text-[12px] block font-normal">User is not registered in the system. Use as custom free text:</span>
+                        <span x-text="search.trim().toUpperCase()"></span>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="items.length === 0 && !loading && search.trim().length === 0">
                 <div class="px-4 py-3 text-sm text-slate-500 text-center">No {{ strtolower($label) }} found</div>
             </template>
 
@@ -356,5 +353,19 @@
                 </div>
             </template>
         </div>
+
+        <!-- Selected Items List displayed underneath -->
+        <template x-if="multiple && selectedItems.length > 0">
+            <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <template x-for="item in selectedItems" :key="item.id">
+                    <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 gap-2">
+                        <span x-text="item.name" class="font-medium truncate" :title="item.name"></span>
+                        <button type="button" @click.stop="removeItem(item)" class="text-slate-400 hover:text-red-600 font-medium text-xs focus:outline-none flex items-center gap-1.5 transition-colors shrink-0">
+                             <i class="fa-solid fa-trash-can text-red-500 text-xs"></i> Remove
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </template>
     </div>
 </div>
