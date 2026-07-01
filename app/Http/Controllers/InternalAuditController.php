@@ -1336,6 +1336,54 @@ class InternalAuditController extends Controller
             }
 
             if ($car) {
+                // 1. Delete CsAuditAction corrective and preventive photos from disk
+                $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+                if ($action) {
+                    // Corrective Photos
+                    if (!empty($action->corrective_path)) {
+                        $paths = explode(',', $action->corrective_path);
+                        foreach ($paths as $path) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                    // Preventive Photos
+                    if (!empty($action->preventive_path)) {
+                        $paths = explode(',', $action->preventive_path);
+                        foreach ($paths as $path) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                }
+
+                // 2. Delete CsAuditCar finding photos from disk
+                if (!empty($car->finding_file_path)) {
+                    $paths = explode(',', $car->finding_file_path);
+                    foreach ($paths as $path) {
+                        $filePath = public_path(trim($path));
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            @unlink($filePath);
+                        }
+                    }
+                }
+
+                // 3. Delete CsAuditDetail finding photos from disk
+                $detail = DB::table('CsAuditDetail')->where('id', $car->audit_detail_id)->first();
+                if ($detail && !empty($detail->finding_photo_path)) {
+                    $paths = explode(',', $detail->finding_photo_path);
+                    foreach ($paths as $path) {
+                        $filePath = public_path(trim($path));
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            @unlink($filePath);
+                        }
+                    }
+                }
+
                 DB::table('CsAuditDetail')
                     ->where('id', $car->audit_detail_id)
                     ->update([
