@@ -251,65 +251,73 @@
                 <!-- Corrective & Preventive Action Side-by-Side -->
                 <div class="border-t border-slate-100 pt-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <!-- A. Corrective Action -->
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action <span class="text-red-500">*</span></label>
-                            <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
-                             <textarea name="corrective_action" required rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter corrective actions...">{{ old('corrective_action', $action->corrective_action ?? '') }}</textarea>
+                         <!-- A. Corrective Action -->
+                         <div class="flex flex-col gap-1.5">
+                             <label class="text-slate-700 font-semibold text-sm tracking-wider">A. Corrective Action <span class="text-red-500">*</span></label>
+                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Tindakan Darurat untuk mengatasi masalah)</span>
+                             <div class="flex flex-col gap-2 mt-1">
+                                 <textarea name="corrective_action_one" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 1...">{{ old('corrective_action_one', $action->corrective_action_one ?? '') }}</textarea>
+                                 <textarea name="corrective_action_two" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 2...">{{ old('corrective_action_two', $action->corrective_action_two ?? '') }}</textarea>
+                                 <textarea name="corrective_action_three" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 3...">{{ old('corrective_action_three', $action->corrective_action_three ?? '') }}</textarea>
+                             </div>
                              
                               @if(!$isComplete)
-                                <div class="mt-3">
-                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Evidence Photos (Max 3)</label>
-                                    
-                                    <div class="flex flex-wrap items-center gap-3">
-                                        <div class="grid grid-cols-2 gap-2 w-full max-w-[280px] shrink-0">
-                                            <div class="relative group">
-                                                <input type="file" id="corr_camera_input" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-blue-200 rounded-lg bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center px-2">
-                                                    <div class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
-                                                        <i class="fas fa-camera text-xs"></i>
-                                                    </div>
-                                                    <span class="text-xs font-medium text-blue-600">Take Photo</span>
-                                                </div>
-                                            </div>
-                                            <div class="relative group">
-                                                <input type="file" id="corr_gallery_input" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                                <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-slate-200 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-all text-center px-2">
-                                                    <div class="w-7 h-7 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center shrink-0">
-                                                        <i class="fas fa-images text-xs"></i>
-                                                    </div>
-                                                    <span class="text-xs font-medium text-slate-600">From Gallery</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Previews positioned to the right of buttons -->
-                                        <div id="corr_preview_container" class="flex flex-wrap gap-2 items-center"></div>
-                                    </div>
-                                    <input type="hidden" name="existing_corrective_photos" id="existing_corrective_photos" value="{{ $action->corrective_path ?? '' }}">
-                                    <input type="file" id="hidden_corr_input" name="corrective_photos[]" multiple class="hidden">
-                                </div>
-                            @endif
+                                 <div class="mt-3">
+                                     <label class="block text-xs font-semibold text-slate-500 mb-1.5">Evidence Photos (Max 3)</label>
+                                     
+                                     <div class="flex flex-wrap items-center gap-3">
+                                         <div class="grid grid-cols-2 gap-2 w-full max-w-[280px] shrink-0">
+                                             <div class="relative group">
+                                                 <input type="file" id="corr_camera_input" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                 <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-blue-200 rounded-lg bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center px-2">
+                                                     <div class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                                         <i class="fas fa-camera text-xs"></i>
+                                                     </div>
+                                                     <span class="text-xs font-medium text-blue-600">Take Photo</span>
+                                                 </div>
+                                             </div>
+                                             <div class="relative group">
+                                                 <input type="file" id="corr_gallery_input" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                                 <div class="flex flex-row items-center justify-center gap-2 h-16 border border-dashed border-slate-200 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-all text-center px-2">
+                                                     <div class="w-7 h-7 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center shrink-0">
+                                                         <i class="fas fa-images text-xs"></i>
+                                                     </div>
+                                                     <span class="text-xs font-medium text-slate-600">From Gallery</span>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         
+                                         <!-- Previews positioned to the right of buttons -->
+                                         <div id="corr_preview_container" class="flex flex-wrap gap-2 items-center"></div>
+                                     </div>
+                                     <input type="hidden" name="existing_corrective_photos" id="existing_corrective_photos" value="{{ $action->corrective_path ?? '' }}">
+                                     <input type="file" id="hidden_corr_input" name="corrective_photos[]" multiple class="hidden">
+                                 </div>
+                             @endif
 
-                            @if($isComplete && !empty($action->corrective_path))
-                                <div class="mt-2 flex flex-wrap gap-3">
-                                    <div id="corr_readonly_container" class="flex flex-wrap gap-2">
-                                        @foreach(explode(',', $action->corrective_path) as $path)
-                                            @if(!empty(trim($path)))
-                                                <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                    <span class="text-[10px] sm:text-xs text-slate-400 italic whitespace-nowrap mt-2"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Click to zoom / preview</span>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- B. Preventive Action -->
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action <span class="text-red-500">*</span></label>
-                            <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
-                            <textarea name="preventive_action" required rows="3" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm mt-1 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter preventive actions...">{{ old('preventive_action', $action->preventive_action ?? '') }}</textarea>
+                             @if($isComplete && !empty($action->corrective_path))
+                                 <div class="mt-2 flex flex-wrap gap-3">
+                                     <div id="corr_readonly_container" class="flex flex-wrap gap-2">
+                                         @foreach(explode(',', $action->corrective_path) as $path)
+                                             @if(!empty(trim($path)))
+                                                 <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                             @endif
+                                         @endforeach
+                                     </div>
+                                     <span class="text-[10px] sm:text-xs text-slate-400 italic whitespace-nowrap mt-2"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Click to zoom / preview</span>
+                                 </div>
+                             @endif
+                         </div>
+                         
+                         <!-- B. Preventive Action -->
+                         <div class="flex flex-col gap-1.5">
+                             <label class="text-slate-700 font-semibold text-sm tracking-wider">B. Preventive Action <span class="text-red-500">*</span></label>
+                             <span class="text-slate-400 text-[10px] -mt-1 block italic">(Perbaikan yang harus segera dilakukan untuk menghilangkan akar penyebab)</span>
+                             <div class="flex flex-col gap-2 mt-1">
+                                 <textarea name="preventive_action_one" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 1...">{{ old('preventive_action_one', $action->preventive_action_one ?? '') }}</textarea>
+                                 <textarea name="preventive_action_two" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 2...">{{ old('preventive_action_two', $action->preventive_action_two ?? '') }}</textarea>
+                                 <textarea name="preventive_action_three" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 3...">{{ old('preventive_action_three', $action->preventive_action_three ?? '') }}</textarea>
+                             </div>
 
                             @if(!$isComplete)
                                 <div class="mt-3">

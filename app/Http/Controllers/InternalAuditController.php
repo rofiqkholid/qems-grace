@@ -525,8 +525,12 @@ class InternalAuditController extends Controller
                   'why_five' => 'nullable|string',
                   'root_cause' => 'required|string',
                   'analyzed_by' => 'required|string',
-                  'corrective_action' => 'required|string',
-                  'preventive_action' => 'required|string',
+                  'corrective_action_one' => 'required|string',
+                  'corrective_action_two' => 'required|string',
+                  'corrective_action_three' => 'required|string',
+                  'preventive_action_one' => 'required|string',
+                  'preventive_action_two' => 'required|string',
+                  'preventive_action_three' => 'required|string',
                   'notes' => 'nullable|string',
                   'auditee_name' => 'nullable|string',
                   'auditee_superior_name' => 'nullable|string',
@@ -571,7 +575,7 @@ class InternalAuditController extends Controller
                  $allPaths = array_merge($existingArray, $paths);
                  $preventivePhotoPath = implode(',', $allPaths);
              }
- 
+
              $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
              if ($existingAction) {
                  DB::table('CsAuditAction')
@@ -584,9 +588,13 @@ class InternalAuditController extends Controller
                          'why_five' => $request->why_five,
                          'root_cause' => $request->root_cause,
                          'analyzed_by' => $request->analyzed_by,
-                         'corrective_action' => $request->corrective_action,
+                         'corrective_action_one' => $request->corrective_action_one,
+                         'corrective_action_two' => $request->corrective_action_two,
+                         'corrective_action_three' => $request->corrective_action_three,
                          'corrective_path' => $correctivePhotoPath,
-                         'preventive_action' => $request->preventive_action,
+                         'preventive_action_one' => $request->preventive_action_one,
+                         'preventive_action_two' => $request->preventive_action_two,
+                         'preventive_action_three' => $request->preventive_action_three,
                          'preventive_path' => $preventivePhotoPath,
                          'notes' => $request->notes,
                          'auditee_name' => $request->auditee_name,
@@ -604,9 +612,13 @@ class InternalAuditController extends Controller
                      'why_five' => $request->why_five,
                      'root_cause' => $request->root_cause,
                      'analyzed_by' => $request->analyzed_by,
-                     'corrective_action' => $request->corrective_action,
+                     'corrective_action_one' => $request->corrective_action_one,
+                     'corrective_action_two' => $request->corrective_action_two,
+                     'corrective_action_three' => $request->corrective_action_three,
                      'corrective_path' => $correctivePhotoPath,
-                     'preventive_action' => $request->preventive_action,
+                     'preventive_action_one' => $request->preventive_action_one,
+                     'preventive_action_two' => $request->preventive_action_two,
+                     'preventive_action_three' => $request->preventive_action_three,
                      'preventive_path' => $preventivePhotoPath,
                      'notes' => $request->notes,
                      'auditee_name' => $request->auditee_name,
