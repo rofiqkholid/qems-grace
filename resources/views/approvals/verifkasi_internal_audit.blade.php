@@ -257,7 +257,7 @@
             ],
             pageLength: 10,
             language: {
-                emptyTable: '<div class="text-center py-8 text-slate-500">No external audit data ready for verification</div>',
+                emptyTable: '<div class="text-center py-8 text-slate-500">No internal audit data ready for verification</div>',
                 info: 'Showing _START_ to _END_ of _TOTAL_ entries',
                 paginate: {
                     previous: '<i class="fa-solid fa-chevron-left"></i>',

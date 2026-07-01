@@ -135,24 +135,18 @@ class InternalAuditController extends Controller
         
         $superiorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->whereNotNull('a.external')
-            ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete')
             ->where('a.status', 'Under Review')
             ->count();
 
         $auditorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->whereNotNull('a.external')
-            ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete')
             ->where('a.status', 'Need Verification')
             ->count();
 
         $closedCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->whereNotNull('a.external')
-            ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete')
             ->where('a.status', 'Closed')
             ->count();
@@ -168,8 +162,6 @@ class InternalAuditController extends Controller
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
             ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
             ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-            ->whereNotNull('a.external')
-            ->where('a.external', '<>', '')
             ->where('d.action_status', 'complete');
 
         // Apply role filter (show all CARs at this stage)
@@ -335,22 +327,16 @@ class InternalAuditController extends Controller
             }),
             "superiorCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->whereNotNull('a.external')
-                ->where('a.external', '<>', '')
                 ->where('d.action_status', 'complete')
                 ->where('a.status', 'Under Review')
                 ->count(),
             "auditorCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->whereNotNull('a.external')
-                ->where('a.external', '<>', '')
                 ->where('d.action_status', 'complete')
                 ->where('a.status', 'Need Verification')
                 ->count(),
             "closedCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->whereNotNull('a.external')
-                ->where('a.external', '<>', '')
                 ->where('d.action_status', 'complete')
                 ->where('a.status', 'Closed')
                 ->count()
