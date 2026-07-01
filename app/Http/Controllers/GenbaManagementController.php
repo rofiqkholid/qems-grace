@@ -597,6 +597,7 @@ class GenbaManagementController extends Controller
                   ->orWhere('Desc', 'LIKE', '%' . $search . '%');
             });
         }
+        $query->orderBy('Key1', 'asc');
         $areas = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'items' => collect($areas->items())->map(function ($area) {
