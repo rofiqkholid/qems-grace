@@ -286,6 +286,8 @@
                     submitBtn.prop('disabled', false).html(originalText);
                 }
             });
+        });
+
         // Search on keyup (debounce)
         var searchTimer;
         $('#searchInput').on('keyup', function() {
