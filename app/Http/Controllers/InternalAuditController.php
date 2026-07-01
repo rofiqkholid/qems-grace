@@ -1384,16 +1384,8 @@ class InternalAuditController extends Controller
                     }
                 }
 
-                DB::table('CsAuditDetail')
-                    ->where('id', $car->audit_detail_id)
-                    ->update([
-                        'judgment' => 'OK',
-                        'evidence' => null,
-                        'finding_photo_path' => null,
-                        'updated_at' => Carbon::now()
-                    ]);
-
                 DB::table('CsAuditCar')->where('id', $car->id)->delete();
+                DB::table('CsAuditDetail')->where('id', $car->audit_detail_id)->delete();
             }
 
             DB::commit();
