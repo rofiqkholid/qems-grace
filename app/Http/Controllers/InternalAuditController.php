@@ -135,19 +135,19 @@ class InternalAuditController extends Controller
         
         $superiorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->where('d.action_status', 'complete')
+            ->where('d.action_status', 'open_verif')
             ->where('a.status', 'Under Review')
             ->count();
 
         $auditorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->where('d.action_status', 'complete')
+            ->where('d.action_status', 'approve_superior')
             ->where('a.status', 'Need Verification')
             ->count();
 
         $closedCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->where('d.action_status', 'complete')
+            ->where('d.action_status', 'verified')
             ->where('a.status', 'Closed')
             ->count();
 
@@ -161,16 +161,18 @@ class InternalAuditController extends Controller
         $query = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
             ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-            ->where('d.action_status', 'complete');
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id');
 
         // Apply role filter (show all CARs at this stage)
         if ($role === 'superior') {
-            $query->where('a.status', 'Under Review');
+            $query->where('d.action_status', 'open_verif')
+                  ->where('a.status', 'Under Review');
         } elseif ($role === 'auditor') {
-            $query->where('a.status', 'Need Verification');
+            $query->where('d.action_status', 'approve_superior')
+                  ->where('a.status', 'Need Verification');
         } elseif ($role === 'closed') {
-            $query->where('a.status', 'Closed');
+            $query->where('d.action_status', 'verified')
+                  ->where('a.status', 'Closed');
         }
 
         $totalRecords = $query->count();
@@ -281,16 +283,23 @@ class InternalAuditController extends Controller
                             </div>';
                     }
                 } elseif ($canAction) {
-                    $actionBtn = '
-                        <div class="flex items-center justify-start gap-2">
-                            ' . $previewBtn . '
-                            <button type="button" onclick="approveCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve">
-                                <i class="fa-solid fa-check text-sm"></i>
-                            </button>
-                            <button type="button" onclick="rejectCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
-                                <i class="fa-solid fa-xmark text-sm"></i>
-                            </button>
-                        </div>';
+                    if ($role === 'superior') {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                                <button type="button" onclick="approveCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve">
+                                    <i class="fa-solid fa-check text-sm"></i>
+                                </button>
+                                <button type="button" onclick="rejectCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                            </div>';
+                    } else {
+                        $actionBtn = '
+                            <div class="flex items-center justify-start gap-2">
+                                ' . $previewBtn . '
+                            </div>';
+                    }
                 } else {
                     if ($role === 'auditor' && $isUserSuperior) {
                         $actionBtn = '
@@ -327,17 +336,17 @@ class InternalAuditController extends Controller
             }),
             "superiorCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'complete')
+                ->where('d.action_status', 'open_verif')
                 ->where('a.status', 'Under Review')
                 ->count(),
             "auditorCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'complete')
+                ->where('d.action_status', 'approve_superior')
                 ->where('a.status', 'Need Verification')
                 ->count(),
             "closedCount" => DB::table('CsAuditCar as a')
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'complete')
+                ->where('d.action_status', 'verified')
                 ->where('a.status', 'Closed')
                 ->count()
         ];
@@ -390,6 +399,13 @@ class InternalAuditController extends Controller
                         'updated_at' => Carbon::now()
                     ]);
 
+                DB::table('CsAuditAction')
+                    ->where('audit_car_id', $request->car_id)
+                    ->update([
+                        'action_status' => 'approve_superior',
+                        'updated_at' => Carbon::now()
+                    ]);
+
                 return response()->json(['success' => true, 'message' => 'CAR Action Report rolled back to Auditor verification queue successfully.']);
             } elseif ($carStatus === 'Need Verification') {
                 // Verify that the user is the Auditee Superior
@@ -401,6 +417,13 @@ class InternalAuditController extends Controller
                     ->where('id', $request->car_id)
                     ->update([
                         'status' => 'Under Review',
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                DB::table('CsAuditAction')
+                    ->where('audit_car_id', $request->car_id)
+                    ->update([
+                        'action_status' => 'open_verif',
                         'updated_at' => Carbon::now()
                     ]);
 
@@ -417,6 +440,7 @@ class InternalAuditController extends Controller
     {
         $request->validate([
             'car_id' => 'required|integer',
+            'notes' => 'nullable|string'
         ]);
 
         try {
@@ -458,12 +482,17 @@ class InternalAuditController extends Controller
 
             DB::beginTransaction();
 
+            $actionUpdate = [
+                'action_status' => 'draft',
+                'updated_at' => Carbon::now()
+            ];
+            if ($request->exists('notes')) {
+                $actionUpdate['notes'] = $request->notes;
+            }
+
             DB::table('CsAuditAction')
                 ->where('audit_car_id', $request->car_id)
-                ->update([
-                    'action_status' => 'draft',
-                    'updated_at' => Carbon::now()
-                ]);
+                ->update($actionUpdate);
 
             DB::table('CsAuditCar')
                 ->where('id', $request->car_id)
@@ -520,47 +549,82 @@ class InternalAuditController extends Controller
                   'notes' => 'nullable|string',
                   'auditee_name' => 'nullable|string',
                   'auditee_superior_name' => 'nullable|string',
-                  'corrective_photos' => 'nullable|array',
-                  'corrective_photos.*' => 'nullable|image|max:5120',
-                  'preventive_photos' => 'nullable|array',
-                  'preventive_photos.*' => 'nullable|image|max:5120',
-                  'existing_corrective_photos' => 'nullable|string',
-                  'existing_preventive_photos' => 'nullable|string',
+                  'corrective_photo_one' => 'nullable|array',
+                  'corrective_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'corrective_photo_two' => 'nullable|array',
+                  'corrective_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'corrective_photo_three' => 'nullable|array',
+                  'corrective_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_one' => 'nullable|array',
+                  'preventive_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_two' => 'nullable|array',
+                  'preventive_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_three' => 'nullable|array',
+                  'preventive_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'existing_corrective_photo_one' => 'nullable|string',
+                  'existing_corrective_photo_two' => 'nullable|string',
+                  'existing_corrective_photo_three' => 'nullable|string',
+                  'existing_preventive_photo_one' => 'nullable|string',
+                  'existing_preventive_photo_two' => 'nullable|string',
+                  'existing_preventive_photo_three' => 'nullable|string',
              ]);
 
-             // Process Corrective Photos
-             $correctivePhotoPath = $request->input('existing_corrective_photos', '');
-             if ($request->hasFile('corrective_photos')) {
-                 $files = $request->file('corrective_photos');
-                 $paths = [];
-                 foreach ($files as $file) {
-                     if ($file) {
-                         $fileName = 'evidence_corr_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                         $file->move(public_path('evidence-photo'), $fileName);
-                         $paths[] = 'evidence-photo/' . $fileName;
+             $fields = [
+                 'corrective_path_one' => ['file' => 'corrective_photo_one', 'existing' => 'existing_corrective_photo_one', 'prefix' => 'evidence_corr_one_'],
+                 'corrective_path_two' => ['file' => 'corrective_photo_two', 'existing' => 'existing_corrective_photo_two', 'prefix' => 'evidence_corr_two_'],
+                 'corrective_path_three' => ['file' => 'corrective_photo_three', 'existing' => 'existing_corrective_photo_three', 'prefix' => 'evidence_corr_three_'],
+                 'preventive_path_one' => ['file' => 'preventive_photo_one', 'existing' => 'existing_preventive_photo_one', 'prefix' => 'evidence_prev_one_'],
+                 'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_'],
+                 'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_'],
+             ];
+
+             $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+             $photoPaths = [];
+
+             foreach ($fields as $col => $info) {
+                 // 1. Parse retained existing paths
+                 $retainedStr = $request->input($info['existing'], '');
+                 $retainedPaths = array_filter(array_map('trim', explode(',', $retainedStr)));
+
+                 // 2. Identify and delete files that were removed by the user
+                 if ($existingAction && !empty($existingAction->$col)) {
+                     $dbPaths = array_filter(array_map('trim', explode(',', $existingAction->$col)));
+                     foreach ($dbPaths as $dbPath) {
+                         if (!in_array($dbPath, $retainedPaths)) {
+                             $filePath = public_path($dbPath);
+                             if (file_exists($filePath) && is_file($filePath)) {
+                                 @unlink($filePath);
+                             }
+                         }
                      }
                  }
-                 $existingArray = array_filter(explode(',', $correctivePhotoPath));
-                 $allPaths = array_merge($existingArray, $paths);
-                 $correctivePhotoPath = implode(',', $allPaths);
+
+                 // 3. Process newly uploaded files
+                 $uploadedPaths = [];
+                 if ($request->hasFile($info['file'])) {
+                     $files = $request->file($info['file']);
+                     if (!is_array($files)) {
+                         $files = [$files];
+                     }
+                     foreach ($files as $file) {
+                         if ($file && $file->isValid()) {
+                             $fileName = $info['prefix'] . uniqid() . '.' . $file->getClientOriginalExtension();
+                             $file->move(public_path('evidence-photo'), $fileName);
+                             $uploadedPaths[] = 'evidence-photo/' . $fileName;
+                         }
+                     }
+                 }
+
+                 // 4. Combine retained and newly uploaded paths
+                 $finalPaths = array_merge($retainedPaths, $uploadedPaths);
+                 $photoPaths[$col] = !empty($finalPaths) ? implode(',', $finalPaths) : null;
              }
 
-             // Process Preventive Photos
-             $preventivePhotoPath = $request->input('existing_preventive_photos', '');
-             if ($request->hasFile('preventive_photos')) {
-                 $files = $request->file('preventive_photos');
-                 $paths = [];
-                 foreach ($files as $file) {
-                     if ($file) {
-                         $fileName = 'evidence_prev_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                         $file->move(public_path('evidence-photo'), $fileName);
-                         $paths[] = 'evidence-photo/' . $fileName;
-                     }
-                 }
-                 $existingArray = array_filter(explode(',', $preventivePhotoPath));
-                 $allPaths = array_merge($existingArray, $paths);
-                 $preventivePhotoPath = implode(',', $allPaths);
-             }
+             $corrPathsList = array_filter([$photoPaths['corrective_path_one'], $photoPaths['corrective_path_two'], $photoPaths['corrective_path_three']]);
+             $prevPathsList = array_filter([$photoPaths['preventive_path_one'], $photoPaths['preventive_path_two'], $photoPaths['preventive_path_three']]);
+             
+             $legacyCorrectivePath = implode(',', $corrPathsList);
+             $legacyPreventivePath = implode(',', $prevPathsList);
 
              $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
              if ($existingAction) {
@@ -577,15 +641,21 @@ class InternalAuditController extends Controller
                          'corrective_action_one' => $request->corrective_action_one,
                          'corrective_action_two' => $request->corrective_action_two,
                          'corrective_action_three' => $request->corrective_action_three,
-                         'corrective_path' => $correctivePhotoPath,
+                         'corrective_path' => $legacyCorrectivePath,
+                         'corrective_path_one' => $photoPaths['corrective_path_one'],
+                         'corrective_path_two' => $photoPaths['corrective_path_two'],
+                         'corrective_path_three' => $photoPaths['corrective_path_three'],
                          'preventive_action_one' => $request->preventive_action_one,
                          'preventive_action_two' => $request->preventive_action_two,
                          'preventive_action_three' => $request->preventive_action_three,
-                         'preventive_path' => $preventivePhotoPath,
+                         'preventive_path' => $legacyPreventivePath,
+                         'preventive_path_one' => $photoPaths['preventive_path_one'],
+                         'preventive_path_two' => $photoPaths['preventive_path_two'],
+                         'preventive_path_three' => $photoPaths['preventive_path_three'],
                          'notes' => $request->notes,
                          'auditee_name' => $request->auditee_name,
                          'auditee_superior_name' => $request->auditee_superior_name,
-                         'action_status' => 'complete',
+                         'action_status' => 'open_verif',
                          'updated_at' => Carbon::now()
                      ]);
              } else {
@@ -601,15 +671,21 @@ class InternalAuditController extends Controller
                      'corrective_action_one' => $request->corrective_action_one,
                      'corrective_action_two' => $request->corrective_action_two,
                      'corrective_action_three' => $request->corrective_action_three,
-                     'corrective_path' => $correctivePhotoPath,
+                     'corrective_path' => $legacyCorrectivePath,
+                     'corrective_path_one' => $photoPaths['corrective_path_one'],
+                     'corrective_path_two' => $photoPaths['corrective_path_two'],
+                     'corrective_path_three' => $photoPaths['corrective_path_three'],
                      'preventive_action_one' => $request->preventive_action_one,
                      'preventive_action_two' => $request->preventive_action_two,
                      'preventive_action_three' => $request->preventive_action_three,
-                     'preventive_path' => $preventivePhotoPath,
+                     'preventive_path' => $legacyPreventivePath,
+                     'preventive_path_one' => $photoPaths['preventive_path_one'],
+                     'preventive_path_two' => $photoPaths['preventive_path_two'],
+                     'preventive_path_three' => $photoPaths['preventive_path_three'],
                      'notes' => $request->notes,
                      'auditee_name' => $request->auditee_name,
                      'auditee_superior_name' => $request->auditee_superior_name,
-                     'action_status' => 'complete',
+                     'action_status' => 'open_verif',
                      'created_at' => Carbon::now(),
                      'updated_at' => Carbon::now()
                  ]);
@@ -689,17 +765,17 @@ class InternalAuditController extends Controller
 
             DB::beginTransaction();
 
-            DB::table('CsAuditAction')
-                ->where('audit_car_id', $car->id)
-                ->update([
-                    'action_status' => 'draft',
-                    'updated_at' => Carbon::now()
-                ]);
-
             DB::table('CsAuditCar')
                 ->where('id', $car->id)
                 ->update([
-                    'status' => 'Draft',
+                    'status' => 'Need Verification',
+                    'updated_at' => Carbon::now()
+                ]);
+
+            DB::table('CsAuditAction')
+                ->where('audit_car_id', $car->id)
+                ->update([
+                    'action_status' => 'approve_superior',
                     'updated_at' => Carbon::now()
                 ]);
 
@@ -708,11 +784,11 @@ class InternalAuditController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Action Plan has been rolled back to draft successfully.'
+                    'message' => 'CAR Action Report has been rolled back to verification successfully.'
                 ]);
             }
 
-            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'Action Plan has been rolled back to draft.');
+            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'CAR Action Report has been rolled back to verification.');
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -1325,7 +1401,7 @@ class InternalAuditController extends Controller
                 // 1. Delete CsAuditAction corrective and preventive photos from disk
                 $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
                 if ($action) {
-                    // Corrective Photos
+                    // Corrective Photos (legacy)
                     if (!empty($action->corrective_path)) {
                         $paths = explode(',', $action->corrective_path);
                         foreach ($paths as $path) {
@@ -1335,10 +1411,27 @@ class InternalAuditController extends Controller
                             }
                         }
                     }
-                    // Preventive Photos
+                    // Preventive Photos (legacy)
                     if (!empty($action->preventive_path)) {
                         $paths = explode(',', $action->preventive_path);
                         foreach ($paths as $path) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                    // Individual Action Photos
+                    $actionPaths = [
+                        $action->corrective_path_one,
+                        $action->corrective_path_two,
+                        $action->corrective_path_three,
+                        $action->preventive_path_one,
+                        $action->preventive_path_two,
+                        $action->preventive_path_three,
+                    ];
+                    foreach ($actionPaths as $path) {
+                        if (!empty($path)) {
                             $filePath = public_path(trim($path));
                             if (file_exists($filePath) && is_file($filePath)) {
                                 @unlink($filePath);
@@ -1420,7 +1513,14 @@ class InternalAuditController extends Controller
     {
         $request->validate([
             'car_id' => 'required|integer',
-            'role' => 'required|string'
+            'role' => 'required|string',
+            'notes' => $request->role === 'auditor' ? 'required|string' : 'nullable|string',
+            'corrective_action_one_verif' => 'nullable|string|in:approve,reject',
+            'corrective_action_two_verif' => 'nullable|string|in:approve,reject',
+            'corrective_action_three_verif' => 'nullable|string|in:approve,reject',
+            'preventive_action_one_verif' => 'nullable|string|in:approve,reject',
+            'preventive_action_two_verif' => 'nullable|string|in:approve,reject',
+            'preventive_action_three_verif' => 'nullable|string|in:approve,reject',
         ]);
 
         try {
@@ -1440,18 +1540,18 @@ class InternalAuditController extends Controller
                 return response()->json(['success' => false, 'message' => 'Action Plan not found for this CAR.']);
             }
 
+            // Check if any of the actions were rejected
+            $hasRejection = $request->corrective_action_one_verif === 'reject'
+                || $request->corrective_action_two_verif === 'reject'
+                || $request->corrective_action_three_verif === 'reject'
+                || $request->preventive_action_one_verif === 'reject'
+                || $request->preventive_action_two_verif === 'reject'
+                || $request->preventive_action_three_verif === 'reject';
+
             if ($role === 'superior') {
                 if (empty($action->auditee_superior_name) || strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
                     return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') is allowed to approve at this stage.']);
                 }
-
-                $updateData = [
-                    'status' => 'Need Verification',
-                    'updated_at' => Carbon::now()
-                ];
-                DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
-
-                return response()->json(['success' => true, 'message' => 'Action Plan approved by Superior. Now waiting for Auditor verification.']);
             } elseif ($role === 'auditor') {
                 // Verify the user is the Auditor
                 $isAuditor = false;
@@ -1468,18 +1568,60 @@ class InternalAuditController extends Controller
                 if (!$isAuditor) {
                     return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to verify and close this CAR.']);
                 }
-
-                $updateData = [
-                    'status' => 'Closed',
-                    'updated_at' => Carbon::now()
-                ];
-                DB::table('CsAuditCar')->where('id', $request->car_id)->update($updateData);
-
-                return response()->json(['success' => true, 'message' => 'CAR verified and Closed successfully by Auditor.']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Invalid role specified.']);
             }
 
-            return response()->json(['success' => false, 'message' => 'Only the Auditee Superior (' . ($action->auditee_superior_name ?? '-') . ') or Auditor (' . ($car->auditor ?? '-') . ') is allowed to approve this CAR.']);
+            DB::beginTransaction();
+
+            // Prepare verif data
+            $verifData = [
+                'corrective_action_one_verif' => ($role === 'superior') ? 'approve' : $request->corrective_action_one_verif,
+                'corrective_action_two_verif' => ($role === 'superior') ? 'approve' : $request->corrective_action_two_verif,
+                'corrective_action_three_verif' => ($role === 'superior') ? 'approve' : $request->corrective_action_three_verif,
+                'preventive_action_one_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_one_verif,
+                'preventive_action_two_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_two_verif,
+                'preventive_action_three_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_three_verif,
+                'updated_at' => Carbon::now()
+            ];
+
+            if ($request->exists('notes')) {
+                $verifData['notes'] = $request->notes;
+            }
+
+            if ($hasRejection) {
+                // Return to draft
+                $verifData['action_status'] = 'draft';
+                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
+                
+                DB::table('CsAuditCar')->where('id', $request->car_id)->update([
+                    'status' => 'Draft',
+                    'updated_at' => Carbon::now()
+                ]);
+
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Action Plan rejected and returned to draft due to rejected items.']);
+            } else {
+                // All approved / not rejected
+                $verifData['action_status'] = ($role === 'superior') ? 'approve_superior' : 'verified';
+                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
+
+                $targetStatus = ($role === 'superior') ? 'Need Verification' : 'Closed';
+                DB::table('CsAuditCar')->where('id', $request->car_id)->update([
+                    'status' => $targetStatus,
+                    'updated_at' => Carbon::now()
+                ]);
+
+                DB::commit();
+                
+                $msg = ($role === 'superior') 
+                    ? 'Action Plan approved by Superior. Now waiting for Auditor verification.' 
+                    : 'CAR verified and Closed successfully by Auditor.';
+                return response()->json(['success' => true, 'message' => $msg]);
+            }
+
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
