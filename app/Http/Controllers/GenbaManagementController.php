@@ -592,14 +592,17 @@ class GenbaManagementController extends Controller
 
         $query = GenbaManagement::get_section_list();
         if ($search) {
-            $query->where('Desc', 'LIKE', '%' . $search . '%');
+            $query->where(function($q) use ($search) {
+                $q->where('Key1', 'LIKE', '%' . $search . '%')
+                  ->orWhere('Desc', 'LIKE', '%' . $search . '%');
+            });
         }
         $areas = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'items' => collect($areas->items())->map(function ($area) {
                 return [
                     'id' => $area->id,
-                    'name' => $area->desc
+                    'name' => $area->id
                 ];
             })->values(),
             'pagination' => [
