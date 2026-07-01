@@ -727,6 +727,27 @@
                                 <i class="fa-solid fa-rotate-left text-base"></i> Rollback
                             </button>
                         @endif
+                        @php
+                            $isAuditee = false;
+                            if (!empty($car->auditee)) {
+                                $auditees = array_map('trim', explode(',', $car->auditee));
+                                foreach ($auditees as $auditeeName) {
+                                    if (strcasecmp(Auth::user()->full_name, $auditeeName) === 0) {
+                                        $isAuditee = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            $showAuditeeRollback = false;
+                            if ($isAuditee && ($car->status ?? '') === 'Under Review') {
+                                $showAuditeeRollback = true;
+                            }
+                        @endphp
+                        @if($showAuditeeRollback)
+                            <button type="button" id="btnAuditeeRollback" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-left text-base"></i> Cancel submission & edit
+                            </button>
+                        @endif
                     @else
                         <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk text-base"></i> Save Action Plan
@@ -823,6 +844,13 @@
             modalIcon.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
             confirmBtn.className = 'px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-colors text-sm';
             confirmBtn.innerText = 'Yes, Rollback';
+        } else if (action === 'auditee_rollback') {
+            modalTitle.innerText = 'Edit Action Plan';
+            modalMessage.innerHTML = 'Are you sure you want to cancel submission and edit this action plan?<br>This will return the status to Draft.';
+            modalIcon.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
+            modalIcon.innerHTML = `<svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6m-6-6l6-6"></path></svg>`;
+            confirmBtn.className = 'px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-colors text-sm';
+            confirmBtn.innerText = 'Yes, Edit';
         }
 
         modal.classList.remove('hidden');
@@ -868,7 +896,7 @@
                 car_id: {{ $car->id }},
                 notes: document.querySelector('textarea[name="notes"]').value
             };
-        } else if (currentAction === 'rollback') {
+        } else if (currentAction === 'rollback' || currentAction === 'auditee_rollback') {
             url = "{{ route('internal_audit.action_report.rollback', request()->route('id')) }}";
             payload = {
                 _token: "{{ csrf_token() }}"
@@ -938,6 +966,14 @@
         if (btnRollback) {
             btnRollback.addEventListener('click', function() {
                 openConfirmationModal('rollback');
+            });
+        }
+
+        // Auditee Rollback Handler
+        const btnAuditeeRollback = document.getElementById('btnAuditeeRollback');
+        if (btnAuditeeRollback) {
+            btnAuditeeRollback.addEventListener('click', function() {
+                openConfirmationModal('auditee_rollback');
             });
         }
 

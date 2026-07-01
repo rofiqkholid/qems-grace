@@ -740,7 +740,9 @@ class InternalAuditController extends Controller
             }
 
             $user = Auth::user();
-            if (($car->status ?? '') === 'Closed') {
+            $carStatus = $car->status ?? '';
+
+            if ($carStatus === 'Closed') {
                 $isAuditor = false;
                 if (!empty($car->auditor)) {
                     $auditors = array_map('trim', explode(',', $car->auditor));
@@ -761,34 +763,81 @@ class InternalAuditController extends Controller
                     }
                     return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.');
                 }
+            } elseif ($carStatus === 'Under Review') {
+                $isAuditee = false;
+                if (!empty($car->auditee)) {
+                    $auditees = array_map('trim', explode(',', $car->auditee));
+                    foreach ($auditees as $auditeeName) {
+                        if (strcasecmp(trim($user->full_name), $auditeeName) === 0) {
+                            $isAuditee = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAuditee) {
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Only the Auditee is allowed to edit the action plan at this stage.'
+                        ]);
+                    }
+                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only the Auditee is allowed to edit the action plan at this stage.');
+                }
+            } else {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Rollback is not allowed at the current stage (' . $carStatus . ').'
+                    ]);
+                }
+                return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Rollback is not allowed at the current stage (' . $carStatus . ').');
             }
 
             DB::beginTransaction();
 
-            DB::table('CsAuditCar')
-                ->where('id', $car->id)
-                ->update([
-                    'status' => 'Need Verification',
-                    'updated_at' => Carbon::now()
-                ]);
+            if ($carStatus === 'Closed') {
+                DB::table('CsAuditCar')
+                    ->where('id', $car->id)
+                    ->update([
+                        'status' => 'Need Verification',
+                        'updated_at' => Carbon::now()
+                    ]);
 
-            DB::table('CsAuditAction')
-                ->where('audit_car_id', $car->id)
-                ->update([
-                    'action_status' => 'approve_superior',
-                    'updated_at' => Carbon::now()
-                ]);
+                DB::table('CsAuditAction')
+                    ->where('audit_car_id', $car->id)
+                    ->update([
+                        'action_status' => 'approve_superior',
+                        'updated_at' => Carbon::now()
+                    ]);
+                $message = 'CAR Action Report has been rolled back to verification successfully.';
+            } else {
+                DB::table('CsAuditCar')
+                    ->where('id', $car->id)
+                    ->update([
+                        'status' => 'Draft',
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                DB::table('CsAuditAction')
+                    ->where('audit_car_id', $car->id)
+                    ->update([
+                        'action_status' => 'draft',
+                        'updated_at' => Carbon::now()
+                    ]);
+                $message = 'CAR Action Report has been rolled back to draft successfully.';
+            }
 
             DB::commit();
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'CAR Action Report has been rolled back to verification successfully.'
+                    'message' => $message
                 ]);
             }
 
-            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', 'CAR Action Report has been rolled back to verification.');
+            return redirect()->route('internal_audit.action_report.preview', $id)->with('toast_success', $message);
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
