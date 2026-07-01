@@ -26,7 +26,7 @@
                     <span id="count-superior" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $superiorCount ?? 0 }}</span>
                 </button>
                 <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    Verif by Auditor or QMS
+                    Verif by Auditor
                     <span id="count-auditor" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
                 </button>
                 <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
