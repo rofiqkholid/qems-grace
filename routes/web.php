@@ -152,7 +152,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/clauses', [MasterController::class, 'clauses'])->name('master.clauses');
         Route::post('/clauses/table', [MasterController::class, 'clauses_table'])->name('master.clauses.table');
-        Route::post('/clauses/store', [MasterController::class, 'store_clauses'])->name('master.clauses.store');
+        Route::post('/', [MasterController::class, 'store_clauses'])->name('master.clauses.store');
         Route::post('/clauses/update', [MasterController::class, 'update_clauses'])->name('master.clauses.update');
         Route::post('/clauses/delete', [MasterController::class, 'delete_clauses'])->name('master.clauses.delete');
 

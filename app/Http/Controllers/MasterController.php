@@ -579,7 +579,7 @@ class MasterController extends Controller
     public function store_clauses(Request $request)
     {
         $request->validate([
-            'clause_no' => 'required|unique:CsKlausul,clause_no',
+            'clause_no' => 'required',
             'clause_title' => 'required',
             'clauses' => 'nullable',
         ]);
@@ -616,7 +616,7 @@ class MasterController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'clause_no' => 'required|unique:CsKlausul,clause_no,' . $request->id,
+            'clause_no' => 'required',
             'clause_title' => 'required',
             'clauses' => 'nullable',
         ]);
