@@ -267,13 +267,13 @@ class InternalAuditController extends Controller
                           }
                       }
                   } elseif ($effectiveRole === 'closed') {
-                      if ($user->username === '031114-001') {
+                      if (in_array($user->username, ['031114-001', '260422-001', '121020-002'])) {
                           $canAction = true;
                       }
                   }
   
                   $isUserAuditor = false;
-                  if ($user->username === '031114-001') {
+                  if (in_array($user->username, ['031114-001', '260422-001', '121020-002'])) {
                       $isUserAuditor = true;
                   } elseif (!empty($item->auditor)) {
                       $auditors = array_map('trim', explode(',', $item->auditor));
@@ -427,7 +427,7 @@ class InternalAuditController extends Controller
 
             if ($carStatus === 'Closed') {
                 // Verify that the user is the Auditor or QMR
-                $isAuditor = ($user->username === '031114-001');
+                $isAuditor = in_array($user->username, ['031114-001', '260422-001', '121020-002']);
                 if (!$isAuditor && !empty($car->auditor)) {
                     $auditors = array_map('trim', explode(',', $car->auditor));
                     foreach ($auditors as $auditorName) {
@@ -439,7 +439,7 @@ class InternalAuditController extends Controller
                 }
 
                 if (!$isAuditor) {
-                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.']);
+                    return response()->json(['success' => false, 'message' => 'Only QMR or designated Auditor is allowed to rollback this closed CAR.']);
                 }
 
                 DB::table('CsAuditCar')
@@ -527,9 +527,9 @@ class InternalAuditController extends Controller
                     return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to reject at this stage.']);
                 }
             } elseif ($carStatus === 'Closed') {
-                // Reject by QMR (031114-001)
-                if ($user->username !== '031114-001') {
-                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) is allowed to reject at this stage.']);
+                // Reject by QMR
+                if (!in_array($user->username, ['031114-001', '260422-001', '121020-002'])) {
+                    return response()->json(['success' => false, 'message' => 'Only QMR is allowed to reject at this stage.']);
                 }
             } else {
                 return response()->json(['success' => false, 'message' => 'Rejection is not allowed at the current CAR stage (' . $carStatus . ').']);
@@ -801,7 +801,7 @@ class InternalAuditController extends Controller
             $carStatus = $car->status ?? '';
 
             if ($carStatus === 'Closed') {
-                $isAuditor = ($user->username === '031114-001');
+                $isAuditor = in_array($user->username, ['031114-001', '260422-001', '121020-002']);
                 if (!$isAuditor && !empty($car->auditor)) {
                     $auditors = array_map('trim', explode(',', $car->auditor));
                     foreach ($auditors as $auditorName) {
@@ -816,10 +816,10 @@ class InternalAuditController extends Controller
                     if ($request->ajax() || $request->wantsJson()) {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.'
+                            'message' => 'Only QMR or designated Auditor is allowed to rollback this closed CAR.'
                         ]);
                     }
-                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.');
+                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only QMR or designated Auditor is allowed to rollback this closed CAR.');
                 }
             } elseif ($carStatus === 'Under Review') {
                 $isAuditee = false;
@@ -1678,9 +1678,9 @@ class InternalAuditController extends Controller
                     return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to verify and close this CAR.']);
                 }
             } elseif ($role === 'closed') {
-                // Verify the user is QMR (031114-001)
-                if ($user->username !== '031114-001') {
-                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) is allowed to perform final verification.']);
+                // Verify the user is QMR
+                if (!in_array($user->username, ['031114-001', '260422-001', '121020-002'])) {
+                    return response()->json(['success' => false, 'message' => 'Only QMR is allowed to perform final verification.']);
                 }
             } else {
                 return response()->json(['success' => false, 'message' => 'Invalid role specified.']);
