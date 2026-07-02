@@ -470,7 +470,7 @@
 
         // Listen to clause changed event
         window.addEventListener('car-clause-changed', function(e) {
-            const clauseTitle = e.detail.value;
+            const clauseTitle = e.detail.id;
             const requirementNo = document.getElementById('car_requirement_no').value;
             const clauses = {!! json_encode(DB::table('CsKlausul')->select('clause_no', 'clause_title', 'clauses')->get()->toArray()) !!};
             const matchedClause = clauses.find(c => c.clause_title === clauseTitle && c.clause_no === requirementNo);
