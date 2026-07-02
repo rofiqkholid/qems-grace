@@ -275,10 +275,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="root_cause_verif" id="root_cause_verif" value="">
                                         <div class="flex flex-col gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('root_cause', 'approve')" id="btn_approve_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve Root Cause">
+                                            <button type="button" onclick="setFieldVerif('root_cause', 'approve')" id="btn_approve_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve Root Cause">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('root_cause', 'reject')" id="btn_reject_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject Root Cause">
+                                            <button type="button" onclick="setFieldVerif('root_cause', 'reject')" id="btn_reject_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject Root Cause">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -372,10 +372,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="corrective_action_one_verif" id="corrective_action_one_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'approve')" id="btn_approve_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'approve')" id="btn_approve_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'reject')" id="btn_reject_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'reject')" id="btn_reject_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -424,10 +424,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="preventive_action_one_verif" id="preventive_action_one_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'approve')" id="btn_approve_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'approve')" id="btn_approve_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'reject')" id="btn_reject_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'reject')" id="btn_reject_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -479,10 +479,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="corrective_action_two_verif" id="corrective_action_two_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'approve')" id="btn_approve_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'approve')" id="btn_approve_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'reject')" id="btn_reject_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'reject')" id="btn_reject_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -531,10 +531,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="preventive_action_two_verif" id="preventive_action_two_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'approve')" id="btn_approve_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'approve')" id="btn_approve_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'reject')" id="btn_reject_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'reject')" id="btn_reject_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -586,10 +586,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="corrective_action_three_verif" id="corrective_action_three_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'approve')" id="btn_approve_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'approve')" id="btn_approve_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'reject')" id="btn_reject_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'reject')" id="btn_reject_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -638,10 +638,10 @@
                                     @if($isAuditorReviewing)
                                         <input type="hidden" name="preventive_action_three_verif" id="preventive_action_three_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'approve')" id="btn_approve_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'approve')" id="btn_approve_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'reject')" id="btn_reject_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'reject')" id="btn_reject_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -1145,11 +1145,11 @@
             if (status === 'approve') {
                 input.value = 'approve';
                 if (approveBtn) approveBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-600 border-green-600 text-white shadow-sm";
-                if (rejectBtn) rejectBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50";
+                if (rejectBtn) rejectBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100";
             } else {
                 input.value = 'reject';
                 if (rejectBtn) rejectBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-red-600 border-red-600 text-white shadow-sm";
-                if (approveBtn) approveBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50";
+                if (approveBtn) approveBtn.className = "w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-green-50 border-green-200 text-green-600 hover:bg-green-100";
             }
         };
         const actionFilesState = {
