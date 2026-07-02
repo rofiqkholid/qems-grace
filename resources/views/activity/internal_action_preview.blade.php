@@ -251,17 +251,6 @@
                             <div class="flex flex-col gap-1.5 flex-grow">
                                 <div class="flex items-center justify-between">
                                     <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
-                                    @if($isComplete && !$isReviewing && !empty($action->root_cause_verif))
-                                        @if($action->root_cause_verif === 'approve')
-                                            @if(($car->status ?? '') === 'Need Verification')
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
-                                            @endif
-                                        @elseif($action->root_cause_verif === 'reject')
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark text-red-500"></i> Rejected</span>
-                                        @endif
-                                    @endif
                                 </div>
                                 <div class="flex items-start gap-2 w-full flex-grow">
                                     <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
@@ -280,6 +269,20 @@
                                 
                                 <div class="flex items-center justify-between mt-1">
                                     <div id="root_cause_preview" class="flex flex-wrap gap-2 items-center">
+                                        @if(!$isReviewing && !empty($action->root_cause_verif))
+                                            @if($action->root_cause_verif === 'approve')
+                                                @if(($car->status ?? '') === 'Need Verification')
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                                @endif
+                                            @elseif($action->root_cause_verif === 'reject')
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark text-red-500"></i> Rejected</span>
+                                            @endif
+                                            @if($isComplete && !empty($action->root_cause_path))
+                                                <div class="h-6 w-[1px] bg-slate-200 mx-1 self-center shrink-0"></div>
+                                            @endif
+                                        @endif
                                         @if($isComplete && !empty($action->root_cause_path))
                                             @foreach(explode(',', $action->root_cause_path) as $idx => $path)
                                                 @php $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION)); @endphp
