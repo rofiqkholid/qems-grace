@@ -231,26 +231,25 @@ class DashboardController extends Controller
             8 => 'a.SysID'
         );
 
-        $totalData = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)->count();
+        $query = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
+            ->whereNotNull('a.asign_to_dept')
+            ->where('a.asign_to_dept', '!=', '');
+
+        $totalData = (clone $query)->count();
         $totalFiltered = $totalData;
         $limit = $request->input('length');
         $start = $request->input('start');
         $order = ($request->input('order.0.column') == 0 ? $columns[0] : $columns[$request->input('order.0.column')]);
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
-        if (empty($search)) {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
-                ->offset($start)
-                ->limit($limit)
-                ->reorder($order, $dir)
-                ->get();
-        } else {
-            $posts = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
-                ->offset($start)
-                ->limit($limit)
-                ->reorder($order, $dir)
-                ->get();
-            $totalFiltered = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)->count();
+        $posts = (clone $query)
+            ->offset($start)
+            ->limit($limit)
+            ->reorder($order, $dir)
+            ->get();
+
+        if (!empty($search)) {
+            $totalFiltered = (clone $query)->count();
         }
 
         $data = array();
