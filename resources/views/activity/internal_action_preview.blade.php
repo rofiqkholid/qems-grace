@@ -251,14 +251,7 @@
                             <div class="flex flex-col gap-1.5 flex-grow">
                                 <div class="flex items-center justify-between">
                                     <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
-                                    @if(!$isComplete)
-                                        <div class="shrink-0">
-                                            <input type="file" id="root_cause_file" name="root_cause_photo[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'root_cause')">
-                                            <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all" title="Take / Upload Photo or PDF">
-                                                <i class="fas fa-camera text-xs"></i> Upload File
-                                            </button>
-                                        </div>
-                                    @elseif(!$isReviewing && !empty($action->root_cause_verif))
+                                    @if($isComplete && !$isReviewing && !empty($action->root_cause_verif))
                                         @if($action->root_cause_verif === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
@@ -285,15 +278,25 @@
                                     @endif
                                 </div>
                                 
-                                <div id="root_cause_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if($isComplete && !empty($action->root_cause_path))
-                                        @foreach(explode(',', $action->root_cause_path) as $idx => $path)
-                                            @php $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION)); @endphp
-                                            <button type="button" onclick="openActionFileModal('{{ asset(trim($path)) }}', '{{ $ext }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors">
-                                                <i class="fa-solid {{ $ext === 'pdf' ? 'fa-file-pdf text-red-500' : 'fa-image text-blue-500' }}"></i>
-                                                Show File {{ $idx + 1 }}
+                                <div class="flex items-center justify-between mt-1">
+                                    <div id="root_cause_preview" class="flex flex-wrap gap-2 items-center">
+                                        @if($isComplete && !empty($action->root_cause_path))
+                                            @foreach(explode(',', $action->root_cause_path) as $idx => $path)
+                                                @php $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION)); @endphp
+                                                <button type="button" onclick="openActionFileModal('{{ asset(trim($path)) }}', '{{ $ext }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors">
+                                                    <i class="fa-solid {{ $ext === 'pdf' ? 'fa-file-pdf text-red-500' : 'fa-image text-blue-500' }}"></i>
+                                                    Show File {{ $idx + 1 }}
+                                                </button>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                    @if(!$isComplete)
+                                        <div class="shrink-0">
+                                            <input type="file" id="root_cause_file" name="root_cause_photo[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'root_cause')">
+                                            <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all" title="Take / Upload Photo or PDF">
+                                                <i class="fas fa-camera text-xs"></i> Upload File
                                             </button>
-                                        @endforeach
+                                        </div>
                                     @endif
                                 </div>
                                 <input type="hidden" name="existing_root_cause_photo" id="existing_root_cause" value="{{ $action->root_cause_path ?? '' }}">
