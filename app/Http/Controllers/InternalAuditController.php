@@ -122,13 +122,14 @@ class InternalAuditController extends Controller
             }
 
             $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+            $approve = DB::table('CsAuditApprove')->where('audit_car_id', $car->id)->first();
 
             $qmrUser = null;
             if ($car && !empty($car->qmr_nik)) {
                 $qmrUser = DB::table('users')->where('username', $car->qmr_nik)->first();
             }
 
-            return view('activity.internal_action_preview', compact('car', 'action', 'qmrUser'));
+            return view('activity.internal_action_preview', compact('car', 'action', 'qmrUser', 'approve'));
         } catch (\Exception $e) {
             return redirect()->route('internal_audit.action_report')->with('error', $e->getMessage());
         }
@@ -339,15 +340,10 @@ class InternalAuditController extends Controller
                                     </button>
                                 </div>';
                         } else {
+                            // auditor and QMR ('closed') must go into preview to approve/reject
                             $actionBtn = '
                                 <div class="flex items-center justify-start gap-2">
                                     ' . $previewBtn . '
-                                    <button type="button" onclick="approveCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve & Close">
-                                        <i class="fa-solid fa-check text-sm"></i>
-                                    </button>
-                                    <button type="button" onclick="rejectCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
-                                        <i class="fa-solid fa-xmark text-sm"></i>
-                                    </button>
                                 </div>';
                         }
                     } else {
@@ -556,6 +552,10 @@ class InternalAuditController extends Controller
                 ->where('audit_car_id', $request->car_id)
                 ->update($actionUpdate);
 
+            DB::table('CsAuditApprove')
+                ->where('audit_car_id', $request->car_id)
+                ->delete();
+
             DB::table('CsAuditCar')
                 ->where('id', $request->car_id)
                 ->update([
@@ -614,17 +614,17 @@ class InternalAuditController extends Controller
                   'auditee_name' => 'nullable|string',
                   'auditee_superior_name' => 'nullable|string',
                   'corrective_photo_one' => 'nullable|array',
-                  'corrective_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'corrective_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'corrective_photo_two' => 'nullable|array',
-                  'corrective_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'corrective_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'corrective_photo_three' => 'nullable|array',
-                  'corrective_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'corrective_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'preventive_photo_one' => 'nullable|array',
-                  'preventive_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_one.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'preventive_photo_two' => 'nullable|array',
-                  'preventive_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_two.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'preventive_photo_three' => 'nullable|array',
-                  'preventive_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+                  'preventive_photo_three.*' => 'file|mimes:jpg,jpeg,png,pdf',
                   'existing_corrective_photo_one' => 'nullable|string',
                   'existing_corrective_photo_two' => 'nullable|string',
                   'existing_corrective_photo_three' => 'nullable|string',
@@ -689,9 +689,6 @@ class InternalAuditController extends Controller
              $corrPathsList = array_filter([$photoPaths['corrective_path_one'], $photoPaths['corrective_path_two'], $photoPaths['corrective_path_three']]);
              $prevPathsList = array_filter([$photoPaths['preventive_path_one'], $photoPaths['preventive_path_two'], $photoPaths['preventive_path_three']]);
              
-             $legacyCorrectivePath = implode(',', $corrPathsList);
-             $legacyPreventivePath = implode(',', $prevPathsList);
-
              $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
              if ($existingAction) {
                  DB::table('CsAuditAction')
@@ -708,14 +705,12 @@ class InternalAuditController extends Controller
                          'corrective_action_one' => $request->corrective_action_one,
                          'corrective_action_two' => $request->corrective_action_two,
                          'corrective_action_three' => $request->corrective_action_three,
-                         'corrective_path' => $legacyCorrectivePath,
                          'corrective_path_one' => $photoPaths['corrective_path_one'],
                          'corrective_path_two' => $photoPaths['corrective_path_two'],
                          'corrective_path_three' => $photoPaths['corrective_path_three'],
                          'preventive_action_one' => $request->preventive_action_one,
                          'preventive_action_two' => $request->preventive_action_two,
                          'preventive_action_three' => $request->preventive_action_three,
-                         'preventive_path' => $legacyPreventivePath,
                          'preventive_path_one' => $photoPaths['preventive_path_one'],
                          'preventive_path_two' => $photoPaths['preventive_path_two'],
                          'preventive_path_three' => $photoPaths['preventive_path_three'],
@@ -738,14 +733,12 @@ class InternalAuditController extends Controller
                      'corrective_action_one' => $request->corrective_action_one,
                      'corrective_action_two' => $request->corrective_action_two,
                      'corrective_action_three' => $request->corrective_action_three,
-                     'corrective_path' => $legacyCorrectivePath,
                      'corrective_path_one' => $photoPaths['corrective_path_one'],
                      'corrective_path_two' => $photoPaths['corrective_path_two'],
                      'corrective_path_three' => $photoPaths['corrective_path_three'],
                      'preventive_action_one' => $request->preventive_action_one,
                      'preventive_action_two' => $request->preventive_action_two,
                      'preventive_action_three' => $request->preventive_action_three,
-                     'preventive_path' => $legacyPreventivePath,
                      'preventive_path_one' => $photoPaths['preventive_path_one'],
                      'preventive_path_two' => $photoPaths['preventive_path_two'],
                      'preventive_path_three' => $photoPaths['preventive_path_three'],
@@ -1519,26 +1512,6 @@ class InternalAuditController extends Controller
                 // 1. Delete CsAuditAction corrective and preventive photos from disk
                 $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
                 if ($action) {
-                    // Corrective Photos (legacy)
-                    if (!empty($action->corrective_path)) {
-                        $paths = explode(',', $action->corrective_path);
-                        foreach ($paths as $path) {
-                            $filePath = public_path(trim($path));
-                            if (file_exists($filePath) && is_file($filePath)) {
-                                @unlink($filePath);
-                            }
-                        }
-                    }
-                    // Preventive Photos (legacy)
-                    if (!empty($action->preventive_path)) {
-                        $paths = explode(',', $action->preventive_path);
-                        foreach ($paths as $path) {
-                            $filePath = public_path(trim($path));
-                            if (file_exists($filePath) && is_file($filePath)) {
-                                @unlink($filePath);
-                            }
-                        }
-                    }
                     // Individual Action Photos
                     $actionPaths = [
                         $action->corrective_path_one,
@@ -1583,6 +1556,8 @@ class InternalAuditController extends Controller
 
                 DB::table('CsAuditCar')->where('id', $car->id)->delete();
                 DB::table('CsAuditDetail')->where('id', $car->audit_detail_id)->delete();
+                DB::table('CsAuditAction')->where('audit_car_id', $car->id)->delete();
+                DB::table('CsAuditApprove')->where('audit_car_id', $car->id)->delete();
             }
 
             DB::commit();
@@ -1717,16 +1692,16 @@ class InternalAuditController extends Controller
                 $verifData['auditor_approved_at'] = Carbon::now();
             }
 
-            if ($request->exists('notes')) {
-                $verifData['notes'] = $request->notes;
-            }
-
             if ($hasRejection) {
                 // Return to draft
-                $verifData['action_status'] = 'draft';
-                $verifData['superior_approved_at'] = null;
-                $verifData['auditor_approved_at'] = null;
-                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
+                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update([
+                    'action_status' => 'draft',
+                    'notes' => $request->notes,
+                    'updated_at' => Carbon::now()
+                ]);
+
+                // Reset verifications
+                DB::table('CsAuditApprove')->where('audit_car_id', $request->car_id)->delete();
                 
                 DB::table('CsAuditCar')->where('id', $request->car_id)->update([
                     'status' => 'Draft',
@@ -1740,17 +1715,47 @@ class InternalAuditController extends Controller
             } else {
                 // All approved / not rejected
                 if ($role === 'closed') {
+                    $now = Carbon::now();
                     DB::table('CsAuditCar')->where('id', $request->car_id)->update([
                         'qmr_nik' => $user->username,
-                        'qmr_approved_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
+                        'qmr_approved_at' => $now,
+                        'updated_at' => $now
                     ]);
+
+                    $approveRecord = DB::table('CsAuditApprove')->where('audit_car_id', $request->car_id)->first();
+                    if (!$approveRecord) {
+                        DB::table('CsAuditApprove')->insert([
+                            'audit_car_id' => $request->car_id,
+                            'qmr_approved_at' => $now,
+                            'created_at' => $now,
+                            'updated_at' => $now
+                        ]);
+                    } else {
+                        DB::table('CsAuditApprove')->where('audit_car_id', $request->car_id)->update([
+                            'qmr_approved_at' => $now,
+                            'updated_at' => $now
+                        ]);
+                    }
 
                     DB::commit();
                     return response()->json(['success' => true, 'message' => 'CAR final verification completed by QMR.']);
                 } else {
-                    $verifData['action_status'] = ($role === 'superior') ? 'approve_superior' : 'verified';
-                    DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
+                    // Update Action Status and notes
+                    DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update([
+                        'action_status' => ($role === 'superior') ? 'approve_superior' : 'verified',
+                        'notes' => $request->notes,
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                    // Upsert approval data
+                    $approveRecord = DB::table('CsAuditApprove')->where('audit_car_id', $request->car_id)->first();
+                    if (!$approveRecord) {
+                        $verifData['audit_car_id'] = $request->car_id;
+                        $verifData['created_at'] = Carbon::now();
+                        DB::table('CsAuditApprove')->insert($verifData);
+                    } else {
+                        DB::table('CsAuditApprove')->where('audit_car_id', $request->car_id)->update($verifData);
+                    }
 
                     $targetStatus = ($role === 'superior') ? 'Need Verification' : 'Closed';
                     $carUpdate = [
@@ -1989,9 +1994,9 @@ class InternalAuditController extends Controller
             'corrective_action' => 'nullable|string',
             'preventive_action' => 'nullable|string',
             'due_date' => 'nullable|date',
-            'photo' => 'nullable|image|max:5120',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf',
             'finding_photo' => 'nullable|array',
-            'finding_photo.*' => 'nullable|image|max:5120',
+            'finding_photo.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf',
             'existing_photos' => 'nullable|string',
             'department' => 'nullable|string',
             'requirement_no' => 'nullable|string',

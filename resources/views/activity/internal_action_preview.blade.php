@@ -2,6 +2,7 @@
 
 @php
     $hideCentralToast = true;
+    $approve = $approve ?? null;
 @endphp
 
 @section('title', 'Action Report Preview')
@@ -170,7 +171,18 @@
                                 <div id="finding_images_container" class="flex flex-wrap gap-2">
                                     @foreach(explode(',', $car->finding_file_path) as $path)
                                         @if(!empty(trim($path)))
-                                            <img src="{{ asset(trim($path)) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                            @php
+                                                $pathTrimmed = trim($path);
+                                                $ext = strtolower(pathinfo($pathTrimmed, PATHINFO_EXTENSION));
+                                            @endphp
+                                            @if($ext === 'pdf')
+                                                <button type="button" onclick="openActionFileModal('{{ asset($pathTrimmed) }}', 'pdf')" class="w-16 h-16 flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
+                                                    <i class="fa-solid fa-file-pdf text-xl"></i>
+                                                    <span class="text-[9px] font-bold mt-1">PDF</span>
+                                                </button>
+                                            @else
+                                                <img src="{{ asset($pathTrimmed) }}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition">
+                                            @endif
                                         @endif
                                     @endforeach
                                 </div>
@@ -246,24 +258,24 @@
                         </div>
 
                         <!-- Right Column: Root Cause & Analyzed By -->
-                        <div class="flex flex-col gap-4 justify-between">
+                        <div class="flex flex-col gap-4 justify-start">
                             <!-- Root Cause -->
-                            <div class="flex flex-col gap-1.5 flex-grow">
+                            <div class="flex flex-col gap-1.5">
                                 <div class="flex items-center justify-between">
                                     <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
                                 </div>
-                                <div class="flex items-start gap-2 w-full flex-grow">
-                                    <div class="flex flex-col gap-1.5 flex-grow">
-                                        <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
-                                        @if(!$isReviewing && !empty($action->root_cause_verif))
+                                <div class="flex items-start gap-2 w-full">
+                                    <div class="flex flex-col gap-1.5 w-full">
+                                        <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
+                                        @if(!$isReviewing && !empty($approve->root_cause_verif ?? ''))
                                             <div class="flex">
-                                                @if($action->root_cause_verif === 'approve')
+                                                @if(($approve->root_cause_verif ?? '') === 'approve')
                                                     @if(($car->status ?? '') === 'Need Verification')
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                                     @else
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                                     @endif
-                                                @elseif($action->root_cause_verif === 'reject')
+                                                @elseif(($approve->root_cause_verif ?? '') === 'reject')
                                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark text-red-500"></i> Rejected</span>
                                                 @endif
                                             </div>
@@ -327,22 +339,22 @@
                 <!-- Corrective & Preventive Action Row-by-Row Grid Alignment -->
                 <div class="border-t border-slate-100 pt-6">
                     @php
-                        $isCorrOneApproved = ($action->corrective_action_one_verif ?? '') === 'approve';
+                        $isCorrOneApproved = ($approve->corrective_action_one_verif ?? '') === 'approve';
                         $isCorrOneReadonly = $isComplete || (!$isComplete && $isCorrOneApproved);
                         
-                        $isPrevOneApproved = ($action->preventive_action_one_verif ?? '') === 'approve';
+                        $isPrevOneApproved = ($approve->preventive_action_one_verif ?? '') === 'approve';
                         $isPrevOneReadonly = $isComplete || (!$isComplete && $isPrevOneApproved);
 
-                        $isCorrTwoApproved = ($action->corrective_action_two_verif ?? '') === 'approve';
+                        $isCorrTwoApproved = ($approve->corrective_action_two_verif ?? '') === 'approve';
                         $isCorrTwoReadonly = $isComplete || (!$isComplete && $isCorrTwoApproved);
                         
-                        $isPrevTwoApproved = ($action->preventive_action_two_verif ?? '') === 'approve';
+                        $isPrevTwoApproved = ($approve->preventive_action_two_verif ?? '') === 'approve';
                         $isPrevTwoReadonly = $isComplete || (!$isComplete && $isPrevTwoApproved);
 
-                        $isCorrThreeApproved = ($action->corrective_action_three_verif ?? '') === 'approve';
+                        $isCorrThreeApproved = ($approve->corrective_action_three_verif ?? '') === 'approve';
                         $isCorrThreeReadonly = $isComplete || (!$isComplete && $isCorrThreeApproved);
                         
-                        $isPrevThreeApproved = ($action->preventive_action_three_verif ?? '') === 'approve';
+                        $isPrevThreeApproved = ($approve->preventive_action_three_verif ?? '') === 'approve';
                         $isPrevThreeReadonly = $isComplete || (!$isComplete && $isPrevThreeApproved);
                     @endphp
 
@@ -389,14 +401,14 @@
                                     @endif
                                 </div>
                                 <div id="corr_one_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->corrective_action_one_verif))
-                                        @if($action->corrective_action_one_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->corrective_action_one_verif ?? ''))
+                                        @if(($approve->corrective_action_one_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->corrective_action_one_verif === 'reject')
+                                        @elseif(($approve->corrective_action_one_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark text-red-500"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->corrective_path_one))
@@ -441,14 +453,14 @@
                                     @endif
                                 </div>
                                 <div id="prev_one_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->preventive_action_one_verif))
-                                        @if($action->preventive_action_one_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->preventive_action_one_verif ?? ''))
+                                        @if(($approve->preventive_action_one_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->preventive_action_one_verif === 'reject')
+                                        @elseif(($approve->preventive_action_one_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->preventive_path_one))
@@ -496,14 +508,14 @@
                                     @endif
                                 </div>
                                 <div id="corr_two_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->corrective_action_two_verif))
-                                        @if($action->corrective_action_two_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->corrective_action_two_verif ?? ''))
+                                        @if(($approve->corrective_action_two_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->corrective_action_two_verif === 'reject')
+                                        @elseif(($approve->corrective_action_two_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->corrective_path_two))
@@ -548,14 +560,14 @@
                                     @endif
                                 </div>
                                 <div id="prev_two_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->preventive_action_two_verif))
-                                        @if($action->preventive_action_two_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->preventive_action_two_verif ?? ''))
+                                        @if(($approve->preventive_action_two_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->preventive_action_two_verif === 'reject')
+                                        @elseif(($approve->preventive_action_two_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->preventive_path_two))
@@ -603,14 +615,14 @@
                                     @endif
                                 </div>
                                 <div id="corr_three_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->corrective_action_three_verif))
-                                        @if($action->corrective_action_three_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->corrective_action_three_verif ?? ''))
+                                        @if(($approve->corrective_action_three_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->corrective_action_three_verif === 'reject')
+                                        @elseif(($approve->corrective_action_three_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->corrective_path_three))
@@ -655,14 +667,14 @@
                                     @endif
                                 </div>
                                 <div id="prev_three_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
-                                    @if(!$isReviewing && !empty($action->preventive_action_three_verif))
-                                        @if($action->preventive_action_three_verif === 'approve')
+                                    @if(!$isReviewing && !empty($approve->preventive_action_three_verif ?? ''))
+                                        @if(($approve->preventive_action_three_verif ?? '') === 'approve')
                                             @if(($car->status ?? '') === 'Need Verification')
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                             @endif
-                                        @elseif($action->preventive_action_three_verif === 'reject')
+                                        @elseif(($approve->preventive_action_three_verif ?? '') === 'reject')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                         @endif
                                         @if($isComplete && !empty($action->preventive_path_three))
@@ -734,7 +746,7 @@
                         <!-- Prepare by -->
                         <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
                             <span class="text-xs font-semibold text-slate-500 tracking-wider">Prepare by</span>
-                            @if(isset($action) && !empty($action->auditee_name))
+                            @if(isset($action) && !empty($action->auditee_name) && $isComplete)
                                 <div class="my-2 select-none">
                                     <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
                                         <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
@@ -761,7 +773,7 @@
                                     </div>
                                 </div>
                                 <div class="text-xs">
-                                    <p class="text-slate-400 font-medium">-</p>
+                                    <p class="text-slate-400 font-medium">{{ $action->auditee_name ?? '-' }}</p>
                                 </div>
                             @endif
                         </div>
@@ -770,7 +782,7 @@
                         <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
                             <span class="text-xs font-semibold text-slate-500 tracking-wider">Checked by</span>
                             @php
-                                $isVerifiedBySuperior = isset($action) && (in_array($action->action_status, ['approve_superior', 'verified']) || !empty($action->superior_approved_at));
+                                $isVerifiedBySuperior = isset($action) && (in_array($action->action_status, ['approve_superior', 'verified']) || !empty($approve->superior_approved_at ?? ''));
                             @endphp
                             @if($isVerifiedBySuperior && !empty($action->auditee_superior_name))
                                 <div class="my-2 select-none">
@@ -786,7 +798,7 @@
                                 <div class="text-xs">
                                     <p class="font-bold text-slate-700">{{ $action->auditee_superior_name }}</p>
                                     <p class="text-slate-400 mt-0.5">
-                                        {{ !empty($action->superior_approved_at) ? \Carbon\Carbon::parse($action->superior_approved_at)->format('d/m/Y') : \Carbon\Carbon::parse($action->updated_at)->format('d/m/Y') }}
+                                        {{ !empty($approve->superior_approved_at ?? '') ? \Carbon\Carbon::parse($approve->superior_approved_at)->format('d/m/Y') : '' }}
                                     </p>
                                 </div>
                             @else
@@ -810,7 +822,7 @@
                         <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
                             <span class="text-xs font-semibold text-slate-500 tracking-wider">Confirm by</span>
                             @php
-                                $isConfirmedByAuditor = isset($action) && ($action->action_status === 'verified' || !empty($action->auditor_approved_at) || ($car->status ?? '') === 'Closed');
+                                $isConfirmedByAuditor = isset($action) && ($action->action_status === 'verified' || !empty($approve->auditor_approved_at ?? '') || ($car->status ?? '') === 'Closed');
                             @endphp
                             @if($isConfirmedByAuditor && !empty($car->auditor))
                                 <div class="my-2 select-none">
@@ -826,7 +838,7 @@
                                 <div class="text-xs">
                                     <p class="font-bold text-slate-700">{{ $car->auditor }}</p>
                                     <p class="text-slate-400 mt-0.5">
-                                        {{ !empty($action->auditor_approved_at) ? \Carbon\Carbon::parse($action->auditor_approved_at)->format('d/m/Y') : \Carbon\Carbon::parse($action->updated_at)->format('d/m/Y') }}
+                                        {{ !empty($approve->auditor_approved_at ?? '') ? \Carbon\Carbon::parse($approve->auditor_approved_at)->format('d/m/Y') : '' }}
                                     </p>
                                 </div>
                             @else
@@ -850,7 +862,7 @@
                         <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
                             <span class="text-xs font-semibold text-slate-500 tracking-wider">Known by</span>
                             @php
-                                $isApprovedByQmr = !empty($car->qmr_approved_at);
+                                $isApprovedByQmr = (!empty($approve) && !empty($approve->qmr_approved_at)) || !empty($car->qmr_approved_at);
                             @endphp
                             @if($isApprovedByQmr)
                                 <div class="my-2 select-none">
@@ -865,7 +877,7 @@
                                 </div>
                                 <div class="text-xs">
                                     <p class="font-bold text-slate-700">{{ $qmrUser->full_name ?? 'PAK ARIF' }}</p>
-                                    <p class="text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($car->qmr_approved_at)->format('d/m/Y') }}</p>
+                                    <p class="text-slate-400 mt-0.5">{{ !empty($approve->qmr_approved_at ?? '') ? \Carbon\Carbon::parse($approve->qmr_approved_at)->format('d/m/Y') : (!empty($car->qmr_approved_at) ? \Carbon\Carbon::parse($car->qmr_approved_at)->format('d/m/Y') : '') }}</p>
                                 </div>
                             @else
                                 <div class="my-2 select-none">

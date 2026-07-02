@@ -218,13 +218,13 @@
                                     </div>
 
                                     <div class="relative group">
-                                        <input type="file" id="gallery_input" multiple accept="image/*"
+                                        <input type="file" id="gallery_input" multiple accept="image/*,application/pdf"
                                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                        <div class="flex flex-row items-center justify-center gap-2 h-[70px] border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 group-hover:bg-slate-50 transition-all text-center px-2">
-                                            <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                                                <i class="fas fa-images text-[14px]"></i>
+                                        <div class="flex flex-row items-center justify-center gap-2 h-[70px] border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/50 group-hover:bg-blue-50 group-hover:border-blue-300 transition-all text-center px-2">
+                                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                                                <i class="fas fa-folder-open text-[14px]"></i>
                                             </div>
-                                            <span class="text-[14px] font-medium text-slate-600 whitespace-nowrap">From Gallery</span>
+                                            <span class="text-[14px] font-medium text-blue-600 whitespace-nowrap">File</span>
                                         </div>
                                     </div>
                                 </div>
@@ -551,15 +551,26 @@
             if (!previewContainer) return;
             previewContainer.innerHTML = '';
 
-            // Render existing photos with red 'x' cancel button
+            // Render existing photos/PDFs with red 'x' cancel button
             existingPhotos.forEach((path, index) => {
                 const wrapper = document.createElement('div');
-                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
+                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group flex items-center justify-center";
                 
-                const img = document.createElement('img');
-                img.src = '/' + path;
-                img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
-                img.onclick = function() { viewPhoto(img.src); };
+                const isPdf = path.toLowerCase().endsWith('.pdf');
+                
+                if (isPdf) {
+                    const pdfDiv = document.createElement('div');
+                    pdfDiv.className = "w-full h-full flex flex-col items-center justify-center rounded-lg cursor-pointer bg-red-50 text-red-500 hover:bg-red-100 transition-colors";
+                    pdfDiv.innerHTML = '<i class="fa-solid fa-file-pdf text-xl"></i><span class="text-[9px] font-bold mt-1">PDF</span>';
+                    pdfDiv.onclick = function() { window.open('/' + path, '_blank'); };
+                    wrapper.appendChild(pdfDiv);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = '/' + path;
+                    img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                    img.onclick = function() { viewPhoto(img.src); };
+                    wrapper.appendChild(img);
+                }
                 
                 const btn = document.createElement('button');
                 btn.type = "button";
@@ -570,22 +581,26 @@
                     removeExistingPhoto(index);
                 };
                 
-                wrapper.appendChild(img);
                 wrapper.appendChild(btn);
                 previewContainer.appendChild(wrapper);
             });
 
             // Render newly uploaded files
             uploadedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group";
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
-                    img.onclick = function() { viewPhoto(e.target.result); };
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative w-16 h-16 bg-slate-100 border border-slate-200 rounded-lg group flex items-center justify-center";
+                
+                const isPdf = file.name.toLowerCase().endsWith('.pdf');
+                
+                if (isPdf) {
+                    const pdfDiv = document.createElement('div');
+                    pdfDiv.className = "w-full h-full flex flex-col items-center justify-center rounded-lg cursor-pointer bg-red-50 text-red-500 hover:bg-red-100 transition-colors";
+                    pdfDiv.innerHTML = '<i class="fa-solid fa-file-pdf text-xl"></i><span class="text-[9px] font-bold mt-1">PDF</span>';
+                    pdfDiv.onclick = function() {
+                        const fileURL = URL.createObjectURL(file);
+                        window.open(fileURL, '_blank');
+                    };
+                    wrapper.appendChild(pdfDiv);
                     
                     const btn = document.createElement('button');
                     btn.type = "button";
@@ -595,12 +610,30 @@
                         evt.stopPropagation();
                         removeNewPhoto(index);
                     };
+                    wrapper.appendChild(btn);
+                    previewContainer.appendChild(wrapper);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
+                        img.onclick = function() { viewPhoto(e.target.result); };
+                        wrapper.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
                     
-                    wrapper.appendChild(img);
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold hover:bg-red-600 transition-colors z-20";
+                    btn.innerHTML = "×";
+                    btn.onclick = function(evt) {
+                        evt.stopPropagation();
+                        removeNewPhoto(index);
+                    };
                     wrapper.appendChild(btn);
                     previewContainer.appendChild(wrapper);
                 }
-                reader.readAsDataURL(file);
             });
         }
 
