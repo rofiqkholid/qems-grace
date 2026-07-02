@@ -1083,7 +1083,7 @@
                 return;
             }
 
-            const role = "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : 'superior' }}";
+            const role = "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : (($car->status ?? '') === 'Closed' ? 'closed' : 'superior') }}";
             if (role === 'auditor') {
                 const fields = [
                     { id: 'corrective_action_one_verif', name: 'Corrective Action 1' },
@@ -1117,7 +1117,7 @@
             payload = {
                 _token: "{{ csrf_token() }}",
                 car_id: {{ $car->id }},
-                role: "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : 'superior' }}",
+                role: "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : (($car->status ?? '') === 'Closed' ? 'closed' : 'superior') }}",
                 notes: document.querySelector('textarea[name="notes"]').value,
                 corrective_action_one_verif: document.getElementById('corrective_action_one_verif')?.value || null,
                 corrective_action_two_verif: document.getElementById('corrective_action_two_verif')?.value || null,
