@@ -1955,6 +1955,8 @@ class InternalAuditController extends Controller
             ->get();
 
         $requirements = DB::table('CsKlausul')
+            ->select('clause_no')
+            ->distinct()
             ->get()
             ->map(function ($r) {
                 return [
@@ -2175,7 +2177,9 @@ class InternalAuditController extends Controller
         $page = $request->post('page', 1);
         $pageSize = 10;
 
-        $query = DB::table('CsKlausul');
+        $query = DB::table('CsKlausul')
+            ->select('clause_no')
+            ->distinct();
 
         if ($search) {
             $query->where('clause_no', 'LIKE', '%' . $search . '%');
@@ -2199,12 +2203,17 @@ class InternalAuditController extends Controller
     public function getClauseTitles(Request $request)
     {
         $search = $request->search;
+        $requirementNo = $request->post('requirement_no') ?? $request->query('requirement_no') ?? $request->requirement_no;
         $page = $request->post('page', 1);
         $pageSize = 10;
 
         $query = DB::table('CsKlausul')
             ->select('clause_title')
             ->distinct();
+
+        if ($requirementNo) {
+            $query->where('clause_no', $requirementNo);
+        }
 
         if ($search) {
             $query->where('clause_title', 'LIKE', '%' . $search . '%');

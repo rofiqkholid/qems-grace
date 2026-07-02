@@ -156,7 +156,10 @@
                             hideLabel="true"
                             apiUrl="{{ route('internal_audit.get_clause_titles') }}"
                             :initialOptions="$clauseTitles->toArray()"
-                            updateEvent="update-car-clause-title" />
+                            updateEvent="update-car-clause-title"
+                            changeEvent="car-clause-changed"
+                            dependencyEvent="car-requirement-changed"
+                            dependencyParam="requirement_no" />
                         <p id="err_clause_title" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
                 </div>
@@ -458,22 +461,23 @@
 
         // Listen to requirement changed event
         window.addEventListener('car-requirement-changed', function(e) {
-            const clauseNo = e.detail.value;
+            const clauseTextarea = document.querySelector('textarea[name="clause_text"]');
+            if (clauseTextarea) {
+                clauseTextarea.value = '';
+                clauseTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
+        // Listen to clause changed event
+        window.addEventListener('car-clause-changed', function(e) {
+            const clauseTitle = e.detail.value;
+            const requirementNo = document.getElementById('car_requirement_no').value;
             const clauses = {!! json_encode(DB::table('CsKlausul')->select('clause_no', 'clause_title', 'clauses')->get()->toArray()) !!};
-            const matchedClause = clauses.find(c => c.clause_no === clauseNo);
-            if (matchedClause) {
-                window.dispatchEvent(new CustomEvent('update-car-clause-title', {
-                    detail: {
-                        id: matchedClause.clause_title,
-                        name: matchedClause.clause_title
-                    }
-                }));
-                const clauseTextarea = document.querySelector('textarea[name="clause_text"]');
-                if (clauseTextarea) {
-                    clauseTextarea.value = matchedClause.clauses || '';
-                    // Trigger input event to fire the draft auto-save
-                    clauseTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+            const matchedClause = clauses.find(c => c.clause_title === clauseTitle && c.clause_no === requirementNo);
+            const clauseTextarea = document.querySelector('textarea[name="clause_text"]');
+            if (clauseTextarea) {
+                clauseTextarea.value = matchedClause ? (matchedClause.clauses || '') : '';
+                clauseTextarea.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
         // Auto-save draft logic
