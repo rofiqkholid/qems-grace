@@ -1955,13 +1955,11 @@ class InternalAuditController extends Controller
             ->get();
 
         $requirements = DB::table('CsKlausul')
-            ->select('clause_no')
-            ->distinct()
             ->get()
             ->map(function ($r) {
                 return [
                     'id' => $r->clause_no,
-                    'name' => $r->clause_no
+                    'name' => $r->clause_no . ' - ' . $r->clause_title
                 ];
             });
 
@@ -2177,12 +2175,13 @@ class InternalAuditController extends Controller
         $page = $request->post('page', 1);
         $pageSize = 10;
 
-        $query = DB::table('CsKlausul')
-            ->select('clause_no')
-            ->distinct();
+        $query = DB::table('CsKlausul');
 
         if ($search) {
-            $query->where('clause_no', 'LIKE', '%' . $search . '%');
+            $query->where(function($q) use ($search) {
+                $q->where('clause_no', 'LIKE', '%' . $search . '%')
+                  ->orWhere('clause_title', 'LIKE', '%' . $search . '%');
+            });
         }
 
         $results = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -2191,7 +2190,7 @@ class InternalAuditController extends Controller
             'items' => collect($results->items())->map(function ($r) {
                 return [
                     'id' => $r->clause_no,
-                    'name' => $r->clause_no
+                    'name' => $r->clause_no . ' - ' . $r->clause_title
                 ];
             })->values(),
             'pagination' => [
