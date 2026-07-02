@@ -728,6 +728,162 @@
                             <input type="text" name="auditee_superior_name" id="auditee_superior_name" value="{{ old('auditee_superior_name', $action->auditee_superior_name ?? '') }}" readonly class="w-full pl-4 pr-8 py-[9px] border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm outline-none truncate" placeholder="Name of Auditee Superior...">
                         </div>
                     </div>
+
+                    <!-- Signature Stamps Status Block -->
+                    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-100 pt-6">
+                        <!-- Prepare by -->
+                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Prepare by</span>
+                            @if(isset($action) && !empty($action->auditee_name))
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-red-500">
+                                            PREPARED
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-bold text-slate-700">{{ $action->auditee_name }}</p>
+                                    <p class="text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($action->created_at)->format('d/m/Y') }}</p>
+                                </div>
+                            @else
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-slate-400">
+                                            PENDING
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="text-slate-400 font-medium">-</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Checked by -->
+                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Checked by</span>
+                            @php
+                                $isVerifiedBySuperior = isset($action) && (in_array($action->action_status, ['approve_superior', 'verified']) || !empty($action->superior_approved_at));
+                            @endphp
+                            @if($isVerifiedBySuperior && !empty($action->auditee_superior_name))
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-red-500">
+                                            CHECKED
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-bold text-slate-700">{{ $action->auditee_superior_name }}</p>
+                                    <p class="text-slate-400 mt-0.5">
+                                        {{ !empty($action->superior_approved_at) ? \Carbon\Carbon::parse($action->superior_approved_at)->format('d/m/Y') : \Carbon\Carbon::parse($action->updated_at)->format('d/m/Y') }}
+                                    </p>
+                                </div>
+                            @else
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-slate-400">
+                                            PENDING
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="text-slate-400 font-medium">{{ $action->auditee_superior_name ?? '-' }}</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Confirm by -->
+                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Confirm by</span>
+                            @php
+                                $isConfirmedByAuditor = isset($action) && ($action->action_status === 'verified' || !empty($action->auditor_approved_at) || ($car->status ?? '') === 'Closed');
+                            @endphp
+                            @if($isConfirmedByAuditor && !empty($car->auditor))
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-red-500">
+                                            CONFIRMED
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-bold text-slate-700">{{ $car->auditor }}</p>
+                                    <p class="text-slate-400 mt-0.5">
+                                        {{ !empty($action->auditor_approved_at) ? \Carbon\Carbon::parse($action->auditor_approved_at)->format('d/m/Y') : \Carbon\Carbon::parse($action->updated_at)->format('d/m/Y') }}
+                                    </p>
+                                </div>
+                            @else
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-slate-400">
+                                            PENDING
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="text-slate-400 font-medium">{{ $car->auditor ?? '-' }}</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Known by -->
+                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Known by</span>
+                            @php
+                                $isApprovedByQmr = !empty($car->qmr_approved_at);
+                            @endphp
+                            @if($isApprovedByQmr)
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-red-500">
+                                            APPROVED
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-bold text-slate-700">{{ $qmrUser->full_name ?? 'PAK ARIF' }}</p>
+                                    <p class="text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($car->qmr_approved_at)->format('d/m/Y') }}</p>
+                                </div>
+                            @else
+                                <div class="my-2 select-none">
+                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
+                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                        </div>
+                                        <div class="px-2 py-0.5 text-slate-400">
+                                            PENDING
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="text-slate-400 font-medium">QMR</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Submit Button / Rollback -->

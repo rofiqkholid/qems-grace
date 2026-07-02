@@ -123,7 +123,12 @@ class InternalAuditController extends Controller
 
             $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
 
-            return view('activity.internal_action_preview', compact('car', 'action'));
+            $qmrUser = null;
+            if ($car && !empty($car->qmr_nik)) {
+                $qmrUser = DB::table('users')->where('username', $car->qmr_nik)->first();
+            }
+
+            return view('activity.internal_action_preview', compact('car', 'action', 'qmrUser'));
         } catch (\Exception $e) {
             return redirect()->route('internal_audit.action_report')->with('error', $e->getMessage());
         }
@@ -1706,6 +1711,12 @@ class InternalAuditController extends Controller
                 'updated_at' => Carbon::now()
             ];
 
+            if ($role === 'superior') {
+                $verifData['superior_approved_at'] = Carbon::now();
+            } elseif ($role === 'auditor') {
+                $verifData['auditor_approved_at'] = Carbon::now();
+            }
+
             if ($request->exists('notes')) {
                 $verifData['notes'] = $request->notes;
             }
@@ -1713,6 +1724,8 @@ class InternalAuditController extends Controller
             if ($hasRejection) {
                 // Return to draft
                 $verifData['action_status'] = 'draft';
+                $verifData['superior_approved_at'] = null;
+                $verifData['auditor_approved_at'] = null;
                 DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
                 
                 DB::table('CsAuditCar')->where('id', $request->car_id)->update([
