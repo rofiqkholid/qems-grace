@@ -151,7 +151,11 @@ class InternalAuditController extends Controller
             ->where('a.status', 'Closed')
             ->count();
 
-        return view('approvals.verifkasi_internal_audit', compact('departments', 'superiorCount', 'auditorCount', 'closedCount'));
+        $allCount = DB::table('CsAuditCar as a')
+            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->count();
+
+        return view('approvals.verifkasi_internal_audit', compact('departments', 'superiorCount', 'auditorCount', 'closedCount', 'allCount'));
     }
 
     public function verificationTable(Request $request)
@@ -217,103 +221,145 @@ class InternalAuditController extends Controller
             "data" => $data->map(function ($item, $key) use ($request) {
                 $start = $request->start ?? 0;
                 
-                $isApproved = !empty($item->qmr_approved_at) || $item->status === 'Closed';
-                
-                $encryptedId = $this->encryptCarId($item->id);
-                $rowNo = $start + $key + 1;
-                $previewBtn = '
-                    <button type="button" title="Preview" class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200 border border-blue-200" id="btn_form_view_doc_' . $rowNo . '" onclick="previewCar(\'' . $encryptedId . '\')">
-                        <span id="svg_form_view_doc_' . $rowNo . '" class="flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-                                <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
-                                <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
-                                <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
-                            </svg>
-                        </span>
-                        <span id="spinner_form_view_doc_' . $rowNo . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
-                    </button>';
+                 $isApproved = !empty($item->qmr_approved_at);
+                 
+                 $encryptedId = $this->encryptCarId($item->id);
+                 $rowNo = $start + $key + 1;
+                 $previewBtn = '
+                     <button type="button" title="Preview" class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200 border border-blue-200" id="btn_form_view_doc_' . $rowNo . '" onclick="previewCar(\'' . $encryptedId . '\')">
+                         <span id="svg_form_view_doc_' . $rowNo . '" class="flex items-center justify-center">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
+                                 <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
+                                 <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
+                                 <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
+                             </svg>
+                         </span>
+                         <span id="spinner_form_view_doc_' . $rowNo . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                     </button>';
+ 
+                  $user = Auth::user();
+                  $canAction = false;
+                  $role = $request->role ?? 'superior';
+  
+                  $effectiveRole = $role;
+                  if ($role === 'all') {
+                      if ($item->status === 'Under Review') {
+                          $effectiveRole = 'superior';
+                      } elseif ($item->status === 'Need Verification') {
+                          $effectiveRole = 'auditor';
+                      } elseif ($item->status === 'Closed') {
+                          $effectiveRole = 'closed';
+                      }
+                  }
 
-                $user = Auth::user();
-                $canAction = false;
-                $role = $request->role ?? 'superior';
-
-                if ($role === 'superior') {
-                    if (!empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0) {
-                        $canAction = true;
-                    }
-                } elseif ($role === 'auditor') {
-                    if (!empty($item->auditor)) {
-                        $auditors = array_map('trim', explode(',', $item->auditor));
-                        foreach ($auditors as $auditorName) {
-                            if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
-                                $canAction = true;
-                                break;
-                            }
-                        }
-                    }
+                  if ($effectiveRole === 'superior') {
+                      if (!empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0) {
+                          $canAction = true;
+                      }
+                  } elseif ($effectiveRole === 'auditor') {
+                      if (!empty($item->auditor)) {
+                          $auditors = array_map('trim', explode(',', $item->auditor));
+                          foreach ($auditors as $auditorName) {
+                              if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                                  $canAction = true;
+                                  break;
+                              }
+                          }
+                      }
+                  } elseif ($effectiveRole === 'closed') {
+                      if ($user->username === '031114-001') {
+                          $canAction = true;
+                      }
+                  }
+  
+                  $isUserAuditor = false;
+                  if ($user->username === '031114-001') {
+                      $isUserAuditor = true;
+                  } elseif (!empty($item->auditor)) {
+                      $auditors = array_map('trim', explode(',', $item->auditor));
+                      foreach ($auditors as $auditorName) {
+                          if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
+                              $isUserAuditor = true;
+                              break;
+                          }
+                      }
+                  }
+  
+                  $isUserSuperior = !empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0;
+  
+                $statusBadge = '';
+                if ($item->status === 'Draft' || $item->action_status === 'draft') {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">Draft (Auditee)</span>';
+                } elseif ($item->status === 'Under Review' || $item->action_status === 'open_verif') {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">Waiting Superior Approval</span>';
+                } elseif ($item->status === 'Need Verification' || $item->action_status === 'approve_superior') {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">Waiting Auditor Approval</span>';
+                } elseif ($item->status === 'Closed' && empty($item->qmr_approved_at)) {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">Waiting QMR Approval</span>';
+                } elseif ($item->status === 'Closed' && !empty($item->qmr_approved_at)) {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">Closed</span>';
+                } else {
+                    $statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">' . ($item->status ?? '-') . '</span>';
                 }
-
-                $isUserAuditor = false;
-                if (!empty($item->auditor)) {
-                    $auditors = array_map('trim', explode(',', $item->auditor));
-                    foreach ($auditors as $auditorName) {
-                        if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
-                            $isUserAuditor = true;
-                            break;
-                        }
-                    }
-                }
-
-                $isUserSuperior = !empty($item->auditee_superior_name) && strcasecmp(trim($user->full_name), trim($item->auditee_superior_name)) === 0;
 
                 $actionBtn = '';
-                if ($isApproved) {
-                    if ($isUserAuditor) {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                                <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
-                                    <i class="fa-solid fa-rotate-left text-sm"></i>
-                                </button>
-                            </div>';
-                    } else {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                            </div>';
-                    }
-                } elseif ($canAction) {
-                    if ($role === 'superior') {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                                <button type="button" onclick="approveCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve">
-                                    <i class="fa-solid fa-check text-sm"></i>
-                                </button>
-                                <button type="button" onclick="rejectCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
-                                    <i class="fa-solid fa-xmark text-sm"></i>
-                                </button>
-                            </div>';
-                    } else {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                            </div>';
-                    }
+                if ($role === 'all') {
+                    $actionBtn = '<div class="flex items-center justify-start gap-2">' . $previewBtn . '</div>';
                 } else {
-                    if ($role === 'auditor' && $isUserSuperior) {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                                <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
-                                    <i class="fa-solid fa-rotate-left text-sm"></i>
-                                </button>
-                            </div>';
+                    if ($isApproved) {
+                        if ($isUserAuditor) {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                    <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
+                                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                                    </button>
+                                </div>';
+                        } else {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                </div>';
+                        }
+                    } elseif ($canAction) {
+                        if ($effectiveRole === 'superior') {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                    <button type="button" onclick="approveCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve">
+                                        <i class="fa-solid fa-check text-sm"></i>
+                                    </button>
+                                    <button type="button" onclick="rejectCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
+                                </div>';
+                        } else {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                    <button type="button" onclick="approveCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:text-green-700 transition-all duration-200" title="Approve & Close">
+                                        <i class="fa-solid fa-check text-sm"></i>
+                                    </button>
+                                    <button type="button" onclick="rejectCarAction(' . $item->id . ', \'' . $effectiveRole . '\')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all duration-200" title="Reject to Draft">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
+                                </div>';
+                        }
                     } else {
-                        $actionBtn = '
-                            <div class="flex items-center justify-start gap-2">
-                                ' . $previewBtn . '
-                            </div>';
+                        if ($effectiveRole === 'auditor' && $isUserSuperior) {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                    <button type="button" onclick="rollbackCarAction(' . $item->id . ')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:text-amber-700 transition-all duration-200" title="Rollback Approval">
+                                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                                    </button>
+                                </div>';
+                        } else {
+                            $actionBtn = '
+                                <div class="flex items-center justify-start gap-2">
+                                    ' . $previewBtn . '
+                                </div>';
+                        }
                     }
                 }
 
@@ -331,6 +377,7 @@ class InternalAuditController extends Controller
                     "auditee" => $item->header_auditee ?? $item->auditee ?? '-',
                     "superior" => $item->auditee_superior_name ?? '-',
                     "action_status" => $item->action_status,
+                    "status_badge" => $statusBadge,
                     "action" => $actionBtn
                 ];
             }),
@@ -348,6 +395,9 @@ class InternalAuditController extends Controller
                 ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
                 ->where('d.action_status', 'verified')
                 ->where('a.status', 'Closed')
+                ->count(),
+            "allCount" => DB::table('CsAuditCar as a')
+                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
                 ->count()
         ];
 
@@ -376,9 +426,9 @@ class InternalAuditController extends Controller
             $carStatus = $car->status ?? 'Under Review';
 
             if ($carStatus === 'Closed') {
-                // Verify that the user is the Auditor
-                $isAuditor = false;
-                if (!empty($car->auditor)) {
+                // Verify that the user is the Auditor or QMR
+                $isAuditor = ($user->username === '031114-001');
+                if (!$isAuditor && !empty($car->auditor)) {
                     $auditors = array_map('trim', explode(',', $car->auditor));
                     foreach ($auditors as $auditorName) {
                         if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
@@ -389,7 +439,7 @@ class InternalAuditController extends Controller
                 }
 
                 if (!$isAuditor) {
-                    return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.']);
+                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.']);
                 }
 
                 DB::table('CsAuditCar')
@@ -475,6 +525,11 @@ class InternalAuditController extends Controller
 
                 if (!$isAuditor) {
                     return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to reject at this stage.']);
+                }
+            } elseif ($carStatus === 'Closed') {
+                // Reject by QMR (031114-001)
+                if ($user->username !== '031114-001') {
+                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) is allowed to reject at this stage.']);
                 }
             } else {
                 return response()->json(['success' => false, 'message' => 'Rejection is not allowed at the current CAR stage (' . $carStatus . ').']);
@@ -743,8 +798,8 @@ class InternalAuditController extends Controller
             $carStatus = $car->status ?? '';
 
             if ($carStatus === 'Closed') {
-                $isAuditor = false;
-                if (!empty($car->auditor)) {
+                $isAuditor = ($user->username === '031114-001');
+                if (!$isAuditor && !empty($car->auditor)) {
                     $auditors = array_map('trim', explode(',', $car->auditor));
                     foreach ($auditors as $auditorName) {
                         if (strcasecmp(trim($user->full_name), $auditorName) === 0) {
@@ -758,10 +813,10 @@ class InternalAuditController extends Controller
                     if ($request->ajax() || $request->wantsJson()) {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.'
+                            'message' => 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.'
                         ]);
                     }
-                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to rollback this closed CAR.');
+                    return redirect()->route('internal_audit.action_report.preview', $id)->with('error', 'Only QMR (031114-001) or designated Auditor is allowed to rollback this closed CAR.');
                 }
             } elseif ($carStatus === 'Under Review') {
                 $isAuditee = false;
@@ -1563,7 +1618,7 @@ class InternalAuditController extends Controller
         $request->validate([
             'car_id' => 'required|integer',
             'role' => 'required|string',
-            'notes' => $request->role === 'auditor' ? 'required|string' : 'nullable|string',
+            'notes' => 'nullable|string',
             'corrective_action_one_verif' => 'nullable|string|in:approve,reject',
             'corrective_action_two_verif' => 'nullable|string|in:approve,reject',
             'corrective_action_three_verif' => 'nullable|string|in:approve,reject',
@@ -1617,6 +1672,11 @@ class InternalAuditController extends Controller
                 if (!$isAuditor) {
                     return response()->json(['success' => false, 'message' => 'Only the designated Auditor (' . ($car->auditor ?? '-') . ') is allowed to verify and close this CAR.']);
                 }
+            } elseif ($role === 'closed') {
+                // Verify the user is QMR (031114-001)
+                if ($user->username !== '031114-001') {
+                    return response()->json(['success' => false, 'message' => 'Only QMR (031114-001) is allowed to perform final verification.']);
+                }
             } else {
                 return response()->json(['success' => false, 'message' => 'Invalid role specified.']);
             }
@@ -1652,21 +1712,32 @@ class InternalAuditController extends Controller
                 return response()->json(['success' => true, 'message' => 'Action Plan rejected and returned to draft due to rejected items.']);
             } else {
                 // All approved / not rejected
-                $verifData['action_status'] = ($role === 'superior') ? 'approve_superior' : 'verified';
-                DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
+                if ($role === 'closed') {
+                    DB::table('CsAuditCar')->where('id', $request->car_id)->update([
+                        'qmr_nik' => $user->username,
+                        'qmr_approved_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ]);
 
-                $targetStatus = ($role === 'superior') ? 'Need Verification' : 'Closed';
-                DB::table('CsAuditCar')->where('id', $request->car_id)->update([
-                    'status' => $targetStatus,
-                    'updated_at' => Carbon::now()
-                ]);
+                    DB::commit();
+                    return response()->json(['success' => true, 'message' => 'CAR final verification completed by QMR.']);
+                } else {
+                    $verifData['action_status'] = ($role === 'superior') ? 'approve_superior' : 'verified';
+                    DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
 
-                DB::commit();
-                
-                $msg = ($role === 'superior') 
-                    ? 'Action Plan approved by Superior. Now waiting for Auditor verification.' 
-                    : 'CAR verified and Closed successfully by Auditor.';
-                return response()->json(['success' => true, 'message' => $msg]);
+                    $targetStatus = ($role === 'superior') ? 'Need Verification' : 'Closed';
+                    DB::table('CsAuditCar')->where('id', $request->car_id)->update([
+                        'status' => $targetStatus,
+                        'updated_at' => Carbon::now()
+                    ]);
+
+                    DB::commit();
+                    
+                    $msg = ($role === 'superior') 
+                        ? 'Action Plan approved by Superior. Now waiting for Auditor verification.' 
+                        : 'CAR verified and Closed successfully by Auditor.';
+                    return response()->json(['success' => true, 'message' => $msg]);
+                }
             }
 
         } catch (\Exception $e) {

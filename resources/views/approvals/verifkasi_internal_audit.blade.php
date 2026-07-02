@@ -30,8 +30,12 @@
                     <span id="count-auditor" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
                 </button>
                 <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    Audit Closed
+                    Verif by QMR
                     <span id="count-closed" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $closedCount ?? 0 }}</span>
+                </button>
+                <button type="button" onclick="setRoleTab('all')" id="tab-all" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
+                    All Data Audit
+                    <span id="count-all" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $allCount ?? 0 }}</span>
                 </button>
             </div>
         </div>
@@ -103,13 +107,14 @@
                     <thead>
                         <tr>
                             <th class="w-[5%] text-center">No</th>
-                            <th class="w-[15%] text-left">Req Number</th>
-                            <th class="w-[12%] text-left">Department</th>
+                            <th class="w-[12%] text-left">Req Number</th>
+                            <th class="w-[10%] text-left">Department</th>
                             <th class="w-[12%] text-left">Finding Category</th>
-                            <th class="w-[15%] text-left">Auditor</th>
-                            <th class="w-[15%] text-left">Auditee</th>
-                            <th class="w-[15%] text-left">Superior</th>
-                            <th class="w-[11%] text-left">Action</th>
+                            <th class="w-[12%] text-left">Auditor</th>
+                            <th class="w-[12%] text-left">Auditee</th>
+                            <th class="w-[12%] text-left">Superior</th>
+                            <th class="w-[15%] text-left">Status</th>
+                            <th class="w-[10%] text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -165,17 +170,12 @@
         sessionStorage.setItem('activeVerificationTab', role);
         
         // Reset all tabs
-        $('#tab-superior, #tab-auditor, #tab-closed').removeClass('border-blue-500 text-blue-600 border-emerald-600 text-emerald-600').addClass('border-transparent text-slate-500 hover:text-slate-800');
-        $('#count-superior, #count-auditor, #count-closed').removeClass('bg-blue-100 text-blue-600 bg-emerald-100 text-emerald-600').addClass('bg-slate-100 text-slate-600');
+        $('#tab-superior, #tab-auditor, #tab-closed, #tab-all').removeClass('border-blue-500 text-blue-600 border-emerald-600 text-emerald-600').addClass('border-transparent text-slate-500 hover:text-slate-800');
+        $('#count-superior, #count-auditor, #count-closed, #count-all').removeClass('bg-blue-100 text-blue-600 bg-emerald-100 text-emerald-600').addClass('bg-slate-100 text-slate-600');
 
-        // Set active tab
-        if (role === 'closed') {
-            $('#tab-closed').removeClass('border-transparent text-slate-500 hover:text-slate-800').addClass('border-emerald-600 text-emerald-600');
-            $('#count-closed').removeClass('bg-slate-100 text-slate-600').addClass('bg-emerald-100 text-emerald-600');
-        } else {
-            $('#tab-' + role).removeClass('border-transparent text-slate-500 hover:text-slate-800').addClass('border-blue-500 text-blue-600');
-            $('#count-' + role).removeClass('bg-slate-100 text-slate-600').addClass('bg-blue-100 text-blue-600');
-        }
+        // Set active tab (always blue)
+        $('#tab-' + role).removeClass('border-transparent text-slate-500 hover:text-slate-800').addClass('border-blue-500 text-blue-600');
+        $('#count-' + role).removeClass('bg-slate-100 text-slate-600').addClass('bg-blue-100 text-blue-600');
 
         // Reload table if initialized
         if ($.fn.DataTable.isDataTable('#findingsTable')) {
@@ -206,6 +206,7 @@
                     $('#count-superior').text(json.superiorCount || 0);
                     $('#count-auditor').text(json.auditorCount || 0);
                     $('#count-closed').text(json.closedCount || 0);
+                    $('#count-all').text(json.allCount || 0);
                     return json.data;
                 }
             },
@@ -245,6 +246,11 @@
                 {
                     data: 'superior',
                     className: 'text-slate-700',
+                },
+                {
+                    data: 'status_badge',
+                    orderable: false,
+                    className: 'text-left',
                 },
                 {
                     data: 'action',
@@ -316,13 +322,16 @@
         window.location.href = "{{ route('internal_audit.action_report.preview', '') }}/" + encryptedId;
     }
 
-    function approveCarAction(id) {
+    let approvalRole = '';
+
+    function approveCarAction(id, role) {
         currentAction = 'approve';
         currentCarId = id;
+        approvalRole = role || currentRole;
 
         const modal = document.getElementById('confirmationModal');
         modal.querySelector('#modalTitle').innerText = 'Verify & Approve CAR';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify and sign off this External Audit CAR as QMR?<br>This will lock the action plan and mark it as Closed.';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to verify and sign off this CAR?<br>This will lock the action plan and mark it as approved.';
 
         const iconContainer = modal.querySelector('#modalIcon');
         iconContainer.className = 'w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5';
@@ -341,7 +350,7 @@
 
         const modal = document.getElementById('confirmationModal');
         modal.querySelector('#modalTitle').innerText = 'Rollback CAR Approval';
-        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback the QMR approval for this CAR?<br>This will change the status back to Under Review.';
+        modal.querySelector('#modalMessage').innerHTML = 'Are you sure you want to rollback the approval for this CAR?<br>This will change the status back to Under Review.';
 
         const iconContainer = modal.querySelector('#modalIcon');
         iconContainer.className = 'w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5';
@@ -354,9 +363,10 @@
         modal.classList.remove('hidden');
     }
 
-    function rejectCarAction(id) {
+    function rejectCarAction(id, role) {
         currentAction = 'reject';
         currentCarId = id;
+        approvalRole = role || currentRole;
 
         const modal = document.getElementById('confirmationModal');
         modal.querySelector('#modalTitle').innerText = 'Reject & Rollback CAR';
@@ -395,7 +405,7 @@
             payload = {
                 _token: "{{ csrf_token() }}",
                 car_id: currentCarId,
-                role: currentRole
+                role: approvalRole
             };
         } else if (currentAction === 'rollback') {
             url = "{{ route('internal_audit.cars.rollback') }}";

@@ -264,10 +264,14 @@
                             }
                         }
 
+                        $isQmr = Auth::user()->username === '031114-001';
+
                         $isReviewing = false;
                         if ($isSuperiorUser && ($car->status ?? '') === 'Under Review') {
                             $isReviewing = true;
                         } elseif ($isAuditorUser && ($car->status ?? '') === 'Need Verification') {
+                            $isReviewing = true;
+                        } elseif ($isQmr && ($car->status ?? '') === 'Closed' && empty($car->qmr_approved_at)) {
                             $isReviewing = true;
                         }
 
@@ -645,11 +649,13 @@
                                     }
                                 }
                             }
+                            $isQmr = Auth::user()->username === '031114-001';
                             // Notes is editable only if:
                             // 1. Action is completed (i.e. status is no longer Draft)
-                            // 2. CAR status is 'Need Verification' (meaning superior has already verified it)
-                            // 3. Current logged-in user is the Auditor
-                            $isNotesEditable = $isComplete && (($car->status ?? '') === 'Need Verification') && $isAuditorUser;
+                            // 2. CAR status is 'Need Verification' (meaning superior has already verified it) and user is Auditor
+                            // 3. CAR status is 'Closed' (waiting for final verif) and user is QMR
+                            $isNotesEditable = ($isComplete && (($car->status ?? '') === 'Need Verification') && $isAuditorUser)
+                                || ($isComplete && (($car->status ?? '') === 'Closed' && empty($car->qmr_approved_at)) && $isQmr);
                         @endphp
                         <!-- Notes for A & B -->
                         <div class="flex flex-col gap-1.5 sm:col-span-2">
@@ -688,6 +694,7 @@
                                     }
                                 }
                             }
+                            $isQmr = Auth::user()->username === '031114-001';
                             $isSuperior = isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0;
                             
                             $showActionButtons = false;
@@ -695,13 +702,17 @@
                                 $showActionButtons = true;
                             } elseif ($isAuditor && ($car->status ?? '') === 'Need Verification') {
                                 $showActionButtons = true;
+                            } elseif ($isQmr && ($car->status ?? '') === 'Closed' && empty($car->qmr_approved_at)) {
+                                $showActionButtons = true;
                             }
                         @endphp
                         @if($showActionButtons)
-                            @if(($car->status ?? '') === 'Need Verification')
-                                <button type="button" id="btnSaveVerification" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
-                                    <i class="fa-solid fa-floppy-disk text-base"></i> Save
-                                </button>
+                            @if(($car->status ?? '') === 'Need Verification' || ($car->status ?? '') === 'Closed')
+                                @if(($car->status ?? '') === 'Need Verification')
+                                    <button type="button" id="btnSaveVerification" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-floppy-disk text-base"></i> Save
+                                    </button>
+                                @endif
                                 <button type="button" id="btnApproveAction" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
                                     <i class="fa-solid fa-check text-base"></i> Approve & Close
                                 </button>
@@ -710,7 +721,7 @@
                                     <i class="fa-solid fa-check text-base"></i> Approve
                                 </button>
                             @endif
-                            @if(($car->status ?? '') === 'Under Review')
+                            @if(($car->status ?? '') === 'Under Review' || ($car->status ?? '') === 'Closed')
                                 <button type="button" id="btnRejectAction" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
                                     <i class="fa-solid fa-xmark text-base"></i> Reject
                                 </button>
@@ -718,7 +729,7 @@
                         @endif
                         @php
                             $showRollback = false;
-                            if (($car->status ?? '') === 'Closed' && $isAuditor) {
+                            if (($car->status ?? '') === 'Closed' && !empty($car->qmr_approved_at) && ($isAuditor || $isQmr)) {
                                 $showRollback = true;
                             }
                         @endphp
