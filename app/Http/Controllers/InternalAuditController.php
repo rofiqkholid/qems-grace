@@ -1959,7 +1959,7 @@ class InternalAuditController extends Controller
             ->map(function ($r) {
                 return [
                     'id' => $r->clause_no,
-                    'name' => $r->clause_no . ' - ' . $r->clause_title
+                    'name' => $r->clause_no
                 ];
             });
 
@@ -2178,10 +2178,7 @@ class InternalAuditController extends Controller
         $query = DB::table('CsKlausul');
 
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('clause_no', 'LIKE', '%' . $search . '%')
-                  ->orWhere('clause_title', 'LIKE', '%' . $search . '%');
-            });
+            $query->where('clause_no', 'LIKE', '%' . $search . '%');
         }
 
         $results = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -2190,7 +2187,7 @@ class InternalAuditController extends Controller
             'items' => collect($results->items())->map(function ($r) {
                 return [
                     'id' => $r->clause_no,
-                    'name' => $r->clause_no . ' - ' . $r->clause_title
+                    'name' => $r->clause_no
                 ];
             })->values(),
             'pagination' => [
