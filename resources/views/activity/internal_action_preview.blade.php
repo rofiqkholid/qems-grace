@@ -185,19 +185,59 @@
         <!-- Action Plan Form Card -->
         <form id="actionPlanForm" action="{{ route('internal_audit.action_report.save_action', request()->route('id')) }}" method="POST" enctype="multipart/form-data" class="mt-6">
             @csrf
-            @php $isComplete = isset($action) && in_array($action->action_status, ['open_verif', 'approve_superior', 'verified']); @endphp
+            @php 
+                $isComplete = isset($action) && in_array($action->action_status, ['open_verif', 'approve_superior', 'verified']); 
+                
+                $isSuperiorUser = isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0;
+                
+                $isAuditorUser = false;
+                if (!empty($car->auditor)) {
+                    $auditors = array_map('trim', explode(',', $car->auditor));
+                    foreach ($auditors as $auditorName) {
+                        if (strcasecmp(Auth::user()->full_name, $auditorName) === 0) {
+                            $isAuditorUser = true;
+                            break;
+                        }
+                    }
+                }
+
+                $isQmr = Auth::user()->username === '031114-001';
+
+                $isReviewing = false;
+                if ($isSuperiorUser && ($car->status ?? '') === 'Under Review') {
+                    $isReviewing = true;
+                } elseif ($isAuditorUser && ($car->status ?? '') === 'Need Verification') {
+                    $isReviewing = true;
+                } elseif ($isQmr && ($car->status ?? '') === 'Closed' && empty($car->qmr_approved_at)) {
+                    $isReviewing = true;
+                }
+
+                $isAuditorReviewing = $isAuditorUser && ($car->status ?? '') === 'Need Verification';
+            @endphp
             <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-8 space-y-8">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800 mb-5 pb-2 border-b border-slate-100">
                         Action Plan & Analysis
                     </h2>
                     
-                    <div class="space-y-6">
-                        <!-- Row 1: Why 1 & Why 5 -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left Column: Why 1 to Why 5 -->
+                        <div class="flex flex-col gap-4">
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 1 <span class="text-red-500">*</span></label>
                                 <textarea name="why_one" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 1...">{{ old('why_one', $action->why_one ?? '') }}</textarea>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 2 <span class="text-red-500">*</span></label>
+                                <textarea name="why_two" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 2...">{{ old('why_two', $action->why_two ?? '') }}</textarea>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 3 <span class="text-red-500">*</span></label>
+                                <textarea name="why_three" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 3...">{{ old('why_three', $action->why_three ?? '') }}</textarea>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 4</label>
+                                <textarea name="why_four" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 5</label>
@@ -205,32 +245,61 @@
                             </div>
                         </div>
 
-                        <!-- Row 2: Why 2 & 3 (Left) and Root Cause (Right) -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Left: Why 2 & Why 3 stacked -->
-                            <div class="space-y-4 flex flex-col justify-between">
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 2 <span class="text-red-500">*</span></label>
-                                    <textarea name="why_two" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 2...">{{ old('why_two', $action->why_two ?? '') }}</textarea>
+                        <!-- Right Column: Root Cause & Analyzed By -->
+                        <div class="flex flex-col gap-4 justify-between">
+                            <!-- Root Cause -->
+                            <div class="flex flex-col gap-1.5 flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
+                                    @if(!$isComplete)
+                                        <div class="shrink-0">
+                                            <input type="file" id="root_cause_file" name="root_cause_photo[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'root_cause')">
+                                            <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all" title="Take / Upload Photo or PDF">
+                                                <i class="fas fa-camera text-xs"></i> Upload File
+                                            </button>
+                                        </div>
+                                    @elseif(!$isReviewing && !empty($action->root_cause_verif))
+                                        @if($action->root_cause_verif === 'approve')
+                                            @if(($car->status ?? '') === 'Need Verification')
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200"><i class="fa-solid fa-circle-check"></i> Approved by Superior</span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg border border-green-200"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                            @endif
+                                        @elseif($action->root_cause_verif === 'reject')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 rounded-lg border border-red-200"><i class="fa-solid fa-circle-xmark text-red-500"></i> Rejected</span>
+                                        @endif
+                                    @endif
                                 </div>
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 3 <span class="text-red-500">*</span></label>
-                                    <textarea name="why_three" required rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 3...">{{ old('why_three', $action->why_three ?? '') }}</textarea>
+                                <div class="flex items-start gap-2 w-full flex-grow">
+                                    <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
+                                    @if($isAuditorReviewing)
+                                        <input type="hidden" name="root_cause_verif" id="root_cause_verif" value="">
+                                        <div class="flex flex-col gap-1 shrink-0 ml-2">
+                                            <button type="button" onclick="setFieldVerif('root_cause', 'approve')" id="btn_approve_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve Root Cause">
+                                                <i class="fa-solid fa-check text-xs"></i>
+                                            </button>
+                                            <button type="button" onclick="setFieldVerif('root_cause', 'reject')" id="btn_reject_root_cause" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject Root Cause">
+                                                <i class="fa-solid fa-xmark text-xs"></i>
+                                            </button>
+                                        </div>
+                                    @endif
                                 </div>
+                                
+                                <div id="root_cause_preview" class="flex flex-wrap gap-2 items-center mt-1.5">
+                                    @if($isComplete && !empty($action->root_cause_path))
+                                        @foreach(explode(',', $action->root_cause_path) as $idx => $path)
+                                            @php $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION)); @endphp
+                                            <button type="button" onclick="openActionFileModal('{{ asset(trim($path)) }}', '{{ $ext }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors">
+                                                <i class="fa-solid {{ $ext === 'pdf' ? 'fa-file-pdf text-red-500' : 'fa-image text-blue-500' }}"></i>
+                                                Show File {{ $idx + 1 }}
+                                            </button>
+                                        @endforeach
+                                    @endif
+                                </div>
+                                <input type="hidden" name="existing_root_cause_photo" id="existing_root_cause" value="{{ $action->root_cause_path ?? '' }}">
                             </div>
-                            <!-- Right: Root Cause -->
-                            <div class="flex flex-col gap-1.5 justify-between">
-                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Root Cause <span class="text-red-500">*</span></label>
-                                <textarea name="root_cause" required rows="5" style="min-height: 120px;" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea flex-grow {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Root Cause...">{{ old('root_cause', $action->root_cause ?? '') }}</textarea>
-                            </div>
-                        </div>
 
-                        <!-- Row 3: Why 4 (Left) and Analyzed by (Right) -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-slate-700 font-semibold text-xs tracking-wider">Why 4</label>
-                                <textarea name="why_four" rows="1" {{ $isComplete ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none text-slate-700 resize-none overflow-hidden autogrow-textarea {{ $isComplete ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Enter Why 4 (Optional)...">{{ old('why_four', $action->why_four ?? '') }}</textarea>
-                            </div>
+                            <!-- Analyzed by -->
                             <div class="flex flex-col gap-1.5">
                                 <label class="text-slate-700 font-semibold text-xs tracking-wider">Analized by Auditee Superior <span class="text-red-500">*</span></label>
                                 <x-searchable-select
@@ -251,32 +320,6 @@
                 <!-- Corrective & Preventive Action Row-by-Row Grid Alignment -->
                 <div class="border-t border-slate-100 pt-6">
                     @php
-                        $isSuperiorUser = isset($action) && strcasecmp(Auth::user()->full_name, $action->auditee_superior_name ?? '') === 0;
-                        
-                        $isAuditorUser = false;
-                        if (!empty($car->auditor)) {
-                            $auditors = array_map('trim', explode(',', $car->auditor));
-                            foreach ($auditors as $auditorName) {
-                                if (strcasecmp(Auth::user()->full_name, $auditorName) === 0) {
-                                    $isAuditorUser = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        $isQmr = Auth::user()->username === '031114-001';
-
-                        $isReviewing = false;
-                        if ($isSuperiorUser && ($car->status ?? '') === 'Under Review') {
-                            $isReviewing = true;
-                        } elseif ($isAuditorUser && ($car->status ?? '') === 'Need Verification') {
-                            $isReviewing = true;
-                        } elseif ($isQmr && ($car->status ?? '') === 'Closed' && empty($car->qmr_approved_at)) {
-                            $isReviewing = true;
-                        }
-
-                        $isAuditorReviewing = $isAuditorUser && ($car->status ?? '') === 'Need Verification';
-
                         $isCorrOneApproved = ($action->corrective_action_one_verif ?? '') === 'approve';
                         $isCorrOneReadonly = $isComplete || (!$isComplete && $isCorrOneApproved);
                         
@@ -327,12 +370,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="corrective_action_one_verif" id="corrective_action_one_verif" value="{{ $action->corrective_action_one_verif ?? 'approve' }}">
+                                        <input type="hidden" name="corrective_action_one_verif" id="corrective_action_one_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'approve')" id="btn_approve_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_one_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'approve')" id="btn_approve_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'reject')" id="btn_reject_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_one_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_one', 'reject')" id="btn_reject_corrective_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -379,12 +422,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="preventive_action_one_verif" id="preventive_action_one_verif" value="{{ $action->preventive_action_one_verif ?? 'approve' }}">
+                                        <input type="hidden" name="preventive_action_one_verif" id="preventive_action_one_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'approve')" id="btn_approve_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_one_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'approve')" id="btn_approve_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'reject')" id="btn_reject_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_one_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_one', 'reject')" id="btn_reject_preventive_action_one" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -434,12 +477,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="corrective_action_two_verif" id="corrective_action_two_verif" value="{{ $action->corrective_action_two_verif ?? 'approve' }}">
+                                        <input type="hidden" name="corrective_action_two_verif" id="corrective_action_two_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'approve')" id="btn_approve_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_two_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'approve')" id="btn_approve_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'reject')" id="btn_reject_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_two_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_two', 'reject')" id="btn_reject_corrective_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -486,12 +529,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="preventive_action_two_verif" id="preventive_action_two_verif" value="{{ $action->preventive_action_two_verif ?? 'approve' }}">
+                                        <input type="hidden" name="preventive_action_two_verif" id="preventive_action_two_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'approve')" id="btn_approve_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_two_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'approve')" id="btn_approve_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'reject')" id="btn_reject_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_two_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_two', 'reject')" id="btn_reject_preventive_action_two" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -541,12 +584,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="corrective_action_three_verif" id="corrective_action_three_verif" value="{{ $action->corrective_action_three_verif ?? 'approve' }}">
+                                        <input type="hidden" name="corrective_action_three_verif" id="corrective_action_three_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'approve')" id="btn_approve_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_three_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'approve')" id="btn_approve_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'reject')" id="btn_reject_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->corrective_action_three_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('corrective_action_three', 'reject')" id="btn_reject_corrective_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -593,12 +636,12 @@
                                         </div>
                                     @endif
                                     @if($isAuditorReviewing)
-                                        <input type="hidden" name="preventive_action_three_verif" id="preventive_action_three_verif" value="{{ $action->preventive_action_three_verif ?? 'approve' }}">
+                                        <input type="hidden" name="preventive_action_three_verif" id="preventive_action_three_verif" value="">
                                         <div class="flex items-center gap-1 shrink-0 ml-2">
-                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'approve')" id="btn_approve_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_three_verif ?? 'approve') === 'approve' ? 'bg-green-600 border-green-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Approve this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'approve')" id="btn_approve_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Approve this row">
                                                 <i class="fa-solid fa-check text-xs"></i>
                                             </button>
-                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'reject')" id="btn_reject_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all {{ ($action->preventive_action_three_verif ?? '') === 'reject' ? 'bg-red-600 border-red-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' }}" title="Reject this row">
+                                            <button type="button" onclick="setFieldVerif('preventive_action_three', 'reject')" id="btn_reject_preventive_action_three" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-all bg-white border-slate-200 text-slate-400 hover:bg-slate-50" title="Reject this row">
                                                 <i class="fa-solid fa-xmark text-xs"></i>
                                             </button>
                                         </div>
@@ -876,6 +919,26 @@
                 showToast('Notes for A & B is required.', 'warning');
                 return;
             }
+
+            const role = "{{ ($car->status ?? '') === 'Need Verification' ? 'auditor' : 'superior' }}";
+            if (role === 'auditor') {
+                const fields = [
+                    { id: 'corrective_action_one_verif', name: 'Corrective Action 1' },
+                    { id: 'corrective_action_two_verif', name: 'Corrective Action 2' },
+                    { id: 'corrective_action_three_verif', name: 'Corrective Action 3' },
+                    { id: 'preventive_action_one_verif', name: 'Preventive Action 1' },
+                    { id: 'preventive_action_two_verif', name: 'Preventive Action 2' },
+                    { id: 'preventive_action_three_verif', name: 'Preventive Action 3' },
+                    { id: 'root_cause_verif', name: 'Root Cause' }
+                ];
+                for (const field of fields) {
+                    const el = document.getElementById(field.id);
+                    if (el && (!el.value || el.value.trim() === '')) {
+                        showToast(`Please verify: ${field.name} has not been verified yet.`, 'warning');
+                        return;
+                    }
+                }
+            }
         }
 
         const confirmBtn = document.getElementById('confirmBtn');
@@ -899,6 +962,7 @@
                 preventive_action_one_verif: document.getElementById('preventive_action_one_verif')?.value || null,
                 preventive_action_two_verif: document.getElementById('preventive_action_two_verif')?.value || null,
                 preventive_action_three_verif: document.getElementById('preventive_action_three_verif')?.value || null,
+                root_cause_verif: document.getElementById('root_cause_verif')?.value || null,
             };
         } else if (currentAction === 'reject') {
             url = "{{ route('internal_audit.cars.reject') }}";
@@ -1094,7 +1158,8 @@
             corr_three: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->corrective_path_three ?? ''))) !!} },
             prev_one: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->preventive_path_one ?? ''))) !!} },
             prev_two: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->preventive_path_two ?? ''))) !!} },
-            prev_three: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->preventive_path_three ?? ''))) !!} }
+            prev_three: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->preventive_path_three ?? ''))) !!} },
+            root_cause: { files: [], existing: {!! json_encode(array_filter(explode(',', $action->root_cause_path ?? ''))) !!} }
         };
 
         window.handleActionFiles = function(input, key) {
@@ -1123,7 +1188,8 @@
                     corr_three: 'existing_corr_three',
                     prev_one: 'existing_prev_one',
                     prev_two: 'existing_prev_two',
-                    prev_three: 'existing_prev_three'
+                    prev_three: 'existing_prev_three',
+                    root_cause: 'existing_root_cause'
                 };
                 const hiddenId = hiddenInputMap[key];
                 if (hiddenId) {

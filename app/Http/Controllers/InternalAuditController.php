@@ -622,6 +622,7 @@ class InternalAuditController extends Controller
                   'existing_preventive_photo_one' => 'nullable|string',
                   'existing_preventive_photo_two' => 'nullable|string',
                   'existing_preventive_photo_three' => 'nullable|string',
+                  'existing_root_cause_photo' => 'nullable|string',
              ]);
 
              $fields = [
@@ -631,6 +632,7 @@ class InternalAuditController extends Controller
                  'preventive_path_one' => ['file' => 'preventive_photo_one', 'existing' => 'existing_preventive_photo_one', 'prefix' => 'evidence_prev_one_'],
                  'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_'],
                  'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_'],
+                 'root_cause_path' => ['file' => 'root_cause_photo', 'existing' => 'existing_root_cause_photo', 'prefix' => 'evidence_root_cause_'],
              ];
 
              $existingAction = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
@@ -692,6 +694,7 @@ class InternalAuditController extends Controller
                          'why_four' => $request->why_four,
                          'why_five' => $request->why_five,
                          'root_cause' => $request->root_cause,
+                         'root_cause_path' => $photoPaths['root_cause_path'],
                          'analyzed_by' => $request->analyzed_by,
                          'corrective_action_one' => $request->corrective_action_one,
                          'corrective_action_two' => $request->corrective_action_two,
@@ -1625,6 +1628,7 @@ class InternalAuditController extends Controller
             'preventive_action_one_verif' => 'nullable|string|in:approve,reject',
             'preventive_action_two_verif' => 'nullable|string|in:approve,reject',
             'preventive_action_three_verif' => 'nullable|string|in:approve,reject',
+            'root_cause_verif' => 'nullable|string|in:approve,reject',
         ]);
 
         try {
@@ -1650,7 +1654,8 @@ class InternalAuditController extends Controller
                 || $request->corrective_action_three_verif === 'reject'
                 || $request->preventive_action_one_verif === 'reject'
                 || $request->preventive_action_two_verif === 'reject'
-                || $request->preventive_action_three_verif === 'reject';
+                || $request->preventive_action_three_verif === 'reject'
+                || $request->root_cause_verif === 'reject';
 
             if ($role === 'superior') {
                 if (empty($action->auditee_superior_name) || strcasecmp(trim($user->full_name), trim($action->auditee_superior_name)) !== 0) {
@@ -1691,6 +1696,7 @@ class InternalAuditController extends Controller
                 'preventive_action_one_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_one_verif,
                 'preventive_action_two_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_two_verif,
                 'preventive_action_three_verif' => ($role === 'superior') ? 'approve' : $request->preventive_action_three_verif,
+                'root_cause_verif' => ($role === 'superior') ? 'approve' : $request->root_cause_verif,
                 'updated_at' => Carbon::now()
             ];
 
