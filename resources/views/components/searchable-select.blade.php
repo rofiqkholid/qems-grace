@@ -69,7 +69,7 @@
             // Listen for dependency changes
             @if($dependencyEvent)
             window.addEventListener('{{ $dependencyEvent }}', (e) => {
-                this.dependencyValue = e.detail.{{ $dependencyParam }};
+                this.dependencyValue = (e.detail.{{ $dependencyParam }} !== undefined) ? e.detail.{{ $dependencyParam }} : (e.detail.value || e.detail.id);
                 this.items = [];
                 this.selectedName = '';
                 this.selectedId = '';

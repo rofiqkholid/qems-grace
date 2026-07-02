@@ -142,7 +142,8 @@
                             apiUrl="{{ route('internal_audit.get_requirements') }}"
                             :initialOptions="$requirements->toArray()"
                             updateEvent="update-car-requirement"
-                            changeEvent="car-requirement-changed" />
+                            changeEvent="car-requirement-changed"
+                            dependencyParam="requirement_no" />
                         <p id="err_requirement_no" class="hidden mt-1 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>This field is required</p>
                     </div>
 
