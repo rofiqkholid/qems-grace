@@ -757,7 +757,7 @@
                                     </button>
                                 @endif
                                 <button type="button" id="btnApproveAction" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
-                                    <i class="fa-solid fa-check text-base"></i> Approve & Close
+                                    <i class="fa-solid fa-check text-base"></i> Approve All
                                 </button>
                             @else
                                 <button type="button" id="btnApproveAction" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2">
