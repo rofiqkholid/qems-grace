@@ -256,7 +256,7 @@
                 <div class="px-4 py-3 text-sm text-slate-500 text-center">No {{ strtolower($label) }} found</div>
             </template>
 
-            <template x-for="item in items" :key="item.id">
+            <template x-for="(item, index) in items" :key="index">
                 <div x-show="!search || search === selectedName || item.name.toLowerCase().includes(search.toLowerCase())"
                     @click="select(item)"
                     class="px-4 py-2.5 text-sm cursor-pointer transition-colors hover:bg-slate-50"
