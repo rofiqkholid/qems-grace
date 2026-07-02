@@ -473,7 +473,7 @@
             const clauseTitle = e.detail.id;
             const requirementNo = document.getElementById('car_requirement_no').value;
             const clauses = {!! json_encode(DB::table('CsKlausul')->select('clause_no', 'clause_title', 'clauses')->get()->toArray()) !!};
-            const matchedClause = clauses.find(c => c.clause_title === clauseTitle && c.clause_no === requirementNo);
+            const matchedClause = clauses.find(c => String(c.clause_title || '').trim() === String(clauseTitle || '').trim() && String(c.clause_no || '').trim() === String(requirementNo || '').trim());
             const clauseTextarea = document.querySelector('textarea[name="clause_text"]');
             if (clauseTextarea) {
                 clauseTextarea.value = matchedClause ? (matchedClause.clauses || '') : '';
