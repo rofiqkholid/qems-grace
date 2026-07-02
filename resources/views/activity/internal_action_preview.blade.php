@@ -1064,6 +1064,19 @@
         const btnApprove = document.getElementById('btnApproveAction');
         if (btnApprove) {
             btnApprove.addEventListener('click', function() {
+                // Auto-approve all fields!
+                const fields = [
+                    'corrective_action_one',
+                    'corrective_action_two',
+                    'corrective_action_three',
+                    'preventive_action_one',
+                    'preventive_action_two',
+                    'preventive_action_three',
+                    'root_cause'
+                ];
+                fields.forEach(field => {
+                    setFieldVerif(field, 'approve');
+                });
                 openConfirmationModal('approve');
             });
         }

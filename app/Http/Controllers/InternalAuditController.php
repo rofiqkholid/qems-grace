@@ -446,6 +446,8 @@ class InternalAuditController extends Controller
                     ->where('id', $request->car_id)
                     ->update([
                         'status' => 'Need Verification',
+                        'qmr_nik' => null,
+                        'qmr_approved_at' => null,
                         'updated_at' => Carbon::now()
                     ]);
 
@@ -553,6 +555,8 @@ class InternalAuditController extends Controller
                 ->where('id', $request->car_id)
                 ->update([
                     'status' => 'Draft',
+                    'qmr_nik' => null,
+                    'qmr_approved_at' => null,
                     'updated_at' => Carbon::now()
                 ]);
 
@@ -859,6 +863,8 @@ class InternalAuditController extends Controller
                     ->where('id', $car->id)
                     ->update([
                         'status' => 'Need Verification',
+                        'qmr_nik' => null,
+                        'qmr_approved_at' => null,
                         'updated_at' => Carbon::now()
                     ]);
 
@@ -1711,6 +1717,8 @@ class InternalAuditController extends Controller
                 
                 DB::table('CsAuditCar')->where('id', $request->car_id)->update([
                     'status' => 'Draft',
+                    'qmr_nik' => null,
+                    'qmr_approved_at' => null,
                     'updated_at' => Carbon::now()
                 ]);
 
@@ -1732,10 +1740,15 @@ class InternalAuditController extends Controller
                     DB::table('CsAuditAction')->where('audit_car_id', $request->car_id)->update($verifData);
 
                     $targetStatus = ($role === 'superior') ? 'Need Verification' : 'Closed';
-                    DB::table('CsAuditCar')->where('id', $request->car_id)->update([
+                    $carUpdate = [
                         'status' => $targetStatus,
                         'updated_at' => Carbon::now()
-                    ]);
+                    ];
+                    if ($role === 'auditor') {
+                        $carUpdate['qmr_nik'] = null;
+                        $carUpdate['qmr_approved_at'] = null;
+                    }
+                    DB::table('CsAuditCar')->where('id', $request->car_id)->update($carUpdate);
 
                     DB::commit();
                     
