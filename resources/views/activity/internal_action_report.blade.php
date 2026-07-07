@@ -25,13 +25,13 @@
                     Minor & Mayor
                     <span id="count-car" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $carCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setCategoryTab('OKE')" id="tab-oke" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    OKE
-                    <span id="count-oke" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $okeCount ?? 0 }}</span>
-                </button>
                 <button type="button" onclick="setCategoryTab('OFI')" id="tab-ofi" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
                     OFI
                     <span id="count-ofi" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $ofiCount ?? 0 }}</span>
+                </button>
+                <button type="button" onclick="setCategoryTab('OKE')" id="tab-oke" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
+                    OKE
+                    <span id="count-oke" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $okeCount ?? 0 }}</span>
                 </button>
             </div>
         </div>
@@ -100,15 +100,16 @@
 
             <!-- Table Section -->
             <div class="p-6">
-                <table id="findingsTable" class="qms-table w-full min-w-[1000px]">
+                <table id="findingsTable" class="qms-table w-full min-w-[1000px]" style="table-layout: auto !important;">
                     <thead>
                         <tr>
                             <th class="w-[5%] text-center">No</th>
-                            <th class="w-[15%]">Req Number</th>
-                            <th class="w-[10%]">Department</th>
-                            <th class="w-[10%]">Finding Category</th>
+                            <th class="w-[5%]">Req Number</th>
+                            <th class="w-[6%]">Date</th>
+                            <th class="w-[5%]">Dept</th>
+                            <th class="w-[4%]">Finding Cat.</th>
                             <th class="w-[15%]">Auditor</th>
-                            <th class="w-[35%]">Auditee</th>
+                            <th class="w-[43%]">Auditee</th>
                             <th class="w-[10%]">Action</th>
                         </tr>
                     </thead>
@@ -122,48 +123,6 @@
     </main>
 
     @include('layouts.footer')
-</div>
-
-<!-- Saran Modal -->
-<div id="saranModal" class="fixed inset-0 z-50 hidden">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 transition-opacity" onclick="closeSaranModal()"></div>
-
-    <!-- Modal -->
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-lg transform transition-all shadow-xl">
-            <!-- Header -->
-            <div class="p-6 border-b border-slate-200 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-slate-800">Isi Saran / Note</h3>
-                <button type="button" onclick="closeSaranModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all duration-200 outline-none">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            
-            <!-- Body -->
-            <form id="saranForm" onsubmit="submitSaran(event)">
-                <div class="p-6">
-                    <input type="hidden" id="saranDetailId" name="detail_id">
-                    <div class="mb-4">
-                        <label for="saranText" class="block text-sm font-semibold text-slate-700 mb-2">Saran / Note</label>
-                        <textarea id="saranText" name="note" rows="6" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none resize-none bg-white" placeholder="Masukkan saran atau catatan di sini..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex gap-3 p-6 pt-0 border-t border-slate-100 mt-4">
-                    <button type="button" onclick="closeSaranModal()"
-                        class="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors text-sm">
-                        Batal
-                    </button>
-                    <button type="submit" id="btnSubmitSaran"
-                        class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -227,17 +186,14 @@
             }
         });
         
-        // Update header label text based on persisted tab
-        if (initialTab === 'OKE' || initialTab === 'OFI') {
-            $('#findingsTable thead th').eq(1).text('Note');
-        } else {
-            $('#findingsTable thead th').eq(1).text('Req Number');
-        }
+        // Clear widths on ready
+        $('#findingsTable th, #findingsTable td').css('width', '');
 
         var table = $('#findingsTable').DataTable({
             dom: '<"overflow-x-auto"t>ip',
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: {
                 url: "{{ route('internal_audit.cars') }}",
                 type: 'POST',
@@ -264,10 +220,14 @@
                     className: 'font-base text-slate-900',
                     render: function(data, type, row) {
                         if (row.finding_category === 'OKE' || row.finding_category === 'OK' || row.finding_category === 'OFI') {
-                            return row.note || '-';
+                            return row.note || '';
                         }
-                        return data || '-';
+                        return data || '';
                     }
+                },
+                {
+                    data: 'audit_date',
+                    className: 'text-slate-700'
                 },
                 {
                     data: 'department',
@@ -305,6 +265,20 @@
                     previous: '<i class="fa-solid fa-chevron-left"></i>',
                     next: '<i class="fa-solid fa-chevron-right"></i>'
                 }
+            },
+            drawCallback: function(settings) {
+                // Clear any inline styles that DataTables sets on columns and headers
+                $('#findingsTable th, #findingsTable td').css('width', '');
+                
+                // Re-apply correct width dynamically on headers based on active tab
+                const category = $('#categoryFilter').val() || 'CAR';
+                if (category === 'OKE' || category === 'OFI') {
+                    $('#findingsTable thead th').eq(1).css('width', '35%');
+                    $('#findingsTable thead th').eq(6).css('width', '23%');
+                } else {
+                    $('#findingsTable thead th').eq(1).css('width', '15%');
+                    $('#findingsTable thead th').eq(6).css('width', '43%');
+                }
             }
         });
 
@@ -318,6 +292,19 @@
             $('body').removeClass('data-loading');
             $('#page-loader').addClass('hidden');
         });
+
+        if (initialTab === 'OKE' || initialTab === 'OFI') {
+            table.column(7).visible(false);
+            $('#findingsTable th, #findingsTable td').css('width', '');
+            $('#findingsTable thead th').eq(1).text('Note').css('width', '35%');
+            $('#findingsTable thead th').eq(6).css('width', '23%');
+        } else {
+            table.column(7).visible(true);
+            $('#findingsTable th, #findingsTable td').css('width', '');
+            $('#findingsTable thead th').eq(1).text('Req Number').css('width', '15%');
+            $('#findingsTable thead th').eq(6).css('width', '43%');
+        }
+        table.columns.adjust().draw(false);
 
         // Auto-filter on change
         $('#dateFrom, #dateTo, #deptFilter, #categoryFilter').on('change', function() {
@@ -417,11 +404,16 @@
         $('#categoryFilter').val(category);
         localStorage.setItem('internal_action_report_active_tab', category);
         
-        // Dynamically change table header
+        // Remove all inline widths from headers and cells to allow browser recalculation
+        $('#findingsTable th, #findingsTable td').css('width', '');
+        
+        // Dynamically change table header and widths
         if (category === 'OKE' || category === 'OFI') {
-            $('#findingsTable thead th').eq(1).text('Note');
+            $('#findingsTable thead th').eq(1).text('Note').css('width', '35%');
+            $('#findingsTable thead th').eq(6).css('width', '23%');
         } else {
-            $('#findingsTable thead th').eq(1).text('Req Number');
+            $('#findingsTable thead th').eq(1).text('Req Number').css('width', '15%');
+            $('#findingsTable thead th').eq(6).css('width', '43%');
         }
         
         const tabs = ['CAR', 'OKE', 'OFI'];
@@ -440,55 +432,26 @@
                          .addClass('bg-slate-100 text-slate-600');
             }
         });
-        
-        $('#findingsTable').DataTable().ajax.reload();
-    }
 
-    // Saran modal logic
-    function openSaranModal(detailId, currentNote) {
-        $('#saranDetailId').val(detailId);
-        $('#saranText').val(currentNote);
-        $('#saranModal').removeClass('hidden');
-    }
+        if (category === 'OKE' || category === 'OFI') {
+            $('#findingsTable').DataTable().column(7).visible(false);
+        } else {
+            $('#findingsTable').DataTable().column(7).visible(true);
+        }
 
-    function closeSaranModal() {
-        $('#saranModal').addClass('hidden');
-        $('#saranDetailId').val('');
-        $('#saranText').val('');
-    }
-
-    function submitSaran(e) {
-        e.preventDefault();
-        
-        var detailId = $('#saranDetailId').val();
-        var note = $('#saranText').val();
-
-        $('#btnSubmitSaran').prop('disabled', true).text('Menyimpan...');
-
-        $.ajax({
-            url: "{{ route('internal_audit.detail.save_note') }}",
-            type: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}",
-                detail_id: detailId,
-                note: note
-            },
-            success: function(response) {
-                $('#btnSubmitSaran').prop('disabled', false).text('Simpan');
-                closeSaranModal();
-
-                if (response.success) {
-                    showToast('Saran berhasil disimpan.', 'success');
-                    $('#findingsTable').DataTable().ajax.reload();
-                } else {
-                    showToast(response.message || 'Gagal menyimpan saran.', 'error');
-                }
-            },
-            error: function() {
-                $('#btnSubmitSaran').prop('disabled', false).text('Simpan');
-                showToast('Terjadi kesalahan saat menghubungi server.', 'error');
+        $('#findingsTable').DataTable().ajax.reload(function() {
+            $('#findingsTable th, #findingsTable td').css('width', '');
+            if (category === 'OKE' || category === 'OFI') {
+                $('#findingsTable thead th').eq(1).css('width', '35%');
+                $('#findingsTable thead th').eq(6).css('width', '23%');
+            } else {
+                $('#findingsTable thead th').eq(1).css('width', '15%');
+                $('#findingsTable thead th').eq(6).css('width', '43%');
             }
+            $('#findingsTable').DataTable().columns.adjust();
         });
     }
+
+
 </script>
 @endpush

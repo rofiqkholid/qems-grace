@@ -779,6 +779,7 @@
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
                     d.finding_category = $('#categoryFilter').val();
+                    d.is_dashboard = true;
                 },
                 error: function(xhr, error, code) {
                     console.error('DataTables AJAX error:', error, code);
