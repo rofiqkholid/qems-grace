@@ -76,7 +76,7 @@ class SummaryGenbaController extends Controller
                 $nestedData['date'] = Carbon::parse($post->Date)->format('d M Y');
                 $nestedData['DocNum'] = $post->DocNum;
                 $nestedData['asign_to_dept'] = $post->asign_to_dept;
-                $auditors = array_filter(preg_split('/\s*[,&]\s*/', $post->Auditor));
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', html_entity_decode($post->Auditor ?? '', ENT_QUOTES, 'UTF-8')));
                 $auditorHtml = '<div class="flex flex-wrap gap-1">';
                 foreach ($auditors as $aud) {
                     $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
