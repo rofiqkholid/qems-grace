@@ -20,11 +20,11 @@
             </div>
             <div class="flex-shrink-0 flex items-center gap-3">
                 <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
-                    <i class="fa-solid fa-file-excel"></i>
+                    <i class="fa-solid fa-download"></i>
                     <span>Export to Excel</span>
                 </button>
                 <button type="button" onclick="exportToPdf()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
-                    <i class="fa-solid fa-file-pdf"></i>
+                    <i class="fa-solid fa-download"></i>
                     <span>Export PDF</span>
                 </button>
             </div>
