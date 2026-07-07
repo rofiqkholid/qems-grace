@@ -364,6 +364,16 @@ class InternalAuditController extends Controller
                     }
                 }
 
+                $auditorHtml = '-';
+                if (!empty($item->auditor)) {
+                    $auditors = array_filter(preg_split('/\s*[,&]\s*/', html_entity_decode($item->auditor, ENT_QUOTES, 'UTF-8')));
+                    $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                    foreach ($auditors as $aud) {
+                        $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                    }
+                    $auditorHtml .= '</div>';
+                }
+
                 return [
                     "no" => $start + $key + 1,
                     "id" => $item->id,
@@ -374,7 +384,7 @@ class InternalAuditController extends Controller
                     "clause_title" => $item->clause_title ?? '-',
                     "due_date" => $item->due_date ? \Carbon\Carbon::parse($item->due_date)->format('d M Y') : '-',
                     "finding_category" => $item->finding_category,
-                    "auditor" => $item->auditor ?? '-',
+                    "auditor" => $auditorHtml,
                     "auditee" => $item->header_auditee ?? $item->auditee ?? '-',
                     "superior" => $item->auditee_superior_name ?? '-',
                     "action_status" => $item->action_status,
