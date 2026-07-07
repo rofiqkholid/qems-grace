@@ -29,7 +29,37 @@ class InternalAuditController extends Controller
 
     public function actionReport()
     {
-        return view('activity.internal_action_report');
+        $departments = DB::table('GenbaDept')
+            ->where('CheckBox01', 1)
+            ->get()
+            ->map(function ($item) {
+                return (object)[
+                    'Key1' => $item->Key1,
+                    'Desc' => $item->Desc,
+                    'id' => $item->Key1,
+                    'name' => $item->Desc
+                ];
+            });
+
+        $baseQuery = DB::table('CsAuditCar')
+            ->whereNotNull('department')
+            ->where('department', '<>', '')
+            ->whereNotNull('finding')
+            ->where('finding', '<>', '');
+
+        $carCount = (clone $baseQuery)->whereIn('finding_category', ['Minor', 'Mayor'])->count();
+        
+        $okeCount = DB::table('CsAuditDetail')
+            ->where(function($q) {
+                $q->where('judgment', 'OKE')
+                  ->orWhere('judgment', 'OK');
+            })->count();
+
+        $ofiCount = DB::table('CsAuditDetail')
+            ->where('judgment', 'OFI')
+            ->count();
+
+        return view('activity.internal_action_report', compact('departments', 'carCount', 'okeCount', 'ofiCount'));
     }
 
     public function actionReportPreview($id)
@@ -1384,55 +1414,138 @@ class InternalAuditController extends Controller
 
     public function getCars(Request $request)
     {
-        $query = DB::table('CsAuditCar as a')
-            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-            ->whereNotNull('a.department')
-            ->where('a.department', '<>', '')
-            ->whereNotNull('a.finding')
-            ->where('a.finding', '<>', '')
-            ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee');
+        $category = $request->input('finding_category', 'CAR');
+        $isCarQuery = !in_array($category, ['OKE', 'OK', 'OFI']);
+
+        if ($isCarQuery) {
+            $query = DB::table('CsAuditCar as a')
+                ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                ->whereNotNull('a.department')
+                ->where('a.department', '<>', '')
+                ->whereNotNull('a.finding')
+                ->where('a.finding', '<>', '')
+                ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee', 'b.note');
+
+            if ($category === 'CAR') {
+                $query->whereIn('a.finding_category', ['Minor', 'Mayor']);
+            }
+        } else {
+            $query = DB::table('CsAuditDetail as b')
+                ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                ->leftJoin('CsAuditCar as a', 'a.audit_detail_id', '=', 'b.id')
+                ->select(
+                    'b.id as detail_id',
+                    'b.judgment as finding_category',
+                    'b.note',
+                    'c.auditee_dept as department',
+                    'c.auditor_names as auditor',
+                    'c.auditee as auditee',
+                    'c.hash_id as schedule_hash_id',
+                    'a.req_number',
+                    'a.id as id',
+                    'b.checksheet_item_id'
+                );
+        }
 
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
-            $query->where(function($q) use ($searchValue) {
-                $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
+            $query->where(function($q) use ($searchValue, $isCarQuery) {
+                if ($isCarQuery) {
+                    $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
+                } else {
+                    $q->where('b.note', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('c.auditee_dept', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('c.auditor_names', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('c.auditee', 'LIKE', "%{$searchValue}%")
+                      ->orWhere('b.judgment', 'LIKE', "%{$searchValue}%");
+                }
             });
         }
 
         // Apply filters if any
         if ($request->has('date_from') && !empty($request->date_from)) {
-            $query->whereDate('a.created_at', '>=', $request->date_from);
+            if ($isCarQuery) {
+                $query->whereDate('a.created_at', '>=', $request->date_from);
+            } else {
+                $query->whereDate('b.created_at', '>=', $request->date_from);
+            }
         }
         if ($request->has('date_to') && !empty($request->date_to)) {
-            $query->whereDate('a.created_at', '<=', $request->date_to);
+            if ($isCarQuery) {
+                $query->whereDate('a.created_at', '<=', $request->date_to);
+            } else {
+                $query->whereDate('b.created_at', '<=', $request->date_to);
+            }
         }
         if ($request->has('dept') && !empty($request->dept)) {
-            $query->where('a.department', $request->dept);
+            if ($isCarQuery) {
+                $query->where('a.department', $request->dept);
+            } else {
+                $query->where('c.auditee_dept', $request->dept);
+            }
         }
         if ($request->has('finding_category') && !empty($request->finding_category)) {
-            $query->where('a.finding_category', $request->finding_category);
+            $cat = $request->finding_category;
+            if ($isCarQuery) {
+                if ($cat === 'CAR') {
+                    $query->whereIn('a.finding_category', ['Minor', 'Mayor']);
+                } else {
+                    $query->where('a.finding_category', $cat);
+                }
+            } else {
+                if ($cat === 'OKE' || $cat === 'OK') {
+                    $query->where(function($q) {
+                        $q->where('b.judgment', 'OKE')
+                          ->orWhere('b.judgment', 'OK');
+                    });
+                } else {
+                    $query->where('b.judgment', $cat);
+                }
+            }
         }
 
-        $totalData = DB::table('CsAuditCar')
-            ->whereNotNull('department')
-            ->where('department', '<>', '')
-            ->whereNotNull('finding')
-            ->where('finding', '<>', '')
-            ->count();
+        if ($isCarQuery) {
+            $totalData = DB::table('CsAuditCar')
+                ->whereNotNull('department')
+                ->where('department', '<>', '')
+                ->whereNotNull('finding')
+                ->where('finding', '<>', '')
+                ->whereIn('finding_category', ['Minor', 'Mayor'])
+                ->count();
+        } else {
+            $totalData = DB::table('CsAuditDetail as b')
+                ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                ->where(function($q) use ($category) {
+                    if ($category === 'OKE' || $category === 'OK') {
+                        $q->where('b.judgment', 'OKE')
+                          ->orWhere('b.judgment', 'OK');
+                    } else {
+                        $q->where('b.judgment', $category);
+                    }
+                })
+                ->count();
+        }
         $totalFiltered = $query->count();
 
         $limit = $request->input('length', 10);
         $start = $request->input('start', 0);
         
-        $posts = $query->offset($start)
-            ->limit($limit)
-            ->orderBy('a.created_at', 'desc')
-            ->get();
+        if ($isCarQuery) {
+            $posts = $query->offset($start)
+                ->limit($limit)
+                ->orderBy('a.created_at', 'desc')
+                ->get();
+        } else {
+            $posts = $query->offset($start)
+                ->limit($limit)
+                ->orderBy('b.created_at', 'desc')
+                ->get();
+        }
 
         $data = [];
         $no = $start + 1;
@@ -1440,35 +1553,55 @@ class InternalAuditController extends Controller
         foreach ($posts as $post) {
             $statusBadge = $post->finding_category ?? 'OFI';
 
-            $sys_id = "'" . $this->encryptCarId($post->id) . "'";
+            $action = '-';
+            if ($isCarQuery) {
+                if (isset($post->id)) {
+                    $sys_id = "'" . $this->encryptCarId($post->id) . "'";
 
-            $action = '<div class="flex items-center justify-start gap-2">';
-            $action .= '
-                <button type="button" title="Preview" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_form_view_doc_' . $no . '" onclick="document_preview(' . $sys_id . ',' . $no . ')">
-                    <span id="svg_form_view_doc_' . $no . '" class="flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-                            <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
-                            <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
-                            <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
-                        </svg>
-                    </span>
-                    <span id="spinner_form_view_doc_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
-                </button>';
+                    $action = '<div class="flex items-center justify-start gap-2">';
+                    $action .= '
+                        <button type="button" title="Preview" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_form_view_doc_' . $no . '" onclick="document_preview(' . $sys_id . ',' . $no . ')">
+                            <span id="svg_form_view_doc_' . $no . '" class="flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
+                                    <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
+                                    <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
+                                    <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
+                                </svg>
+                            </span>
+                            <span id="spinner_form_view_doc_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                        </button>';
 
-            if ($hasDeletePermission) {
-                $action .= '
-                    <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" id="btn_f_genba_conform_delete_' . $no . '" onclick="f_genba_conform_delete(' . $sys_id . ',' . $no . ')">
-                        <span id="icon_f_genba_conform_delete_' . $no . '" class="flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none">
-                                <path opacity="0.3" d="M5 9C5 8.44772 5.44772 8 6 8H18C18.5523 8 19 8.44772 19 9V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V9Z" fill="currentColor"/>
-                                <path d="M5 5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V7H5V5Z" fill="currentColor"/>
-                                <path d="M9 4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V4H9V4Z" fill="currentColor"/>
+                    if ($hasDeletePermission) {
+                        $action .= '
+                            <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" id="btn_f_genba_conform_delete_' . $no . '" onclick="f_genba_conform_delete(' . $sys_id . ',' . $no . ')">
+                                <span id="icon_f_genba_conform_delete_' . $no . '" class="flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none">
+                                        <path opacity="0.3" d="M5 9C5 8.44772 5.44772 8 6 8H18C18.5523 8 19 8.44772 19 9V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V9Z" fill="currentColor"/>
+                                        <path d="M5 5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V7H5V5Z" fill="currentColor"/>
+                                        <path d="M9 4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V4H9V4Z" fill="currentColor"/>
+                                    </svg>
+                                </span>
+                                <span id="loader_f_genba_conform_delete_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                            </button>';
+                    }
+                    $action .= '</div>';
+                }
+            } else {
+                $detailId = $post->detail_id;
+                $noteText = $post->note ?? '';
+                $action = '<div class="flex items-center justify-start gap-2">
+                    <button type="button" title="Saran" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200" id="btn_saran_doc_' . $no . '" onclick="openSaranModal(' . $detailId . ', ' . htmlspecialchars(json_encode($noteText), ENT_QUOTES, 'UTF-8') . ')">
+                        <span id="svg_saran_doc_' . $no . '" class="flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
+                                <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
+                                <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path>
+                                <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
                             </svg>
                         </span>
-                        <span id="loader_f_genba_conform_delete_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
-                    </button>';
+                        <span id="spinner_saran_doc_' . $no . '" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                    </button>
+                </div>';
             }
-            $action .= '</div>';
 
             $auditorHtml = '-';
             if (!empty($post->auditor)) {
@@ -1483,13 +1616,14 @@ class InternalAuditController extends Controller
             $data[] = [
                 'no' => $no++,
                 'req_number' => $post->req_number ?? '-',
+                'note' => $post->note ?? '-',
                 'department' => $post->department ?? '-',
                 'finding_category' => $statusBadge,
                 'auditor' => $auditorHtml,
                 'auditee' => $post->header_auditee ?? $post->auditee ?? '-',
                 'action' => $action,
-                'schedule_hash_id' => $post->schedule_hash_id,
-                'checksheet_item_id' => $post->checksheet_item_id
+                'schedule_hash_id' => $post->schedule_hash_id ?? null,
+                'checksheet_item_id' => $post->checksheet_item_id ?? null
             ];
         }
 
@@ -1586,6 +1720,27 @@ class InternalAuditController extends Controller
             return response()->json(['success' => true, 'message' => 'CAR Action Report deleted successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function saveDetailNote(Request $request)
+    {
+        $request->validate([
+            'detail_id' => 'required|integer',
+            'note' => 'nullable|string'
+        ]);
+
+        try {
+            DB::table('CsAuditDetail')
+                ->where('id', $request->detail_id)
+                ->update([
+                    'note' => $request->note,
+                    'updated_at' => Carbon::now()
+                ]);
+
+            return response()->json(['success' => true, 'message' => 'Saran berhasil disimpan.']);
+        } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
