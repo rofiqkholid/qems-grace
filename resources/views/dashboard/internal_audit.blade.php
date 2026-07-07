@@ -60,7 +60,7 @@
                     <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
                         <div class="flex items-center justify-between p-3 rounded-none bg-green-50/50 border border-green-100">
                             <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-none bg-[#00E396] -green-200"></span>
+                                <span class="w-3 h-3 rounded-none bg-[#22c55e] -green-200"></span>
                                 <span class="font-semibold text-slate-700 text-xs">OK</span>
                             </div>
                             <span id="val_ok" class="font-bold text-slate-800 text-xs">...</span>
@@ -361,7 +361,7 @@
                             datasets: [{
                                 data: pieData,
                                 backgroundColor: [
-                                    '#00E396',
+                                    '#22c55e',
                                     '#FEB019',
                                     '#FF4560',
                                     '#008FFB'
@@ -536,7 +536,7 @@
                 datasets: [{
                         label: 'OK',
                         data: okData,
-                        backgroundColor: '#00E396', // Green
+                        backgroundColor: '#22c55e', // Green
                     },
                     {
                         label: 'Minor',
