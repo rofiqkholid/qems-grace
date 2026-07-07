@@ -1037,7 +1037,7 @@ class InternalAuditController extends Controller
                     ->update([
                         'auditee' => $request->agenda_name,
                         'audit_date' => $request->schedule_date,
-                        'auditor_names' => $request->auditor_niks,
+                        'auditor_names' => html_entity_decode($request->auditor_niks ?? '', ENT_QUOTES, 'UTF-8'),
                         'auditee_dept' => $request->auditee_dept,
                         'audit_type' => $request->audit_type,
                         'status' => 'Scheduled',
@@ -1052,7 +1052,7 @@ class InternalAuditController extends Controller
                     'hash_id' => $hash,
                     'auditee' => $request->agenda_name,
                     'audit_date' => $request->schedule_date,
-                    'auditor_names' => $request->auditor_niks,
+                    'auditor_names' => html_entity_decode($request->auditor_niks ?? '', ENT_QUOTES, 'UTF-8'),
                     'auditee_dept' => $request->auditee_dept,
                     'audit_type' => $request->audit_type,
                     'status' => 'Scheduled',
@@ -1079,6 +1079,7 @@ class InternalAuditController extends Controller
 
         $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
         $schedule->auditee_dept_name = $dept ? $dept->Key1 : $schedule->auditee_dept;
+        $schedule->auditor_names = html_entity_decode($schedule->auditor_names ?? '', ENT_QUOTES, 'UTF-8');
 
         // Override id to be hash_id for the form input
         $schedule->id = $schedule->hash_id;
@@ -1097,6 +1098,7 @@ class InternalAuditController extends Controller
         }
 
         // Map column names for compatibility with the conduct view
+        $schedule->auditor_names = html_entity_decode($schedule->auditor_names ?? '', ENT_QUOTES, 'UTF-8');
         $schedule->auditor_niks = $schedule->auditor_names;
         $schedule->schedule_date = $schedule->audit_date;
 
@@ -1882,6 +1884,7 @@ class InternalAuditController extends Controller
     {
         $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
         if (!$schedule) abort(404);
+        $schedule->auditor_names = html_entity_decode($schedule->auditor_names ?? '', ENT_QUOTES, 'UTF-8');
         $schedule->formatted_date = $schedule->audit_date ? Carbon::parse($schedule->audit_date)->format('d M Y') : '-';
 
         $item = DB::table('CsChecksheetItem')->where('id', $item_id)->first();
