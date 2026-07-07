@@ -20,22 +20,22 @@
             </div>
             
             <!-- Selector Tabs -->
-            <div class="flex border-b border-slate-200 md:mr-24">
-                <button type="button" onclick="setRoleTab('superior')" id="tab-superior" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-all duration-200 outline-none flex items-center">
-                    Verif by Superior
-                    <span id="count-superior" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $superiorCount ?? 0 }}</span>
+            <div class="flex w-full md:w-auto border-b border-slate-200 md:mr-24 overflow-hidden">
+                <button type="button" onclick="setRoleTab('superior')" id="tab-superior" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                    <span class="hidden md:inline mr-1">Verif by</span> Superior
+                    <span id="count-superior" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $superiorCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    Verif by Auditor
-                    <span id="count-auditor" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
+                <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                    <span class="hidden md:inline mr-1">Verif by</span> Auditor
+                    <span id="count-auditor" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    Verif by QMR
-                    <span id="count-closed" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $closedCount ?? 0 }}</span>
+                <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                    <span class="hidden md:inline mr-1">Verif by</span> QMR
+                    <span id="count-closed" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $closedCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('all')" id="tab-all" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    All Data Audit
-                    <span id="count-all" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $allCount ?? 0 }}</span>
+                <button type="button" onclick="setRoleTab('all')" id="tab-all" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                    <span class="hidden md:inline">All Data Audit</span><span class="md:hidden">All</span>
+                    <span id="count-all" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $allCount ?? 0 }}</span>
                 </button>
             </div>
         </div>
@@ -43,7 +43,7 @@
         <!-- Main Card -->
         <div class="bg-white rounded-lg border border-slate-200">
             <!-- Filter Section -->
-            <div class="p-6 border-b border-slate-200 bg-slate-50/50">
+            <div class="p-4 md:p-6 border-b border-slate-200 bg-slate-50/50">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
@@ -54,49 +54,57 @@
                         </div>
                     </div>
 
-                    <!-- Date From -->
-                    <div class="w-full lg:w-auto">
-                        <div class="date-input-container w-full lg:w-auto">
-                            <input type="date" id="dateFrom" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
-                                class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
-                            <span class="placeholder-overlay absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">dd/mm/yyyy</span>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
-                                <i class="fa-regular fa-calendar text-sm"></i>
+                    <!-- Dates Container (Side-by-Side on Mobile) -->
+                    <div class="flex flex-row gap-2 w-full lg:w-auto">
+                        <!-- Date From -->
+                        <div class="flex-1 min-w-0 lg:w-auto">
+                            <div class="date-input-container relative w-full lg:w-auto">
+                                <input type="date" id="dateFrom" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
+                                    style="min-width: 0;"
+                                    class="w-full lg:w-[150px] pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
+                                <span class="placeholder-overlay absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-sm pointer-events-none">dd/mm/yyyy</span>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-regular fa-calendar text-sm"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="flex-1 min-w-0 lg:w-auto">
+                            <div class="date-input-container relative w-full lg:w-auto">
+                                <input type="date" id="dateTo" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
+                                    style="min-width: 0;"
+                                    class="w-full lg:w-[150px] pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
+                                <span class="placeholder-overlay absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-sm pointer-events-none">dd/mm/yyyy</span>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-regular fa-calendar text-sm"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Date To -->
-                    <div class="w-full lg:w-auto">
-                        <div class="date-input-container w-full lg:w-auto">
-                            <input type="date" id="dateTo" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
-                                class="w-full lg:w-[150px] pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white">
-                            <span class="placeholder-overlay absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">dd/mm/yyyy</span>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
-                                <i class="fa-regular fa-calendar text-sm"></i>
-                            </div>
+                    <!-- Dept & Reset Container (Side-by-Side on Mobile) -->
+                    <div class="flex flex-row gap-2 w-full lg:w-auto">
+                        <!-- Department Filter -->
+                        <div class="flex-1 lg:w-[200px]">
+                            <x-searchable-select
+                                name="dept"
+                                id="deptFilter"
+                                label="Department"
+                                :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
+                                valueField="name"
+                                hideLabel="true"
+                                placeholder="Select Department..." />
                         </div>
-                    </div>
 
-                    <!-- Department Filter -->
-                    <div class="w-full lg:w-[200px]">
-                        <x-searchable-select
-                            name="dept"
-                            id="deptFilter"
-                            label="Department"
-                            :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
-                            valueField="name"
-                            hideLabel="true"
-                            placeholder="Select Department..." />
-                    </div>
-
-                    <!-- Reset Button -->
-                    <div class="w-full lg:w-auto">
-                        <button type="button" id="btnReset"
-                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
-                            <i class="fa-solid fa-rotate-right text-sm"></i>
-                            Reset
-                        </button>
+                        <!-- Reset Button -->
+                        <div class="flex-1 lg:w-auto">
+                            <button type="button" id="btnReset"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
+                                <i class="fa-solid fa-rotate-right text-sm"></i>
+                                Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
