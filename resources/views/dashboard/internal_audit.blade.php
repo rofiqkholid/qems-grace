@@ -13,9 +13,17 @@
     <!-- Page Content -->
     <main class="flex-1 p-4 lg:p-6">
         <!-- Page Title -->
-        <div class="mb-8">
-            <h1 class="text-xl md:text-2xl font-bold text-slate-800">Internal Audit Dashboard</h1>
-            <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Internal Audit findings and performance in real-time.</p>
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Internal Audit Dashboard</h1>
+                <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Internal Audit findings and performance in real-time.</p>
+            </div>
+            <div class="flex-shrink-0">
+                <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Export to Excel</span>
+                </button>
+            </div>
         </div>
 
         <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
@@ -1030,6 +1038,31 @@
             galleryViewer.destroy();
             galleryViewer = null;
         }
+    }
+
+    function exportToExcel() {
+        const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
+        const dateFrom = $('#dateFrom').val() || '';
+        const dateTo = $('#dateTo').val() || '';
+        const dept = $('#deptFilter').val() || '';
+        const category = $('#categoryFilter').val() || '';
+
+        const url = new URL("{{ route('dashboard.internal_audit.export') }}");
+        if (search) url.searchParams.append('search', search);
+        if (dateFrom) url.searchParams.append('date_from', dateFrom);
+        if (dateTo) url.searchParams.append('date_to', dateTo);
+        if (dept) url.searchParams.append('dept', dept);
+        if (category) url.searchParams.append('finding_category', category);
+
+        // Use a hidden iframe to trigger the download so that the main window's beforeunload event is not fired
+        let iframe = document.getElementById('download-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'download-iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url.toString();
     }
 </script>
 @endpush
