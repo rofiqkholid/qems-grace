@@ -262,8 +262,11 @@
                                 <textarea x-model="noteModalText" 
                                           rows="4" 
                                           class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                          style="max-height: 60vh; overflow-y: auto;"
                                           placeholder="Tulis evidence atau catatan hasil audit (baik nama, nomor dokumen, PIC yang diperiksa dan deskripsi implementasinya)."
-                                          :disabled="isReadOnly"></textarea>
+                                          :disabled="isReadOnly"
+                                          @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
+                                          x-init="$watch('noteModalText', value => { $nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; }) })"></textarea>
                             </div>
                         </div>
                     </div>
