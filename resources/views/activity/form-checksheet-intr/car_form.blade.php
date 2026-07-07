@@ -304,6 +304,8 @@
 </div>
 
 <script>
+    const baseUrl = "{{ asset('') }}";
+
     function autoGrow(element) {
         element.style.height = "auto";
         element.style.height = (element.scrollHeight) + "px";
@@ -567,11 +569,11 @@
                     const pdfDiv = document.createElement('div');
                     pdfDiv.className = "w-full h-full flex flex-col items-center justify-center rounded-lg cursor-pointer bg-red-50 text-red-500 hover:bg-red-100 transition-colors";
                     pdfDiv.innerHTML = '<i class="fa-solid fa-file-pdf text-xl"></i><span class="text-[9px] font-bold mt-1">PDF</span>';
-                    pdfDiv.onclick = function() { window.open('/' + path, '_blank'); };
+                    pdfDiv.onclick = function() { window.open(baseUrl + path, '_blank'); };
                     wrapper.appendChild(pdfDiv);
                 } else {
                     const img = document.createElement('img');
-                    img.src = '/' + path;
+                    img.src = baseUrl + path;
                     img.className = "w-full h-full object-cover rounded-lg cursor-pointer";
                     img.onclick = function() { viewPhoto(img.src); };
                     wrapper.appendChild(img);
