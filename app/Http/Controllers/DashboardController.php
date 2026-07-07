@@ -489,6 +489,14 @@ class DashboardController extends Controller
             $overdue = $openOverdueResults[$dept]->TotalOverdue ?? 0;
             $needApprove = $openOverdueResults[$dept]->TotalNeedApprove ?? 0;
 
+            // Merging legacy combined "PE & TMC" counts into PE and TMC respectively
+            if ($dept === 'PE' || $dept === 'TMC') {
+                $close += $closedResults['PE & TMC']->TotalClose ?? 0;
+                $open += $openOverdueResults['PE & TMC']->TotalOpen ?? 0;
+                $overdue += $openOverdueResults['PE & TMC']->TotalOverdue ?? 0;
+                $needApprove += $openOverdueResults['PE & TMC']->TotalNeedApprove ?? 0;
+            }
+
             $deptName = $dept;
             if ($deptName === 'TS') $deptName = 'Mtc';
 

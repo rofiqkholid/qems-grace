@@ -126,7 +126,11 @@ class GenbaManagement extends Model
         }
 
         if (!empty($dept)) {
-            $result->where('a.asign_to_dept', $dept);
+            if ($dept === 'PE' || $dept === 'TMC') {
+                $result->whereIn('a.asign_to_dept', [$dept, 'PE & TMC']);
+            } else {
+                $result->where('a.asign_to_dept', $dept);
+            }
         }
 
         if (!empty($detail_area)) {
