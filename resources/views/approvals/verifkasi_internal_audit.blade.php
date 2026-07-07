@@ -21,19 +21,19 @@
             
             <!-- Selector Tabs -->
             <div class="flex w-full md:w-auto border-b border-slate-200 md:mr-24 overflow-hidden">
-                <button type="button" onclick="setRoleTab('superior')" id="tab-superior" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                <button type="button" onclick="setRoleTab('superior')" id="tab-superior" class="flex-1 md:flex-none min-w-0 whitespace-nowrap px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
                     <span class="hidden md:inline mr-1">Verif by</span> Superior
                     <span id="count-superior" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $superiorCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                <button type="button" onclick="setRoleTab('auditor')" id="tab-auditor" class="flex-1 md:flex-none min-w-0 whitespace-nowrap px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
                     <span class="hidden md:inline mr-1">Verif by</span> Auditor
                     <span id="count-auditor" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $auditorCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                <button type="button" onclick="setRoleTab('closed')" id="tab-closed" class="flex-1 md:flex-none min-w-0 whitespace-nowrap px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
                     <span class="hidden md:inline mr-1">Verif by</span> QMR
                     <span id="count-closed" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $closedCount ?? 0 }}</span>
                 </button>
-                <button type="button" onclick="setRoleTab('all')" id="tab-all" class="flex-1 min-w-0 px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
+                <button type="button" onclick="setRoleTab('all')" id="tab-all" class="flex-1 md:flex-none min-w-0 whitespace-nowrap px-1 md:px-5 py-2 md:py-2.5 text-[11px] md:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex flex-col md:flex-row items-center justify-center md:justify-start">
                     <span class="hidden md:inline">All Data Audit</span><span class="md:hidden">All</span>
                     <span id="count-all" class="hidden md:inline-flex ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $allCount ?? 0 }}</span>
                 </button>
