@@ -696,111 +696,78 @@ class DashboardController extends Controller
 
         $records = $query->orderBy('a.created_at', 'desc')->get();
 
-        $columns = ['No', 'Req Number', 'Department', 'Finding Category', 'Auditor', 'Auditee', 'Finding', 'Note', 'Action Plan', 'Target Date', 'Status', 'Created At'];
+        $htmlString = view('export.xlxs_export', compact('records'))->render();
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'xlsx');
-        $zip = new \ZipArchive();
-        $zip->open($tempFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Html();
+        $spreadsheet = $reader->loadFromString($htmlString);
 
-        // [Content_Types].xml
-        $contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
-            . '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-            . '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-            . '<Default Extension="xml" ContentType="application/xml"/>'
-            . '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-            . '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-            . '</Types>';
-        $zip->addFromString('[Content_Types].xml', $contentTypes);
-
-        // _rels/.rels
-        $rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
-            . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-            . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
-            . '</Relationships>';
-        $zip->addFromString('_rels/.rels', $rels);
-
-        // xl/workbook.xml
-        $workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
-            . '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-            . '<sheets>'
-            . '<sheet name="Internal Audit Findings" sheetId="1" r:id="rId1"/>'
-            . '</sheets>'
-            . '</workbook>';
-        $zip->addFromString('xl/workbook.xml', $workbook);
-
-        // xl/_rels/workbook.xml.rels
-        $workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
-            . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-            . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-            . '</Relationships>';
-        $zip->addFromString('xl/_rels/workbook.xml.rels', $workbookRels);
-
-        // xl/worksheets/sheet1.xml
-        $sheetData = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
-            . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            . '<sheetData>';
-
-        // Helper to convert index to letter (1 -> A, 2 -> B, etc.)
-        $colLetter = function($n) {
-            $letter = '';
-            while ($n > 0) {
-                $t = ($n - 1) % 26;
-                $letter = chr(65 + $t) . $letter;
-                $n = (int)(($n - $t) / 26);
-            }
-            return $letter;
-        };
-
-        // Write header row
-        $sheetData .= '<row r="1">';
-        $cIdx = 1;
-        foreach ($columns as $headerText) {
-            $ref = $colLetter($cIdx) . '1';
-            $val = htmlspecialchars($headerText, ENT_QUOTES, 'UTF-8');
-            $sheetData .= '<c r="' . $ref . '" t="inlineStr"><is><t>' . $val . '</t></is></c>';
-            $cIdx++;
-        }
-        $sheetData .= '</row>';
-
-        // Write data rows
-        $rIdx = 2;
-        $no = 1;
-        foreach ($records as $row) {
-            $sheetData .= '<row r="' . $rIdx . '">';
-            $rowValues = [
-                $no++,
-                $row->req_number,
-                $row->department,
-                $row->finding_category,
-                $row->auditor,
-                $row->auditee,
-                $row->finding,
-                $row->detail_note,
-                $row->action_plan,
-                $row->due_date,
-                $row->status,
-                $row->created_at
-            ];
-            $cIdx = 1;
-            foreach ($rowValues as $val) {
-                $ref = $colLetter($cIdx) . $rIdx;
-                $valStr = htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8');
-                $sheetData .= '<c r="' . $ref . '" t="inlineStr"><is><t>' . $valStr . '</t></is></c>';
-                $cIdx++;
-            }
-            $sheetData .= '</row>';
-            $rIdx++;
+        // Auto-fit columns
+        $sheet = $spreadsheet->getActiveSheet();
+        foreach ($sheet->getColumnIterator() as $column) {
+            $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
         }
 
-        $sheetData .= '</sheetData></worksheet>';
-        $zip->addFromString('xl/worksheets/sheet1.xml', $sheetData);
-        $zip->close();
-
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $fileName = 'Internal_Audit_Export_' . date('Ymd_His') . '.xlsx';
 
-        return response()->download($tempFile, $fileName, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Cache-Control' => 'max-age=0',
-        ])->deleteFileAfterSend(true);
+        return response()->stream(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Cache-Control' => 'max-age=0',
+            ]
+        );
+    }
+
+    public function internal_audit_print(Request $request)
+    {
+        $query = DB::table('CsAuditCar as a')
+            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->whereNotNull('a.department')
+            ->where('a.department', '<>', '')
+            ->whereNotNull('a.finding')
+            ->where('a.finding', '<>', '')
+            ->select(
+                'a.*', 
+                'b.checksheet_item_id', 
+                'b.note as detail_note', 
+                'c.hash_id as schedule_hash_id', 
+                'c.auditee as header_auditee',
+                'd.corrective_action_one as action_plan'
+            );
+
+        // Apply filters
+        if ($request->has('search') && !empty($request->search)) {
+            $searchValue = $request->search;
+            $query->where(function($q) use ($searchValue) {
+                $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
+            });
+        }
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('a.created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('a.created_at', '<=', $request->date_to);
+        }
+        if ($request->has('dept') && !empty($request->dept)) {
+            $query->where('a.department', $request->dept);
+        }
+        if ($request->has('finding_category') && !empty($request->finding_category)) {
+            $query->where('a.finding_category', $request->finding_category);
+        }
+
+        $records = $query->orderBy('a.created_at', 'desc')->get();
+
+        return view('export.pdf_export', compact('records'));
     }
 }

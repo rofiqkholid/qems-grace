@@ -18,10 +18,14 @@
                 <h1 class="text-xl md:text-2xl font-bold text-slate-800">Internal Audit Dashboard</h1>
                 <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Internal Audit findings and performance in real-time.</p>
             </div>
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 flex items-center gap-3">
                 <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-file-excel"></i>
                     <span>Export to Excel</span>
+                </button>
+                <button type="button" onclick="exportToPdf()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Export PDF</span>
                 </button>
             </div>
         </div>
@@ -1063,6 +1067,24 @@
             document.body.appendChild(iframe);
         }
         iframe.src = url.toString();
+    }
+
+    function exportToPdf() {
+        const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
+        const dateFrom = $('#dateFrom').val() || '';
+        const dateTo = $('#dateTo').val() || '';
+        const dept = $('#deptFilter').val() || '';
+        const category = $('#categoryFilter').val() || '';
+
+        const url = new URL("{{ route('dashboard.internal_audit.print') }}");
+        if (search) url.searchParams.append('search', search);
+        if (dateFrom) url.searchParams.append('date_from', dateFrom);
+        if (dateTo) url.searchParams.append('date_to', dateTo);
+        if (dept) url.searchParams.append('dept', dept);
+        if (category) url.searchParams.append('finding_category', category);
+
+        // Open in new tab so user can see preview and print to PDF
+        window.open(url.toString(), '_blank');
     }
 </script>
 @endpush
