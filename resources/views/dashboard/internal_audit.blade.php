@@ -804,7 +804,10 @@
                 },
                 {
                     data: 'auditor',
-                    className: 'text-slate-700'
+                    className: 'text-slate-700',
+                    render: function(data, type, row) {
+                        return data || '';
+                    }
                 },
                 {
                     data: 'auditee',

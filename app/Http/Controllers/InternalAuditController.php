@@ -1470,12 +1470,22 @@ class InternalAuditController extends Controller
             }
             $action .= '</div>';
 
+            $auditorHtml = '-';
+            if (!empty($post->auditor)) {
+                $auditors = array_filter(preg_split('/\s*[,&]\s*/', html_entity_decode($post->auditor, ENT_QUOTES, 'UTF-8')));
+                $auditorHtml = '<div class="flex flex-wrap gap-1">';
+                foreach ($auditors as $aud) {
+                    $auditorHtml .= '<span class="px-2 py-1 bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 uppercase tracking-tight">' . trim($aud) . '</span>';
+                }
+                $auditorHtml .= '</div>';
+            }
+
             $data[] = [
                 'no' => $no++,
                 'req_number' => $post->req_number ?? '-',
                 'department' => $post->department ?? '-',
                 'finding_category' => $statusBadge,
-                'auditor' => $post->auditor ?? '-',
+                'auditor' => $auditorHtml,
                 'auditee' => $post->header_auditee ?? $post->auditee ?? '-',
                 'action' => $action,
                 'schedule_hash_id' => $post->schedule_hash_id,
