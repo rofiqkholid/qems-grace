@@ -132,7 +132,7 @@
                             name="dept"
                             id="deptFilter"
                             label="Department"
-                            :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
+                            :initialOptions="collect($departments)->filter(fn($d) => $d !== 'PE & TMC')->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
                             updateEvent="updateDeptFilter"
                             hideLabel="true" />
