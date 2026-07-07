@@ -403,37 +403,11 @@ class DashboardController extends Controller
             }
         };
 
-        $departments = [
-            'PUR',
-            'HRGA',
-            'TMF',
-            'SLS',
-            'FA',
-            'NPC',
-            'PPIC',
-            'DPC',
-            'ICT',
-            'STP',
-            'ASSY',
-            'MTC'
-        ];
-
-        $deptFromDb = DB::connection('sqlsrv')
-            ->table('GenbaProcAuditDtl as g')
-            ->join('GenbaProcAudit as b', 'g.genba_id', '=', 'b.SysID')
-            ->whereNotNull('b.Auditor')
-            ->where('b.Auditor', '!=', '')
-            ->where($categoryFilter)
-            ->distinct()
-            ->whereNotNull('g.asign_to_dept')
-            ->where(function ($q) {
-                $q->where('b.IsDelete', '!=', 1)
-                    ->orWhereNull('b.IsDelete');
-            })
-            ->pluck('g.asign_to_dept')
+        $allDepartments = DB::connection('sqlsrv')
+            ->table('GenbaDept')
+            ->where('Checkbox01', 1)
+            ->pluck('Key1')
             ->toArray();
-
-        $allDepartments = array_unique(array_merge($departments, $deptFromDb));
 
 
         $closedResults = DB::connection('sqlsrv')
