@@ -152,7 +152,7 @@
 
             <!-- Section 3: Clause Description & Finding Evidence Details side-by-side -->
             <div class="border-t border-slate-100 pt-6">
-                <div class="grid grid-cols-2 gap-3 sm:gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Clause Description -->
                     <div class="flex flex-col gap-1 sm:gap-1.5">
                         <label class="text-slate-500 text-[10px] sm:text-xs tracking-wider">Clause Description / Klausul</label>
@@ -742,155 +742,155 @@
                     </div>
 
                     <!-- Signature Stamps Status Block -->
-                    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-100 pt-6">
+                    <div class="mt-8 grid grid-cols-4 gap-1.5 sm:gap-4 border-t border-slate-100 pt-6">
                         <!-- Prepare by -->
-                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
-                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Prepare by</span>
+                        <div class="flex flex-col items-center justify-between p-1 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[90px] sm:min-h-[140px]">
+                            <span class="text-[8px] sm:text-xs font-semibold text-slate-500 tracking-wider">Prepare by</span>
                             @if(isset($action) && !empty($action->auditee_name) && $isComplete)
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
-                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-red-500 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-[5px] sm:text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-red-500">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-red-500">
                                             PREPARED
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="font-bold text-slate-700">{{ $action->auditee_name }}</p>
-                                    <p class="text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($action->created_at)->format('d/m/Y') }}</p>
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="font-bold text-slate-700 truncate max-w-[55px] sm:max-w-none" title="{{ $action->auditee_name }}">{{ $action->auditee_name }}</p>
+                                    <p class="text-slate-400 text-[7px] sm:text-[10px] mt-0.5">{{ \Carbon\Carbon::parse($action->created_at)->format('d/m/Y') }}</p>
                                 </div>
                             @else
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
-                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-slate-300 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[5px] sm:text-[11px]"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-slate-400">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-slate-400">
                                             PENDING
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="text-slate-400 font-medium">{{ $action->auditee_name ?? '-' }}</p>
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="text-slate-400 font-medium truncate max-w-[55px] sm:max-w-none">{{ $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '-' }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Checked by -->
-                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
-                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Checked by</span>
+                        <div class="flex flex-col items-center justify-between p-1 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[90px] sm:min-h-[140px]">
+                            <span class="text-[8px] sm:text-xs font-semibold text-slate-500 tracking-wider">Checked by</span>
                             @php
                                 $isVerifiedBySuperior = isset($action) && (in_array($action->action_status, ['approve_superior', 'verified']) || !empty($approve->superior_approved_at ?? ''));
                             @endphp
                             @if($isVerifiedBySuperior && !empty($action->auditee_superior_name))
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
-                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-red-500 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-[5px] sm:text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-red-500">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-red-500">
                                             CHECKED
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="font-bold text-slate-700">{{ $action->auditee_superior_name }}</p>
-                                    <p class="text-slate-400 mt-0.5">
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="font-bold text-slate-700 truncate max-w-[55px] sm:max-w-none" title="{{ $action->auditee_superior_name }}">{{ $action->auditee_superior_name }}</p>
+                                    <p class="text-slate-400 text-[7px] sm:text-[10px] mt-0.5">
                                         {{ !empty($approve->superior_approved_at ?? '') ? \Carbon\Carbon::parse($approve->superior_approved_at)->format('d/m/Y') : '' }}
                                     </p>
                                 </div>
                             @else
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
-                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-slate-300 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[5px] sm:text-[11px]"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-slate-400">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-slate-400">
                                             PENDING
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="text-slate-400 font-medium">{{ $action->auditee_superior_name ?? '-' }}</p>
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="text-slate-400 font-medium truncate max-w-[55px] sm:max-w-none">{{ !empty($action->auditee_superior_name) ? $action->auditee_superior_name : 'Superior' }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Confirm by -->
-                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
-                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Confirm by</span>
+                        <div class="flex flex-col items-center justify-between p-1 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[90px] sm:min-h-[140px]">
+                            <span class="text-[8px] sm:text-xs font-semibold text-slate-500 tracking-wider">Confirm by</span>
                             @php
                                 $isConfirmedByAuditor = isset($action) && ($action->action_status === 'verified' || !empty($approve->auditor_approved_at ?? '') || ($car->status ?? '') === 'Closed');
                             @endphp
                             @if($isConfirmedByAuditor && !empty($car->auditor))
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
-                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-red-500 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-[5px] sm:text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-red-500">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-red-500">
                                             CONFIRMED
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="font-bold text-slate-700">{{ $car->auditor }}</p>
-                                    <p class="text-slate-400 mt-0.5">
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="font-bold text-slate-700 truncate max-w-[55px] sm:max-w-none" title="{{ $car->auditor }}">{{ $car->auditor }}</p>
+                                    <p class="text-slate-400 text-[7px] sm:text-[10px] mt-0.5">
                                         {{ !empty($approve->auditor_approved_at ?? '') ? \Carbon\Carbon::parse($approve->auditor_approved_at)->format('d/m/Y') : '' }}
                                     </p>
                                 </div>
                             @else
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
-                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-slate-300 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[5px] sm:text-[11px]"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-slate-400">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-slate-400">
                                             PENDING
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="text-slate-400 font-medium">{{ $car->auditor ?? '-' }}</p>
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="text-slate-400 font-medium truncate max-w-[55px] sm:max-w-none">{{ $car->auditor ?? '-' }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Known by -->
-                        <div class="flex flex-col items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[140px]">
-                            <span class="text-xs font-semibold text-slate-500 tracking-wider">Known by</span>
+                        <div class="flex flex-col items-center justify-between p-1 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 text-center min-h-[90px] sm:min-h-[140px]">
+                            <span class="text-[8px] sm:text-xs font-semibold text-slate-500 tracking-wider">Known by</span>
                             @php
                                 $isApprovedByQmr = (!empty($approve) && !empty($approve->qmr_approved_at)) || !empty($car->qmr_approved_at);
                             @endphp
                             @if($isApprovedByQmr)
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-red-500 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-red-500 text-red-500">
-                                            <i class="fa-solid fa-check text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-red-500 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-red-500 text-red-500">
+                                            <i class="fa-solid fa-check text-[5px] sm:text-xs" style="-webkit-text-stroke: 0.5px currentColor;"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-red-500">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-red-500">
                                             APPROVED
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
-                                    <p class="font-bold text-slate-700">{{ $qmrUser->full_name ?? 'PAK ARIF' }}</p>
-                                    <p class="text-slate-400 mt-0.5">{{ !empty($approve->qmr_approved_at ?? '') ? \Carbon\Carbon::parse($approve->qmr_approved_at)->format('d/m/Y') : (!empty($car->qmr_approved_at) ? \Carbon\Carbon::parse($car->qmr_approved_at)->format('d/m/Y') : '') }}</p>
+                                <div class="text-[8px] sm:text-xs">
+                                    <p class="font-bold text-slate-700 truncate max-w-[55px] sm:max-w-none" title="{{ $qmrUser->full_name ?? 'PAK ARIF' }}">{{ $qmrUser->full_name ?? 'PAK ARIF' }}</p>
+                                    <p class="text-slate-400 text-[7px] sm:text-[10px] mt-0.5">{{ !empty($approve->qmr_approved_at ?? '') ? \Carbon\Carbon::parse($approve->qmr_approved_at)->format('d/m/Y') : (!empty($car->qmr_approved_at) ? \Carbon\Carbon::parse($car->qmr_approved_at)->format('d/m/Y') : '') }}</p>
                                 </div>
                             @else
-                                <div class="my-2 select-none">
-                                    <div class="inline-flex items-center border-2 border-slate-300 font-bold uppercase tracking-widest text-sm bg-white overflow-hidden">
-                                        <div class="px-2 py-0.5 border-r-2 border-slate-300 text-slate-400">
-                                            <i class="fa-solid fa-clock text-[11px]"></i>
+                                <div class="my-0.5 sm:my-2 select-none">
+                                    <div class="inline-flex items-center border-[0.5px] sm:border-2 border-slate-300 font-bold uppercase tracking-widest text-[6px] sm:text-sm bg-white overflow-hidden">
+                                        <div class="px-0.5 sm:px-2 py-0.5 border-r-[0.5px] sm:border-r-2 border-slate-300 text-slate-400">
+                                            <i class="fa-solid fa-clock text-[5px] sm:text-[11px]"></i>
                                         </div>
-                                        <div class="px-2 py-0.5 text-slate-400">
+                                        <div class="px-0.5 sm:px-2 py-0.5 text-slate-400">
                                             PENDING
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs">
+                                <div class="text-[8px] sm:text-xs">
                                     <p class="text-slate-400 font-medium">QMR</p>
                                 </div>
                             @endif
