@@ -27,6 +27,8 @@ class DashboardController extends Controller
                 $menuId = 102;
             } elseif ($request->is('*dashboard-safety*')) {
                 $menuId = 106;
+            } elseif ($request->is('*dashboard-internal-audit*')) {
+                $menuId = 113;
             }
             
             if (!UserMenuPermission::canView($menuId)) {
@@ -70,6 +72,11 @@ class DashboardController extends Controller
     public function index()
     {
         return view('dashboard.genba_mng');
+    }
+
+    public function internal_audit_index()
+    {
+        return view('dashboard.internal_audit');
     }
 
     public function data_cards(Request $request, $category_id = 'NOT_BIQ')
@@ -572,5 +579,75 @@ class DashboardController extends Controller
     public function safety_chart_all_dept($yearMonth)
     {
         return $this->chart_all_dept($yearMonth, 10);
+    }
+
+    public function internal_audit_data_cards(Request $request)
+    {
+        $yearMonth = $request->input('yearMonth', date('Y-m'));
+        [$year, $month] = explode('-', $yearMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        $query = DB::table('CsAuditDetail as d')
+            ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+            ->whereYear('h.audit_date', $year)
+            ->whereMonth('h.audit_date', $month);
+
+        $okCount = (clone $query)->where('d.judgment', 'OK')->count();
+        $minorCount = (clone $query)->where('d.judgment', 'Minor')->count();
+        $majorCount = (clone $query)->where('d.judgment', 'Mayor')->count();
+        $ofiCount = (clone $query)->where('d.judgment', 'OFI')->count();
+
+        return response()->json([
+            'ok' => $okCount,
+            'minor' => $minorCount,
+            'major' => $majorCount,
+            'ofi' => $ofiCount
+        ]);
+    }
+
+    public function internal_audit_chart_all_dept($yearMonth)
+    {
+        [$year, $month] = explode('-', $yearMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        $departments = DB::table('GenbaDept')
+            ->orderBy('Key1')
+            ->pluck('Key1')
+            ->toArray();
+
+        $data_name_dept = [];
+        $data_total_ok = [];
+        $data_total_minor = [];
+        $data_total_major = [];
+        $data_total_ofi = [];
+
+        foreach ($departments as $dept) {
+            $query = DB::table('CsAuditDetail as d')
+                ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+                ->where('h.auditee_dept', $dept)
+                ->whereYear('h.audit_date', $year)
+                ->whereMonth('h.audit_date', $month);
+
+            $ok = (clone $query)->where('d.judgment', 'OK')->count();
+            $minor = (clone $query)->where('d.judgment', 'Minor')->count();
+            $major = (clone $query)->where('d.judgment', 'Mayor')->count();
+            $ofi = (clone $query)->where('d.judgment', 'OFI')->count();
+
+            $data_name_dept[] = $dept;
+            $data_total_ok[] = $ok;
+            $data_total_minor[] = $minor;
+            $data_total_major[] = $major;
+            $data_total_ofi[] = $ofi;
+        }
+
+        return response()->json([
+            'data_name_dept' => $data_name_dept,
+            'data_total_ok' => $data_total_ok,
+            'data_total_minor' => $data_total_minor,
+            'data_total_major' => $data_total_major,
+            'data_total_ofi' => $data_total_ofi,
+        ]);
     }
 }

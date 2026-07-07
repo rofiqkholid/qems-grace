@@ -98,6 +98,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard-safety/table', [DashboardController::class, 'safety_table'])->name('dashboard.safety.table');
     Route::get('/dashboard-safety/chart-data/{yearMonth}', [DashboardController::class, 'safety_chart_all_dept'])->name('dashboard.safety.chart_data');
 
+    // Internal Audit Dashboard Routes
+    Route::get('/dashboard-internal-audit', [DashboardController::class, 'internal_audit_index'])->name('dashboard.internal_audit');
+    Route::get('/dashboard-internal-audit/data_cards', [DashboardController::class, 'internal_audit_data_cards'])->name('dashboard.internal_audit.data_cards');
+    Route::get('/dashboard-internal-audit/chart-data/{yearMonth}', [DashboardController::class, 'internal_audit_chart_all_dept'])->name('dashboard.internal_audit.chart_data');
+
 
     // Genba Header Routes
     Route::post('/genba_header/table', [GenbaManagementController::class, 'genbaHeaderTable'])->name('genba.header.table');

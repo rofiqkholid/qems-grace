@@ -57,6 +57,7 @@ class Menu extends Model
                         ['menu' => 101, 'children' => []],
                         ['menu' => 102, 'children' => []],
                         ['menu' => 106, 'children' => []],
+                        ['menu' => 113, 'children' => []],
                     ]
                 ],
                 [
