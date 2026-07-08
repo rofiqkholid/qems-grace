@@ -26,12 +26,8 @@
                     <span id="count-car" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">{{ $carCount ?? 0 }}</span>
                 </button>
                 <button type="button" onclick="setCategoryTab('OFI')" id="tab-ofi" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    OFI Suggestion
+                    OFI
                     <span id="count-ofi" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $ofiCount ?? 0 }}</span>
-                </button>
-                <button type="button" onclick="setCategoryTab('OKE')" id="tab-oke" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all duration-200 outline-none flex items-center">
-                    OKE Suggestion
-                    <span id="count-oke" class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $okeCount ?? 0 }}</span>
                 </button>
             </div>
         </div>
