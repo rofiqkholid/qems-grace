@@ -576,8 +576,28 @@ class DashboardController extends Controller
             ->whereMonth('h.audit_date', $month);
 
         $okCount = (clone $query)->where('d.judgment', 'OK')->count();
-        $minorCount = (clone $query)->where('d.judgment', 'Minor')->count();
-        $majorCount = (clone $query)->where('d.judgment', 'Mayor')->count();
+        $minorCount = (clone $query)->where('d.judgment', 'Minor')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('CsAuditCar as car')
+                  ->whereColumn('car.audit_detail_id', 'd.id')
+                  ->whereNotNull('car.finding')
+                  ->where('car.finding', '<>', '')
+                  ->whereNotNull('car.requirement_no')
+                  ->where('car.requirement_no', '<>', '');
+            })
+            ->count();
+        $majorCount = (clone $query)->where('d.judgment', 'Mayor')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('CsAuditCar as car')
+                  ->whereColumn('car.audit_detail_id', 'd.id')
+                  ->whereNotNull('car.finding')
+                  ->where('car.finding', '<>', '')
+                  ->whereNotNull('car.requirement_no')
+                  ->where('car.requirement_no', '<>', '');
+            })
+            ->count();
         $ofiCount = (clone $query)->where('d.judgment', 'OFI')->count();
 
         return response()->json([
@@ -613,8 +633,28 @@ class DashboardController extends Controller
                 ->whereMonth('h.audit_date', $month);
 
             $ok = (clone $query)->where('d.judgment', 'OK')->count();
-            $minor = (clone $query)->where('d.judgment', 'Minor')->count();
-            $major = (clone $query)->where('d.judgment', 'Mayor')->count();
+            $minor = (clone $query)->where('d.judgment', 'Minor')
+                ->whereExists(function ($q) {
+                    $q->select(DB::raw(1))
+                      ->from('CsAuditCar as car')
+                      ->whereColumn('car.audit_detail_id', 'd.id')
+                      ->whereNotNull('car.finding')
+                      ->where('car.finding', '<>', '')
+                      ->whereNotNull('car.requirement_no')
+                      ->where('car.requirement_no', '<>', '');
+                })
+                ->count();
+            $major = (clone $query)->where('d.judgment', 'Mayor')
+                ->whereExists(function ($q) {
+                    $q->select(DB::raw(1))
+                      ->from('CsAuditCar as car')
+                      ->whereColumn('car.audit_detail_id', 'd.id')
+                      ->whereNotNull('car.finding')
+                      ->where('car.finding', '<>', '')
+                      ->whereNotNull('car.requirement_no')
+                      ->where('car.requirement_no', '<>', '');
+                })
+                ->count();
             $ofi = (clone $query)->where('d.judgment', 'OFI')->count();
 
             $data_name_dept[] = $dept;
@@ -639,6 +679,7 @@ class DashboardController extends Controller
             ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
             ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->leftJoin('CsChecksheetItem as e', 'e.id', '=', 'b.checksheet_item_id')
             ->whereNotNull('a.department')
             ->where('a.department', '<>', '')
             ->whereNotNull('a.finding')
@@ -649,7 +690,22 @@ class DashboardController extends Controller
                 'b.note as detail_note', 
                 'c.hash_id as schedule_hash_id', 
                 'c.auditee as header_auditee',
-                'd.corrective_action_one as action_plan'
+                'c.audit_date as audit_date',
+                'c.audit_type as audit_type',
+                'e.scope_item as scope_item',
+                'd.auditee_superior_name as superior_name',
+                'd.corrective_action_one',
+                'd.corrective_action_two',
+                'd.corrective_action_three',
+                'd.preventive_action_one',
+                'd.preventive_action_two',
+                'd.preventive_action_three',
+                'd.corrective_path_one',
+                'd.corrective_path_two',
+                'd.corrective_path_three',
+                'd.preventive_path_one',
+                'd.preventive_path_two',
+                'd.preventive_path_three'
             );
 
         // Apply filters
@@ -678,15 +734,135 @@ class DashboardController extends Controller
 
         $records = $query->orderBy('a.created_at', 'desc')->get();
 
-        $htmlString = view('export.xlxs_export', compact('records'))->render();
+        $templatePath = public_path('tamplate-xlsx/Internal_Audit_Export_Tamplate.xlsx');
+        if (file_exists($templatePath)) {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Set Column B width slightly wider to avoid #### format overflow
+            $sheet->getColumnDimension('B')->setWidth(8);
+            
+            // We want to write data starting from row 11.
+            // Let's copy style of row 11 before writing.
+            $styleB11 = $sheet->getStyle('B11');
+            $styleC11 = $sheet->getStyle('C11');
+            $styleD11 = $sheet->getStyle('D11');
+            $styleE11 = $sheet->getStyle('E11');
+            $styleF11 = $sheet->getStyle('F11');
+            $styleG11 = $sheet->getStyle('G11');
+            $styleH11 = $sheet->getStyle('H11');
+            $styleI11 = $sheet->getStyle('I11');
+            $styleJ11 = $sheet->getStyle('J11');
+            $styleK11 = $sheet->getStyle('K11');
+            $styleL11 = $sheet->getStyle('L11');
+            $styleM11 = $sheet->getStyle('M11');
+            $styleN11 = $sheet->getStyle('N11');
+            $styleO11 = $sheet->getStyle('O11');
+            $styleP11 = $sheet->getStyle('P11');
+            $styleQ11 = $sheet->getStyle('Q11');
+            $styleR11 = $sheet->getStyle('R11');
+            $styleS11 = $sheet->getStyle('S11');
+            
+            $startRow = 11;
+            
+            // Clear row 11 first (just in case)
+            for ($col = 2; $col <= 19; $col++) { // Columns B to S
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $sheet->setCellValue($colLetter . $startRow, null);
+            }
+            
+            $currentRow = $startRow;
+            foreach ($records as $index => $row) {
+                if ($currentRow > $startRow) {
+                    $sheet->insertNewRowBefore($currentRow, 1);
+                }
+                
+                // Duplicate styles
+                $sheet->duplicateStyle($styleB11, 'B' . $currentRow);
+                $sheet->duplicateStyle($styleC11, 'C' . $currentRow);
+                $sheet->duplicateStyle($styleD11, 'D' . $currentRow);
+                $sheet->duplicateStyle($styleE11, 'E' . $currentRow);
+                $sheet->duplicateStyle($styleF11, 'F' . $currentRow);
+                $sheet->duplicateStyle($styleG11, 'G' . $currentRow);
+                $sheet->duplicateStyle($styleH11, 'H' . $currentRow);
+                $sheet->duplicateStyle($styleI11, 'I' . $currentRow);
+                $sheet->duplicateStyle($styleJ11, 'J' . $currentRow);
+                $sheet->duplicateStyle($styleK11, 'K' . $currentRow);
+                $sheet->duplicateStyle($styleL11, 'L' . $currentRow);
+                $sheet->duplicateStyle($styleM11, 'M' . $currentRow);
+                $sheet->duplicateStyle($styleN11, 'N' . $currentRow);
+                $sheet->duplicateStyle($styleO11, 'O' . $currentRow);
+                $sheet->duplicateStyle($styleP11, 'P' . $currentRow);
+                $sheet->duplicateStyle($styleQ11, 'Q' . $currentRow);
+                $sheet->duplicateStyle($styleR11, 'R' . $currentRow);
+                $sheet->duplicateStyle($styleS11, 'S' . $currentRow);
+                
+                // Set alignment wrap and vertical center
+                foreach (range('B', 'S') as $colLetter) {
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                    
+                    // Add borders
+                    $sheet->getStyle($colLetter . $currentRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                }
+                
+                // Format dates
+                $auditDateStr = $row->audit_date ? \Carbon\Carbon::parse($row->audit_date)->format('d M Y') : '-';
+                $dueDateStr = $row->due_date ? \Carbon\Carbon::parse($row->due_date)->format('d M Y') : '-';
+                
+                // Action items formatting
+                $corrective = array_filter([$row->corrective_action_one, $row->corrective_action_two, $row->corrective_action_three]);
+                $preventive = array_filter([$row->preventive_action_one, $row->preventive_action_two, $row->preventive_action_three]);
+                
+                $corrective_str = '';
+                foreach ($corrective as $cIdx => $act) {
+                    $corrective_str .= ($cIdx + 1) . ". " . $act . "\n";
+                }
+                $corrective_str = rtrim($corrective_str);
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Html();
-        $spreadsheet = $reader->loadFromString($htmlString);
-
-        // Auto-fit columns
-        $sheet = $spreadsheet->getActiveSheet();
-        foreach ($sheet->getColumnIterator() as $column) {
-            $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+                $preventive_str = '';
+                foreach ($preventive as $pIdx => $act) {
+                    $preventive_str .= ($pIdx + 1) . ". " . $act . "\n";
+                }
+                $preventive_str = rtrim($preventive_str);
+                
+                // Write values
+                $sheet->setCellValue('B' . $currentRow, $index + 1);
+                $sheet->getStyle('B' . $currentRow)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
+                $sheet->setCellValue('C' . $currentRow, $auditDateStr);
+                $sheet->setCellValue('D' . $currentRow, $row->req_number ?? '-');
+                $sheet->setCellValue('E' . $currentRow, $row->requirement_no ?? '-');
+                $sheet->setCellValue('F' . $currentRow, $row->audit_type ?? '-');
+                $sheet->setCellValue('G' . $currentRow, $row->scope_item ?? '-');
+                $sheet->setCellValue('H' . $currentRow, $row->department ?? '-');
+                $sheet->setCellValue('I' . $currentRow, $row->auditee ?? '-');
+                $sheet->setCellValue('J' . $currentRow, $row->superior_name ?? '-');
+                $sheet->setCellValue('K' . $currentRow, $row->auditor ?? '-');
+                $sheet->setCellValue('L' . $currentRow, $row->finding_category ?? '-');
+                $sheet->setCellValue('M' . $currentRow, $row->finding ?? '-');
+                $sheet->setCellValue('N' . $currentRow, $dueDateStr);
+                $sheet->setCellValue('O' . $currentRow, $row->status ?? '-');
+                $sheet->setCellValue('P' . $currentRow, $corrective_str ?: '-');
+                $sheet->setCellValue('Q' . $currentRow, $dueDateStr);
+                $sheet->setCellValue('R' . $currentRow, $preventive_str ?: '-');
+                $sheet->setCellValue('S' . $currentRow, $dueDateStr);
+                
+                $currentRow++;
+            }
+            
+            // Set row heights for written data rows to fit multi-line values nicely
+            for ($r = $startRow; $r < $currentRow; $r++) {
+                $sheet->getRowDimension($r)->setRowHeight(-1); // Auto height
+            }
+            
+        } else {
+            $htmlString = view('export.xlxs_export', compact('records'))->render();
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Html();
+            $spreadsheet = $reader->loadFromString($htmlString);
+            $sheet = $spreadsheet->getActiveSheet();
+            foreach ($sheet->getColumnIterator() as $column) {
+                $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+            }
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -711,6 +887,7 @@ class DashboardController extends Controller
             ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
             ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
             ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+            ->leftJoin('CsChecksheetItem as e', 'e.id', '=', 'b.checksheet_item_id')
             ->whereNotNull('a.department')
             ->where('a.department', '<>', '')
             ->whereNotNull('a.finding')
@@ -721,7 +898,22 @@ class DashboardController extends Controller
                 'b.note as detail_note', 
                 'c.hash_id as schedule_hash_id', 
                 'c.auditee as header_auditee',
-                'd.corrective_action_one as action_plan'
+                'c.audit_date as audit_date',
+                'c.audit_type as audit_type',
+                'e.scope_item as scope_item',
+                'd.auditee_superior_name as superior_name',
+                'd.corrective_action_one',
+                'd.corrective_action_two',
+                'd.corrective_action_three',
+                'd.preventive_action_one',
+                'd.preventive_action_two',
+                'd.preventive_action_three',
+                'd.corrective_path_one',
+                'd.corrective_path_two',
+                'd.corrective_path_three',
+                'd.preventive_path_one',
+                'd.preventive_path_two',
+                'd.preventive_path_three'
             );
 
         // Apply filters

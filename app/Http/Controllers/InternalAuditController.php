@@ -1425,6 +1425,8 @@ class InternalAuditController extends Controller
                 ->where('a.department', '<>', '')
                 ->whereNotNull('a.finding')
                 ->where('a.finding', '<>', '')
+                ->whereNotNull('a.requirement_no')
+                ->where('a.requirement_no', '<>', '')
                 ->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee', 'b.note', 'c.audit_date');
 
             if ($category === 'CAR') {
