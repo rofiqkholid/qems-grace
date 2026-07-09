@@ -673,6 +673,93 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function internal_audit_chart_closed_dept($yearMonth)
+    {
+        [$year, $month] = explode('-', $yearMonth);
+        $year = (int) $year;
+        $month = (int) $month;
+        $today = Carbon::now()->toDateString();
+
+        $departments = DB::table('GenbaDept')
+            ->orderBy('Key1')
+            ->pluck('Key1')
+            ->toArray();
+
+        $data_name_dept = [];
+        $data_total_minor = [];
+        $data_total_major = [];
+        $data_total_minor_overdue = [];
+        $data_total_major_overdue = [];
+
+        foreach ($departments as $dept) {
+            $minor = DB::table('CsAuditCar as car')
+                ->join('CsAuditDetail as d', 'd.id', '=', 'car.audit_detail_id')
+                ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+                ->where('car.department', $dept)
+                ->where('car.finding_category', 'Minor')
+                ->where('car.status', 'Closed')
+                ->whereYear('h.audit_date', $year)
+                ->whereMonth('h.audit_date', $month)
+                ->count();
+
+            $major = DB::table('CsAuditCar as car')
+                ->join('CsAuditDetail as d', 'd.id', '=', 'car.audit_detail_id')
+                ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+                ->where('car.department', $dept)
+                ->where('car.finding_category', 'Mayor')
+                ->where('car.status', 'Closed')
+                ->whereYear('h.audit_date', $year)
+                ->whereMonth('h.audit_date', $month)
+                ->count();
+
+            $minorOverdue = DB::table('CsAuditCar as car')
+                ->join('CsAuditDetail as d', 'd.id', '=', 'car.audit_detail_id')
+                ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+                ->leftJoin('CsAuditAction as act', 'act.audit_car_id', '=', 'car.id')
+                ->where('car.department', $dept)
+                ->where('car.finding_category', 'Minor')
+                ->where('car.status', '<>', 'Closed')
+                ->whereDate('car.due_date', '<', $today)
+                ->where(function($q) {
+                    $q->whereNull('act.action_status')
+                      ->orWhereNotIn('act.action_status', ['open_verif', 'approve_superior', 'verified']);
+                })
+                ->whereYear('h.audit_date', $year)
+                ->whereMonth('h.audit_date', $month)
+                ->count();
+
+            $majorOverdue = DB::table('CsAuditCar as car')
+                ->join('CsAuditDetail as d', 'd.id', '=', 'car.audit_detail_id')
+                ->join('CsAuditHeader as h', 'h.id', '=', 'd.audit_header_id')
+                ->leftJoin('CsAuditAction as act', 'act.audit_car_id', '=', 'car.id')
+                ->where('car.department', $dept)
+                ->where('car.finding_category', 'Mayor')
+                ->where('car.status', '<>', 'Closed')
+                ->whereDate('car.due_date', '<', $today)
+                ->where(function($q) {
+                    $q->whereNull('act.action_status')
+                      ->orWhereNotIn('act.action_status', ['open_verif', 'approve_superior', 'verified']);
+                })
+                ->whereYear('h.audit_date', $year)
+                ->whereMonth('h.audit_date', $month)
+                ->count();
+
+            $data_name_dept[] = $dept;
+            $data_total_minor[] = $minor;
+            $data_total_major[] = $major;
+            $data_total_minor_overdue[] = $minorOverdue;
+            $data_total_major_overdue[] = $majorOverdue;
+        }
+
+        return response()->json([
+            'data_name_dept' => $data_name_dept,
+            'data_total_minor' => $data_total_minor,
+            'data_total_major' => $data_total_major,
+            'data_total_minor_overdue' => $data_total_minor_overdue,
+            'data_total_major_overdue' => $data_total_major_overdue,
+        ]);
+    }
+
     public function internal_audit_export(Request $request)
     {
         $query = DB::table('CsAuditCar as a')

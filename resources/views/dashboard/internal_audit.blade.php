@@ -146,10 +146,10 @@
                             label="Department"
                             :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                             valueField="name"
-                            updateEvent="reset-dept"
+                            updateEvent="updateDeptFilter"
                             hideLabel="true" />
                     </div>
-
+ 
                     <!-- Finding Category Filter -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         @php
@@ -165,7 +165,7 @@
                             id="categoryFilter"
                             label="Finding Category"
                             :initialOptions="$categoryOptions"
-                            updateEvent="reset-category"
+                            updateEvent="updateCategoryFilter"
                             hideLabel="true" />
                     </div>
 
@@ -182,10 +182,11 @@
                         <tr>
                             <th class="w-[5%] text-center">No</th>
                             <th class="w-[15%]">Req Number</th>
+                            <th class="w-[10%]">Audit Date</th>
                             <th class="w-[10%]">Department</th>
                             <th class="w-[10%]">Finding Category</th>
                             <th class="w-[15%]">Auditor</th>
-                            <th class="w-[35%]">Auditee</th>
+                            <th class="w-[25%]">Auditee</th>
                             <th class="w-[10%]">Action</th>
                         </tr>
                     </thead>
@@ -196,6 +197,36 @@
             </div>
             <!-- Data Count Component -->
             <x-data-table tableId="findingsTable" />
+        </div>
+
+        <!-- Closed Findings Chart -->
+        <div class="mt-8 bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800">Closed Findings Per Department</h3>
+                        <p class="text-[10px] sm:text-sm text-slate-500">Summary of verified/closed Minor and Major findings per department</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-2">
+                        <!-- Chart Pagination (Visible on Mobile only) -->
+                        <div id="closedChartPagination" class="hidden items-center gap-1.5">
+                            <span id="closedChartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
+                            <button type="button" id="btnClosedChartPrev" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button type="button" id="btnClosedChartNext" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative h-[390px] w-full">
+                    <canvas id="closedDeptChart"></canvas>
+                </div>
+            </div>
 
 
 
@@ -637,25 +668,15 @@
                             }
                         }));
 
-                        // 2. Set Status Filter
-                        // Map display label to backend code
-                        let statusCode = '';
-                        if (datasetLabel === 'Open') statusCode = 'OPEN';
-                        else if (datasetLabel === 'Need Verif') statusCode = 'NEED_VERIF';
-                        else if (datasetLabel === 'Close') statusCode = 'CLOSE';
-                        else if (datasetLabel === 'Overdue') statusCode = 'OVERDUE';
-
-                        currentStatusFilter = statusCode;
-
-                        // 3. Update Status Dropdown UI
-                        window.dispatchEvent(new CustomEvent('updateStatusFilter', {
+                        // 2. Update Finding Category Filter
+                        window.dispatchEvent(new CustomEvent('updateCategoryFilter', {
                             detail: {
-                                id: statusCode,
+                                id: datasetLabel,
                                 name: datasetLabel
                             }
                         }));
 
-                        // 4. Reload Table
+                        // 3. Reload Table
                         if (table) {
                             table.ajax.reload();
                         }
@@ -722,17 +743,298 @@
         }, 1500);
     }
 
+    // --- Closed Department Chart Logic ---
+    let closedDeptChart = null;
+    let rawClosedChartData = null;
+    let currentClosedChartPage = 1;
+    let closedChartPageSize = 5;
+ 
+    function loadClosedDeptChart(yearMonth) {
+        $.ajax({
+            url: "{{ route('dashboard.internal_audit.closed_chart_data', ':yearMonth') }}".replace(':yearMonth', yearMonth),
+            type: "GET",
+            dataType: "json",
+            success: function(response) {
+                rawClosedChartData = response;
+                currentClosedChartPage = 1;
+                renderClosedDeptChart();
+            },
+            error: function(xhr) {
+                console.error("Failed to load closed chart data:", xhr);
+            }
+        });
+    }
+ 
+    function renderClosedDeptChart() {
+        if (!rawClosedChartData) return;
+ 
+        const ctx = document.getElementById('closedDeptChart').getContext('2d');
+ 
+        if (closedDeptChart) {
+            closedDeptChart.destroy();
+        }
+ 
+        const isMobile = window.innerWidth < 1280;
+ 
+        // Dynamic page size based on screen width
+        const width = window.innerWidth;
+        if (width < 380) closedChartPageSize = 3;
+        else if (width < 480) closedChartPageSize = 4;
+        else if (width < 640) closedChartPageSize = 5;
+        else if (width < 768) closedChartPageSize = 6;
+        else if (width < 1024) closedChartPageSize = 7;
+        else closedChartPageSize = 9;
+ 
+        let labels = rawClosedChartData.data_name_dept;
+        let minorData = rawClosedChartData.data_total_minor;
+        let majorData = rawClosedChartData.data_total_major;
+        let minorOverdueData = rawClosedChartData.data_total_minor_overdue || [];
+        let majorOverdueData = rawClosedChartData.data_total_major_overdue || [];
+ 
+        if (isMobile) {
+            let zipped = [];
+            for (let i = 0; i < labels.length; i++) {
+                zipped.push({
+                    name: labels[i],
+                    minor: minorData[i] || 0,
+                    major: majorData[i] || 0,
+                    minorOverdue: minorOverdueData[i] || 0,
+                    majorOverdue: majorOverdueData[i] || 0
+                });
+            }
+ 
+            zipped.sort((a, b) => {
+                const bTotal = b.major + b.majorOverdue;
+                const aTotal = a.major + a.majorOverdue;
+                if (bTotal !== aTotal) {
+                    return bTotal - aTotal;
+                }
+                return (b.minor + b.minorOverdue) - (a.minor + a.minorOverdue);
+            });
+ 
+            labels = zipped.map(item => item.name);
+            minorData = zipped.map(item => item.minor);
+            majorData = zipped.map(item => item.major);
+            minorOverdueData = zipped.map(item => item.minorOverdue);
+            majorOverdueData = zipped.map(item => item.majorOverdue);
+ 
+            const totalItems = labels.length;
+            const totalPages = Math.ceil(totalItems / closedChartPageSize) || 1;
+            
+            if (currentClosedChartPage < 1) currentClosedChartPage = 1;
+            if (currentClosedChartPage > totalPages) currentClosedChartPage = totalPages;
+ 
+            const startIndex = (currentClosedChartPage - 1) * closedChartPageSize;
+            const endIndex = startIndex + closedChartPageSize;
+ 
+            labels = labels.slice(startIndex, endIndex);
+            minorData = minorData.slice(startIndex, endIndex);
+            majorData = majorData.slice(startIndex, endIndex);
+            minorOverdueData = minorOverdueData.slice(startIndex, endIndex);
+            majorOverdueData = majorOverdueData.slice(startIndex, endIndex);
+ 
+            $('#closedChartPageIndicator').text(currentClosedChartPage + '/' + totalPages);
+            $('#btnClosedChartPrev').prop('disabled', currentClosedChartPage === 1);
+            $('#btnClosedChartNext').prop('disabled', currentClosedChartPage === totalPages);
+            $('#closedChartPagination').removeClass('hidden').addClass('flex');
+        } else {
+            $('#closedChartPagination').removeClass('flex').addClass('hidden');
+        }
+ 
+        const allValues = [
+            ...minorData,
+            ...majorData,
+            ...minorOverdueData,
+            ...majorOverdueData
+        ];
+        const maxValue = Math.max(...allValues, 0);
+        const suggestedMax = maxValue + 1;
+ 
+        let delayed;
+ 
+        closedDeptChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Minor Close',
+                        data: minorData,
+                        backgroundColor: '#86efac', // Light Green
+                    },
+                    {
+                        label: 'Major Close',
+                        data: majorData,
+                        backgroundColor: '#15803d', // Dark Green
+                    },
+                    {
+                        label: 'Minor Overdue',
+                        data: minorOverdueData,
+                        backgroundColor: '#fdb56a', // Light Orange/Salmon
+                    },
+                    {
+                        label: 'Major Overdue',
+                        data: majorOverdueData,
+                        backgroundColor: '#ef4444', // Red
+                    }
+                ]
+            },
+            plugins: [{
+                id: 'customLabelsClosed',
+                afterDatasetsDraw: (chart) => {
+                    const { ctx } = chart;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        if (!meta.hidden) {
+                            meta.data.forEach((element, index) => {
+                                const data = dataset.data[index];
+                                if (data > 0) {
+                                    ctx.fillStyle = '#334155';
+                                    ctx.font = 'bold 11px sans-serif';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+                                    const xPos = element.x;
+                                    const yPos = element.y - 3;
+                                    ctx.fillText(data, xPos, yPos);
+                                }
+                            });
+                        }
+                    });
+                }
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animations: {
+                    y: {
+                        duration: 1000,
+                        easing: 'easeOutQuart',
+                        delay: context => {
+                            let delay = 0;
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                delay = context.dataIndex * 0 + 100;
+                            }
+                            return delay;
+                        },
+                        from: (context) => {
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                const scale = context.chart.scales.y;
+                                if (scale) return scale.getPixelForValue(0);
+                            }
+                            return undefined;
+                        },
+                        loop: false
+                    }
+                },
+                onClick: (e) => {
+                    const points = closedDeptChart.getElementsAtEventForMode(e, 'nearest', {
+                        intersect: true
+                    }, true);
+ 
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const label = closedDeptChart.data.labels[firstPoint.index];
+                        const datasetLabel = closedDeptChart.data.datasets[firstPoint.datasetIndex].label;
+ 
+                        window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                            detail: {
+                                id: label,
+                                name: label
+                            }
+                        }));
+ 
+                        let mappedCategory = datasetLabel;
+                        if (datasetLabel === 'Minor Close' || datasetLabel === 'Minor Overdue') {
+                            mappedCategory = 'Minor';
+                        } else if (datasetLabel === 'Major Close' || datasetLabel === 'Major Overdue') {
+                            mappedCategory = 'Mayor';
+                        }
+
+                        window.dispatchEvent(new CustomEvent('updateCategoryFilter', {
+                            detail: {
+                                id: mappedCategory,
+                                name: mappedCategory
+                            }
+                        }));
+ 
+                        if (table) {
+                            table.ajax.reload();
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            color: 'rgba(203, 213, 225, 0.4)',
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: suggestedMax,
+                        grid: {
+                            borderDash: [2, 2]
+                        },
+                        ticks: {
+                            maxTicksLimit: 6
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+ 
+        setTimeout(() => {
+            delayed = true;
+        }, 1500);
+    }
+ 
     // Initialize Chart
     $(document).ready(function() {
         const initialDate = $('#chartFilterDate').val();
         loadDeptChart(initialDate);
+        loadClosedDeptChart(initialDate);
         loadDataCards(initialDate);
-
+ 
         $('#chartFilterDate').change(function() {
             loadDeptChart($(this).val());
+            loadClosedDeptChart($(this).val());
             loadDataCards($(this).val());
         });
-
+ 
         // Pagination buttons
         $('#btnChartPrev').click(function() {
             if (currentChartPage > 1) {
@@ -740,7 +1042,7 @@
                 renderDeptChart();
             }
         });
-
+ 
         $('#btnChartNext').click(function() {
             if (rawChartData) {
                 const totalItems = rawChartData.data_name_dept.length;
@@ -751,18 +1053,37 @@
                 }
             }
         });
-
+ 
+        // Closed Chart Pagination buttons
+        $('#btnClosedChartPrev').click(function() {
+            if (currentClosedChartPage > 1) {
+                currentClosedChartPage--;
+                renderClosedDeptChart();
+            }
+        });
+ 
+        $('#btnClosedChartNext').click(function() {
+            if (rawClosedChartData) {
+                const totalItems = rawClosedChartData.data_name_dept.length;
+                const totalPages = Math.ceil(totalItems / closedChartPageSize) || 1;
+                if (currentClosedChartPage < totalPages) {
+                    currentClosedChartPage++;
+                    renderClosedDeptChart();
+                }
+            }
+        });
+ 
         // Handle resize
         $(window).resize(function() {
             const currentMobile = window.innerWidth < 1280;
             if (currentMobile !== isMobileMode) {
                 currentChartPage = 1;
                 renderDeptChart();
+                currentClosedChartPage = 1;
+                renderClosedDeptChart();
             }
         });
     });
-
-
 
     $(document).ready(function() {
         table = $('#findingsTable').DataTable({
@@ -794,6 +1115,10 @@
                 {
                     data: 'req_number',
                     className: 'font-base text-slate-900'
+                },
+                {
+                    data: 'audit_date',
+                    className: 'text-slate-700'
                 },
                 {
                     data: 'department',
@@ -857,8 +1182,8 @@
             $('#dateTo').val('').removeAttr('data-has-value');
             
             // Reset searchable-select components
-            window.dispatchEvent(new CustomEvent('reset-dept', { detail: '' }));
-            window.dispatchEvent(new CustomEvent('reset-category', { detail: '' }));
+            window.dispatchEvent(new CustomEvent('updateDeptFilter', { detail: '' }));
+            window.dispatchEvent(new CustomEvent('updateCategoryFilter', { detail: '' }));
             
             table.ajax.reload();
         });
