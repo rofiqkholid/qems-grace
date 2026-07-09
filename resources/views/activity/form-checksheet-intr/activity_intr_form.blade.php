@@ -288,6 +288,63 @@
             </div>
         </div>
     </div>
+    <!-- Confirmation Modal -->
+    <div x-show="confirmModalOpen" 
+         style="display: none;" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         role="dialog" 
+         aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background Overlay -->
+            <div x-show="confirmModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-slate-900/60 transition-opacity" 
+                 @click="confirmModalOpen = false"></div>
+
+            <!-- Trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal Panel -->
+            <div x-show="confirmModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-slate-200 p-6">
+                
+                <div class="text-center">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 mb-5">
+                        <i class="fa-solid fa-circle-question text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">
+                        Finish Audit
+                    </h3>
+                    <p class="text-slate-500 text-sm mb-6">
+                        Are you sure you want to finish this audit?
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <button type="button" 
+                                @click="confirmModalOpen = false" 
+                                class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm">
+                            No
+                        </button>
+                        <button type="button" 
+                                @click="executeSubmit()" 
+                                class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors text-sm">
+                            Yes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Mobile Sidebar Overlay -->
@@ -322,6 +379,7 @@
             },
 
             noteModalOpen: false,
+            confirmModalOpen: false,
             noteModalItemId: null,
             noteModalText: '',
 
@@ -523,6 +581,11 @@
                     return;
                 }
 
+                this.confirmModalOpen = true;
+            },
+
+            executeSubmit() {
+                this.confirmModalOpen = false;
                 this.isLoading = true;
 
                 const results = {};

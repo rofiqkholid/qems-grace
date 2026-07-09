@@ -499,6 +499,21 @@ class InternalAuditController extends Controller
                         'updated_at' => Carbon::now()
                     ]);
 
+                DB::table('CsAuditApprove')
+                    ->where('audit_car_id', $request->car_id)
+                    ->update([
+                        'auditor_approved_at' => null,
+                        'qmr_approved_at' => null,
+                        'corrective_action_one_verif' => null,
+                        'corrective_action_two_verif' => null,
+                        'corrective_action_three_verif' => null,
+                        'preventive_action_one_verif' => null,
+                        'preventive_action_two_verif' => null,
+                        'preventive_action_three_verif' => null,
+                        'root_cause_verif' => null,
+                        'updated_at' => Carbon::now()
+                    ]);
+
                 return response()->json(['success' => true, 'message' => 'CAR Action Report rolled back to Auditor verification queue successfully.']);
             } elseif ($carStatus === 'Need Verification') {
                 // Verify that the user is the Auditee Superior
