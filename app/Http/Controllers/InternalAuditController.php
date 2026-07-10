@@ -2649,6 +2649,7 @@ class InternalAuditController extends Controller
                         $sheet->getStyle($colLetter . $currentRow)->getFont()->setName('Times New Roman')->setSize(11)->setBold(true);
                         $sheet->getStyle($colLetter . $currentRow)->getFont()->getColor()->setRGB('000000');
                     } else {
+                        $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
                         $sheet->getStyle($colLetter . $currentRow)->getFont()->setName('Times New Roman')->setSize(11)->setBold(false);
                     }
                 }
