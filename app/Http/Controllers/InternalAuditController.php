@@ -2600,6 +2600,7 @@ class InternalAuditController extends Controller
             // Format Group/Scope Header Row
             $sheet->getStyle("C{$currentRow}")->getFont()->setName('Times New Roman')->setSize(12)->setBold(true);
             $sheet->getStyle("C{$currentRow}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getRowDimension($currentRow)->setRowHeight(22);
             
             // Borders for group header row (from B to L)
             foreach (range('B', 'L') as $colLetter) {

@@ -84,7 +84,7 @@
                             <i class="fa-solid fa-arrow-left"></i>
                             <span>Back to Activity</span>
                         </a>
-                        <a href="{{ route('internal_audit.export', $schedule->hash_id) }}" 
+                        <a href="{{ route('internal_audit.export', $schedule->hash_id) }}" target="_blank"
                            class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-sm">
                             <i class="fa-solid fa-file-excel"></i>
                             <span>Export Excel</span>
