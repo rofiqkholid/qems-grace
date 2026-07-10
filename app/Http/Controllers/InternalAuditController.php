@@ -2515,4 +2515,163 @@ class InternalAuditController extends Controller
 
         return "SAI - INT - " . strtoupper($department) . " - " . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
+
+    public function exportExcel($schedule_id)
+    {
+        $schedule = DB::table('CsAuditHeader')->where('hash_id', $schedule_id)->first();
+        if (!$schedule) {
+            abort(404, 'Schedule not found.');
+        }
+
+        // Map column names for compatibility
+        $schedule->auditor_names = html_entity_decode($schedule->auditor_names ?? '', ENT_QUOTES, 'UTF-8');
+        $schedule->auditor_niks = $schedule->auditor_names;
+        $schedule->schedule_date = $schedule->audit_date;
+
+        // Fetch department description
+        $dept = DB::table('GenbaDept')->where('Key1', $schedule->auditee_dept)->first();
+        $schedule->auditee_dept_name = $dept ? $dept->Key1 : $schedule->auditee_dept;
+
+        $scheduleDepts = array_map('trim', explode(',', $schedule->auditee_dept ?? ''));
+        $items = DB::table('CsChecksheetItem')
+            ->where('is_active', 1)
+            ->where('audit_type', $schedule->audit_type)
+            ->where(function($q) use ($scheduleDepts) {
+                foreach ($scheduleDepts as $dept) {
+                    if ($dept) {
+                        $q->orWhere('department', 'LIKE', '%' . $dept . '%');
+                    }
+                }
+            })
+            ->get();
+
+        $details = DB::table('CsAuditDetail as d')
+            ->leftJoin('CsAuditCar as c', 'c.audit_detail_id', '=', 'd.id')
+            ->where('d.audit_header_id', $schedule->id)
+            ->select('d.*', 'c.finding as car_finding')
+            ->get()
+            ->keyBy('checksheet_item_id');
+
+        $templatePath = public_path('tamplate-xlsx/Internal_Audit_Export_ChecksheetTamplate.xlsx');
+        if (!file_exists($templatePath)) {
+            abort(404, 'Excel template not found.');
+        }
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 1. Fill headers
+        $sheet->setCellValue('E8', $schedule->schedule_date ? \Carbon\Carbon::parse($schedule->schedule_date)->format('d M Y') : '-');
+        $sheet->setCellValue('E9', $schedule->auditee_dept_name ?? $schedule->auditee_dept);
+        $sheet->setCellValue('E10', $schedule->auditor_names);
+        $sheet->setCellValue('E11', $schedule->auditee);
+
+        // 2. Clear default rows starting from 14
+        $mergeCells = $sheet->getMergeCells();
+        foreach ($mergeCells as $mergeRange) {
+            $rangeBounds = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::rangeBoundaries($mergeRange);
+            if ($rangeBounds[0][1] >= 14) {
+                $sheet->unmergeCells($mergeRange);
+            }
+        }
+
+        // Clear row values from row 14 to 40 to clear the placeholders
+        for ($r = 14; $r <= 40; $r++) {
+            for ($col = 2; $col <= 12; $col++) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $sheet->setCellValue($colLetter . $r, null);
+                $sheet->getStyle($colLetter . $r)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE);
+            }
+        }
+
+        // 3. Group and write data
+        $groupedItems = $items->groupBy(function($item) {
+            return $item->scope_item ?: 'General';
+        });
+
+        $currentRow = 14;
+        $globalIteration = 1;
+        
+        foreach ($groupedItems as $scopeName => $scopeGroup) {
+            // Write Group/Scope Header Row
+            $sheet->mergeCells("C{$currentRow}:L{$currentRow}");
+            $sheet->setCellValue("C{$currentRow}", $scopeName);
+            
+            // Format Group/Scope Header Row
+            $sheet->getStyle("C{$currentRow}")->getFont()->setName('Times New Roman')->setSize(12)->setBold(true);
+            $sheet->getStyle("C{$currentRow}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            
+            // Borders for group header row (from B to L)
+            foreach (range('B', 'L') as $colLetter) {
+                $sheet->getStyle($colLetter . $currentRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                $sheet->getStyle($colLetter . $currentRow)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('F2F2F2');
+            }
+            
+            $currentRow++;
+            
+            // Write each checksheet item under this group
+            foreach ($scopeGroup as $item) {
+                $detail = $details->get($item->id);
+                $judgment = $detail ? strtoupper($detail->judgment) : '';
+                $evidence = $detail ? ($detail->note ?: ($detail->evidence ?? '')) : '';
+                $carFinding = $detail ? ($detail->car_finding ?? '') : '';
+                
+                // Write No (Column B)
+                $sheet->setCellValue("B{$currentRow}", $globalIteration);
+                
+                // Write Pertanyaan (Column C-E merged)
+                $sheet->mergeCells("C{$currentRow}:E{$currentRow}");
+                $questionText = $item->check_item_idn . ($item->check_item_en ? "\n" . $item->check_item_en : '');
+                $sheet->setCellValue("C{$currentRow}", $questionText);
+                
+                // Write Bukti/Evidence (Column F-I merged)
+                $sheet->mergeCells("F{$currentRow}:I{$currentRow}");
+                $buktiText = ($judgment === 'MINOR' || $judgment === 'MAYOR') ? $carFinding : $evidence;
+                $sheet->setCellValue("F{$currentRow}", $buktiText ?: '');
+                
+                // Write OK/NG (Column J-L merged)
+                $sheet->mergeCells("J{$currentRow}:L{$currentRow}");
+                $sheet->setCellValue("J{$currentRow}", $judgment);
+
+                // Apply borders and font styles to row cells
+                foreach (range('B', 'L') as $colLetter) {
+                    $sheet->getStyle($colLetter . $currentRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                    
+                    if ($colLetter === 'B') {
+                        $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                        $sheet->getStyle($colLetter . $currentRow)->getFont()->setName('Times New Roman')->setSize(11)->setBold(false);
+                    } elseif ($colLetter === 'J' || $colLetter === 'K' || $colLetter === 'L') {
+                        $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                        $sheet->getStyle($colLetter . $currentRow)->getFont()->setName('Times New Roman')->setSize(11)->setBold(true);
+                        $sheet->getStyle($colLetter . $currentRow)->getFont()->getColor()->setRGB('000000');
+                    } else {
+                        $sheet->getStyle($colLetter . $currentRow)->getFont()->setName('Times New Roman')->setSize(11)->setBold(false);
+                    }
+                }
+                
+                $sheet->getRowDimension($currentRow)->setRowHeight(-1); // Auto row height
+                
+                $currentRow++;
+                $globalIteration++;
+            }
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'Internal_Audit_Export_Checksheet_' . strtoupper($schedule->hash_id) . '_' . date('Ymd_His') . '.xlsx';
+
+        return response()->stream(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Cache-Control' => 'max-age=0',
+            ]
+        );
+    }
 }

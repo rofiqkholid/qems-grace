@@ -66,7 +66,7 @@
                             <div class="text-sm font-semibold text-slate-800 mt-1">{{ $schedule->auditee_dept_name }}</div>
                         </div>
                     </div>
-                    <div class="p-6 border-t border-slate-100 bg-slate-50/50 space-y-3" x-show="!isReadOnly">
+                    <div class="p-6 border-t border-slate-100 bg-slate-50/50 space-y-3" x-show="status !== 'Done'">
                         <button @click="submitForm()"
                             class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold text-base transition-all active:scale-95 shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -78,10 +78,17 @@
                             Please remember to submit after completing all checksheets.
                         </p>
                     </div>
-                    <div class="p-6 border-t border-slate-100 bg-slate-50/50 text-center" x-show="isReadOnly">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <i class="fa-solid fa-circle-check"></i> Audit Completed
-                        </span>
+                    <div class="p-6 border-t border-slate-100 bg-slate-50/50 space-y-2.5" x-show="status === 'Done'">
+                        <a href="{{ route('internal_audit') }}" 
+                           class="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-sm">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Back to Activity</span>
+                        </a>
+                        <a href="{{ route('internal_audit.export', $schedule->hash_id) }}" 
+                           class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Export Excel</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -175,15 +182,15 @@
                                             <div :class="answers[{{ $itemId }}] !== '' ? 'opacity-100' : 'opacity-0 pointer-events-none'"
                                                 class="w-full sm:w-44 transition-all duration-200">
                                                 
-                                                <!-- For Minor and Mayor: Link to CAR Form -->
-                                                <template x-if="answers[{{ $itemId }}] === 'Minor' || answers[{{ $itemId }}] === 'Mayor'">
-                                                    <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
-                                                        class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
-                                                        :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
-                                                        <i class="fas" :class="isReadOnly ? 'fa-eye' : (hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera')"></i>
-                                                        <span class="font-medium text-xs whitespace-nowrap" x-text="isReadOnly ? 'View Finding Details' : (hasFinding({{ $itemId }}) ? 'Report Added' : 'Add Report')"></span>
-                                                    </a>
-                                                </template>
+                                                 <!-- For Minor and Mayor: Link to CAR Form -->
+                                                 <template x-if="answers[{{ $itemId }}] === 'Minor' || answers[{{ $itemId }}] === 'Mayor'">
+                                                     <a :href="'{{ route('internal_audit.car_form', ['schedule_id' => $schedule->hash_id, 'item_id' => $itemId]) }}?judgment=' + answers[{{ $itemId }}]"
+                                                         class="w-full flex items-center justify-center gap-2 px-3 h-[52px] rounded-lg transition-colors border"
+                                                         :class="hasFinding({{ $itemId }}) ? 'bg-green-50 text-green-600 border-green-200 hover:!bg-green-100 hover:!border-green-300 hover:!text-green-700' : 'bg-blue-50 text-blue-600 border-blue-100 hover:!bg-blue-100 hover:!border-blue-300 hover:!text-blue-700'">
+                                                         <i class="fas" :class="hasFinding({{ $itemId }}) ? 'fa-check-circle' : 'fa-camera'"></i>
+                                                         <span class="font-medium text-xs whitespace-nowrap" x-text="hasFinding({{ $itemId }}) ? 'Report Added' : 'Add Report'"></span>
+                                                     </a>
+                                                 </template>
 
                                                 <!-- For OK and OFI: Open Note/Evidence Modal -->
                                                 <template x-if="answers[{{ $itemId }}] === 'OK' || answers[{{ $itemId }}] === 'OFI'">
@@ -354,7 +361,8 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('genbaForm', () => ({
-            isReadOnly: {{ $schedule->status === 'Done' ? 'true' : 'false' }},
+            isReadOnly: false,
+            status: '{{ $schedule->status }}',
             isLoading: false,
             answers: {},
             activeModal: null,
@@ -620,7 +628,7 @@
                     if (data.success) {
                         showToast(data.message, 'success');
                         setTimeout(() => {
-                            window.location.href = "{{ route('internal_audit') }}";
+                            window.location.href = "{{ route('internal_audit.conduct', $schedule->hash_id) }}";
                         }, 1500);
                     } else {
                         showToast(data.message, 'error');

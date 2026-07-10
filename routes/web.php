@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/internal-audit/checksheet', [InternalAuditController::class, 'getChecksheet'])->name('internal_audit.checksheet');
     Route::post('/internal-audit/get-users', [InternalAuditController::class, 'getUsers'])->name('internal_audit.get_users');
     Route::get('/internal-audit/conduct/{schedule_id}', [InternalAuditController::class, 'conduct'])->name('internal_audit.conduct');
+    Route::get('/internal-audit/conduct/{schedule_id}/export', [InternalAuditController::class, 'exportExcel'])->name('internal_audit.export');
     Route::get('/internal-audit/conduct/{schedule_id}/car/{item_id}', [InternalAuditController::class, 'carForm'])->name('internal_audit.car_form');
     Route::post('/internal-audit/conduct/{schedule_id}/car/{item_id}/send-draft', [InternalAuditController::class, 'sendDraftCarForm'])->name('internal_audit.car_form.send_draft');
     Route::post('/internal-audit/submit', [InternalAuditController::class, 'submitAudit'])->name('internal_audit.submit');
