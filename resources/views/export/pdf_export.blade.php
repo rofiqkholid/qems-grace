@@ -73,7 +73,7 @@
                 <th class="border border-slate-300 font-semibold">CAR NO</th>
                 <th class="border border-slate-300 font-semibold">CLAUSE NO</th>
                 <th class="border border-slate-300 font-semibold">Audit Category</th>
-                <th class="border border-slate-300 font-semibold">Part No/Name</th>
+                <th class="border border-slate-300 font-semibold">Part No/Part Name/Process Checked</th>
                 <th class="border border-slate-300 font-semibold">Dept</th>
                 <th class="border border-slate-300 font-semibold">Auditee</th>
                 <th class="border border-slate-300 font-semibold">Auditee Superior</th>
@@ -98,7 +98,7 @@
                     <td class="border border-slate-200 text-center">{{ $index + 1 }}</td>
                     <td class="border border-slate-200 white-space-nowrap">{{ $row->audit_date ? \Carbon\Carbon::parse($row->audit_date)->format('d M Y') : '-' }}</td>
                     <td class="border border-slate-200 font-medium">{{ $row->req_number ?? '-' }}</td>
-                    <td class="border border-slate-200">{{ $row->requirement_no ?? '-' }}</td>
+                    <td class="border border-slate-200">{{ $row->clause_title ?? '-' }}</td>
                     <td class="border border-slate-200">{{ $row->audit_type ?? '-' }}</td>
                     <td class="border border-slate-200">{{ $row->scope_item ?? '-' }}</td>
                     <td class="border border-slate-200">{{ $row->department ?? '-' }}</td>

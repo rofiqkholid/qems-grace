@@ -918,7 +918,7 @@ class DashboardController extends Controller
                 $sheet->getStyle('B' . $currentRow)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
                 $sheet->setCellValue('C' . $currentRow, $auditDateStr);
                 $sheet->setCellValue('D' . $currentRow, $row->req_number ?? '-');
-                $sheet->setCellValue('E' . $currentRow, $row->requirement_no ?? '-');
+                $sheet->setCellValue('E' . $currentRow, $row->clause_title ?? '-');
                 $sheet->setCellValue('F' . $currentRow, $row->audit_type ?? '-');
                 $sheet->setCellValue('G' . $currentRow, $row->scope_item ?? '-');
                 $sheet->setCellValue('H' . $currentRow, $row->department ?? '-');

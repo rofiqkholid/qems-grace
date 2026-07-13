@@ -44,7 +44,7 @@
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">CAR NO</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">CLAUSE NO</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Audit Category</th>
-                <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Part No/Nam</th>
+                <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Part No/Part Name/Process Checked</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Dept</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Auditee</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Auditee Superior</th>
@@ -81,7 +81,7 @@
                     <td style="text-align: center; border: 1px solid #000;">{{ $index + 1 }}</td>
                     <td style="text-align: center; border: 1px solid #000;">{{ $row->audit_date ? \Carbon\Carbon::parse($row->audit_date)->format('d M Y') : '-' }}</td>
                     <td style="border: 1px solid #000;">{{ $row->req_number ?? '-' }}</td>
-                    <td style="border: 1px solid #000;">{{ $row->requirement_no ?? '-' }}</td>
+                    <td style="border: 1px solid #000;">{{ $row->clause_title ?? '-' }}</td>
                     <td style="border: 1px solid #000;">{{ $row->audit_type ?? '-' }}</td>
                     <td style="border: 1px solid #000;">{{ $row->scope_item ?? '-' }}</td>
                     <td style="border: 1px solid #000;">{{ $row->department ?? '-' }}</td>
