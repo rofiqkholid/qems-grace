@@ -34,9 +34,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-190px)]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-215px)]">
             <!-- Left Info Panel -->
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-3 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
                 <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-full flex flex-col">
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50">
                         <h2 class="text-lg font-bold text-slate-800">Audit Header Information</h2>
