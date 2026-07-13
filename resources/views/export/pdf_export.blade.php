@@ -71,7 +71,7 @@
                 <th class="border border-slate-300 font-semibold text-center">No</th>
                 <th class="border border-slate-300 font-semibold">DATE OF AUDIT</th>
                 <th class="border border-slate-300 font-semibold">CAR NO</th>
-                <th class="border border-slate-300 font-semibold">CLAUSE NO</th>
+                <th class="border border-slate-300 font-semibold">CLAUSE TITLE</th>
                 <th class="border border-slate-300 font-semibold">Audit Category</th>
                 <th class="border border-slate-300 font-semibold">Part No/Part Name/Process Checked</th>
                 <th class="border border-slate-300 font-semibold">Dept</th>

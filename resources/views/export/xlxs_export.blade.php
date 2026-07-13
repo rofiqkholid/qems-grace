@@ -42,7 +42,7 @@
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">No</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">DATE OF AUDIT</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">CAR NO</th>
-                <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">CLAUSE NO</th>
+                <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">CLAUSE TITLE</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Audit Category</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Part No/Part Name/Process Checked</th>
                 <th style="font-weight: bold; background-color: #1F4E78; color: #FFFFFF; text-align: center; border: 1px solid #000;">Dept</th>
