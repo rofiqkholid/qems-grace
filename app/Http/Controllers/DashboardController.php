@@ -825,8 +825,6 @@ class DashboardController extends Controller
         if (file_exists($templatePath)) {
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
             $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setCellValue('E10', 'CLAUSE TITLE');
-            $sheet->setCellValue('G10', 'Part No/Part Name/Process Checked');
             
             // Set Column B width slightly wider to avoid #### format overflow
             $sheet->getColumnDimension('B')->setWidth(8);
