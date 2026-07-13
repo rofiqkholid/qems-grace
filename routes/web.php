@@ -59,7 +59,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/cars/approve', [InternalAuditController::class, 'approveCar'])->name('internal_audit.cars.approve');
     Route::post('/internal-audit/cars/rollback', [InternalAuditController::class, 'rollbackCar'])->name('internal_audit.cars.rollback');
     Route::post('/internal-audit/cars/reject', [InternalAuditController::class, 'rejectCar'])->name('internal_audit.cars.reject');
-    Route::post('/internal-audit/verification/table', [InternalAuditController::class, 'verificationTable'])->name('internal_audit.verification.table');
     Route::post('/internal-audit/cars/delete', [InternalAuditController::class, 'deleteCar'])->name('internal_audit.cars.delete');
     Route::post('/internal-audit/get-requirements', [InternalAuditController::class, 'getRequirements'])->name('internal_audit.get_requirements');
     Route::post('/internal-audit/get-clause-titles', [InternalAuditController::class, 'getClauseTitles'])->name('internal_audit.get_clause_titles');
