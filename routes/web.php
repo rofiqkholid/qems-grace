@@ -31,8 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', function () {
         return redirect()->route('dashboard');
     });
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard-mng', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/dashboard-mng', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/genba_management', function () {
         return view('activity.genba_header_form');
