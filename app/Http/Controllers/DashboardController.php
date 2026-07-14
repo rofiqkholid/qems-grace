@@ -828,7 +828,7 @@ class DashboardController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             
             // Set dynamic headers
-            $sheet->setCellValue('R2', ': ' . date('Ymd') . '-' . rand(1000, 9999));
+            $sheet->setCellValue('R2', ': FO-08-02');
             $sheet->setCellValue('R3', ': ' . ($request->dept ? strtoupper($request->dept) : 'MANAGEMENT'));
             $sheet->setCellValue('R4', ': ' . date('d M Y'));
             $sheet->setCellValue('R5', ': 01');
