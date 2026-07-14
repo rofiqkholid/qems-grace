@@ -57,10 +57,10 @@ class AuthController extends Controller
         }
 
         Auth::login($user, $request->filled('remember'));
-
+ 
         $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard'));
+ 
+        return redirect()->route('dashboard');
     }
 
     /**

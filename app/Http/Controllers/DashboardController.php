@@ -781,6 +781,7 @@ class DashboardController extends Controller
                 'c.audit_type as audit_type',
                 'e.scope_item as scope_item',
                 'd.auditee_superior_name as superior_name',
+                'd.action_status as action_status',
                 'd.corrective_action_one',
                 'd.corrective_action_two',
                 'd.corrective_action_three',
@@ -826,6 +827,13 @@ class DashboardController extends Controller
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
             $sheet = $spreadsheet->getActiveSheet();
             
+            // Set dynamic headers
+            $sheet->setCellValue('R2', ': ' . date('Ymd') . '-' . rand(1000, 9999));
+            $sheet->setCellValue('R3', ': ' . ($request->dept ? strtoupper($request->dept) : 'MANAGEMENT'));
+            $sheet->setCellValue('R4', ': ' . date('d M Y'));
+            $sheet->setCellValue('R5', ': 01');
+            $sheet->setCellValue('R6', ': 1 dari 1');
+            
             // Set Column B width slightly wider to avoid #### format overflow
             $sheet->getColumnDimension('B')->setWidth(8);
             
@@ -848,12 +856,11 @@ class DashboardController extends Controller
             $styleP11 = $sheet->getStyle('P11');
             $styleQ11 = $sheet->getStyle('Q11');
             $styleR11 = $sheet->getStyle('R11');
-            $styleS11 = $sheet->getStyle('S11');
             
             $startRow = 11;
             
             // Clear row 11 first (just in case)
-            for ($col = 2; $col <= 19; $col++) { // Columns B to S
+            for ($col = 2; $col <= 18; $col++) { // Columns B to R
                 $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                 $sheet->setCellValue($colLetter . $startRow, null);
             }
@@ -882,10 +889,9 @@ class DashboardController extends Controller
                 $sheet->duplicateStyle($styleP11, 'P' . $currentRow);
                 $sheet->duplicateStyle($styleQ11, 'Q' . $currentRow);
                 $sheet->duplicateStyle($styleR11, 'R' . $currentRow);
-                $sheet->duplicateStyle($styleS11, 'S' . $currentRow);
                 
                 // Set alignment wrap and vertical center
-                foreach (range('B', 'S') as $colLetter) {
+                foreach (range('B', 'R') as $colLetter) {
                     $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setWrapText(true);
                     $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                     
@@ -913,6 +919,22 @@ class DashboardController extends Controller
                 }
                 $preventive_str = rtrim($preventive_str);
                 
+                // Status calculation
+                $statusText = '-';
+                if ($row->status === 'Draft' || ($row->action_status ?? '') === 'draft') {
+                    $statusText = 'Draft (Auditee)';
+                } elseif ($row->status === 'Under Review' || ($row->action_status ?? '') === 'open_verif') {
+                    $statusText = 'Waiting Superior Approval';
+                } elseif ($row->status === 'Need Verification' || ($row->action_status ?? '') === 'approve_superior') {
+                    $statusText = 'Waiting Auditor Approval';
+                } elseif ($row->status === 'Closed' && empty($row->qmr_approved_at)) {
+                    $statusText = 'Waiting QMR Approval';
+                } elseif ($row->status === 'Closed' && !empty($row->qmr_approved_at)) {
+                    $statusText = 'Closed';
+                } else {
+                    $statusText = $row->status ?? '-';
+                }
+                
                 // Write values
                 $sheet->setCellValue('B' . $currentRow, $index + 1);
                 $sheet->getStyle('B' . $currentRow)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
@@ -927,12 +949,11 @@ class DashboardController extends Controller
                 $sheet->setCellValue('K' . $currentRow, $row->auditor ?? '-');
                 $sheet->setCellValue('L' . $currentRow, $row->finding_category ?? '-');
                 $sheet->setCellValue('M' . $currentRow, $row->finding ?? '-');
-                $sheet->setCellValue('N' . $currentRow, $dueDateStr);
-                $sheet->setCellValue('O' . $currentRow, $row->status ?? '-');
-                $sheet->setCellValue('P' . $currentRow, $corrective_str ?: '-');
+                $sheet->setCellValue('N' . $currentRow, $corrective_str ?: '-');
+                $sheet->setCellValue('O' . $currentRow, $dueDateStr);
+                $sheet->setCellValue('P' . $currentRow, $preventive_str ?: '-');
                 $sheet->setCellValue('Q' . $currentRow, $dueDateStr);
-                $sheet->setCellValue('R' . $currentRow, $preventive_str ?: '-');
-                $sheet->setCellValue('S' . $currentRow, $dueDateStr);
+                $sheet->setCellValue('R' . $currentRow, $statusText);
                 
                 $currentRow++;
             }
