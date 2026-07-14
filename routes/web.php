@@ -28,11 +28,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/qms', [DashboardController::class, 'index']);
-    Route::get('/qms/', function () {
-        return redirect('/qms');
-    });
+    Route::get('/', function () {
+        $uri = request()->getRequestUri();
+        if ($uri !== '/' && str_ends_with($uri, '/')) {
+            return redirect(request()->getSchemeAndHttpHost() . rtrim($uri, '/'), 301);
+        }
+        return app(DashboardController::class)->index();
+    })->name('dashboard');
     Route::get('/dashboard-mng', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::get('/genba_management', function () {
