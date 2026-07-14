@@ -8,3 +8,4 @@ import '@fontsource/outfit/600.css';
 import '@fontsource/outfit/700.css';
 import '@fontsource/outfit/800.css';
 import '@fontsource/outfit/900.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';

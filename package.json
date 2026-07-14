@@ -15,6 +15,7 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
-        "@fontsource/outfit": "^5.2.8"
+        "@fontsource/outfit": "^5.2.8",
+        "@fortawesome/fontawesome-free": "^7.3.0"
     }
 }
