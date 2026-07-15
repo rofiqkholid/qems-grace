@@ -385,7 +385,7 @@
                                             <input type="file" id="corr_one_file" name="corrective_photo_one[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_one')">
                                             <button type="button" onclick="document.getElementById('corr_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -438,7 +438,7 @@
                                             <input type="file" id="prev_one_file" name="preventive_photo_one[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_one')">
                                             <button type="button" onclick="document.getElementById('prev_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -494,7 +494,7 @@
                                             <input type="file" id="corr_two_file" name="corrective_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_two')">
                                             <button type="button" onclick="document.getElementById('corr_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -547,7 +547,7 @@
                                             <input type="file" id="prev_two_file" name="preventive_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_two')">
                                             <button type="button" onclick="document.getElementById('prev_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -603,7 +603,7 @@
                                             <input type="file" id="corr_three_file" name="corrective_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_three')">
                                             <button type="button" onclick="document.getElementById('corr_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -656,7 +656,7 @@
                                             <input type="file" id="prev_three_file" name="preventive_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_three')">
                                             <button type="button" onclick="document.getElementById('prev_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
+                                                <span class="text-red-500 absolute -top-1.5 -right-1.5 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
