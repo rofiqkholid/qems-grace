@@ -10,9 +10,6 @@
 
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/sai_logo_circle.png') }}">
 
-
-
-
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 

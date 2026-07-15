@@ -309,8 +309,8 @@
                                     @if(!$isComplete)
                                         <div class="shrink-0">
                                             <input type="file" id="root_cause_file" name="root_cause_photo[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'root_cause')">
-                                            <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all" title="Take / Upload Photo or PDF">
-                                                <i class="fas fa-camera text-xs"></i> Upload File
+                                            <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all relative" title="Take / Upload Photo or PDF">
+                                                <i class="fas fa-camera text-xs"></i> Upload File <span class="text-red-500 font-bold ml-0.5">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -383,8 +383,9 @@
                                     @if(!$isComplete && !$isCorrOneApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="corr_one_file" name="corrective_photo_one[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_one')">
-                                            <button type="button" onclick="document.getElementById('corr_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('corr_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -435,8 +436,9 @@
                                     @if(!$isComplete && !$isPrevOneApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="prev_one_file" name="preventive_photo_one[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_one')">
-                                            <button type="button" onclick="document.getElementById('prev_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('prev_one_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -490,8 +492,9 @@
                                     @if(!$isComplete && !$isCorrTwoApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="corr_two_file" name="corrective_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_two')">
-                                            <button type="button" onclick="document.getElementById('corr_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('corr_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -542,8 +545,9 @@
                                     @if(!$isComplete && !$isPrevTwoApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="prev_two_file" name="preventive_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_two')">
-                                            <button type="button" onclick="document.getElementById('prev_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('prev_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -597,8 +601,9 @@
                                     @if(!$isComplete && !$isCorrThreeApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="corr_three_file" name="corrective_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_three')">
-                                            <button type="button" onclick="document.getElementById('corr_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('corr_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -649,8 +654,9 @@
                                     @if(!$isComplete && !$isPrevThreeApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="prev_three_file" name="preventive_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_three')">
-                                            <button type="button" onclick="document.getElementById('prev_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all" title="Take / Upload Photo or PDF">
+                                            <button type="button" onclick="document.getElementById('prev_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
+                                                <span class="text-red-500 absolute -top-1 -right-1 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -1283,6 +1289,25 @@
                 if (!analyzedBy || !analyzedBy.value || analyzedBy.value.trim() === '') {
                     showToast('Please select Analized by Auditee Superior.', 'error');
                     return;
+                }
+
+                // Validate mandatory file uploads
+                const requiredFiles = [
+                    { key: 'root_cause', name: 'Root Cause' },
+                    { key: 'corr_one', name: 'Corrective Action 1' },
+                    { key: 'corr_two', name: 'Corrective Action 2' },
+                    { key: 'corr_three', name: 'Corrective Action 3' },
+                    { key: 'prev_one', name: 'Preventive Action 1' },
+                    { key: 'prev_two', name: 'Preventive Action 2' },
+                    { key: 'prev_three', name: 'Preventive Action 3' }
+                ];
+
+                for (const item of requiredFiles) {
+                    const state = actionFilesState[item.key];
+                    if (!state || (state.files.length === 0 && state.existing.length === 0)) {
+                        showToast(`Upload file untuk ${item.name} wajib diisi.`, 'error');
+                        return;
+                    }
                 }
                 
                 // Get submit button and show loading state
