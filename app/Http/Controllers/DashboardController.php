@@ -827,12 +827,8 @@ class DashboardController extends Controller
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
             $sheet = $spreadsheet->getActiveSheet();
             
-            // Set dynamic headers
-            $sheet->setCellValue('R2', ': FO-08-02');
-            $sheet->setCellValue('R3', ': ' . ($request->dept ? strtoupper($request->dept) : 'MANAGEMENT'));
+            // Set dynamic headers (only export date changes)
             $sheet->setCellValue('R4', ': ' . date('d M Y'));
-            $sheet->setCellValue('R5', ': 01');
-            $sheet->setCellValue('R6', ': 1 dari 1');
             
             // Set Column B width slightly wider to avoid #### format overflow
             $sheet->getColumnDimension('B')->setWidth(8);

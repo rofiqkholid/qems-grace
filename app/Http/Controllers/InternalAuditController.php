@@ -2573,6 +2573,7 @@ class InternalAuditController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // 1. Fill headers
+        $sheet->setCellValue('L4', date('d M Y'));
         $sheet->setCellValue('E8', $schedule->schedule_date ? \Carbon\Carbon::parse($schedule->schedule_date)->format('d M Y') : '-');
         $sheet->setCellValue('E9', $schedule->auditee_dept_name ?? $schedule->auditee_dept);
         $sheet->setCellValue('E10', $schedule->auditor_names);
