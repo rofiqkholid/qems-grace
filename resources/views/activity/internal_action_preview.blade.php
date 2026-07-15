@@ -1307,7 +1307,7 @@
                 for (const item of requiredFiles) {
                     const state = actionFilesState[item.key];
                     if (!state || (state.files.length === 0 && state.existing.length === 0)) {
-                        showToast(`Upload file untuk ${item.name} wajib diisi.`, 'error');
+                        showToast(`Uploading file for ${item.name} is required.`, 'error');
                         return;
                     }
                 }
