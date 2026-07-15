@@ -690,17 +690,20 @@ class InternalAuditController extends Controller
              ]);
 
              $fields = [
-                 'corrective_path_one' => ['file' => 'corrective_photo_one', 'existing' => 'existing_corrective_photo_one', 'prefix' => 'evidence_corr_one_', 'label' => 'Corrective Action 1'],
-                 'corrective_path_two' => ['file' => 'corrective_photo_two', 'existing' => 'existing_corrective_photo_two', 'prefix' => 'evidence_corr_two_', 'label' => 'Corrective Action 2'],
-                 'corrective_path_three' => ['file' => 'corrective_photo_three', 'existing' => 'existing_corrective_photo_three', 'prefix' => 'evidence_corr_three_', 'label' => 'Corrective Action 3'],
-                 'preventive_path_one' => ['file' => 'preventive_photo_one', 'existing' => 'existing_preventive_photo_one', 'prefix' => 'evidence_prev_one_', 'label' => 'Preventive Action 1'],
-                 'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_', 'label' => 'Preventive Action 2'],
-                 'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_', 'label' => 'Preventive Action 3'],
-                 'root_cause_path' => ['file' => 'root_cause_photo', 'existing' => 'existing_root_cause_photo', 'prefix' => 'evidence_root_cause_', 'label' => 'Root Cause'],
+                 'corrective_path_one' => ['file' => 'corrective_photo_one', 'existing' => 'existing_corrective_photo_one', 'prefix' => 'evidence_corr_one_', 'label' => 'Corrective Action 1', 'required' => true],
+                 'corrective_path_two' => ['file' => 'corrective_photo_two', 'existing' => 'existing_corrective_photo_two', 'prefix' => 'evidence_corr_two_', 'label' => 'Corrective Action 2', 'required' => true],
+                 'corrective_path_three' => ['file' => 'corrective_photo_three', 'existing' => 'existing_corrective_photo_three', 'prefix' => 'evidence_corr_three_', 'label' => 'Corrective Action 3', 'required' => true],
+                 'preventive_path_one' => ['file' => 'preventive_photo_one', 'existing' => 'existing_preventive_photo_one', 'prefix' => 'evidence_prev_one_', 'label' => 'Preventive Action 1', 'required' => true],
+                 'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_', 'label' => 'Preventive Action 2', 'required' => true],
+                 'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_', 'label' => 'Preventive Action 3', 'required' => true],
+                 'root_cause_path' => ['file' => 'root_cause_photo', 'existing' => 'existing_root_cause_photo', 'prefix' => 'evidence_root_cause_', 'label' => 'Root Cause', 'required' => false],
              ];
 
              // Validate that at least one file exists (either newly uploaded or existing retained) for each required field
              foreach ($fields as $col => $info) {
+                 if (!($info['required'] ?? false)) {
+                     continue;
+                 }
                  $hasNewFile = $request->hasFile($info['file']);
                  $hasExistingFile = !empty(array_filter(array_map('trim', explode(',', $request->input($info['existing'], '')))));
                  if (!$hasNewFile && !$hasExistingFile) {

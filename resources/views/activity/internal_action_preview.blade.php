@@ -310,7 +310,7 @@
                                         <div class="shrink-0">
                                             <input type="file" id="root_cause_file" name="root_cause_photo[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'root_cause')">
                                             <button type="button" onclick="document.getElementById('root_cause_file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold transition-all relative" title="Take / Upload Photo or PDF">
-                                                <i class="fas fa-camera text-xs"></i> Upload File <span class="text-red-500 font-bold ml-0.5">*</span>
+                                                <i class="fas fa-camera text-xs"></i> Upload File
                                             </button>
                                         </div>
                                     @endif
@@ -1295,7 +1295,6 @@
 
                 // Validate mandatory file uploads
                 const requiredFiles = [
-                    { key: 'root_cause', name: 'Root Cause' },
                     { key: 'corr_one', name: 'Corrective Action 1' },
                     { key: 'corr_two', name: 'Corrective Action 2' },
                     { key: 'corr_three', name: 'Corrective Action 3' },
