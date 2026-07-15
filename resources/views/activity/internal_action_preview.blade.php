@@ -1022,6 +1022,8 @@
 
 
 <script>
+    const assetUrl = "{{ asset('') }}";
+
     function autoGrow(element) {
         element.style.height = "auto";
         element.style.height = (element.scrollHeight) + "px";
@@ -1428,7 +1430,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = "relative w-12 h-12 bg-slate-100 border border-slate-200 rounded-lg group cursor-pointer flex items-center justify-center";
                 wrapper.onclick = function() {
-                    openActionFileModal('/' + path, ext);
+                    openActionFileModal(assetUrl + path, ext);
                 };
                 
                 if (ext === 'pdf') {
@@ -1437,7 +1439,7 @@
                     wrapper.appendChild(icon);
                 } else {
                     const img = document.createElement('img');
-                    img.src = '/' + path;
+                    img.src = assetUrl + path;
                     img.className = "w-full h-full object-cover rounded-lg";
                     wrapper.appendChild(img);
                 }
