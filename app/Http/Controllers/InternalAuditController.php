@@ -706,7 +706,7 @@ class InternalAuditController extends Controller
                  if (!$hasNewFile && !$hasExistingFile) {
                      return response()->json([
                          'success' => false,
-                         'message' => "Upload file untuk {$info['label']} wajib diisi."
+                         'message' => "Uploading file for {$info['label']} is required."
                      ], 400);
                  }
              }
