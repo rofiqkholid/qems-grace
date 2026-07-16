@@ -1271,7 +1271,7 @@ class InternalAuditController extends Controller
     public function getUsers(\Illuminate\Http\Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = DB::table('users')->orderBy('full_name', 'asc');
@@ -1298,7 +1298,7 @@ class InternalAuditController extends Controller
     public function getSuperiors(\Illuminate\Http\Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = DB::table('users')
@@ -2459,7 +2459,7 @@ class InternalAuditController extends Controller
     public function getRequirements(Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = DB::table('CsKlausul')
@@ -2489,7 +2489,7 @@ class InternalAuditController extends Controller
     {
         $search = $request->search;
         $requirementNo = $request->post('requirement_no') ?? $request->query('requirement_no') ?? $request->requirement_no;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = DB::table('CsKlausul')

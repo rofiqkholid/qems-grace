@@ -533,7 +533,7 @@ class GenbaManagementController extends Controller
     {
         $search = $request->search;
         $processFilter = $request->process;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = GenbaManagement::get_genba_area();
@@ -564,7 +564,7 @@ class GenbaManagementController extends Controller
     public function get_genba_category(Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
         $query = GenbaManagement::get_genba_category();
         if ($search) {
@@ -587,7 +587,7 @@ class GenbaManagementController extends Controller
     public function get_section(Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = GenbaManagement::get_section_list();
@@ -615,7 +615,7 @@ class GenbaManagementController extends Controller
     public function get_user_data(Request $request)
     {
         $search = $request->search;
-        $page = $request->post('page', 1);
+        $page = $request->input('page', 1);
         $pageSize = 10;
 
         $query = GenbaManagement::get_users($search);
