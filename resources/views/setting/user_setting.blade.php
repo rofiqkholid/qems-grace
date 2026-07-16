@@ -181,10 +181,22 @@
                             <!-- Credentials / Security Card -->
                             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
                                 <div class="p-4 border-b border-slate-200 bg-slate-50/50">
-                                    <h4 class="font-bold text-slate-800 text-sm">Security & Password</h4>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">Leave blank if you do not want to change password</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Roles & Security</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Manage user roles and credentials</p>
                                 </div>
                                 <div class="p-5 space-y-4 flex-1">
+                                    <div class="flex flex-col">
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">User Roles</label>
+                                        <x-searchable-select-multi
+                                            name="roles"
+                                            id="formRoles"
+                                            label="User Roles"
+                                            updateEvent="update-user-roles"
+                                            hideLabel="true"
+                                            multiple="true"
+                                            maxItems="10"
+                                            :initialOptions="$rolesList" />
+                                    </div>
                                     <div class="flex flex-col">
                                         <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">New Password</label>
                                         <input type="password" name="password" id="password" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
@@ -476,6 +488,12 @@
         $('#full_name').val('');
         $('#username').val('').prop('disabled', false).removeClass('bg-slate-50 cursor-not-allowed text-slate-500');
         $('#email').val('');
+        window.dispatchEvent(new CustomEvent('update-user-roles', { 
+            detail: { 
+                id: '', 
+                name: '' 
+            } 
+        }));
         $('#password').val('').prop('required', true);
         $('#password_confirmation').val('').prop('required', true);
 
@@ -535,6 +553,13 @@
                 $('#full_name').val(response.user.full_name);
                 $('#username').val(response.user.username);
                 $('#email').val(response.user.email);
+                const userRolesList = (response.user.roles || []).join(', ');
+                window.dispatchEvent(new CustomEvent('update-user-roles', { 
+                    detail: { 
+                        id: userRolesList, 
+                        name: userRolesList 
+                    } 
+                }));
                 $('#password').val('');
                 $('#password_confirmation').val('');
 

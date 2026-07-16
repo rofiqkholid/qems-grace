@@ -178,6 +178,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/intr-check-item/store', [MasterController::class, 'store_intr_check_item'])->name('master.intr_check_item.store');
         Route::post('/intr-check-item/update', [MasterController::class, 'update_intr_check_item'])->name('master.intr_check_item.update');
         Route::post('/intr-check-item/delete', [MasterController::class, 'delete_intr_check_item'])->name('master.intr_check_item.delete');
+
+        Route::get('/roles', [MasterController::class, 'roles'])->name('master.roles');
+        Route::post('/roles/table', [MasterController::class, 'roles_table'])->name('master.roles.table');
+        Route::post('/roles/store', [MasterController::class, 'store_roles'])->name('master.roles.store');
+        Route::post('/roles/update', [MasterController::class, 'update_roles'])->name('master.roles.update');
+        Route::post('/roles/delete', [MasterController::class, 'delete_roles'])->name('master.roles.delete');
     });
 
     Route::get('/user-management', [MasterController::class, 'user_management'])->name('master.user_management');
