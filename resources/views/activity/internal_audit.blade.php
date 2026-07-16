@@ -162,9 +162,17 @@
                             <!-- Auditor -->
                             <div class="col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">Auditor <span class="text-red-500">*</span></label>
-                                <input type="text" id="formAuditorNiks" name="auditor_niks" required
-                                    value="{{ Auth::user()->full_name ?? '' }}"
-                                    class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300">
+                                <x-searchable-select-multi
+                                    name="auditor_niks"
+                                    id="formAuditor"
+                                    label="Auditor"
+                                    required="true"
+                                    apiUrl="{{ route('internal_audit.get_users') }}"
+                                    updateEvent="update-auditor"
+                                    changeEvent="auditor-changed"
+                                    hideLabel="true"
+                                    multiple="true"
+                                    maxItems="7" />
                             </div>
 
                             <!-- Audit Date -->
@@ -318,13 +326,10 @@
                 errors.push('Auditee is required');
             }
 
-            const auditorVal = $('#formAuditorNiks').val();
+            const auditorVal = $('#formAuditor').val();
             if (!auditorVal) {
                 isValid = false;
                 errors.push('Auditor is required');
-                $('#formAuditorNiks').addClass('border-red-500');
-            } else {
-                $('#formAuditorNiks').removeClass('border-red-500');
             }
 
             const deptVal = $('#formAuditeeDept').val();
@@ -428,7 +433,12 @@
                     var dateVal = sched.audit_date ? sched.audit_date.split(' ')[0].split('T')[0] : '';
                     $('#formScheduleDate').val(dateVal);
                     
-                    $('#formAuditorNiks').val(sched.auditor_names || '');
+                    window.dispatchEvent(new CustomEvent('update-auditor', { 
+                        detail: { 
+                            id: sched.auditor_names || '', 
+                            name: sched.auditor_names || '' 
+                        } 
+                    }));
                     
                     // Dispatch searchable-select updates
                     window.dispatchEvent(new CustomEvent('update-auditee-dept', { 
@@ -473,8 +483,12 @@
         $('#formScheduleId').val('');
         window.dispatchEvent(new CustomEvent('update-audit-type', { detail: { id: '', name: '' } }));
         
-        // Default Auditor and Date
-        $('#formAuditorNiks').val('{{ Auth::user()->full_name ?? "" }}');
+        window.dispatchEvent(new CustomEvent('update-auditor', { 
+            detail: { 
+                id: '{{ Auth::user()->full_name ?? "" }}', 
+                name: '{{ Auth::user()->full_name ?? "" }}' 
+            } 
+        }));
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
