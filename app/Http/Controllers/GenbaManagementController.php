@@ -190,6 +190,18 @@ class GenbaManagementController extends Controller
             $rawSysId = trim($request->sys_id, "'");
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $rawSysId)[0]));
 
+            // Retrieve detail row to delete files on disk
+            $detail = DB::connection('sqlsrv')->table('GenbaProcAuditDtl')->where('SysID', $sysId)->first();
+            if ($detail && !empty($detail->Path)) {
+                $paths = explode(',', $detail->Path);
+                foreach ($paths as $path) {
+                    $filePath = public_path('findings-photo/' . trim($path));
+                    if (file_exists($filePath) && is_file($filePath)) {
+                        @unlink($filePath);
+                    }
+                }
+            }
+
             DB::connection('sqlsrv')->table('GenbaProcAuditDtl')->where('SysID', $sysId)->delete();
 
             return response()->json(['success' => true, 'message' => 'Data deleted successfully.']);
@@ -444,6 +456,20 @@ class GenbaManagementController extends Controller
         try {
             $rawSysId = trim($request->sys_id, "'");
             $sysId = Crypt::decryptString(str_replace("-", "=", explode('_', $rawSysId)[0]));
+
+            // Retrieve all details to delete physical files
+            $details = DB::connection('sqlsrv')->table('GenbaProcAuditDtl')->where('genba_id', $sysId)->get();
+            foreach ($details as $detail) {
+                if (!empty($detail->Path)) {
+                    $paths = explode(',', $detail->Path);
+                    foreach ($paths as $path) {
+                        $filePath = public_path('findings-photo/' . trim($path));
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            @unlink($filePath);
+                        }
+                    }
+                }
+            }
 
             // Soft delete by setting IsDelete to 1
             DB::connection('sqlsrv')->table('GenbaProcAudit')->where('SysID', $sysId)->update(['IsDelete' => 1]);
@@ -1147,6 +1173,16 @@ class GenbaManagementController extends Controller
         $updates = false;
 
         if ($targetRow) {
+            // Delete old photos that are no longer part of the updated list
+            $oldPaths = !empty($targetRow->Path) ? explode(',', $targetRow->Path) : [];
+            $deletedPaths = array_diff($oldPaths, $photoPaths);
+            foreach ($deletedPaths as $delPath) {
+                $filePath = public_path('findings-photo/' . trim($delPath));
+                if (file_exists($filePath) && is_file($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+
             // Update existing row
             $updates = DB::table('GenbaProcAuditDtl')
                 ->where('SysID', $targetRow->SysID)

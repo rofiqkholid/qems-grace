@@ -2303,6 +2303,13 @@ class InternalAuditController extends Controller
             $photoPath = $detail ? $detail->finding_photo_path : null;
 
             if ($request->hasFile('photo')) {
+                // Delete old file if exists
+                if ($detail && !empty($detail->finding_photo_path)) {
+                    $oldFilePath = public_path(trim($detail->finding_photo_path));
+                    if (file_exists($oldFilePath) && is_file($oldFilePath)) {
+                        @unlink($oldFilePath);
+                    }
+                }
                 $file = $request->file('photo');
                 $fileName = 'finding_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/cs_audit'), $fileName);
@@ -2379,6 +2386,19 @@ class InternalAuditController extends Controller
             }
 
             if ($car) {
+                // Delete old photos that were removed by the user from finding_file_path
+                if (!empty($car->finding_file_path)) {
+                    $oldCarPaths = array_filter(array_map('trim', explode(',', $car->finding_file_path)));
+                    $newCarPaths = array_filter(array_map('trim', explode(',', $findingPhotoPath)));
+                    $deletedCarPaths = array_diff($oldCarPaths, $newCarPaths);
+                    foreach ($deletedCarPaths as $delPath) {
+                        $filePath = public_path(trim($delPath));
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            @unlink($filePath);
+                        }
+                    }
+                }
+
                 $reqNumber = $car->req_number;
                 if (!$reqNumber || $car->department !== $department) {
                     $reqNumber = $this->generateCarReqNumber($department);
@@ -2449,9 +2469,91 @@ class InternalAuditController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized action.']);
         }
         try {
-            DB::table('CsAuditHeader')->where('hash_id', $id)->delete();
-            return response()->json(['success' => true, 'message' => 'Schedule deleted successfully.']);
+            DB::beginTransaction();
+
+            $schedule = DB::table('CsAuditHeader')->where('hash_id', $id)->first();
+            if ($schedule) {
+                // Find all associated details
+                $details = DB::table('CsAuditDetail')->where('audit_header_id', $schedule->id)->get();
+                $detailIds = $details->pluck('id')->toArray();
+
+                // Find all associated CARs
+                $cars = [];
+                $carIds = [];
+                if (!empty($detailIds)) {
+                    $cars = DB::table('CsAuditCar')->whereIn('audit_detail_id', $detailIds)->get();
+                    $carIds = $cars->pluck('id')->toArray();
+                }
+
+                // Find all associated Actions
+                $actions = [];
+                if (!empty($carIds)) {
+                    $actions = DB::table('CsAuditAction')->whereIn('audit_car_id', $carIds)->get();
+                }
+
+                // 1. Delete CsAuditAction photos from disk
+                foreach ($actions as $action) {
+                    $actionPaths = [
+                        $action->corrective_path_one,
+                        $action->corrective_path_two,
+                        $action->corrective_path_three,
+                        $action->preventive_path_one,
+                        $action->preventive_path_two,
+                        $action->preventive_path_three,
+                        $action->root_cause_path,
+                    ];
+                    foreach ($actionPaths as $path) {
+                        if (!empty($path)) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                }
+
+                // 2. Delete CsAuditCar finding photos from disk
+                foreach ($cars as $car) {
+                    if (!empty($car->finding_file_path)) {
+                        $paths = explode(',', $car->finding_file_path);
+                        foreach ($paths as $path) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                }
+
+                // 3. Delete CsAuditDetail finding photos from disk
+                foreach ($details as $detail) {
+                    if (!empty($detail->finding_photo_path)) {
+                        $paths = explode(',', $detail->finding_photo_path);
+                        foreach ($paths as $path) {
+                            $filePath = public_path(trim($path));
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                    }
+                }
+
+                // 4. Delete DB rows explicitly
+                if (!empty($carIds)) {
+                    DB::table('CsAuditAction')->whereIn('audit_car_id', $carIds)->delete();
+                    DB::table('CsAuditApprove')->whereIn('audit_car_id', $carIds)->delete();
+                    DB::table('CsAuditCar')->whereIn('id', $carIds)->delete();
+                }
+                if (!empty($detailIds)) {
+                    DB::table('CsAuditDetail')->whereIn('id', $detailIds)->delete();
+                }
+                DB::table('CsAuditHeader')->where('id', $schedule->id)->delete();
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Schedule and all associated findings, actions, and photos deleted successfully.']);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
