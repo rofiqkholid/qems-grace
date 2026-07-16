@@ -123,9 +123,9 @@
                         @csrf
                         <input type="hidden" name="user_id" id="form_user_id">
 
-                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col w-full">
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col w-full relative">
                             <!-- Card Header -->
-                            <div class="p-4 border-b border-slate-200 bg-slate-50/50">
+                            <div class="p-4 border-b border-slate-200 bg-slate-50/50 rounded-t-xl">
                                 <h4 class="font-bold text-slate-800 text-sm">User Settings</h4>
                                 <p class="text-[11px] text-slate-500 mt-0.5">Edit basic information, user roles, and security credentials</p>
                             </div>
@@ -205,7 +205,7 @@
                             </div>
                             
                             <!-- Card Footer -->
-                            <div class="px-5 py-4 border-t border-slate-200 bg-slate-50/50 flex justify-end">
+                            <div class="px-5 py-4 border-t border-slate-200 bg-slate-50/50 flex justify-end rounded-b-xl">
                                 <button type="submit" id="btnSaveProfile" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
                                     <i class="fa-solid fa-floppy-disk"></i>
                                     <span>Save Settings</span>
