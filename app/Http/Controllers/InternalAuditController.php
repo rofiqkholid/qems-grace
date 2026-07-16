@@ -693,14 +693,17 @@ class InternalAuditController extends Controller
              if ($request->filled('analyzed_by')) {
                  $analyzedByUser = DB::table('users')->where('full_name', $request->analyzed_by)->first();
                  if ($analyzedByUser) {
-                     $userRole = DB::table('user_role')->where('id_user', $analyzedByUser->id)->first();
-                     $roles = $userRole ? json_decode($userRole->role, true) : [];
-                     if (!is_array($roles) || (!in_array('MANAGER', $roles) && !in_array('ASSISTEN MANAGER', $roles))) {
-                         return response()->json([
-                             'success' => false,
-                             'message' => 'The selected superior must have the MANAGER or ASSISTEN MANAGER role.'
-                         ], 400);
-                     }
+                      $userRole = DB::table('user_role')->where('id_user', $analyzedByUser->id)->first();
+                      $roles = $userRole ? json_decode($userRole->role, true) : [];
+                      if (is_array($roles)) {
+                          $roles = array_map('strtoupper', $roles);
+                      }
+                      if (!is_array($roles) || (!in_array('MANAGER', $roles) && !in_array('ASSISTEN MANAGER', $roles) && !in_array('ASSISTANT MANAGER', $roles))) {
+                          return response()->json([
+                              'success' => false,
+                              'message' => 'The selected superior must have the MANAGER or ASSISTEN MANAGER role.'
+                          ], 400);
+                      }
                  } else {
                      return response()->json([
                          'success' => false,
