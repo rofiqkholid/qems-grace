@@ -1274,7 +1274,7 @@ class InternalAuditController extends Controller
         $page = $request->post('page', 1);
         $pageSize = 10;
 
-        $query = DB::table('users');
+        $query = DB::table('users')->orderBy('full_name', 'asc');
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('full_name', 'LIKE', '%' . $search . '%')
@@ -1309,7 +1309,8 @@ class InternalAuditController extends Controller
                       $subQ->orWhere('role', 'LIKE', '%MANAGER%')
                            ->orWhere('role', 'LIKE', '%ASSISTEN MANAGER%');
                   });
-            });
+            })
+            ->orderBy('full_name', 'asc');
 
         if ($search) {
             $query->where(function($q) use ($search) {
