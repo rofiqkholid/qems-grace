@@ -702,7 +702,7 @@ class MasterController extends Controller
                     "no" => $start + $key + 1,
                     "id" => $item->id,
                     "role_name" => $item->role_name,
-                    "action" => '<div class="flex items-center justify-center gap-2">
+                    "action" => '<div class="flex items-center justify-start gap-2">
                                 <button type="button" title="Edit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
                                     onclick="handleEdit(this)"
                                     data-id="' . $item->id . '"
@@ -1191,7 +1191,8 @@ class MasterController extends Controller
 
     public function user_management()
     {
-        return view('setting.user_management');
+        $hierarchy = Menu::getMenuHierarchyMaps();
+        return view('setting.user_management', compact('hierarchy'));
     }
 
     public function user_management_table(Request $request)

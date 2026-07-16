@@ -347,26 +347,10 @@
     }
 
     // Lookup map for children
-    const menuChildren = {
-        85: [86, 89, 92],      // Genba Management -> Setup, Activity, Verification
-        86: [87, 88],          // Setup -> Team, Member
-        89: [90, 91],          // Activity -> Genba Form, Findings Genba
-        92: [93, 94],          // Verification -> Findings Result, Verifikasi Genba
-        95: [96, 97, 98, 99],  // Data Master -> Line Checked, Category, Department, Check Item
-        100: [101, 102],       // Dashboard -> Genba Management, Genba BIQ
-        104: [103, 105]        // Setting -> User Permission, User Setting
-    };
+    const menuChildren = @json($hierarchy['children'] ?? []);
 
     // Lookup map for parents
-    const menuParents = {
-        86: 85, 89: 85, 92: 85,
-        87: 86, 88: 86,
-        90: 89, 91: 89,
-        93: 92, 94: 92,
-        96: 95, 97: 95, 98: 95, 99: 95,
-        101: 100, 102: 100,
-        103: 104, 105: 104
-    };
+    const menuParents = @json($hierarchy['parents'] ?? []);
 
     function togglePermissionHierarchy(menuId, type, checkbox) {
         const isChecked = checkbox.checked;

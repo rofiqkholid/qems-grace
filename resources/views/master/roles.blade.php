@@ -48,7 +48,7 @@
                         <tr>
                             <th class="w-[10%] text-center">No</th>
                             <th class="w-[75%]">Role Name</th>
-                            <th class="w-[15%] text-center">Action</th>
+                            <th class="w-[15%]">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -167,7 +167,7 @@
             columns: [
                 { data: 'no', className: 'text-center' },
                 { data: 'role_name' },
-                { data: 'action', orderable: false, className: 'text-center' }
+                { data: 'action', orderable: false }
             ],
             order: [[1, 'asc']],
             pageLength: 10,

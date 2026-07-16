@@ -121,4 +121,39 @@ class Menu extends Model
         }
         return $ids;
     }
+
+    /**
+     * Get hierarchy maps (children and parents) dynamically
+     */
+    public static function getMenuHierarchyMaps()
+    {
+        $config = self::getMenuStructureConfig();
+        $children = [];
+        $parents = [];
+
+        foreach ($config['mainMenus'] as $main) {
+            $mainId = $main['menu'];
+            if (!$mainId) continue;
+
+            if (!empty($main['children'])) {
+                $children[$mainId] = array_column($main['children'], 'menu');
+                foreach ($main['children'] as $sub) {
+                    $subId = $sub['menu'];
+                    $parents[$subId] = $mainId;
+
+                    if (!empty($sub['children'])) {
+                        $children[$subId] = $sub['children'];
+                        foreach ($sub['children'] as $childId) {
+                            $parents[$childId] = $subId;
+                        }
+                    }
+                }
+            }
+        }
+
+        return [
+            'children' => $children,
+            'parents' => $parents
+        ];
+    }
 }
