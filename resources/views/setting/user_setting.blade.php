@@ -123,14 +123,19 @@
                         @csrf
                         <input type="hidden" name="user_id" id="form_user_id">
 
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                            <!-- Profile Card -->
-                            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
-                                <div class="p-4 border-b border-slate-200 bg-slate-50/50">
-                                    <h4 class="font-bold text-slate-800 text-sm">Profile Settings</h4>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">Edit basic information and avatar</p>
-                                </div>
-                                <div class="p-5 space-y-6 flex-1">
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col w-full">
+                            <!-- Card Header -->
+                            <div class="p-4 border-b border-slate-200 bg-slate-50/50">
+                                <h4 class="font-bold text-slate-800 text-sm">User Settings</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Edit basic information, user roles, and security credentials</p>
+                            </div>
+                            
+                            <!-- Card Body: Grid with vertical separator -->
+                            <div class="grid grid-cols-1 xl:grid-cols-2">
+                                <!-- Left Section: Profile Settings -->
+                                <div class="p-5 space-y-6">
+                                    <h5 class="font-bold text-slate-700 text-xs pb-2 border-b border-slate-100">Profile Settings</h5>
+                                    
                                     <!-- Profile Image Upload -->
                                     <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
                                         <div class="relative">
@@ -169,50 +174,42 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Card Footer -->
-                                <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                                    <button type="submit" id="btnSaveProfile" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
-                                        <i class="fa-solid fa-floppy-disk"></i>
-                                        <span>Save Profile</span>
-                                    </button>
+
+                                <!-- Right Section: Roles & Security with vertical border separator -->
+                                <div class="p-5 space-y-6 border-t xl:border-t-0 xl:border-l border-slate-200">
+                                    <h5 class="font-bold text-slate-700 text-xs pb-2 border-b border-slate-100">Roles & Security</h5>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex flex-col">
+                                            <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">New Password</label>
+                                            <input type="password" name="password" id="password" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <label for="password_confirmation" class="block text-xs font-bold text-slate-700 mb-1.5">Confirm Password</label>
+                                            <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <label class="block text-xs font-bold text-slate-700 mb-1.5">User Roles</label>
+                                            <x-searchable-select-multi
+                                                name="roles"
+                                                id="formRoles"
+                                                label="User Roles"
+                                                updateEvent="update-user-roles"
+                                                hideLabel="true"
+                                                multiple="true"
+                                                maxItems="10"
+                                                :initialOptions="$rolesList" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Credentials / Security Card -->
-                            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
-                                <div class="p-4 border-b border-slate-200 bg-slate-50/50">
-                                    <h4 class="font-bold text-slate-800 text-sm">Roles & Security</h4>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">Manage user roles and credentials</p>
-                                </div>
-                                <div class="p-5 space-y-4 flex-1">
-                                    <div class="flex flex-col">
-                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">User Roles</label>
-                                        <x-searchable-select-multi
-                                            name="roles"
-                                            id="formRoles"
-                                            label="User Roles"
-                                            updateEvent="update-user-roles"
-                                            hideLabel="true"
-                                            multiple="true"
-                                            maxItems="10"
-                                            :initialOptions="$rolesList" />
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">New Password</label>
-                                        <input type="password" name="password" id="password" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <label for="password_confirmation" class="block text-xs font-bold text-slate-700 mb-1.5">Confirm Password</label>
-                                        <input type="password" name="password_confirmation" id="password_confirmation" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
-                                    </div>
-                                </div>
-                                <!-- Card Footer -->
-                                <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                                    <button type="submit" id="btnUpdatePassword" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
-                                        <i class="fa-solid fa-key"></i>
-                                        <span>Update Password</span>
-                                    </button>
-                                </div>
+                            
+                            <!-- Card Footer -->
+                            <div class="px-5 py-4 border-t border-slate-200 bg-slate-50/50 flex justify-end">
+                                <button type="submit" id="btnSaveProfile" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Save Settings</span>
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -255,36 +252,25 @@
             fetchUsers();
         });
 
-        let isPasswordSubmit = false;
-
-        $('#btnUpdatePassword').on('click', function() {
-            isPasswordSubmit = true;
-        });
-
-        $('#btnSaveProfile').on('click', function() {
-            isPasswordSubmit = false;
-        });
-
         // Form submission via AJAX
         $('#userSettingsForm').on('submit', function(e) {
-            if (isPasswordSubmit) {
-                const newPassword = $('#password').val().trim();
-                if (!newPassword) {
-                    e.preventDefault();
-                    updateSaveStatus('New password is required.', 'error');
-                    
-                    $('#ajaxAlertContainer').html(`
-                        <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex flex-col gap-1 text-sm shadow-sm animate-fade-in">
-                            <div class="flex items-center gap-3">
-                                <i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>
-                                <span class="font-semibold">Update failed</span>
-                            </div>
-                            <p class="text-rose-600 text-xs mt-0.5">Please fill in the password fields to reset password.</p>
+            const newPassword = $('#password').val().trim();
+            const confirmPassword = $('#password_confirmation').val().trim();
+            if ((newPassword || confirmPassword) && !newPassword) {
+                e.preventDefault();
+                updateSaveStatus('New password is required.', 'error');
+                
+                $('#ajaxAlertContainer').html(`
+                    <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex flex-col gap-1 text-sm shadow-sm animate-fade-in">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>
+                            <span class="font-semibold">Update failed</span>
                         </div>
-                    `).removeClass('hidden');
-                    $('#userDetailSection').scrollTop(0);
-                    return false;
-                }
+                        <p class="text-rose-600 text-xs mt-0.5">Please fill in the password fields to reset password.</p>
+                    </div>
+                `).removeClass('hidden');
+                $('#userDetailSection').scrollTop(0);
+                return false;
             }
 
             e.preventDefault();

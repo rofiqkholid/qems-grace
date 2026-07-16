@@ -328,7 +328,7 @@
                                     required="true"
                                     hideLabel="true"
                                     disabled="{{ $isComplete ? 1 : 0 }}"
-                                    apiUrl="{{ route('internal_audit.get_users') }}"
+                                    apiUrl="{{ route('internal_audit.get_superiors') }}"
                                     updateEvent="update-analyzed-by"
                                     changeEvent="analyzed-by-changed" />
                             </div>

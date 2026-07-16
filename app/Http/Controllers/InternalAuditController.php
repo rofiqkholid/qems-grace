@@ -684,10 +684,30 @@ class InternalAuditController extends Controller
                   'existing_corrective_photo_two' => 'nullable|string',
                   'existing_corrective_photo_three' => 'nullable|string',
                   'existing_preventive_photo_one' => 'nullable|string',
-                  'existing_preventive_photo_two' => 'nullable|string',
+                   'existing_preventive_photo_two' => 'nullable|string',
                   'existing_preventive_photo_three' => 'nullable|string',
                   'existing_root_cause_photo' => 'nullable|string',
              ]);
+
+             // Securely validate on the backend that the selected user indeed has the Manager / Assistant Manager role
+             if ($request->filled('analyzed_by')) {
+                 $analyzedByUser = DB::table('users')->where('full_name', $request->analyzed_by)->first();
+                 if ($analyzedByUser) {
+                     $userRole = DB::table('user_role')->where('id_user', $analyzedByUser->id)->first();
+                     $roles = $userRole ? json_decode($userRole->role, true) : [];
+                     if (!is_array($roles) || (!in_array('MANAGER', $roles) && !in_array('ASSISTEN MANAGER', $roles))) {
+                         return response()->json([
+                             'success' => false,
+                             'message' => 'The selected superior must have the MANAGER or ASSISTEN MANAGER role.'
+                         ], 400);
+                     }
+                 } else {
+                     return response()->json([
+                         'success' => false,
+                         'message' => 'The selected superior is not a registered user.'
+                     ], 400);
+                 }
+             }
 
              $fields = [
                  'corrective_path_one' => ['file' => 'corrective_photo_one', 'existing' => 'existing_corrective_photo_one', 'prefix' => 'evidence_corr_one_', 'label' => 'Corrective Action 1', 'required' => true],
@@ -1243,6 +1263,42 @@ class InternalAuditController extends Controller
         $pageSize = 10;
 
         $query = DB::table('users');
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('full_name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('username', 'LIKE', '%' . $search . '%');
+            });
+        }
+        $users = $query->paginate($pageSize, ['*'], 'page', $page);
+        return response()->json([
+            'items' => collect($users->items())->map(function ($user) {
+                return [
+                    'id' => $user->full_name,
+                    'name' => $user->full_name
+                ];
+            })->values(),
+            'pagination' => [
+                'more' => $users->hasMorePages(),
+            ]
+        ]);
+    }
+
+    public function getSuperiors(\Illuminate\Http\Request $request)
+    {
+        $search = $request->search;
+        $page = $request->post('page', 1);
+        $pageSize = 10;
+
+        $query = DB::table('users')
+            ->whereIn('id', function($q) {
+                $q->select('id_user')
+                  ->from('user_role')
+                  ->where(function($subQ) {
+                      $subQ->orWhere('role', 'LIKE', '%MANAGER%')
+                           ->orWhere('role', 'LIKE', '%ASSISTEN MANAGER%');
+                  });
+            });
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('full_name', 'LIKE', '%' . $search . '%')
