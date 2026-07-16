@@ -124,7 +124,7 @@ table.dataTable.qms-table thead th {
 .qms-table thead th.sorting::after,
 .qms-table thead th.sorting_asc::after,
 .qms-table thead th.sorting_desc::after {
-    font-family: 'Font Awesome 6 Free' !important;
+    font-family: 'Font Awesome 7 Free', 'Font Awesome 6 Free' !important;
     font-weight: 900 !important;
     position: absolute !important;
     right: 0.25rem !important;
