@@ -1133,6 +1133,18 @@ class InternalAuditController extends Controller
                         'status' => 'Scheduled',
                         'updated_at' => Carbon::now()
                     ]);
+
+                 DB::table('CsAuditCar')
+                     ->whereIn('audit_detail_id', function ($q) use ($schedule) {
+                         $q->select('id')
+                           ->from('CsAuditDetail')
+                           ->where('audit_header_id', $schedule->id);
+                     })
+                    ->update([
+                        'auditor' => html_entity_decode($request->auditor_niks ?? '', ENT_QUOTES, 'UTF-8'),
+                        'auditee' => $request->agenda_name,
+                        'updated_at' => Carbon::now()
+                    ]);
                 $hash = $scheduleId;
             } else {
                 // Insert
