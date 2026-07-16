@@ -698,6 +698,7 @@ class DashboardController extends Controller
                 ->where('car.department', $dept)
                 ->where('car.finding_category', 'Minor')
                 ->where('car.status', 'Closed')
+                ->whereNotNull('car.qmr_approved_at')
                 ->whereYear('h.audit_date', $year)
                 ->whereMonth('h.audit_date', $month)
                 ->count();
@@ -708,6 +709,7 @@ class DashboardController extends Controller
                 ->where('car.department', $dept)
                 ->where('car.finding_category', 'Mayor')
                 ->where('car.status', 'Closed')
+                ->whereNotNull('car.qmr_approved_at')
                 ->whereYear('h.audit_date', $year)
                 ->whereMonth('h.audit_date', $month)
                 ->count();

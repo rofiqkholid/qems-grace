@@ -104,8 +104,8 @@
                                 <thead>
                                     <tr>
                                         <th class="px-3 sm:px-6 py-4 text-left">Menu Structure</th>
-                                        <th class="px-3 sm:px-6 py-4 text-center w-[22%] sm:w-[20%]">Can View</th>
-                                        <th class="px-3 sm:px-6 py-4 text-center w-[22%] sm:w-[20%]">Can Delete</th>
+                                        <th class="px-3 sm:px-6 py-4 text-left w-[22%] sm:w-[20%]">Can View</th>
+                                        <th class="px-3 sm:px-6 py-4 text-left w-[22%] sm:w-[20%]">Can Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody id="permissionsTableBody" class="bg-white divide-y divide-slate-100 text-sm text-slate-700">
@@ -288,7 +288,7 @@
 
                     // Checks visibility
                     const viewCheckbox = item.level_menu_id > 1 
-                        ? `<label class="relative inline-flex items-center cursor-pointer justify-center">
+                        ? `<label class="relative inline-flex items-center cursor-pointer justify-start">
                             <input type="checkbox" name="permissions[${item.id}][is_view]" value="1" ${hasViewChecked} 
                                 data-menu-id="${item.id}" data-type="view" onchange="togglePermissionHierarchy(${item.id}, 'view', this)"
                                 class="sr-only peer">
@@ -297,7 +297,7 @@
                         : '';
 
                     const deleteCheckbox = item.level_menu_id > 2
-                        ? `<label class="relative inline-flex items-center cursor-pointer justify-center">
+                        ? `<label class="relative inline-flex items-center cursor-pointer justify-start">
                             <input type="checkbox" name="permissions[${item.id}][is_delete]" value="1" ${hasDeleteChecked} 
                                 data-menu-id="${item.id}" data-type="delete" onchange="togglePermissionHierarchy(${item.id}, 'delete', this)"
                                 class="sr-only peer">
@@ -312,10 +312,10 @@
                                     <span class="${labelClass}">${item.menu_name}</span>
                                 </div>
                             </td>
-                            <td class="px-3 sm:px-6 py-3.5 text-center align-middle">
+                            <td class="px-3 sm:px-6 py-3.5 text-left align-middle">
                                 ${viewCheckbox}
                             </td>
-                            <td class="px-3 sm:px-6 py-3.5 text-center align-middle">
+                            <td class="px-3 sm:px-6 py-3.5 text-left align-middle">
                                 ${deleteCheckbox}
                             </td>
                         </tr>
