@@ -89,6 +89,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-mng/data_cards', [DashboardController::class, 'data_cards'])->name('dashboard.data_cards');
     Route::post('/dashboard-mng/table', [DashboardController::class, 'table'])->name('dashboard.table');
     Route::get('/dashboard-mng/chart-data/{yearMonth}', [DashboardController::class, 'chart_all_dept'])->name('dashboard.chart_data');
+    Route::get('/dashboard-mng/export', [DashboardController::class, 'genba_mng_export'])->name('dashboard.export');
+
 
     // Genba BIQ Dashboard Routes
     Route::get('/dashboard-biq', [DashboardController::class, 'biq_index'])->name('dashboard.biq');

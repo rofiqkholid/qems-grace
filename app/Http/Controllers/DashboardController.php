@@ -1050,4 +1050,128 @@ class DashboardController extends Controller
 
         return view('export.pdf_export', compact('records'));
     }
+
+    public function genba_mng_export(Request $request, $category_id = 'NOT_BIQ')
+    {
+        $search = $request->search;
+        $date_from = $request->date_from;
+        $date_to = $request->date_to;
+        $auditor = $request->auditor;
+        $dept = $request->dept;
+        $status_filter = $request->status;
+        $detail_area = $request->detail_area;
+
+        $query = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, $category_id)
+            ->whereNotNull('a.asign_to_dept')
+            ->where('a.asign_to_dept', '!=', '');
+
+        $records = $query->get();
+
+        $templatePath = public_path('tamplate-xlsx/Genba_MNG_Export_Tamplate.xlsx');
+        if (file_exists($templatePath)) {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Set dynamic header: K4 has export date
+            $sheet->setCellValue('K4', date('d-m-Y'));
+            
+            // We want to write data starting from row 11.
+            // Copy styling of row 11 before writing.
+            $styleB11 = $sheet->getStyle('B11');
+            $styleC11 = $sheet->getStyle('C11');
+            $styleD11 = $sheet->getStyle('D11');
+            $styleE11 = $sheet->getStyle('E11');
+            $styleF11 = $sheet->getStyle('F11');
+            $styleG11 = $sheet->getStyle('G11');
+            $styleH11 = $sheet->getStyle('H11');
+            $styleI11 = $sheet->getStyle('I11');
+            
+            $startRow = 11;
+            
+            // Clear row 11 first
+            for ($col = 2; $col <= 11; $col++) { // Columns B to K
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $sheet->setCellValue($colLetter . $startRow, null);
+            }
+            
+            $currentRow = $startRow;
+            foreach ($records as $index => $row) {
+                if ($currentRow > $startRow) {
+                    $sheet->insertNewRowBefore($currentRow, 1);
+                }
+                
+                // Duplicate styles
+                $sheet->duplicateStyle($styleB11, 'B' . $currentRow);
+                $sheet->duplicateStyle($styleC11, 'C' . $currentRow);
+                $sheet->duplicateStyle($styleD11, 'D' . $currentRow);
+                $sheet->duplicateStyle($styleE11, 'E' . $currentRow);
+                $sheet->duplicateStyle($styleF11, 'F' . $currentRow);
+                $sheet->duplicateStyle($styleG11, 'G' . $currentRow);
+                $sheet->duplicateStyle($styleH11, 'H' . $currentRow);
+                $sheet->duplicateStyle($styleI11, 'I' . $currentRow);
+                $sheet->duplicateStyle($styleI11, 'J' . $currentRow);
+                $sheet->duplicateStyle($styleI11, 'K' . $currentRow);
+                
+                // Merge columns I to K for finding
+                $sheet->mergeCells("I{$currentRow}:K{$currentRow}");
+                
+                // Set alignment wrap and vertical center
+                foreach (range('B', 'K') as $colLetter) {
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle($colLetter . $currentRow)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                    $sheet->getStyle($colLetter . $currentRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                }
+                
+                // Format date
+                $genbaDateStr = $row->Date ? \Carbon\Carbon::parse($row->Date)->format('d M Y') : '-';
+                
+                // Status mapping
+                if ($row->verification_result == '1' || $row->verification_result == 1) {
+                    $statusText = 'CLOSE';
+                } elseif (!empty($row->execution_comment) && !empty($row->execution_path)) {
+                    $statusText = 'NEED VERIF';
+                } elseif (!empty($row->due_date) && \Carbon\Carbon::parse($row->due_date)->lt(\Carbon\Carbon::today())) {
+                    $statusText = 'OVERDUE';
+                } else {
+                    $statusText = 'OPEN';
+                }
+                
+                // Write values
+                $sheet->setCellValue('B' . $currentRow, $index + 1);
+                $sheet->getStyle('B' . $currentRow)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
+                $sheet->setCellValue('C' . $currentRow, $genbaDateStr);
+                $sheet->setCellValue('D' . $currentRow, $row->DocNum ?? '-');
+                $sheet->setCellValue('E' . $currentRow, $row->Area_Checked ?? '-');
+                $sheet->setCellValue('F' . $currentRow, $row->asign_to_dept ?? '-');
+                $sheet->setCellValue('G' . $currentRow, $row->Auditor ?? '-');
+                $sheet->setCellValue('H' . $currentRow, $statusText);
+                $sheet->setCellValue('I' . $currentRow, $row->findings ?? '-');
+                
+                $currentRow++;
+            }
+            
+            // Set row heights to fit multi-line content
+            for ($r = $startRow; $r < $currentRow; $r++) {
+                $sheet->getRowDimension($r)->setRowHeight(-1); // Auto height
+            }
+        } else {
+            abort(404, 'Template file not found.');
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'Genba_MNG_Export_' . date('Ymd_His') . '.xlsx';
+
+        return response()->stream(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Cache-Control' => 'max-age=0',
+            ]
+        );
+    }
 }
+
