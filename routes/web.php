@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/internal-action-report/preview/{id}', [InternalAuditController::class, 'actionReportPreview'])->name('internal_audit.action_report.preview');
     Route::post('/internal-action-report/preview/{id}/save-action', [InternalAuditController::class, 'saveActionReportDetails'])->name('internal_audit.action_report.save_action');
     Route::post('/internal-action-report/preview/{id}/rollback', [InternalAuditController::class, 'rollbackActionPlan'])->name('internal_audit.action_report.rollback');
+    Route::get('/internal-action-report/preview/{id}/export', [InternalAuditController::class, 'exportCarExcel'])->name('internal_audit.action_report.export');
     Route::post('/internal-audit/schedules', [InternalAuditController::class, 'getSchedules'])->name('internal_audit.schedules');
     Route::post('/internal-audit/schedules/store', [InternalAuditController::class, 'storeSchedule'])->name('internal_audit.schedules.store');
     Route::get('/internal-audit/schedules/detail/{id}', [InternalAuditController::class, 'getScheduleDetail'])->name('internal_audit.schedules.detail');

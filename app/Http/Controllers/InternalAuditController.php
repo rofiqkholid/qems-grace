@@ -2866,4 +2866,210 @@ class InternalAuditController extends Controller
             ]
         );
     }
+
+    public function exportCarExcel($id)
+    {
+        try {
+            $carId = $this->decryptCarId($id);
+            $car = null;
+
+            if ($carId) {
+                $car = DB::table('CsAuditCar as a')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.id', $carId)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
+                        'c.auditee as header_auditee',
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
+
+            if (!$car) {
+                $car = DB::table('CsAuditCar as a')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.hash_id', $id)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
+                        'c.auditee as header_auditee',
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
+
+            if (!$car) {
+                try {
+                    $decryptedId = Crypt::decryptString($id);
+                    $carId = explode('_', $decryptedId)[0];
+                } catch (\Exception $e) {
+                    $carId = $id;
+                }
+
+                $car = DB::table('CsAuditCar as a')
+                    ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                    ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+                    ->where('a.id', $carId)
+                    ->select(
+                        'a.*', 
+                        'b.checksheet_item_id', 
+                        'c.hash_id as schedule_hash_id', 
+                        'c.audit_type',
+                        'c.auditee as header_auditee',
+                        'b.evidence', 
+                        'b.finding_photo_path'
+                    )
+                    ->first();
+            }
+
+            if (!$car) {
+                return redirect()->back()->with('error', 'CAR Action Report not found.');
+            }
+
+            $car->formatted_date = $car->created_at ? Carbon::parse($car->created_at)->format('d F Y') : '-';
+
+            // Auto-fill due_date if missing
+            if (empty($car->due_date)) {
+                $schedule = DB::table('CsAuditHeader')
+                    ->join('CsAuditDetail as d', 'd.audit_header_id', '=', 'CsAuditHeader.id')
+                    ->where('d.id', $car->audit_detail_id)
+                    ->select('CsAuditHeader.audit_date', 'CsAuditHeader.schedule_date')
+                    ->first();
+                $auditDate = $schedule->audit_date ?? $schedule->schedule_date ?? null;
+                if ($auditDate) {
+                    $autoDueDate = Carbon::parse($auditDate)->addWeeks(2)->toDateString();
+                    DB::table('CsAuditCar')->where('id', $car->id)->update([
+                        'due_date' => $autoDueDate,
+                        'updated_at' => Carbon::now()
+                    ]);
+                    $car->due_date = $autoDueDate;
+                }
+            }
+
+            $action = DB::table('CsAuditAction')->where('audit_car_id', $car->id)->first();
+
+            $templatePath = public_path('tamplate-xlsx/Tamplate_CAR Audit 2025.xlsx');
+            if (!file_exists($templatePath)) {
+                abort(404, 'Excel template not found.');
+            }
+
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set cell values
+            $sheet->setCellValue('F7', $car->req_number ?? '-');
+            $sheet->setCellValue('G7', $car->formatted_date);
+            
+            // Checkboxes or text for type of audit
+            $surveillance = !empty($car->surveillance) ? $car->surveillance : '';
+            $external = !empty($car->external) ? $car->external : '';
+            $internalAudit = !empty($car->internal_audit) ? $car->internal_audit : (empty($car->schedule_hash_id) ? 'Header Deleted' : ($car->audit_type ?? ''));
+            
+            $sheet->setCellValue('A11', $surveillance);
+            $sheet->setCellValue('D11', $external);
+            $sheet->setCellValue('F11', $internalAudit);
+            
+            $sheet->setCellValue('A18', $car->department ?? '-');
+            $sheet->setCellValue('E18', $car->requirement_no ?? '-');
+            $sheet->setCellValue('G18', $car->clause_title ?? '-');
+            
+            $sheet->setCellValue('A21', $car->clause_text ?? '-');
+            $sheet->setCellValue('H21', $car->finding_category ?? 'OFI');
+            
+            $sheet->setCellValue('A30', $car->finding ?? '-');
+            $sheet->setCellValue('H30', $car->auditor ?? '-');
+            $sheet->setCellValue('I30', $car->header_auditee ?? $car->auditee ?? '-');
+            
+            $sheet->setCellValue('A33', $action->root_cause ?? '');
+            $sheet->setCellValue('I34', $action->auditee_superior_name ?? '');
+            
+            // Corrective Action (Rows A38:E46 merged)
+            $correctiveActions = [];
+            if (!empty($action->corrective_action_one)) {
+                $correctiveActions[] = "1. " . $action->corrective_action_one;
+            }
+            if (!empty($action->corrective_action_two)) {
+                $correctiveActions[] = "2. " . $action->corrective_action_two;
+            }
+            if (!empty($action->corrective_action_three)) {
+                $correctiveActions[] = "3. " . $action->corrective_action_three;
+            }
+            $correctiveText = count($correctiveActions) > 0 ? implode("\n", $correctiveActions) : '';
+            $sheet->setCellValue('A38', $correctiveText);
+            
+            // Preventive Action (Rows F38:I46 merged)
+            $preventiveActions = [];
+            if (!empty($action->preventive_action_one)) {
+                $preventiveActions[] = "1. " . $action->preventive_action_one;
+            }
+            if (!empty($action->preventive_action_two)) {
+                $preventiveActions[] = "2. " . $action->preventive_action_two;
+            }
+            if (!empty($action->preventive_action_three)) {
+                $preventiveActions[] = "3. " . $action->preventive_action_three;
+            }
+            $preventiveText = count($preventiveActions) > 0 ? implode("\n", $preventiveActions) : '';
+            $sheet->setCellValue('F38', $preventiveText);
+            
+            $sheet->setCellValue('A47', "DEADLINE : " . ($car->due_date ? Carbon::parse($car->due_date)->format('d F Y') : '-'));
+            $sheet->setCellValue('A49', $action->notes ?? '');
+            $sheet->setCellValue('H49', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '-');
+            $sheet->setCellValue('I49', $action->auditee_superior_name ?? '');
+
+            // Set Verification Result (A52:C53 merged) based on QMR approval status
+            $sheet->setCellValue('A52', !empty($car->qmr_approved_at) ? 'Close' : 'Open');
+            $sheet->getStyle('A52')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A52')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A52')->getFont()->setBold(true);
+
+            // Set signature names for Auditee (G52), Auditor (H52), and QMR (I52)
+            $sheet->setCellValue('G52', $action->auditee_name ?? $car->header_auditee ?? $car->auditee ?? '-');
+            $sheet->setCellValue('H52', $car->auditor ?? '-');
+            
+            $qmrName = 'Arif Basuki';
+            if (!empty($car->qmr_nik)) {
+                $qmrUser = DB::table('users')->where('username', $car->qmr_nik)->first();
+                if ($qmrUser && !empty($qmrUser->full_name)) {
+                    $qmrName = $qmrUser->full_name;
+                }
+            }
+            if (!empty($car->qmr_approved_at)) {
+                $sheet->setCellValue('I52', $qmrName);
+            } else {
+                $sheet->setCellValue('I52', '');
+            }
+
+            foreach (['G52', 'H52', 'I52'] as $sigCell) {
+                $sheet->getStyle($sigCell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle($sigCell)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            }
+
+            // Wrap text and vertical top alignment for content cells
+            foreach (['A21', 'A30', 'A33', 'A38', 'F38', 'A49'] as $cell) {
+                $sheet->getStyle($cell)->getAlignment()->setWrapText(true);
+                $sheet->getStyle($cell)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+                $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            }
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $fileName = 'CAR_Audit_Export_' . str_replace('/', '-', $car->req_number ?? 'Report') . '_' . date('Ymd_His') . '.xlsx';
+
+            $tempFile = tempnam(sys_get_temp_dir(), 'car_export');
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
+        }
+    }
 }

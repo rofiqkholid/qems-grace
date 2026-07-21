@@ -16,21 +16,29 @@
 
     <main class="flex-1 p-3 sm:p-6">
         <!-- Page Title & Back Button -->
-        <div class="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
-            @php
-                $backUrl = route('internal_audit.action_report');
-                $previousUrl = url()->previous();
-                if ($previousUrl && (str_contains($previousUrl, 'verification') || str_contains($previousUrl, 'verifkasi') || str_contains($previousUrl, 'verifikasi'))) {
-                    $backUrl = route('internal_audit.verification');
-                }
-            @endphp
-            <a href="{{ $backUrl }}"
-                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-700">Action Report Preview</h1>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Detailed overview of CAR Action Report finding</p>
+        <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4">
+                @php
+                    $backUrl = route('internal_audit.action_report');
+                    $previousUrl = url()->previous();
+                    if ($previousUrl && (str_contains($previousUrl, 'verification') || str_contains($previousUrl, 'verifkasi') || str_contains($previousUrl, 'verifikasi'))) {
+                        $backUrl = route('internal_audit.verification');
+                    }
+                @endphp
+                <a href="{{ $backUrl }}"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-700">Action Report Preview</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Detailed overview of CAR Action Report finding</p>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <a href="{{ route('internal_audit.action_report.export', request()->route('id')) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all text-sm shadow-sm">
+                    <i class="fa-solid fa-file-excel text-base"></i>
+                    Export Excel
+                </a>
             </div>
         </div>
 
