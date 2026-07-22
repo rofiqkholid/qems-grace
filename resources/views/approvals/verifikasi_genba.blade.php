@@ -80,6 +80,19 @@
                             placeholder="Select Detail Area..." />
                     </div>
 
+                    <!-- Status Filter -->
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[180px]">
+                        <x-searchable-select
+                            name="status_filter"
+                            id="statusFilter"
+                            label="Status"
+                            :initialOptions="[['id' => 'pending', 'name' => 'Need Verification'], ['id' => 'approved', 'name' => 'Approved'], ['id' => 'rejected', 'name' => 'Rejected']]"
+                            valueField="id"
+                            updateEvent="updateStatusFilter"
+                            hideLabel="true"
+                            placeholder="Select Status..." />
+                    </div>
+
                     <!-- Reset Button -->
                     <div class="col-span-2 lg:col-span-auto">
                         <button type="button" id="btnReset"
@@ -248,6 +261,7 @@
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
                     d.detail_area = $('#detailAreaFilter').val();
+                    d.status_filter = $('#statusFilter').val();
                 }
             },
             columns: [{
@@ -371,7 +385,7 @@
         });
 
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #detailAreaFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #detailAreaFilter, #statusFilter').on('change', function() {
             table.ajax.reload();
         });
 
@@ -384,7 +398,14 @@
             $('#dateTo').val('').removeAttr('data-has-value');
             $('#deptFilter').val('');
             $('#detailAreaFilter').val('');
+            $('#statusFilter').val('');
             window.dispatchEvent(new CustomEvent('updateDetailAreaFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
+            window.dispatchEvent(new CustomEvent('updateStatusFilter', {
                 detail: {
                     id: '',
                     name: ''

@@ -19,7 +19,7 @@ class ExecutionGenbaController extends Controller
         $date_to = $request->date_to;
         $dept = $request->dept;
         $detail_area = $request->detail_area;
-
+        $status_filter = $request->status_filter;
 
         $columns = array(
             0 => 'a.created_at',
@@ -36,6 +36,17 @@ class ExecutionGenbaController extends Controller
         $query = GenbaManagement::get_genba_approval_list($search, $date_from, $date_to, null, $dept, $detail_area);
         $query->where('a.corrective_action', 1)->where('a.evidence', 1);
 
+        if ($status_filter === 'approved') {
+            $query->where('a.verification_result', 1);
+        } else if ($status_filter === 'rejected') {
+            $query->where('a.verification_result', 2);
+        } else if ($status_filter === 'pending') {
+            $query->where(function($q) {
+                $q->whereNull('a.verification_result')
+                  ->orWhere('a.verification_result', '');
+            });
+        }
+
         $totalData = $query->count();
         $totalFiltered = $totalData;
 
@@ -46,6 +57,18 @@ class ExecutionGenbaController extends Controller
 
         $postsQuery = GenbaManagement::get_genba_approval_list($search, $date_from, $date_to, null, $dept, $detail_area);
         $postsQuery->where('a.corrective_action', 1)->where('a.evidence', 1);
+
+        if ($status_filter === 'approved') {
+            $postsQuery->where('a.verification_result', 1);
+        } else if ($status_filter === 'rejected') {
+            $postsQuery->where('a.verification_result', 2);
+        } else if ($status_filter === 'pending') {
+            $postsQuery->where(function($q) {
+                $q->whereNull('a.verification_result')
+                  ->orWhere('a.verification_result', '');
+            });
+        }
+
         $postsQuery->addSelect(DB::raw("(CASE 
             WHEN (a.execution_comment IS NULL OR a.execution_comment = '') THEN 'Need Action Plan' 
             WHEN (a.execution_path IS NULL OR a.execution_path = '') THEN 'Need Evidence' 
