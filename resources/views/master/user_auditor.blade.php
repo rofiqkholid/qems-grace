@@ -69,25 +69,46 @@
         table = $('#userAuditorTable').DataTable({
             processing: true,
             serverSide: true,
-            dom: '<"overflow-x-auto"t>',
+            dom: 'r<"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-200 gap-4"ip>',
             ajax: {
                 url: "{{ route('master.user_auditor.table') }}",
                 type: 'POST',
                 data: function(d) {
                     d._token = "{{ csrf_token() }}";
-                    d.search = { value: $('#searchInput').val() };
+                    d.search.value = $('#searchInput').val();
                 }
             },
             columns: [
-                { data: 'no', className: 'text-center' },
-                { data: 'username' },
-                { data: 'full_name' },
-                { data: 'is_auditor', orderable: false }
+                {
+                    data: 'no',
+                    name: 'no',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center font-base text-slate-700'
+                },
+                {
+                    data: 'username',
+                    name: 'username',
+                    className: 'text-slate-700 font-semibold'
+                },
+                {
+                    data: 'full_name',
+                    name: 'full_name',
+                    className: 'text-slate-700'
+                },
+                {
+                    data: 'is_auditor',
+                    name: 'is_auditor',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center'
+                }
             ],
             order: [[2, 'asc']],
             pageLength: 25,
+            pagingType: "simple_numbers",
             language: {
-                emptyTable: '<div class="text-center py-8 text-slate-500">No users available</div>'
+                emptyTable: '<div class="flex flex-col items-center justify-center py-8 text-slate-500"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p>No data available</p></div>',
             }
         });
 

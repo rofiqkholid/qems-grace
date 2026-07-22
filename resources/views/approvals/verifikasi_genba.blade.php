@@ -743,7 +743,7 @@
                 closeConfirmationModal();
                 if (response.status === 'success') {
                     showToast(response.message, 'success');
-                    $('#findingsTable').DataTable().ajax.reload();
+                    $('#findingsTable').DataTable().ajax.reload(null, false);
                 } else {
                     showToast(response.message, 'error');
                 }
