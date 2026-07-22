@@ -1277,11 +1277,16 @@ class InternalAuditController extends Controller
         $page = $request->input('page', 1);
         $pageSize = 10;
 
-        $query = DB::table('users')->orderBy('full_name', 'asc');
+        $query = DB::table('users as u')
+            ->join('CsAuditAuditor as a', 'u.id', '=', 'a.id_user')
+            ->where('a.is_auditor', 1)
+            ->orderBy('u.full_name', 'asc')
+            ->select('u.*');
+            
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('full_name', 'LIKE', '%' . $search . '%')
-                  ->orWhere('username', 'LIKE', '%' . $search . '%');
+                $q->where('u.full_name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('u.username', 'LIKE', '%' . $search . '%');
             });
         }
         $users = $query->paginate($pageSize, ['*'], 'page', $page);
