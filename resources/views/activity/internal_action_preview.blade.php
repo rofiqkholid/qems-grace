@@ -496,13 +496,12 @@
                             <!-- Corrective Row 2 -->
                             <div class="flex flex-col gap-1 w-full">
                                 <div class="flex items-center gap-2">
-                                    <textarea name="corrective_action_two" required rows="1" {{ $isCorrTwoReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isCorrTwoReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 2...">{{ old('corrective_action_two', $action->corrective_action_two ?? '') }}</textarea>
+                                    <textarea name="corrective_action_two" rows="1" {{ $isCorrTwoReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isCorrTwoReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 2...">{{ old('corrective_action_two', $action->corrective_action_two ?? '') }}</textarea>
                                     @if(!$isComplete && !$isCorrTwoApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="corr_two_file" name="corrective_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_two')">
                                             <button type="button" onclick="document.getElementById('corr_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-2 -right-2 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -549,13 +548,12 @@
                             <!-- Preventive Row 2 -->
                             <div class="flex flex-col gap-1 w-full">
                                 <div class="flex items-center gap-2">
-                                    <textarea name="preventive_action_two" required rows="1" {{ $isPrevTwoReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isPrevTwoReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 2...">{{ old('preventive_action_two', $action->preventive_action_two ?? '') }}</textarea>
+                                    <textarea name="preventive_action_two" rows="1" {{ $isPrevTwoReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isPrevTwoReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 2...">{{ old('preventive_action_two', $action->preventive_action_two ?? '') }}</textarea>
                                     @if(!$isComplete && !$isPrevTwoApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="prev_two_file" name="preventive_photo_two[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_two')">
                                             <button type="button" onclick="document.getElementById('prev_two_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-2 -right-2 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -605,13 +603,12 @@
                             <!-- Corrective Row 3 -->
                             <div class="flex flex-col gap-1 w-full">
                                 <div class="flex items-center gap-2">
-                                    <textarea name="corrective_action_three" required rows="1" {{ $isCorrThreeReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isCorrThreeReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 3...">{{ old('corrective_action_three', $action->corrective_action_three ?? '') }}</textarea>
+                                    <textarea name="corrective_action_three" rows="1" {{ $isCorrThreeReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isCorrThreeReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Corrective Action 3...">{{ old('corrective_action_three', $action->corrective_action_three ?? '') }}</textarea>
                                     @if(!$isComplete && !$isCorrThreeApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="corr_three_file" name="corrective_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'corr_three')">
                                             <button type="button" onclick="document.getElementById('corr_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-2 -right-2 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -658,13 +655,12 @@
                             <!-- Preventive Row 3 -->
                             <div class="flex flex-col gap-1 w-full">
                                 <div class="flex items-center gap-2">
-                                    <textarea name="preventive_action_three" required rows="1" {{ $isPrevThreeReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isPrevThreeReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 3...">{{ old('preventive_action_three', $action->preventive_action_three ?? '') }}</textarea>
+                                    <textarea name="preventive_action_three" rows="1" {{ $isPrevThreeReadonly ? 'readonly' : '' }} class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none overflow-hidden autogrow-textarea text-slate-700 {{ $isPrevThreeReadonly ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : '' }}" placeholder="Preventive Action 3...">{{ old('preventive_action_three', $action->preventive_action_three ?? '') }}</textarea>
                                     @if(!$isComplete && !$isPrevThreeApproved)
                                         <div class="shrink-0">
                                             <input type="file" id="prev_three_file" name="preventive_photo_three[]" multiple accept="image/*,application/pdf" class="hidden" onchange="handleActionFiles(this, 'prev_three')">
                                             <button type="button" onclick="document.getElementById('prev_three_file').click()" class="w-10 h-10 border border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center transition-all relative" title="Take / Upload Photo or PDF">
                                                 <i class="fas fa-camera text-xs"></i>
-                                                <span class="text-red-500 absolute -top-2 -right-2 text-[10px] font-bold">*</span>
                                             </button>
                                         </div>
                                     @endif
@@ -1304,11 +1300,7 @@
                 // Validate mandatory file uploads
                 const requiredFiles = [
                     { key: 'corr_one', name: 'Corrective Action 1' },
-                    { key: 'corr_two', name: 'Corrective Action 2' },
-                    { key: 'corr_three', name: 'Corrective Action 3' },
-                    { key: 'prev_one', name: 'Preventive Action 1' },
-                    { key: 'prev_two', name: 'Preventive Action 2' },
-                    { key: 'prev_three', name: 'Preventive Action 3' }
+                    { key: 'prev_one', name: 'Preventive Action 1' }
                 ];
 
                 for (const item of requiredFiles) {

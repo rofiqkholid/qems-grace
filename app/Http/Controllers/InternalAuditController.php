@@ -660,11 +660,11 @@ class InternalAuditController extends Controller
                   'root_cause' => 'required|string',
                   'analyzed_by' => 'required|string',
                   'corrective_action_one' => 'required|string',
-                  'corrective_action_two' => 'required|string',
-                  'corrective_action_three' => 'required|string',
+                  'corrective_action_two' => 'nullable|string',
+                  'corrective_action_three' => 'nullable|string',
                   'preventive_action_one' => 'required|string',
-                  'preventive_action_two' => 'required|string',
-                  'preventive_action_three' => 'required|string',
+                  'preventive_action_two' => 'nullable|string',
+                  'preventive_action_three' => 'nullable|string',
                   'notes' => 'nullable|string',
                   'auditee_name' => 'nullable|string',
                   'auditee_superior_name' => 'nullable|string',
@@ -714,11 +714,11 @@ class InternalAuditController extends Controller
 
              $fields = [
                  'corrective_path_one' => ['file' => 'corrective_photo_one', 'existing' => 'existing_corrective_photo_one', 'prefix' => 'evidence_corr_one_', 'label' => 'Corrective Action 1', 'required' => true],
-                 'corrective_path_two' => ['file' => 'corrective_photo_two', 'existing' => 'existing_corrective_photo_two', 'prefix' => 'evidence_corr_two_', 'label' => 'Corrective Action 2', 'required' => true],
-                 'corrective_path_three' => ['file' => 'corrective_photo_three', 'existing' => 'existing_corrective_photo_three', 'prefix' => 'evidence_corr_three_', 'label' => 'Corrective Action 3', 'required' => true],
+                 'corrective_path_two' => ['file' => 'corrective_photo_two', 'existing' => 'existing_corrective_photo_two', 'prefix' => 'evidence_corr_two_', 'label' => 'Corrective Action 2', 'required' => false],
+                 'corrective_path_three' => ['file' => 'corrective_photo_three', 'existing' => 'existing_corrective_photo_three', 'prefix' => 'evidence_corr_three_', 'label' => 'Corrective Action 3', 'required' => false],
                  'preventive_path_one' => ['file' => 'preventive_photo_one', 'existing' => 'existing_preventive_photo_one', 'prefix' => 'evidence_prev_one_', 'label' => 'Preventive Action 1', 'required' => true],
-                 'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_', 'label' => 'Preventive Action 2', 'required' => true],
-                 'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_', 'label' => 'Preventive Action 3', 'required' => true],
+                 'preventive_path_two' => ['file' => 'preventive_photo_two', 'existing' => 'existing_preventive_photo_two', 'prefix' => 'evidence_prev_two_', 'label' => 'Preventive Action 2', 'required' => false],
+                 'preventive_path_three' => ['file' => 'preventive_photo_three', 'existing' => 'existing_preventive_photo_three', 'prefix' => 'evidence_prev_three_', 'label' => 'Preventive Action 3', 'required' => false],
                  'root_cause_path' => ['file' => 'root_cause_photo', 'existing' => 'existing_root_cause_photo', 'prefix' => 'evidence_root_cause_', 'label' => 'Root Cause', 'required' => false],
              ];
 
