@@ -678,7 +678,8 @@ class MasterController extends Controller
     {
         $query = DB::table('users as u')
             ->leftJoin('CsAuditAuditor as a', 'u.id', '=', 'a.id_user')
-            ->select('u.id', 'u.username', 'u.full_name', DB::raw('COALESCE(a.is_auditor, 0) as is_auditor'));
+            ->select('u.id', 'u.username', 'u.full_name', DB::raw('COALESCE(a.is_auditor, 0) as is_auditor'))
+            ->orderBy('u.full_name', 'asc');
 
         // Search
         if ($request->has('search') && !empty($request->search['value'])) {

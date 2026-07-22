@@ -84,7 +84,7 @@
                 { data: 'full_name' },
                 { data: 'is_auditor', orderable: false }
             ],
-            order: [[1, 'asc']],
+            order: [[2, 'asc']],
             pageLength: 25,
             language: {
                 emptyTable: '<div class="text-center py-8 text-slate-500">No users available</div>'
