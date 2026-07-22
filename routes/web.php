@@ -188,6 +188,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/roles/store', [MasterController::class, 'store_roles'])->name('master.roles.store');
         Route::post('/roles/update', [MasterController::class, 'update_roles'])->name('master.roles.update');
         Route::post('/roles/delete', [MasterController::class, 'delete_roles'])->name('master.roles.delete');
+        Route::get('/user-auditor', [MasterController::class, 'user_auditor'])->name('master.user_auditor');
+        Route::post('/user-auditor/table', [MasterController::class, 'user_auditor_table'])->name('master.user_auditor.table');
+        Route::post('/user-auditor/toggle', [MasterController::class, 'toggle_user_auditor'])->name('master.user_auditor.toggle');
     });
 
     Route::get('/user-management', [MasterController::class, 'user_management'])->name('master.user_management');

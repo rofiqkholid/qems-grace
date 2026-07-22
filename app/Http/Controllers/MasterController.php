@@ -669,6 +669,109 @@ class MasterController extends Controller
         return view('master.roles');
     }
 
+    public function user_auditor()
+    {
+        return view('master.user_auditor');
+    }
+
+    public function user_auditor_table(Request $request)
+    {
+        $query = DB::table('users as u')
+            ->leftJoin('CsAuditAuditor as a', 'u.id', '=', 'a.id_user')
+            ->select('u.id', 'u.username', 'u.full_name', DB::raw('COALESCE(a.is_auditor, 0) as is_auditor'));
+
+        // Search
+        if ($request->has('search') && !empty($request->search['value'])) {
+            $searchValue = $request->search['value'];
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('u.username', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('u.full_name', 'LIKE', "%{$searchValue}%");
+            });
+        }
+
+        // Total records
+        $totalRecords = DB::table('users')->count();
+        $filteredRecords = $query->count();
+
+        // Pagination
+        if ($request->has('start') && $request->has('length')) {
+            $query->skip($request->start)->take($request->length);
+        }
+
+        $data = $query->get();
+
+        $response = [
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $filteredRecords,
+            "data" => $data->map(function ($item, $key) use ($request) {
+                $start = $request->start ?? 0;
+                
+                $checked = $item->is_auditor ? 'checked' : '';
+                
+                $checkbox = '<div class="flex items-center justify-start pl-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" value="' . $item->id . '" class="sr-only peer toggle-auditor" ' . $checked . ' onchange="toggleAuditor(this, ' . $item->id . ')">
+                        <div class="w-6 h-6 rounded-md border border-slate-300 flex items-center justify-center peer-checked:border-sky-400 peer-checked:bg-sky-50 peer-checked:[&_svg]:scale-100 transition-all shrink-0">
+                            <svg class="w-4.5 h-4.5 text-sky-500 scale-0 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </label>
+                </div>';
+
+                return [
+                    "no" => $start + $key + 1,
+                    "id" => $item->id,
+                    "username" => $item->username,
+                    "full_name" => $item->full_name ?? '-',
+                    "is_auditor" => $checkbox
+                ];
+            })
+        ];
+
+        return response()->json($response);
+    }
+
+    public function toggle_user_auditor(Request $request)
+    {
+        $request->validate([
+            'id_user' => 'required|integer',
+            'is_auditor' => 'required|boolean'
+        ]);
+
+        $id_user = $request->id_user;
+        $is_auditor = $request->is_auditor;
+
+        $userExists = DB::table('users')->where('id', $id_user)->exists();
+        if (!$userExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        $exists = DB::table('CsAuditAuditor')->where('id_user', $id_user)->exists();
+        if ($exists) {
+            DB::table('CsAuditAuditor')->where('id_user', $id_user)->update([
+                'is_auditor' => $is_auditor,
+                'updated_at' => now()
+            ]);
+        } else {
+            DB::table('CsAuditAuditor')->insert([
+                'id_user' => $id_user,
+                'is_auditor' => $is_auditor,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User auditor status updated successfully.'
+        ]);
+    }
+
     public function roles_table(Request $request)
     {
         $query = DB::table('GraceRole')->orderBy('id', 'desc');
