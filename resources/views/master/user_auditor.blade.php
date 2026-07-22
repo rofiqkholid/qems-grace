@@ -89,7 +89,7 @@
                 {
                     data: 'username',
                     name: 'username',
-                    className: 'text-slate-700 font-semibold'
+                    className: 'text-slate-700'
                 },
                 {
                     data: 'full_name',
