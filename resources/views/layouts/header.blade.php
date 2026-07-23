@@ -69,11 +69,11 @@
                                     <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
                                     <p class="text-xs text-slate-500">{{ Auth::user()?->email ?? '' }}</p>
                                 </div>
-                                <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                                <a href="{{ route('master.user_setting') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                                     <i class="fa-solid fa-user w-4"></i>
                                     <span>Profile</span>
                                 </a>
-                                <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                                <a href="{{ route('master.user_setting') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                                     <i class="fa-solid fa-gear w-4"></i>
                                     <span>Settings</span>
                                 </a>
