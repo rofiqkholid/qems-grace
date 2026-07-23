@@ -20,12 +20,12 @@
             <!-- Form -->
             <div class="p-8">
                 @if ($errors->any())
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div class="flex items-center gap-2 text-red-600">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        <span class="font-medium">An error occurred:</span>
+                <div id="error-box" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <div id="error-header" class="flex items-center gap-2 text-red-600">
+                        <i id="error-icon" class="fa-solid fa-circle-exclamation"></i>
+                        <span id="error-title" class="font-medium">An error occurred:</span>
                     </div>
-                    <ul class="mt-2 text-sm text-red-600 list-none space-y-1">
+                    <ul id="error-list" class="mt-2 text-sm text-red-600 list-none space-y-1">
                         @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                         @endforeach
@@ -134,6 +134,33 @@
                         if (submitBtn) {
                             submitBtn.disabled = false;
                             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+
+                        // Switch style to blue Information
+                        const errorBox = document.getElementById('error-box');
+                        const errorHeader = document.getElementById('error-header');
+                        const errorIcon = document.getElementById('error-icon');
+                        const errorTitle = document.getElementById('error-title');
+                        const errorList = document.getElementById('error-list');
+
+                        if (errorBox) {
+                            errorBox.classList.remove('bg-red-50', 'border-red-200');
+                            errorBox.classList.add('bg-blue-50', 'border-blue-200');
+                        }
+                        if (errorHeader) {
+                            errorHeader.classList.remove('text-red-600');
+                            errorHeader.classList.add('text-blue-600');
+                        }
+                        if (errorIcon) {
+                            errorIcon.classList.remove('fa-circle-exclamation');
+                            errorIcon.classList.add('fa-circle-info');
+                        }
+                        if (errorTitle) {
+                            errorTitle.textContent = 'Information:';
+                        }
+                        if (errorList) {
+                            errorList.classList.remove('text-red-600');
+                            errorList.classList.add('text-blue-600');
                         }
                     } else {
                         li.textContent = `Too many login attempts. Please try again in ${seconds} seconds.`;
