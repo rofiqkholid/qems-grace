@@ -1241,6 +1241,39 @@ class GenbaManagementController extends Controller
             return redirect()->back()->with('error', 'Please enter a valid document number.');
         }
 
+        // Search in CsAuditCar table first
+        $cleanDocNum = str_replace(' ', '', $doc_num);
+        $auditCar = DB::table('CsAuditCar')
+            ->where(DB::raw("REPLACE(req_number, ' ', '')"), '=', $cleanDocNum)
+            ->first();
+
+        if ($auditCar) {
+            $s1 = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+            $s2 = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+            $mid = str_pad($auditCar->id, 6, '0', STR_PAD_LEFT);
+            $plain = $s1 . $mid . $s2;
+            
+            $appKey = config('app.key', 'qms_secret_fallback_key_123');
+            $key = substr(md5($appKey), 0, 16);
+            
+            $encrypted = '';
+            for ($i = 0; $i < 16; $i++) {
+                $encrypted .= chr(ord($plain[$i]) ^ ord($key[$i]));
+            }
+            
+            $hex = bin2hex($encrypted);
+            
+            $encryptedCarId = sprintf('%s-%s-%s-%s-%s',
+                substr($hex, 0, 8),
+                substr($hex, 8, 4),
+                substr($hex, 12, 4),
+                substr($hex, 16, 4),
+                substr($hex, 20, 12)
+            );
+            
+            return redirect()->route('internal_audit.action_report.preview', $encryptedCarId);
+        }
+
         // Try to parse DocNum (format: ddMMyy-SysID)
         // Example: 280126-790 -> SysID is 790
         $parts = explode('-', $doc_num);
