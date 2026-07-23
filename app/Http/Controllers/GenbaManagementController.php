@@ -1242,9 +1242,12 @@ class GenbaManagementController extends Controller
         }
 
         // Search in CsAuditCar table first
-        $cleanDocNum = str_replace(' ', '', $doc_num);
+        $search1 = trim($doc_num); 
+        $search2 = str_replace(' ', '', $doc_num); 
+        $search3 = implode(' - ', array_map('trim', explode('-', $search2))); 
+
         $auditCar = DB::table('CsAuditCar')
-            ->where(DB::raw("REPLACE(req_number, ' ', '')"), '=', $cleanDocNum)
+            ->whereIn('req_number', [$search1, $search2, $search3])
             ->first();
 
         if ($auditCar) {
