@@ -25,7 +25,7 @@
                         <i class="fa-solid fa-circle-exclamation"></i>
                         <span class="font-medium">Terjadi kesalahan:</span>
                     </div>
-                    <ul class="mt-2 text-sm text-red-600 list-disc list-inside">
+                    <ul class="mt-2 text-sm text-red-600 list-none space-y-1">
                         @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                         @endforeach
@@ -112,5 +112,35 @@
             icon.classList.add('fa-eye');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorItems = document.querySelectorAll('.list-none li');
+        errorItems.forEach(li => {
+            const match = li.textContent.match(/Too many login attempts\. Please try again in (\d+) seconds\./);
+            if (match) {
+                let seconds = parseInt(match[1], 10);
+                const submitBtn = document.querySelector('button[type="submit"]');
+                
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                
+                const timer = setInterval(() => {
+                    seconds--;
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        li.textContent = 'You can try logging in now.';
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    } else {
+                        li.textContent = `Too many login attempts. Please try again in ${seconds} seconds.`;
+                    }
+                }, 1000);
+            }
+        });
+    });
 </script>
 @endsection
