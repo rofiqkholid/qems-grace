@@ -544,7 +544,7 @@
             error: function() {
                 $('#icon_f_genba_conform_delete_' + no).removeClass('hidden');
                 $('#loader_f_genba_conform_delete_' + no).addClass('hidden');
-                showToast('Terjadi kesalahan', 'error');
+                showToast('An error occurred.', 'error');
             }
         });
     }

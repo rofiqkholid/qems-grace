@@ -23,7 +23,7 @@
                 <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                     <div class="flex items-center gap-2 text-red-600">
                         <i class="fa-solid fa-circle-exclamation"></i>
-                        <span class="font-medium">Terjadi kesalahan:</span>
+                        <span class="font-medium">An error occurred:</span>
                     </div>
                     <ul class="mt-2 text-sm text-red-600 list-none space-y-1">
                         @foreach ($errors->all() as $error)
