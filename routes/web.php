@@ -33,7 +33,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', function () {
         return redirect()->route('dashboard');
     });
-    Route::get('/dashboard-mng', [DashboardController::class, 'index'])->name('dashboard');
+    Route::view('/dashboard-mng', 'dashboard.genba-mng')->name('dashboard');
 
     Route::get('/genba-management', function () {
         return view('activity.genba-header-form');
@@ -111,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-safety/chart-data/{yearMonth}', [DashboardController::class, 'safety_chart_all_dept'])->name('dashboard.safety.chart_data');
 
     // Internal Audit Dashboard Routes
-    Route::get('/dashboard-internal-audit', [DashboardController::class, 'internal_audit_index'])->name('dashboard.internal-audit');
+    Route::view('/dashboard-internal-audit', 'dashboard.internal-audit')->name('dashboard.internal-audit');
     Route::get('/dashboard-internal-audit/data_cards', [DashboardController::class, 'internal_audit_data_cards'])->name('dashboard.internal-audit.data_cards');
     Route::get('/dashboard-internal-audit/chart-data/{yearMonth}', [DashboardController::class, 'internal_audit_chart_all_dept'])->name('dashboard.internal-audit.chart_data');
     Route::get('/dashboard-internal-audit/closed-chart-data/{yearMonth}', [DashboardController::class, 'internal_audit_chart_closed_dept'])->name('dashboard.internal-audit.closed_chart_data');
@@ -120,7 +120,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-internal-audit/print', [DashboardController::class, 'internal_audit_print'])->name('dashboard.internal-audit.print');
 
     // KPI Dashboard Routes
-    Route::get('/dashboard-kpi', [DashboardController::class, 'kpi_index'])->name('dashboard.kpi');
+    Route::view('/dashboard-kpi', 'dashboard.kpi')->name('dashboard.kpi');
 
 
     // Genba Header Routes

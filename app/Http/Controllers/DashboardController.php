@@ -71,21 +71,6 @@ class DashboardController extends Controller
         return null;
     }
 
-    public function index()
-    {
-        return view('dashboard.genba-mng');
-    }
-
-    public function internal_audit_index()
-    {
-        return view('dashboard.internal-audit');
-    }
-
-    public function kpi_index()
-    {
-        return view('dashboard.kpi');
-    }
-
     public function data_cards(Request $request, $category_id = 'NOT_BIQ')
     {
         $yearMonth = $request->input('yearMonth', date('Y-m'));
