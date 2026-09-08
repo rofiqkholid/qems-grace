@@ -42,6 +42,15 @@
                     <i class="fa-solid fa-comments text-base sm:text-lg"></i>
                 </a>
 
+                <!-- Notification Icon -->
+                <button type="button" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" title="Notifications">
+                    <i class="fa-solid fa-bell text-base sm:text-lg"></i>
+                    <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                </button>
+
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
 
                 <!-- Realtime Clock -->

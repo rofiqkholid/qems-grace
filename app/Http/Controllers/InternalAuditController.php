@@ -165,6 +165,8 @@ class InternalAuditController extends Controller
         }
     }
 
+    public function verification()
+    {
         $departments = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
