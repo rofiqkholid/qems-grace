@@ -119,6 +119,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-internal-audit/export', [DashboardController::class, 'internal_audit_export'])->name('dashboard.internal-audit.export');
     Route::get('/dashboard-internal-audit/print', [DashboardController::class, 'internal_audit_print'])->name('dashboard.internal-audit.print');
 
+    // KPI Dashboard Routes
+    Route::get('/dashboard-kpi', [DashboardController::class, 'kpi_index'])->name('dashboard.kpi');
+
 
     // Genba Header Routes
     Route::post('/genba-header/table', [GenbaManagementController::class, 'genbaHeaderTable'])->name('genba.header.table');
@@ -253,7 +256,7 @@ Route::middleware(['auth'])->group(function () {
             return view('errors.coming-soon');
         })->name('kpi.department');
         Route::get('/monthly-summary', function () {
-            return view('errors.coming-soon');
+            return view('kpi.monthly-summary');
         })->name('kpi.monthly-summary');
         Route::get('/print-report', function () {
             return view('errors.coming-soon');

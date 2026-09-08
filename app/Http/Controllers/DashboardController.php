@@ -29,6 +29,8 @@ class DashboardController extends Controller
                 $menuId = 106;
             } elseif ($request->is('*dashboard-internal-audit*')) {
                 $menuId = 113;
+            } elseif ($request->is('*dashboard-kpi*')) {
+                $menuId = 123;
             }
             
             if (!UserMenuPermission::canView($menuId)) {
@@ -77,6 +79,11 @@ class DashboardController extends Controller
     public function internal_audit_index()
     {
         return view('dashboard.internal-audit');
+    }
+
+    public function kpi_index()
+    {
+        return view('dashboard.kpi');
     }
 
     public function data_cards(Request $request, $category_id = 'NOT_BIQ')

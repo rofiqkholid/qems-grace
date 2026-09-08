@@ -216,6 +216,16 @@ class MenuSeeder extends Seeder
                 'icon' => '<span></span>'
             ],
             [
+                'id' => 123,
+                'sequence_id' => 4,
+                'level_menu_id' => 3,
+                'group_id' => 7,
+                'sub_group_id' => 100,
+                'menu' => 'dashboard-kpi',
+                'menu_name' => 'KPI Dashboard',
+                'icon' => '<span></span>'
+            ],
+            [
                 'id' => 104,
                 'sequence_id' => 2,
                 'level_menu_id' => 2,
