@@ -398,6 +398,8 @@ class DashboardController extends Controller
         $allDepartments = DB::connection('sqlsrv')
             ->table('GenbaDept')
             ->where('Checkbox01', 1)
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
             ->pluck('Key1')
             ->toArray();
 
@@ -624,6 +626,8 @@ class DashboardController extends Controller
         }
 
         $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
             ->orderBy('Key1')
             ->pluck('Key1')
             ->toArray();
@@ -704,6 +708,8 @@ class DashboardController extends Controller
         $today = Carbon::now()->toDateString();
 
         $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
             ->orderBy('Key1')
             ->pluck('Key1')
             ->toArray();
@@ -1282,6 +1288,174 @@ class DashboardController extends Controller
                 'Cache-Control' => 'max-age=0',
             ]
         );
+    }
+
+    public function kpi_index()
+    {
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->orderBy('Key1', 'asc')
+            ->pluck('Key1')
+            ->toArray();
+
+        return view('dashboard.kpi', compact('departments'));
+    }
+
+    public function kpi_chart_data(Request $request, $year)
+    {
+        $year = (int)$year;
+        $pillarFilter = $request->pillar;
+        $deptFilter = $request->dept;
+
+        // Selalu gunakan 6 Pilar lengkap baku
+        $allStandardPillars = ['Safety', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
+        if ($pillarFilter) {
+            $pillars = array_values(array_filter($allStandardPillars, fn($p) => strtolower($p) === strtolower($pillarFilter)));
+        } else {
+            $pillars = $allStandardPillars;
+        }
+
+        // Ambil seluruh daftar departemen baku dari tabel GenbaDept (Kecuali BOD, AGM, GM)
+        $deptsQuery = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->orderBy('Key1', 'asc');
+        if ($deptFilter) {
+            $deptsQuery->where('Key1', $deptFilter);
+        }
+        $departments = $deptsQuery->pluck('Key1')->toArray();
+
+        $resultByPillar = [];
+
+        foreach ($pillars as $pillar) {
+            // Ambil KPI per pilar
+            $kpiIds = DB::table('KPIList')->where('pillar', $pillar)->pluck('id')->toArray();
+
+            $deptAchieved = [];
+            $deptNotAchieved = [];
+            $deptTotal = [];
+
+            foreach ($departments as $dept) {
+                $kpiCompanies = DB::table('KPICompany')
+                    ->whereIn('kpi_list_id', $kpiIds)
+                    ->where('department_code', $dept)
+                    ->get();
+
+                $achieved = 0;
+                $notAchieved = 0;
+                $total = 0;
+
+                foreach ($kpiCompanies as $kc) {
+                    $activities = DB::table('KPICompanyActivity')
+                        ->where('kpi_company_id', $kc->id)
+                        ->get();
+
+                    if ($activities->count() > 0) {
+                        foreach ($activities as $act) {
+                            $st = strtolower(trim($act->status ?? ''));
+                            if (in_array($st, ['achieve', 'achieved', 'ok', 'good'])) {
+                                $achieved++;
+                                $total++;
+                            } elseif (in_array($st, ['not achieve', 'not achieved', 'not_achieved', 'ng', 'bad'])) {
+                                $notAchieved++;
+                                $total++;
+                            }
+                        }
+                    }
+                }
+
+                $deptAchieved[] = $achieved;
+                $deptNotAchieved[] = $notAchieved;
+                $deptTotal[] = $total;
+            }
+
+            $resultByPillar[$pillar] = [
+                'departments' => $departments,
+                'achieved' => $deptAchieved,
+                'not_achieved' => $deptNotAchieved,
+                'total' => $deptTotal
+            ];
+        }
+
+        return response()->json([
+            'year' => $year,
+            'departments' => $departments,
+            'pillars' => $pillars,
+            'data' => $resultByPillar
+        ]);
+    }
+
+    public function kpi_summary_cards(Request $request, $year)
+    {
+        $year = (int)$year;
+        $pillarFilter = $request->pillar;
+        $deptFilter = $request->dept;
+
+        $query = DB::table('KPICompany as kc')
+            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id');
+
+        if ($pillarFilter) {
+            $query->where('kl.pillar', $pillarFilter);
+        }
+        if ($deptFilter) {
+            $query->where('kc.department_code', $deptFilter);
+        }
+
+        $kpiCompanies = $query->select('kc.id', 'kc.kpi_list_id')->get();
+        $totalKpi = $kpiCompanies->count();
+        $activities = DB::table('KPICompanyActivity as kca')
+            ->join('KPICompany as kc', 'kca.kpi_company_id', '=', 'kc.id')
+            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id');
+
+        if ($pillarFilter) {
+            $activities->where('kl.pillar', $pillarFilter);
+        }
+        if ($deptFilter) {
+            $activities->where('kc.department_code', $deptFilter);
+        }
+
+        $allActs = $activities->whereNotNull('kca.status')->where('kca.status', '!=', '')->get(['kca.status']);
+
+        $achieved = 0;
+        $notAchieved = 0;
+
+        foreach ($allActs as $act) {
+            $st = strtolower(trim($act->status ?? ''));
+            if (in_array($st, ['achieve', 'achieved', 'ok', 'good'])) {
+                $achieved++;
+            } elseif (in_array($st, ['not achieve', 'not achieved', 'not_achieved', 'ng', 'bad'])) {
+                $notAchieved++;
+            }
+        }
+
+        $totalKpi = $achieved + $notAchieved;
+        $achievementRate = $totalKpi > 0 ? round(($achieved / $totalKpi) * 100, 1) : 0;
+
+        return response()->json([
+            'totalKpi' => $totalKpi,
+            'achieved' => $achieved,
+            'notAchieved' => $notAchieved,
+            'noData' => 0,
+            'achievementRate' => $achievementRate
+        ]);
+    }
+
+    private function parseLocalNumber($val)
+    {
+        if ($val === null || $val === '') {
+            return 0.0;
+        }
+        $val = trim($val);
+        if (strpos($val, ',') !== false) {
+            $val = str_replace('.', '', $val);
+            $val = str_replace(',', '.', $val);
+        } else {
+            if (substr_count($val, '.') > 1) {
+                $val = str_replace('.', '', $val);
+            }
+        }
+        return (float) filter_var($val, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     }
 }
 

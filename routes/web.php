@@ -120,7 +120,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-internal-audit/print', [DashboardController::class, 'internal_audit_print'])->name('dashboard.internal-audit.print');
 
     // KPI Dashboard Routes
-    Route::view('/dashboard-kpi', 'dashboard.kpi')->name('dashboard.kpi');
+    Route::get('/dashboard-kpi', [DashboardController::class, 'kpi_index'])->name('dashboard.kpi');
+    Route::get('/dashboard-kpi/chart-data/{year}', [DashboardController::class, 'kpi_chart_data'])->name('dashboard.kpi.chart_data');
+    Route::get('/dashboard-kpi/summary-cards/{year}', [DashboardController::class, 'kpi_summary_cards'])->name('dashboard.kpi.summary_cards');
 
 
     // Genba Header Routes

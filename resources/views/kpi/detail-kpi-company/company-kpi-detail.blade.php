@@ -58,7 +58,7 @@
                         if (!empty($exprClean)) {
                             try {
                                 $calculatedActual = @eval("return ({$exprClean});");
-                                $unit = $act->unit ?? ($kpi->unit ?? '');
+                                $unit = ($act && !empty($act->unit)) ? $act->unit : ($kpi->unit ?? '');
                                 $isPercentUnit = in_array(strtolower(trim($unit)), ['%', 'percent', 'persen']);
                                 if ($isPercentUnit && strpos($exprClean, '*') !== false && strpos($exprClean, '/') === false && $countComponentsInExpr > 1) {
                                     $calculatedActual = $calculatedActual / pow(100, $countComponentsInExpr - 1);
@@ -406,7 +406,21 @@
                                      @endphp
                                      @if($hasActVal)
                                          <td class="p-3 text-center border-r border-slate-200">
-                                             @if($act->status === 'Achieved')
+                                             @php
+                                                 $targetVal = $parseLocalNum($kpi->target);
+                                                 $actValNum = $parseLocalNum($valVal);
+                                                 $op = trim(htmlspecialchars_decode($kpi->operator));
+                                                 $isAchieved = false;
+                                                 switch ($op) {
+                                                     case '>=': $isAchieved = ($actValNum >= $targetVal); break;
+                                                     case '<=': $isAchieved = ($actValNum <= $targetVal); break;
+                                                     case '>':  $isAchieved = ($actValNum > $targetVal); break;
+                                                     case '<':  $isAchieved = ($actValNum < $targetVal); break;
+                                                     case '=':
+                                                     default:   $isAchieved = ($actValNum == $targetVal); break;
+                                                 }
+                                             @endphp
+                                             @if($isAchieved)
                                                  <div class="inline-flex w-7 h-7 rounded-full items-center justify-center bg-green-100 text-green-600" title="Achieved">
                                                      <i class="fas fa-circle text-[12px]"></i>
                                                  </div>

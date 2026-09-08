@@ -165,9 +165,11 @@ class InternalAuditController extends Controller
         }
     }
 
-    public function verification()
-    {
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->pluck('Key1');
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->orderBy('Key1', 'asc')
+            ->pluck('Key1');
         
         $superiorCount = DB::table('CsAuditCar as a')
             ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')

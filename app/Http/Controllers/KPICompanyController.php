@@ -991,21 +991,22 @@ class KPICompanyController extends Controller
             $status = null;
 
             if ($actualValInput !== null && $actualValInput !== '') {
-                $actualVal = $this->parseLocalNumber($actualValInput);
+                $actValNum = (float) $actualValInput;
+                $actualVal = number_format($actValNum, 2, ',', '');
                 
                 // Automatically calculate status based on actual, master_target, and operator
-                $operator = trim(htmlspecialchars_decode($activity->operator));
-                $targetStr = $activity->master_target;
+                $operator = trim(htmlspecialchars_decode($activity->operator ?? '>='));
+                $targetStr = $activity->master_target ?? '0';
                 $targetVal = $this->parseLocalNumber($targetStr);
 
                 $isAchieved = false;
                 switch ($operator) {
-                    case '>=': $isAchieved = ($actualVal >= $targetVal); break;
-                    case '<=': $isAchieved = ($actualVal <= $targetVal); break;
-                    case '>':  $isAchieved = ($actualVal > $targetVal); break;
-                    case '<':  $isAchieved = ($actualVal < $targetVal); break;
+                    case '>=': $isAchieved = ($actValNum >= $targetVal); break;
+                    case '<=': $isAchieved = ($actValNum <= $targetVal); break;
+                    case '>':  $isAchieved = ($actValNum > $targetVal); break;
+                    case '<':  $isAchieved = ($actValNum < $targetVal); break;
                     case '=':
-                    default:   $isAchieved = ($actualVal == $targetVal); break;
+                    default:   $isAchieved = ($actValNum == $targetVal); break;
                 }
                 $status = $isAchieved ? 'Achieved' : 'Not Achieved';
             }
@@ -1267,7 +1268,7 @@ class KPICompanyController extends Controller
 
         $kpi = DB::table('KPICompany as child')
             ->leftJoin('KPIList as parent', 'child.kpi_list_id', '=', 'parent.id')
-            ->select('child.*', 'parent.operator', 'parent.target')
+            ->select('child.*', 'parent.operator', 'parent.target', 'parent.unit')
             ->where('child.id', $kpiCompanyId)
             ->first();
 
@@ -1379,7 +1380,7 @@ class KPICompanyController extends Controller
                 DB::table('KPICompanyActivity')
                     ->where('id', $activity->id)
                     ->update([
-                        'actual' => $calculatedActual,
+                        'actual' => number_format((float)$calculatedActual, 2, ',', ''),
                         'status' => $status,
                         'updated_at' => \Carbon\Carbon::now()
                     ]);
