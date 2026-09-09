@@ -22,7 +22,12 @@ class NotificationController extends Controller
         $roles = strtoupper($user->roles ?? '');
         $username = strtoupper($user->username ?? '');
 
-        // Return true if department/role contains ICT/ADMIN, or fallback to true for logged in users with menu permission
+        // Fetch department from t100_user_dept if empty on user model
+        if (empty($dept)) {
+            $deptVal = DB::table('t100_user_dept')->where('id_user', $user->id)->value('department');
+            $dept = strtoupper($deptVal ?? '');
+        }
+
         if (
             str_contains($dept, 'ICT') ||
             str_contains($dept, 'INFORMATION') ||
@@ -35,7 +40,7 @@ class NotificationController extends Controller
             return true;
         }
 
-        return true; // Grant access so menu is visible in Data Master for logged in users
+        return false;
     }
 
     /**
