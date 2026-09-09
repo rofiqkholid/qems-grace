@@ -19,11 +19,11 @@
                 <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Internal Audit findings and performance in real-time.</p>
             </div>
             <div class="flex-shrink-0 flex items-center justify-end w-full sm:w-auto self-end sm:self-auto gap-1.5 sm:gap-3">
-                <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                <button type="button" id="btnExportExcel" onclick="exportToExcel(this)" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export to Excel</span>
                 </button>
-                <button type="button" onclick="exportToPdf()" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                <button type="button" id="btnExportPdf" onclick="exportToPdf(this)" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export PDF</span>
                 </button>
@@ -2041,7 +2041,18 @@
         }
     }
 
-    function exportToExcel() {
+    function exportToExcel(btn) {
+        const $btn = $(btn || '#btnExportExcel');
+        const $icon = $btn.find('i');
+        const $text = $btn.find('span');
+
+        const originalIconClass = $icon.attr('class');
+        const originalText = $text.text();
+
+        $btn.prop('disabled', true);
+        $icon.attr('class', 'fa-solid fa-circle-notch fa-spin text-xs sm:text-sm');
+        $text.text('Downloading...');
+
         const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
         const dateFrom = $('#dateFrom').val() || '';
         const dateTo = $('#dateTo').val() || '';
@@ -2064,9 +2075,26 @@
             document.body.appendChild(iframe);
         }
         iframe.src = url.toString();
+
+        setTimeout(() => {
+            $btn.prop('disabled', false);
+            $icon.attr('class', originalIconClass);
+            $text.text(originalText);
+        }, 3500);
     }
 
-    function exportToPdf() {
+    function exportToPdf(btn) {
+        const $btn = $(btn || '#btnExportPdf');
+        const $icon = $btn.find('i');
+        const $text = $btn.find('span');
+
+        const originalIconClass = $icon.attr('class');
+        const originalText = $text.text();
+
+        $btn.prop('disabled', true);
+        $icon.attr('class', 'fa-solid fa-circle-notch fa-spin text-xs sm:text-sm');
+        $text.text('Loading PDF...');
+
         const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
         const dateFrom = $('#dateFrom').val() || '';
         const dateTo = $('#dateTo').val() || '';
@@ -2082,6 +2110,12 @@
 
         // Open in new tab so user can see preview and print to PDF
         window.open(url.toString(), '_blank');
+
+        setTimeout(() => {
+            $btn.prop('disabled', false);
+            $icon.attr('class', originalIconClass);
+            $text.text(originalText);
+        }, 2500);
     }
 </script>
 @endpush
