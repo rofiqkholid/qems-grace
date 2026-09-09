@@ -46,9 +46,8 @@
                 <div class="relative" id="notif-menu-container">
                     <button type="button" id="notif-menu-button" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center focus:outline-none" title="Notifications">
                         <i class="fa-solid fa-bell text-base sm:text-lg"></i>
-                        <span id="notif-badge" class="hidden absolute top-1.5 right-1.5 flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        <span id="notif-badge" class="hidden absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-rose-500 rounded-full leading-none shadow-sm">
+                            0
                         </span>
                     </button>
 
@@ -184,7 +183,10 @@
                     const listContainer = document.getElementById('notif-list-container');
 
                     if (data.unread_count > 0) {
-                        if (badge) badge.classList.remove('hidden');
+                        if (badge) {
+                            badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                            badge.classList.remove('hidden');
+                        }
                         if (countText) {
                             countText.textContent = `${data.unread_count} New`;
                             countText.classList.remove('hidden');
