@@ -10,6 +10,7 @@ use App\Http\Controllers\MasterController;
 use App\Http\Controllers\InternalAuditController;
 use App\Http\Controllers\AgentChatController;
 use App\Http\Controllers\KPICompanyController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -124,6 +125,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-kpi/chart-data/{year}', [DashboardController::class, 'kpi_chart_data'])->name('dashboard.kpi.chart_data');
     Route::get('/dashboard-kpi/summary-cards/{year}', [DashboardController::class, 'kpi_summary_cards'])->name('dashboard.kpi.summary_cards');
 
+
+    // Notification Routes
+    Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark_read');
+
+    // Master Notification Routes (ICT only)
+    Route::get('/data-master/notification', [NotificationController::class, 'masterIndex'])->name('master.notification');
+    Route::post('/data-master/notification/table', [NotificationController::class, 'masterTable'])->name('master.notification.table');
+    Route::post('/data-master/notification/send', [NotificationController::class, 'sendBroadcast'])->name('master.notification.send');
+    Route::post('/data-master/notification/update', [NotificationController::class, 'updateNotification'])->name('master.notification.update');
+    Route::post('/data-master/notification/delete', [NotificationController::class, 'deleteNotification'])->name('master.notification.delete');
 
     // Genba Header Routes
     Route::post('/genba-header/table', [GenbaManagementController::class, 'genbaHeaderTable'])->name('genba.header.table');

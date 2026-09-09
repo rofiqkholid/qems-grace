@@ -57,6 +57,9 @@
                         @if(!\App\Models\UserMenuPermission::canView($subItem['menu']->id))
                             @continue
                         @endif
+                        @if(($subItem['menu']->id == 124 || $subItem['menu']->menu === 'data-master/notification') && !\App\Http\Controllers\NotificationController::isIctUser())
+                            @continue
+                        @endif
                     <div>
                         @if(empty($subItem['children']))
                         @php

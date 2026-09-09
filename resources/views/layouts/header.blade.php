@@ -42,14 +42,42 @@
                     <i class="fa-solid fa-comments text-base sm:text-lg"></i>
                 </a>
 
-                <!-- Notification Icon -->
-                <button type="button" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" title="Notifications">
-                    <i class="fa-solid fa-bell text-base sm:text-lg"></i>
-                    <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                </button>
+                <!-- Notification Dropdown -->
+                <div class="relative" id="notif-menu-container">
+                    <button type="button" id="notif-menu-button" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center focus:outline-none" title="Notifications">
+                        <i class="fa-solid fa-bell text-base sm:text-lg"></i>
+                        <span id="notif-badge" class="hidden absolute top-1.5 right-1.5 flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                    </button>
+
+                    <!-- Notification Dropdown Panel -->
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-xl py-2 z-50 transform transition-all duration-200">
+                        <!-- Header -->
+                        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-slate-800">Notifications</h3>
+                                <span id="notif-count-text" class="hidden px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-600 rounded-full">0 New</span>
+                            </div>
+                            <button type="button" id="mark-all-read" class="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">Mark all as read</button>
+                        </div>
+
+                        <!-- Notification Items List Container -->
+                        <div id="notif-list-container" class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                            <div class="px-4 py-8 text-center text-xs text-slate-400">
+                                Loading notifications...
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="p-2 border-t border-slate-100 text-center">
+                            <a href="{{ route('dashboard.internal-audit') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 block py-1 transition-colors">
+                                View All Audit Notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
 
@@ -115,19 +143,143 @@
     document.addEventListener('DOMContentLoaded', function() {
         const userMenuButton = document.getElementById('user-menu-button');
         const userDropdown = document.getElementById('user-dropdown');
+        const notifMenuButton = document.getElementById('notif-menu-button');
+        const notifDropdown = document.getElementById('notif-dropdown');
+        const notifBadge = document.getElementById('notif-badge');
+        const markAllRead = document.getElementById('mark-all-read');
 
         if (userMenuButton && userDropdown) {
             userMenuButton.addEventListener('click', function(e) {
                 e.stopPropagation();
+                if (notifDropdown) notifDropdown.classList.add('hidden');
                 userDropdown.classList.toggle('hidden');
             });
+        }
 
-            document.addEventListener('click', function(e) {
-                if (!userDropdown.contains(e.target) && !userMenuButton.contains(e.target)) {
-                    userDropdown.classList.add('hidden');
-                }
+        if (notifMenuButton && notifDropdown) {
+            notifMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (userDropdown) userDropdown.classList.add('hidden');
+                notifDropdown.classList.toggle('hidden');
             });
         }
+
+        document.addEventListener('click', function(e) {
+            if (userDropdown && userMenuButton && !userDropdown.contains(e.target) && !userMenuButton.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+            if (notifDropdown && notifMenuButton && !notifDropdown.contains(e.target) && !notifMenuButton.contains(e.target)) {
+                notifDropdown.classList.add('hidden');
+            }
+        });
+
+        function loadNotifications() {
+            fetch("{{ route('notifications.get') }}")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return;
+
+                    const badge = document.getElementById('notif-badge');
+                    const countText = document.getElementById('notif-count-text');
+                    const listContainer = document.getElementById('notif-list-container');
+
+                    if (data.unread_count > 0) {
+                        if (badge) badge.classList.remove('hidden');
+                        if (countText) {
+                            countText.textContent = `${data.unread_count} New`;
+                            countText.classList.remove('hidden');
+                        }
+                    } else {
+                        if (badge) badge.classList.add('hidden');
+                        if (countText) {
+                            countText.textContent = `0 New`;
+                            countText.classList.add('hidden');
+                        }
+                    }
+
+                    if (listContainer) {
+                        if (!data.notifications || data.notifications.length === 0) {
+                            listContainer.innerHTML = `
+                                <div class="px-4 py-8 text-center text-xs text-slate-400">
+                                    No notifications yet
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        let html = '';
+                        data.notifications.forEach(item => {
+                            let iconBg = 'bg-blue-100 text-blue-600';
+                            let iconClass = 'fa-solid fa-bell';
+                            if (item.type === 'warning') {
+                                iconBg = 'bg-amber-100 text-amber-600';
+                                iconClass = 'fa-solid fa-circle-exclamation';
+                            } else if (item.type === 'success') {
+                                iconBg = 'bg-emerald-100 text-emerald-600';
+                                iconClass = 'fa-solid fa-square-check';
+                            } else if (item.type === 'danger') {
+                                iconBg = 'bg-rose-100 text-rose-600';
+                                iconClass = 'fa-solid fa-triangle-exclamation';
+                            }
+
+                            const itemUrl = item.url ? item.url : '#';
+                            const unreadDot = item.is_read == 0 ? '<span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></span>' : '';
+
+                            html += `
+                                <a href="${itemUrl}" onclick="markNotifRead(${item.id}, event, '${itemUrl}')" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors ${item.is_read == 0 ? 'bg-blue-50/20' : ''}">
+                                    <div class="w-8 h-8 rounded-full ${iconBg} flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="${iconClass} text-sm"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-800 truncate">${item.title}</p>
+                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5">${item.message || ''}</p>
+                                        <span class="text-[10px] text-slate-400 mt-1 block">${item.time_ago}</span>
+                                    </div>
+                                    ${unreadDot}
+                                </a>
+                            `;
+                        });
+                        listContainer.innerHTML = html;
+                    }
+                })
+                .catch(err => console.error('Error fetching notifications:', err));
+        }
+
+        window.markNotifRead = function(id, e, url) {
+            e.preventDefault();
+            fetch("{{ route('notifications.mark_read') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ id: id })
+            }).then(() => {
+                if (url && url !== '#') {
+                    window.location.href = url;
+                } else {
+                    loadNotifications();
+                }
+            });
+        };
+
+        if (markAllRead) {
+            markAllRead.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch("{{ route('notifications.mark_read') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({})
+                }).then(() => {
+                    loadNotifications();
+                });
+            });
+        }
+
+        loadNotifications();
 
         // Global Search Handler
         const globalSearchInput = document.getElementById('globalSearchInput');
