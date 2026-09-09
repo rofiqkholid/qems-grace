@@ -91,7 +91,7 @@
                     <td style="border: 1px solid #000;">{{ $row->finding_category ?? '-' }}</td>
                     <td style="border: 1px solid #000;">{{ $row->finding ?? '-' }}</td>
                     <td style="text-align: center; border: 1px solid #000;">{{ $row->due_date ? \Carbon\Carbon::parse($row->due_date)->format('d M Y') : '-' }}</td>
-                    <td style="border: 1px solid #000;">{{ $row->status ?? '-' }}</td>
+                    <td style="border: 1px solid #000;">{{ (($row->finding_category ?? '') === 'OFI') ? '-' : ($row->status ?? '-') }}</td>
                     <td style="border: 1px solid #000;">{!! nl2br(e($corrective_str)) ?: '-' !!}</td>
                     <td style="text-align: center; border: 1px solid #000;">{{ $row->due_date ? \Carbon\Carbon::parse($row->due_date)->format('d M Y') : '-' }}</td>
                     <td style="border: 1px solid #000;">{!! nl2br(e($preventive_str)) ?: '-' !!}</td>

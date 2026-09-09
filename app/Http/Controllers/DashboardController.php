@@ -874,23 +874,49 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function internal_audit_export(Request $request)
+    private function getInternalAuditExportQuery(Request $request)
     {
-        $query = DB::table('CsAuditCar as a')
-            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+        $query = DB::table('CsAuditDetail as b')
+            ->join('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
+            ->leftJoin('CsAuditCar as a', 'a.audit_detail_id', '=', 'b.id')
             ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
             ->leftJoin('CsChecksheetItem as e', 'e.id', '=', 'b.checksheet_item_id')
-            ->whereNotNull('a.department')
-            ->where('a.department', '<>', '')
-            ->whereNotNull('a.finding')
-            ->where('a.finding', '<>', '')
+            ->where(function($q) {
+                $q->where(function($q1) {
+                    $q1->whereNotNull('a.department')
+                       ->where('a.department', '<>', '')
+                       ->whereNotNull('a.finding')
+                       ->where('a.finding', '<>', '');
+                })
+                ->orWhere(function($q2) {
+                    $q2->where('b.judgment', 'OFI')
+                       ->where(function($q3) {
+                           $q3->where(function($q4) {
+                               $q4->whereNotNull('b.note')
+                                  ->where('b.note', '<>', '');
+                           })->orWhere(function($q4) {
+                               $q4->whereNotNull('b.evidence')
+                                  ->where('b.evidence', '<>', '');
+                           })->orWhere(function($q4) {
+                               $q4->whereNotNull('a.finding')
+                                  ->where('a.finding', '<>', '');
+                           });
+                       });
+                });
+            })
             ->select(
-                'a.*', 
-                'b.checksheet_item_id', 
-                'b.note as detail_note', 
-                'c.hash_id as schedule_hash_id', 
-                'c.auditee as header_auditee',
+                'a.id as id',
+                'a.hash_id',
+                'a.req_number',
+                'a.clause_text',
+                'a.status',
+                'a.due_date',
+                'a.qmr_approved_at',
+                'b.id as detail_id',
+                'b.checksheet_item_id',
+                'b.note as detail_note',
+                'b.evidence as detail_evidence',
+                'c.hash_id as schedule_hash_id',
                 'c.audit_date as audit_date',
                 'c.audit_type as audit_type',
                 'e.scope_item as scope_item',
@@ -907,7 +933,14 @@ class DashboardController extends Controller
                 'd.corrective_path_three',
                 'd.preventive_path_one',
                 'd.preventive_path_two',
-                'd.preventive_path_three'
+                'd.preventive_path_three',
+                DB::raw("COALESCE(NULLIF(a.department, ''), c.auditee_dept) as department"),
+                DB::raw("COALESCE(NULLIF(a.auditor, ''), c.auditor_names) as auditor"),
+                DB::raw("COALESCE(NULLIF(a.auditee, ''), c.auditee) as auditee"),
+                DB::raw("COALESCE(NULLIF(a.finding_category, ''), b.judgment) as finding_category"),
+                DB::raw("COALESCE(NULLIF(a.finding, ''), b.note, b.evidence) as finding"),
+                DB::raw("COALESCE(NULLIF(a.clause_title, ''), NULLIF(a.requirement_no, '')) as clause_title"),
+                DB::raw("COALESCE(a.created_at, b.created_at) as created_at")
             );
 
         // Apply filters
@@ -916,25 +949,64 @@ class DashboardController extends Controller
             $query->where(function($q) use ($searchValue) {
                 $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
                   ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('c.auditee_dept', 'LIKE', "%{$searchValue}%")
                   ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('c.auditor_names', 'LIKE', "%{$searchValue}%")
                   ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
+                  ->orWhere('c.auditee', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('b.judgment', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('a.finding', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('b.note', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('b.evidence', 'LIKE', "%{$searchValue}%");
             });
         }
         if ($request->has('date_from') && !empty($request->date_from)) {
-            $query->whereDate('a.created_at', '>=', $request->date_from);
+            $query->where(function($q) use ($request) {
+                $q->whereDate('a.created_at', '>=', $request->date_from)
+                  ->orWhere(function($q2) use ($request) {
+                      $q2->whereNull('a.created_at')
+                         ->whereDate('b.created_at', '>=', $request->date_from);
+                  });
+            });
         }
         if ($request->has('date_to') && !empty($request->date_to)) {
-            $query->whereDate('a.created_at', '<=', $request->date_to);
+            $query->where(function($q) use ($request) {
+                $q->whereDate('a.created_at', '<=', $request->date_to)
+                  ->orWhere(function($q2) use ($request) {
+                      $q2->whereNull('a.created_at')
+                         ->whereDate('b.created_at', '<=', $request->date_to);
+                  });
+            });
         }
         if ($request->has('dept') && !empty($request->dept)) {
-            $query->where('a.department', $request->dept);
+            $query->where(function($q) use ($request) {
+                $q->where('a.department', $request->dept)
+                  ->orWhere(function($q2) use ($request) {
+                      $q2->where(function($q3) {
+                          $q3->whereNull('a.department')->orWhere('a.department', '');
+                      })->where('c.auditee_dept', $request->dept);
+                  });
+            });
         }
         if ($request->has('finding_category') && !empty($request->finding_category)) {
-            $query->where('a.finding_category', $request->finding_category);
+            $cat = $request->finding_category;
+            $query->where(function($q) use ($cat) {
+                $q->where('a.finding_category', $cat)
+                  ->orWhere(function($q2) use ($cat) {
+                      $q2->where(function($q3) {
+                          $q3->whereNull('a.finding_category')->orWhere('a.finding_category', '');
+                      })->where('b.judgment', $cat);
+                  });
+            });
         }
 
-        $records = $query->orderBy('a.created_at', 'desc')->get();
+        return $query->orderBy(DB::raw("COALESCE(a.created_at, b.created_at)"), 'desc');
+    }
+
+    public function internal_audit_export(Request $request)
+    {
+        $records = $this->getInternalAuditExportQuery($request)->get();
 
         $templatePath = public_path('tamplate-xlsx/Internal_Audit_Export_Tamplate.xlsx');
         if (file_exists($templatePath)) {
@@ -1031,7 +1103,9 @@ class DashboardController extends Controller
                 
                 // Status calculation
                 $statusText = '-';
-                if ($row->status === 'Draft' || ($row->action_status ?? '') === 'draft') {
+                if (($row->finding_category ?? '') === 'OFI') {
+                    $statusText = '-';
+                } elseif ($row->status === 'Draft' || ($row->action_status ?? '') === 'draft') {
                     $statusText = 'Draft (Auditee)';
                 } elseif ($row->status === 'Under Review' || ($row->action_status ?? '') === 'open_verif') {
                     $statusText = 'Waiting Superior Approval';
@@ -1101,64 +1175,7 @@ class DashboardController extends Controller
 
     public function internal_audit_print(Request $request)
     {
-        $query = DB::table('CsAuditCar as a')
-            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id')
-            ->leftJoin('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->leftJoin('CsChecksheetItem as e', 'e.id', '=', 'b.checksheet_item_id')
-            ->whereNotNull('a.department')
-            ->where('a.department', '<>', '')
-            ->whereNotNull('a.finding')
-            ->where('a.finding', '<>', '')
-            ->select(
-                'a.*', 
-                'b.checksheet_item_id', 
-                'b.note as detail_note', 
-                'c.hash_id as schedule_hash_id', 
-                'c.auditee as header_auditee',
-                'c.audit_date as audit_date',
-                'c.audit_type as audit_type',
-                'e.scope_item as scope_item',
-                'd.auditee_superior_name as superior_name',
-                'd.corrective_action_one',
-                'd.corrective_action_two',
-                'd.corrective_action_three',
-                'd.preventive_action_one',
-                'd.preventive_action_two',
-                'd.preventive_action_three',
-                'd.corrective_path_one',
-                'd.corrective_path_two',
-                'd.corrective_path_three',
-                'd.preventive_path_one',
-                'd.preventive_path_two',
-                'd.preventive_path_three'
-            );
-
-        // Apply filters
-        if ($request->has('search') && !empty($request->search)) {
-            $searchValue = $request->search;
-            $query->where(function($q) use ($searchValue) {
-                $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.auditor', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.auditee', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('a.finding_category', 'LIKE', "%{$searchValue}%");
-            });
-        }
-        if ($request->has('date_from') && !empty($request->date_from)) {
-            $query->whereDate('a.created_at', '>=', $request->date_from);
-        }
-        if ($request->has('date_to') && !empty($request->date_to)) {
-            $query->whereDate('a.created_at', '<=', $request->date_to);
-        }
-        if ($request->has('dept') && !empty($request->dept)) {
-            $query->where('a.department', $request->dept);
-        }
-        if ($request->has('finding_category') && !empty($request->finding_category)) {
-            $query->where('a.finding_category', $request->finding_category);
-        }
-
-        $records = $query->orderBy('a.created_at', 'desc')->get();
+        $records = $this->getInternalAuditExportQuery($request)->get();
 
         return view('export.pdf-export', compact('records'));
     }

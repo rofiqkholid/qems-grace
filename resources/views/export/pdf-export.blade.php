@@ -109,7 +109,9 @@
                     
                     // Status calculation exactly like Excel
                     $statusText = '-';
-                    if ($row->status === 'Draft' || ($row->action_status ?? '') === 'draft') {
+                    if (($row->finding_category ?? '') === 'OFI') {
+                        $statusText = '-';
+                    } elseif ($row->status === 'Draft' || ($row->action_status ?? '') === 'draft') {
                         $statusText = 'Draft (Auditee)';
                     } elseif ($row->status === 'Under Review' || ($row->action_status ?? '') === 'open_verif') {
                         $statusText = 'Waiting Superior Approval';
