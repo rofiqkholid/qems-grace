@@ -34,11 +34,6 @@ class MasterController extends Controller
         });
     }
 
-    public function line_checked()
-    {
-        return view('master.line-checked');
-    }
-
     public function line_checked_table(Request $request)
     {
         $query = DB::table('Genba_Area')->orderBy('SysID', 'desc');
@@ -189,10 +184,7 @@ class MasterController extends Controller
         }
     }
 
-    public function category()
-    {
-        return view('master.category');
-    }
+
 
     public function category_table(Request $request)
     {
@@ -346,10 +338,7 @@ class MasterController extends Controller
 
 
 
-    public function department()
-    {
-        return view('master.department');
-    }
+
 
     public function department_table(Request $request)
     {
@@ -499,10 +488,7 @@ class MasterController extends Controller
         }
     }
 
-    public function clauses()
-    {
-        return view('master.clauses');
-    }
+
 
     public function clauses_table(Request $request)
     {
@@ -664,15 +650,7 @@ class MasterController extends Controller
         }
     }
 
-    public function roles()
-    {
-        return view('master.roles');
-    }
 
-    public function user_auditor()
-    {
-        return view('master.user-auditor');
-    }
 
     public function user_auditor_table(Request $request)
     {
@@ -1407,10 +1385,7 @@ class MasterController extends Controller
         }
     }
 
-    public function menu_management()
-    {
-        return view('setting.menu-management');
-    }
+
 
     public function menu_management_table(Request $request)
     {

@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/spv_verification', function() {
         return redirect()->route('summary-verif');
     });
-    Route::get('/room-chat-agent', [AgentChatController::class, 'index'])->name('agent.chat');
+    Route::view('/room-chat-agent', 'agent.room-chat-agent')->name('agent.chat');
     Route::post('/room-chat-agent/send', [AgentChatController::class, 'send'])->name('agent.chat.send');
 
     // Dashboard Routes
@@ -109,13 +109,13 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Genba BIQ Dashboard Routes
-    Route::get('/dashboard-biq', [DashboardController::class, 'biq_index'])->name('dashboard.biq');
+    Route::view('/dashboard-biq', 'dashboard.genba-biq')->name('dashboard.biq');
     Route::get('/dashboard-biq/data_cards', [DashboardController::class, 'biq_data_cards'])->name('dashboard.biq.data_cards');
     Route::post('/dashboard-biq/table', [DashboardController::class, 'biq_table'])->name('dashboard.biq.table');
     Route::get('/dashboard-biq/chart-data/{yearMonth}', [DashboardController::class, 'biq_chart_all_dept'])->name('dashboard.biq.chart_data');
 
     // Genba Safety Dashboard Routes
-    Route::get('/dashboard-safety', [DashboardController::class, 'safety_index'])->name('dashboard.safety');
+    Route::view('/dashboard-safety', 'dashboard.genba-safety')->name('dashboard.safety');
     Route::get('/dashboard-safety/data_cards', [DashboardController::class, 'safety_data_cards'])->name('dashboard.safety.data_cards');
     Route::post('/dashboard-safety/table', [DashboardController::class, 'safety_table'])->name('dashboard.safety.table');
     Route::get('/dashboard-safety/chart-data/{yearMonth}', [DashboardController::class, 'safety_chart_all_dept'])->name('dashboard.safety.chart_data');
@@ -179,52 +179,53 @@ Route::middleware(['auth'])->group(function () {
 
     // Data Master Routes
     Route::prefix('data-master')->group(function () {
-        Route::get('/line-checked', [MasterController::class, 'line_checked'])->name('master.line-checked');
+        Route::view('/line-checked', 'master.line-checked')->name('master.line-checked');
         Route::post('/line-checked/table', [MasterController::class, 'line_checked_table'])->name('master.line-checked.table');
         Route::post('/line-checked/store', [MasterController::class, 'store_line_checked'])->name('master.line-checked.store');
         Route::post('/line-checked/update', [MasterController::class, 'update_line_checked'])->name('master.line-checked.update');
         Route::post('/line-checked/delete', [MasterController::class, 'delete_line_checked'])->name('master.line-checked.delete');
 
-        Route::get('/category', [MasterController::class, 'category'])->name('master.category');
+        Route::view('/category', 'master.category')->name('master.category');
         Route::post('/category/table', [MasterController::class, 'category_table'])->name('master.category.table');
         Route::post('/category/store', [MasterController::class, 'store_category'])->name('master.category.store');
         Route::post('/category/update', [MasterController::class, 'update_category'])->name('master.category.update');
         Route::post('/category/delete', [MasterController::class, 'delete_category'])->name('master.category.delete');
 
-        Route::get('/department', [MasterController::class, 'department'])->name('master.department');
+        Route::view('/department', 'master.department')->name('master.department');
         Route::post('/department/table', [MasterController::class, 'department_table'])->name('master.department.table');
         Route::post('/department/store', [MasterController::class, 'store_department'])->name('master.department.store');
         Route::post('/department/update', [MasterController::class, 'update_department'])->name('master.department.update');
         Route::post('/department/delete', [MasterController::class, 'delete_department'])->name('master.department.delete');
 
-        Route::get('/clauses', [MasterController::class, 'clauses'])->name('master.clauses');
+        Route::view('/clauses', 'master.clauses')->name('master.clauses');
         Route::post('/clauses/table', [MasterController::class, 'clauses_table'])->name('master.clauses.table');
         Route::post('/', [MasterController::class, 'store_clauses'])->name('master.clauses.store');
         Route::post('/clauses/update', [MasterController::class, 'update_clauses'])->name('master.clauses.update');
         Route::post('/clauses/delete', [MasterController::class, 'delete_clauses'])->name('master.clauses.delete');
 
-        Route::get('/check-item', [MasterController::class, 'check_item'])->name('master.check-item');
+        Route::view('/check-item', 'master.check-item')->name('master.check-item');
         Route::post('/check-item/table', [MasterController::class, 'check_item_table'])->name('master.check-item.table');
         Route::post('/check-item/store', [MasterController::class, 'store_check_item'])->name('master.check-item.store');
         Route::post('/check-item/update', [MasterController::class, 'update_check_item'])->name('master.check-item.update');
         Route::post('/check-item/delete', [MasterController::class, 'delete_check_item'])->name('master.check-item.delete');
 
-        Route::get('/intr-check-item', [MasterController::class, 'intr_check_item'])->name('master.intr-check-item');
+        Route::view('/intr-check-item', 'master.intr-check-item')->name('master.intr-check-item');
         Route::post('/intr-check-item/table', [MasterController::class, 'intr_check_item_table'])->name('master.intr-check-item.table');
         Route::post('/intr-check-item/store', [MasterController::class, 'store_intr_check_item'])->name('master.intr-check-item.store');
         Route::post('/intr-check-item/update', [MasterController::class, 'update_intr_check_item'])->name('master.intr-check-item.update');
         Route::post('/intr-check-item/delete', [MasterController::class, 'delete_intr_check_item'])->name('master.intr-check-item.delete');
 
-        Route::get('/roles', [MasterController::class, 'roles'])->name('master.roles');
+        Route::view('/roles', 'master.roles')->name('master.roles');
         Route::post('/roles/table', [MasterController::class, 'roles_table'])->name('master.roles.table');
         Route::post('/roles/store', [MasterController::class, 'store_roles'])->name('master.roles.store');
         Route::post('/roles/update', [MasterController::class, 'update_roles'])->name('master.roles.update');
         Route::post('/roles/delete', [MasterController::class, 'delete_roles'])->name('master.roles.delete');
-        Route::get('/user-auditor', [MasterController::class, 'user_auditor'])->name('master.user-auditor');
+
+        Route::view('/user-auditor', 'master.user-auditor')->name('master.user-auditor');
         Route::post('/user-auditor/table', [MasterController::class, 'user_auditor_table'])->name('master.user-auditor.table');
         Route::post('/user-auditor/toggle', [MasterController::class, 'toggle_user_auditor'])->name('master.user-auditor.toggle');
 
-        Route::get('/kpi-list', [MasterController::class, 'kpi_list'])->name('master.kpi_list');
+        Route::view('/kpi-list', 'master.kpi-list')->name('master.kpi_list');
         Route::post('/kpi-list/table', [MasterController::class, 'kpi_list_table'])->name('master.kpi_list.table');
         Route::post('/kpi-list/store', [MasterController::class, 'store_kpi_list'])->name('master.kpi_list.store');
         Route::post('/kpi-list/update', [MasterController::class, 'update_kpi_list'])->name('master.kpi_list.update');
@@ -234,14 +235,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kpi-list/formula/{kpi_list_id}', [MasterController::class, 'get_kpi_formula'])->name('master.kpi_list.formula');
         Route::post('/kpi-list/formula/save', [MasterController::class, 'save_kpi_formula'])->name('master.kpi_list.formula.save');
 
-        Route::get('/kpi-unit', [MasterController::class, 'kpi_unit'])->name('master.kpi_unit');
+        Route::view('/kpi-unit', 'master.kpi-unit')->name('master.kpi_unit');
         Route::post('/kpi-unit/table', [MasterController::class, 'kpi_unit_table'])->name('master.kpi_unit.table');
         Route::post('/kpi-unit/store', [MasterController::class, 'store_kpi_unit'])->name('master.kpi_unit.store');
         Route::post('/kpi-unit/update', [MasterController::class, 'update_kpi_unit'])->name('master.kpi_unit.update');
         Route::post('/kpi-unit/delete', [MasterController::class, 'delete_kpi_unit'])->name('master.kpi_unit.delete');
         Route::post('/kpi-unit/options', [MasterController::class, 'kpi_unit_options'])->name('master.kpi_unit.options');
-
-
     });
 
     Route::get('/user-management', [MasterController::class, 'user_management'])->name('master.user_management');
@@ -250,11 +249,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user-management/table', [MasterController::class, 'user_management_table'])->name('master.user_management.table');
     Route::post('/user-management/update-permission', [MasterController::class, 'update_user_permission'])->name('master.user_management.update_permission');
 
-    Route::get('/user-setting', [MasterController::class, 'user_setting'])->name('master.user_setting');
+    Route::view('/user-setting', 'setting.user-setting')->name('master.user_setting');
     Route::post('/user-setting/update', [MasterController::class, 'update_user_setting'])->name('master.user_setting.update');
     Route::post('/user-setting/store', [MasterController::class, 'store_user'])->name('master.user_setting.store');
 
-    Route::get('/menu-management', [MasterController::class, 'menu_management'])->name('master.menu_management');
+    Route::view('/menu-management', 'setting.menu-management')->name('master.menu_management');
     Route::post('/menu-management/table', [MasterController::class, 'menu_management_table'])->name('master.menu_management.table');
 
     // Key Performance Indicator Routes

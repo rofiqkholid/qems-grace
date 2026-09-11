@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Crypt;
 
 class AgentChatController extends Controller
 {
-    public function index()
-    {
-        return view('agent.room-chat-agent');
-    }
-
     public function send(Request $request)
     {
         $request->validate([
