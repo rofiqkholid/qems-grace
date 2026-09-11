@@ -40,7 +40,7 @@
                             name="filter_pillar"
                             id="filter_pillar"
                             label="Pillar"
-                            :initialOptions="$pillars->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
+                            :initialOptions="($pillars ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
                             updateEvent="set-filter-pillar"
                             changeEvent="filter-pillar-changed"
                             hideLabel="true" />
@@ -52,7 +52,7 @@
                             name="filter_category"
                             id="filter_category"
                             label="Category"
-                            :initialOptions="$categories->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
+                            :initialOptions="($categories ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
                             updateEvent="set-filter-category"
                             changeEvent="filter-category-changed"
                             hideLabel="true" />
