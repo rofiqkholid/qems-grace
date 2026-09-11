@@ -22,7 +22,7 @@
 @endphp
 @extends('layouts.app')
 
-@section('title', 'Master Notification - ICT')
+@section('title', 'Master Notification')
 
 @section('content')
 @include('layouts.sidebar')

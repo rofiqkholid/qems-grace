@@ -61,7 +61,7 @@ class MenuSeeder extends Seeder
                 'level_menu_id' => 4,
                 'group_id' => 5,
                 'sub_group_id' => 85,
-                'menu' => 'team_member',
+                'menu' => 'room-team',
                 'menu_name' => 'Member',
                 'icon' => '<span></span>'
             ],
@@ -111,7 +111,7 @@ class MenuSeeder extends Seeder
                 'level_menu_id' => 4,
                 'group_id' => 5,
                 'sub_group_id' => 87,
-                'menu' => 'spv_verification',
+                'menu' => 'spv-verification',
                 'menu_name' => 'Findings Result',
                 'icon' => '<span></span>'
             ],

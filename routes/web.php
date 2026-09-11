@@ -79,6 +79,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/room-team', function () {
         return view('activity.setup.room-team');
     })->name('room-team');
+    Route::get('/team_member', function () {
+        return redirect()->route('room-team');
+    });
+    Route::get('/team-member', function () {
+        return redirect()->route('room-team');
+    });
 
     Route::get('/genba-mng-management', function () {
         return view('activity.findings-genba');
@@ -89,6 +95,9 @@ Route::middleware(['auth'])->group(function () {
     })->name('verifikasi-genba');
 
     Route::get('/spv-verification', [SummaryGenbaController::class, 'index'])->name('summary-verif');
+    Route::get('/spv_verification', function() {
+        return redirect()->route('summary-verif');
+    });
     Route::get('/room-chat-agent', [AgentChatController::class, 'index'])->name('agent.chat');
     Route::post('/room-chat-agent/send', [AgentChatController::class, 'send'])->name('agent.chat.send');
 
