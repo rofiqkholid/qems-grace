@@ -266,10 +266,6 @@ table.dataTable.qms-table tbody td {
     appearance: none !important;
 }
 
-.date-input-container input[type="date"]::-moz-calendar-picker-indicator {
-    display: none !important;
-}
-
 .date-input-container input[type="date"] {
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
@@ -302,7 +298,30 @@ table.dataTable.qms-table tbody td {
     visibility: hidden;
 }
 
-/* Hide native browser date input placeholder text when empty and unfocused */
+/* Hide native browser date input placeholder text when empty and unfocused (Chrome & Firefox) */
+.date-input-container input[type="date"]:not(:focus):not([data-has-value="true"]) {
+    color: transparent !important;
+}
+
+.date-input-container input[type="date"]:focus,
+.date-input-container input[type="date"][data-has-value="true"] {
+    color: #1e293b !important;
+}
+
 .date-input-container input[type="date"]:not(:focus):not([data-has-value="true"])::-webkit-datetime-edit {
     color: transparent !important;
+}
+
+/* Firefox specific fixes for native date picker indicator */
+@supports (-moz-appearance: none) {
+    .date-input-container input[type="date"]::-webkit-calendar-picker-indicator {
+        display: block !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        right: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        cursor: pointer !important;
+    }
 }
