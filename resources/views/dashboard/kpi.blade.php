@@ -348,9 +348,9 @@
     }
 
     function loadDataCards(yearMonth) {
-        let year = yearMonth ? yearMonth.split('-')[0] : "{{ date('Y') }}";
+        let param = yearMonth || "{{ date('Y-m') }}";
         $.ajax({
-            url: "{{ route('dashboard.kpi.summary_cards', ':year') }}".replace(':year', year),
+            url: "{{ route('dashboard.kpi.summary_cards', ':year') }}".replace(':year', param),
             type: "GET",
             dataType: "json",
             success: function(response) {
@@ -383,9 +383,7 @@
     let deptChart = null;
     let table = null; 
     let selectedStatus = ''; 
-    let selectedMonthYear = ''; 
-    let selectedClause = '';
-    let selectedAuditType = '';
+    let selectedMonthYear = '';
 
     // Pagination state
     let rawChartData = null;
@@ -394,9 +392,9 @@
     let isMobileMode = null;
 
     function loadDeptChart(yearMonth) {
-        let year = yearMonth ? yearMonth.split('-')[0] : "{{ date('Y') }}";
+        let param = yearMonth || "{{ date('Y-m') }}";
         $.ajax({
-            url: "{{ route('dashboard.kpi.chart_data', ':year') }}".replace(':year', year),
+            url: "{{ route('dashboard.kpi.chart_data', ':year') }}".replace(':year', param),
             type: "GET",
             dataType: "json",
             success: function(response) {
@@ -442,7 +440,9 @@
     function renderDeptChart() {
         if (!rawChartData) return;
 
-        const ctx = document.getElementById('deptChart').getContext('2d');
+        const canvas = document.getElementById('deptChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
 
         if (deptChart) {
             deptChart.destroy();
@@ -712,9 +712,9 @@
     let closedChartPageSize = 5;
  
     function loadClosedDeptChart(yearMonth) {
-        let year = yearMonth ? yearMonth.split('-')[0] : "{{ date('Y') }}";
+        let param = yearMonth || "{{ date('Y-m') }}";
         $.ajax({
-            url: "{{ route('dashboard.kpi.chart_data', ':year') }}".replace(':year', year),
+            url: "{{ route('dashboard.kpi.chart_data', ':year') }}".replace(':year', param),
             type: "GET",
             dataType: "json",
             success: function(response) {
@@ -756,7 +756,9 @@
     function renderClosedDeptChart() {
         if (!rawClosedChartData) return;
  
-        const ctx = document.getElementById('closedDeptChart').getContext('2d');
+        const canvas = document.getElementById('closedDeptChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
  
         if (closedDeptChart) {
             closedDeptChart.destroy();
@@ -1033,344 +1035,12 @@
         }, 100);
     }
 
-    let clauseChart = null;
-    let clauseStatsPieChart = null;
-    let rawClauseChartData = null;
-    let currentClauseChartPage = 1;
-    let clauseChartPageSize = 9;
-
-    function loadClauseChart(yearMonth) {
-        $.ajax({
-            url: "{{ route('dashboard.internal-audit.clause_chart_data', ':yearMonth') }}".replace(':yearMonth', yearMonth),
-            type: "GET",
-            data: {
-                audit_type: selectedAuditType
-            },
-            dataType: "json",
-            success: function(response) {
-                rawClauseChartData = response;
-                currentClauseChartPage = 1;
-                renderClauseChart();
-            },
-            error: function(xhr, status, error) {
-                console.error(error);
-            }
-        });
-    }
-
-    function renderClauseChart() {
-        if (!rawClauseChartData) return;
-
-        const ctx = document.getElementById('clauseChart').getContext('2d');
-
-        if (clauseChart) {
-            clauseChart.destroy();
-        }
-
-        const isMobile = window.innerWidth < 1280;
-
-        // Display 5 items on mobile/tablet (to prevent squished bars), and 8 items on PC/laptop
-        clauseChartPageSize = window.innerWidth < 1024 ? 5 : 8;
-
-        let labels = rawClauseChartData.labels;
-        let minorData = rawClauseChartData.minor;
-        let majorData = rawClauseChartData.major;
-        let ofiData = rawClauseChartData.ofi;
-
-        let zipped = [];
-        for (let i = 0; i < labels.length; i++) {
-            zipped.push({
-                name: labels[i],
-                minor: minorData[i] || 0,
-                major: majorData[i] || 0,
-                ofi: ofiData[i] || 0
-            });
-        }
-
-        zipped.sort((a, b) => {
-            const bTotal = b.minor + b.major + b.ofi;
-            const aTotal = a.minor + a.major + a.ofi;
-            return bTotal - aTotal;
-        });
-
-        labels = zipped.map(item => item.name);
-        minorData = zipped.map(item => item.minor);
-        majorData = zipped.map(item => item.major);
-        ofiData = zipped.map(item => item.ofi);
-
-        const totalItems = labels.length;
-        if (totalItems > clauseChartPageSize) {
-            const totalPages = Math.ceil(totalItems / clauseChartPageSize) || 1;
-            
-            if (currentClauseChartPage < 1) currentClauseChartPage = 1;
-            if (currentClauseChartPage > totalPages) currentClauseChartPage = totalPages;
-
-            const startIndex = (currentClauseChartPage - 1) * clauseChartPageSize;
-            const endIndex = startIndex + clauseChartPageSize;
-
-            labels = labels.slice(startIndex, endIndex);
-            minorData = minorData.slice(startIndex, endIndex);
-            majorData = majorData.slice(startIndex, endIndex);
-            ofiData = ofiData.slice(startIndex, endIndex);
-
-            $('#clauseChartPageIndicator').text(currentClauseChartPage + '/' + totalPages);
-            $('#btnClauseChartPrev').prop('disabled', currentClauseChartPage === 1);
-            $('#btnClauseChartNext').prop('disabled', currentClauseChartPage === totalPages);
-            $('#clauseChartPagination').removeClass('hidden').addClass('flex');
-        } else {
-            $('#clauseChartPagination').removeClass('flex').addClass('hidden');
-        }
-
-        const allValues = [
-            ...minorData,
-            ...majorData,
-            ...ofiData
-        ];
-        const maxValue = Math.max(...allValues, 0);
-        const suggestedMax = maxValue + 1;
-
-        let delayed;
-
-        clauseChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Minor',
-                        data: minorData,
-                        backgroundColor: '#FEB019',
-                    },
-                    {
-                        label: 'Major',
-                        data: majorData,
-                        backgroundColor: '#FF4560',
-                    },
-                    {
-                        label: 'OFI',
-                        data: ofiData,
-                        backgroundColor: '#008FFB',
-                    }
-                ]
-            },
-            plugins: [{
-                id: 'customLabelsClause',
-                afterDatasetsDraw: (chart) => {
-                    const { ctx } = chart;
-                    chart.data.datasets.forEach((dataset, i) => {
-                        const meta = chart.getDatasetMeta(i);
-                        if (!meta.hidden) {
-                            meta.data.forEach((element, index) => {
-                                const data = dataset.data[index];
-                                if (data > 0) {
-                                    ctx.fillStyle = '#334155';
-                                    ctx.font = 'bold 11px sans-serif';
-                                    ctx.textAlign = 'center';
-                                    ctx.textBaseline = 'bottom';
-                                    const xPos = element.x;
-                                    const yPos = element.y - 3;
-                                    ctx.fillText(data, xPos, yPos);
-                                }
-                            });
-                        }
-                    });
-                }
-            }],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animations: {
-                    y: {
-                        duration: 1000,
-                        easing: 'easeOutQuart',
-                        delay: context => {
-                            let delay = 0;
-                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
-                                delay = context.dataIndex * 0 + 100;
-                            }
-                            return delay;
-                        },
-                        from: (context) => {
-                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
-                                const scale = context.chart.scales.y;
-                                if (scale) return scale.getPixelForValue(0);
-                            }
-                            return undefined;
-                        },
-                        loop: false
-                    }
-                },
-                onClick: (e, elements, chart) => {
-                    const points = chart.getElementsAtEventForMode(e, 'nearest', {
-                        intersect: true
-                    }, true);
-
-                    if (points.length) {
-                        const firstPoint = points[0];
-                        const label = chart.data.labels[firstPoint.index];
-                        const datasetLabel = chart.data.datasets[firstPoint.datasetIndex].label;
-
-                        selectedStatus = ''; 
-                        
-                        let mappedCategory = datasetLabel;
-                        if (datasetLabel === 'Major') {
-                            mappedCategory = 'Mayor';
-                        }
-
-                        selectedMonthYear = $('#chartFilterDate').val();
-                        selectedClause = label;
-
-                        window.dispatchEvent(new CustomEvent('updateCategoryFilter', {
-                            detail: {
-                                id: mappedCategory,
-                                name: mappedCategory
-                            }
-                        }));
-
-                        window.dispatchEvent(new CustomEvent('updateDeptFilter', {
-                            detail: {
-                                id: '',
-                                name: ''
-                            }
-                        }));
-
-                        if (table) {
-                            table.ajax.reload();
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: true,
-                            drawOnChartArea: true,
-                            drawTicks: false,
-                            color: 'rgba(203, 213, 225, 0.4)',
-                        },
-                        ticks: {
-                            maxRotation: 0,
-                            minRotation: 0,
-                            autoSkip: false,
-                            callback: function(value, index, values) {
-                                let label = this.getLabelForValue(value);
-                                if (window.innerWidth < 1024) {
-                                    return label ? label.split(' ')[0] : '';
-                                }
-                                if (label && label.length > 15) {
-                                    return label.substring(0, 15) + '...';
-                                }
-                                return label;
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: suggestedMax,
-                        grid: {
-                            borderDash: [2, 2]
-                        },
-                        ticks: {
-                            maxTicksLimit: 6
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y;
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        setTimeout(() => {
-            delayed = true;
-        }, 1500);
-
-        // Compute Overview Totals for Clause Pie Chart
-        const sumMinor = rawClauseChartData.minor.reduce((a, b) => a + b, 0);
-        const sumMajor = rawClauseChartData.major.reduce((a, b) => a + b, 0);
-        const sumOfi = rawClauseChartData.ofi.reduce((a, b) => a + b, 0);
-
-        $('#val_clause_minor').text(new Intl.NumberFormat().format(sumMinor));
-        $('#val_clause_major').text(new Intl.NumberFormat().format(sumMajor));
-        $('#val_clause_ofi').text(new Intl.NumberFormat().format(sumOfi));
-
-        const clausePieData = [sumMinor, sumMajor, sumOfi];
-
-        if (clauseStatsPieChart) {
-            clauseStatsPieChart.destroy();
-        }
-
-        setTimeout(function() {
-            const canvas = document.getElementById('clauseStatsPieChart');
-            if (!canvas) return;
-            const pieCtx = canvas.getContext('2d');
-            clauseStatsPieChart = new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Minor', 'Major', 'OFI'],
-                    datasets: [{
-                        data: clausePieData,
-                        backgroundColor: ['#FEB019', '#FF4560', '#008FFB'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    animations: {
-                        circumference: {
-                            duration: 1500,
-                            easing: 'easeOutQuart',
-                            from: 0
-                        },
-                        rotation: {
-                            duration: 1500,
-                            easing: 'easeOutQuart',
-                            from: 0
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }, 100);
-    }
- 
     // Initialize Chart
     $(document).ready(function() {
         const initialDate = $('#chartFilterDate').val() || '{{ date("Y-m") }}';
         selectedMonthYear = initialDate;
         loadDeptChart(initialDate);
         loadClosedDeptChart(initialDate);
-        loadClauseChart(initialDate);
         loadDataCards(initialDate);
 
         $(document).on('change', '#chartFilterDate', function() {
@@ -1378,14 +1048,9 @@
             selectedMonthYear = val;
             loadDeptChart(val);
             loadClosedDeptChart(val);
-            loadClauseChart(val);
             loadDataCards(val);
-            if (table) {
-                table.ajax.reload();
-            }
         });
 
- 
         // Pagination buttons
         $('#btnChartPrev').click(function() {
             if (currentChartPage > 1) {
@@ -1424,25 +1089,6 @@
             }
         });
 
-        // Clause Chart Pagination buttons
-        $('#btnClauseChartPrev').click(function() {
-            if (currentClauseChartPage > 1) {
-                currentClauseChartPage--;
-                renderClauseChart();
-            }
-        });
- 
-        $('#btnClauseChartNext').click(function() {
-            if (rawClauseChartData) {
-                const totalItems = rawClauseChartData.labels.length;
-                const totalPages = Math.ceil(totalItems / clauseChartPageSize) || 1;
-                if (currentClauseChartPage < totalPages) {
-                    currentClauseChartPage++;
-                    renderClauseChart();
-                }
-            }
-        });
- 
         // Handle resize
         $(window).resize(function() {
             const currentMobile = window.innerWidth < 1280;
@@ -1452,352 +1098,16 @@
                 renderPieChart();
                 currentClosedChartPage = 1;
                 renderClosedDeptChart();
-                currentClauseChartPage = 1;
-                renderClauseChart();
             }
         });
     });
-
-    $(document).ready(function() {
-        table = $('#findingsTable').DataTable({
-            dom: '<"overflow-x-auto"t>ip',
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('internal_audit.cars') }}",
-                type: 'POST',
-                data: function(d) {
-                    d._token = "{{ csrf_token() }}";
-                    d.search = { value: $('#searchInput').val() };
-                    d.date_from = $('#dateFrom').val();
-                    d.date_to = $('#dateTo').val();
-                    d.dept = $('#deptFilter').val();
-                    d.finding_category = $('#categoryFilter').val();
-                    d.status = selectedStatus;
-                    d.month_year = selectedMonthYear;
-                    d.requirement_no = selectedClause;
-                    d.audit_type = selectedAuditType;
-                    d.is_dashboard = true;
-                },
-                error: function(xhr, error, code) {
-                    console.error('DataTables AJAX error:', error, code);
-                    console.error('Response:', xhr.responseText);
-                }
-            },
-            columns: [{
-                    data: 'no',
-                    orderable: false,
-                    className: 'text-center font-base text-slate-700'
-                },
-                {
-                    data: 'req_number',
-                    className: 'font-base text-slate-900'
-                },
-                {
-                    data: 'audit_date',
-                    className: 'text-slate-700'
-                },
-                {
-                    data: 'department',
-                    className: 'text-slate-700'
-                },
-                {
-                    data: 'finding_category',
-                    className: 'text-slate-700'
-                },
-                {
-                    data: 'auditor',
-                    className: 'text-slate-700',
-                    render: function(data, type, row) {
-                        return data || '';
-                    }
-                },
-                {
-                    data: 'auditee',
-                    className: 'text-slate-700'
-                },
-                {
-                    data: 'action',
-                    orderable: false,
-                    className: 'text-left'
-                }
-            ],
-            order: [
-                [1, 'desc']
-            ],
-            pageLength: 10,
-            language: {
-                emptyTable: '<div class="text-center py-8 text-slate-500">No data available</div>',
-                info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-                paginate: {
-                    previous: '<i class="fa-solid fa-chevron-left"></i>',
-                    next: '<i class="fa-solid fa-chevron-right"></i>'
-                }
-            }
-        });
-
-        // Show/hide page loader on DataTables AJAX
-        table.on('preXhr.dt', function() {
-            $('body').addClass('data-loading');
-            $('#page-loader').removeClass('hidden');
-        });
-
-        table.on('xhr.dt', function() {
-            $('body').removeClass('data-loading');
-            $('#page-loader').addClass('hidden');
-        });
-
-        // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #categoryFilter').on('change', function() {
-            selectedStatus = '';
-            selectedMonthYear = '';
-            selectedClause = '';
-            table.ajax.reload();
-        });
-
-        // Reset button
-        $('#btnReset').click(function() {
-            $('#searchInput').val('');
-            $('#dateFrom').val('').removeAttr('data-has-value');
-            $('#dateTo').val('').removeAttr('data-has-value');
-            
-            selectedStatus = '';
-            selectedMonthYear = '';
-            selectedClause = '';
-            
-            // Reset searchable-select components
-            window.dispatchEvent(new CustomEvent('updateDeptFilter', { detail: '' }));
-            window.dispatchEvent(new CustomEvent('updateCategoryFilter', { detail: '' }));
-            
-            table.ajax.reload();
-        });
-
-        if ($('#dateFrom').val()) $('#dateFrom').attr('data-has-value', 'true');
-        if ($('#dateTo').val()) $('#dateTo').attr('data-has-value', 'true');
-
-        // Search with debounce
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), wait);
-            };
-        }
-
-        $('#searchInput').on('keyup', debounce(function() {
-            table.ajax.reload();
-        }, 500));
-    });
-
-    // Delete confirmation variables
-    var deleteTargetSysId = null;
-    var deleteTargetNo = null;
-
-    function f_genba_conform_delete(sysId, no) {
-        deleteTargetSysId = sysId;
-        deleteTargetNo = no;
-        $('#deleteConfirmModal').removeClass('hidden');
-    }
-
-    function closeDeleteModal() {
-        $('#deleteConfirmModal').addClass('hidden');
-        deleteTargetSysId = null;
-        deleteTargetNo = null;
-    }
-
-    function executeDelete() {
-        if (!deleteTargetSysId) return;
-
-        var sysId = deleteTargetSysId;
-        var no = deleteTargetNo;
-
-        // Show loader on button
-        $('#icon_f_genba_conform_delete_' + no).addClass('hidden');
-        $('#loader_f_genba_conform_delete_' + no).removeClass('hidden');
-
-        closeDeleteModal();
-
-        $.ajax({
-            url: "{{ route('internal_audit.cars.delete') }}",
-            type: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}",
-                sys_id: sysId
-            },
-            success: function(response) {
-                $('#icon_f_genba_conform_delete_' + no).removeClass('hidden');
-                $('#loader_f_genba_conform_delete_' + no).addClass('hidden');
-
-                if (response.success) {
-                    showToast('CAR Action Report deleted successfully.', 'success');
-                    $('#findingsTable').DataTable().ajax.reload();
-                } else {
-                    showToast('Failed to delete CAR Action Report.', 'error');
-                }
-            },
-            error: function() {
-                $('#icon_f_genba_conform_delete_' + no).removeClass('hidden');
-                $('#loader_f_genba_conform_delete_' + no).addClass('hidden');
-                showToast('An error occurred.', 'error');
-            }
-        });
-    }
-
-    function document_preview(id, no) {
-        window.location.href = "{{ route('internal_audit.action_report.preview', '') }}/" + id;
-    }
-
-    // Viewer instance
-    var galleryViewer = null;
-
-    const findingPhotoBaseUrl = "{{ asset('findings-photo') }}";
-    const evidencePhotoBaseUrl = "{{ asset('evidence-photo') }}";
-
-    function viewGenbaImages(pathBefore, pathAfter, captionBefore, captionAfter) {
-        // Reset state
-        $('#imageContainerBefore, #imageContainerAfter').empty();
-        $('#noImageBefore, #noImageAfter').addClass('hidden');
-
-        // Convert captions if needed (decodeURIComponent handles encoded strings from controller)
-        $('#modalCaptionBefore').text(decodeURIComponent(captionBefore || ''));
-        $('#modalCaptionAfter').text(decodeURIComponent(captionAfter || ''));
-
-        // Logic to Populate BEFORE Images
-        if (pathBefore && pathBefore.trim() !== '') {
-            const paths = pathBefore.split(',');
-            paths.forEach(imgName => {
-                imgName = imgName.trim();
-                if (imgName) {
-                    const fullPath = findingPhotoBaseUrl + '/' + imgName;
-                    const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-none bg-slate-100 border border-slate-200 aspect-[4/3]">
-                            <img src="${fullPath}" 
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                 alt="Before Image"
-                                 onerror="this.parentElement.style.display='none'">
-                        </div>
-                     `;
-                    $('#imageContainerBefore').append(imgHtml);
-                }
-            });
-        } else {
-            $('#noImageBefore').removeClass('hidden').addClass('flex');
-        }
-
-        // Logic to Populate AFTER Images
-        if (pathAfter && pathAfter.trim() !== '') {
-            const paths = pathAfter.split(',');
-            paths.forEach(imgName => {
-                imgName = imgName.trim();
-                if (imgName) {
-                    const fullPath = evidencePhotoBaseUrl + '/' + imgName;
-                    const imgHtml = `
-                        <div class="relative group cursor-zoom-in overflow-hidden rounded-none bg-slate-100 border border-slate-200 aspect-[4/3]">
-                            <img src="${fullPath}" 
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                 alt="After Image"
-                                 onerror="this.parentElement.style.display='none'">
-                        </div>
-                     `;
-                    $('#imageContainerAfter').append(imgHtml);
-                }
-            });
-        } else {
-            $('#noImageAfter').removeClass('hidden').addClass('flex');
-        }
-
-        // Initialize Viewer
-        if (galleryViewer) {
-            galleryViewer.destroy();
-        }
-
-        // We can create a viewer for the whole modal content wrapper so it picks up all images
-        var container = document.querySelector('#imagePreviewModal .p-6');
-
-        // Check if Viewer is defined
-        if (typeof Viewer !== 'undefined' && container) {
-            galleryViewer = new Viewer(container, {
-                toolbar: {
-                    zoomIn: 1,
-                    zoomOut: 1,
-                    oneToOne: 1,
-                    reset: 1,
-                    prev: 1,
-                    play: 1,
-                    next: 1,
-                    rotateLeft: 1,
-                    rotateRight: 1,
-                    flipHorizontal: 1,
-                    flipVertical: 1,
-                },
-                title: false,
-                transition: true,
-            });
-        }
-
-        // Show modal
-        $('#imagePreviewModal').removeClass('hidden');
-    }
-
-    // Keep existing viewImage for backward compatibility
-    function viewImage(path) {
-        // Call the new function with the path as 'pathBefore' (first arg)
-        // and empty strings for the others.
-        viewGenbaImages(path, '', '', '');
-    }
-
-    function closeImageModal() {
-        $('#imagePreviewModal').addClass('hidden');
-        $('#imageContainerBefore, #imageContainerAfter').empty();
-
-        if (galleryViewer) {
-            galleryViewer.destroy();
-            galleryViewer = null;
-        }
-    }
 
     function exportToExcel() {
-        const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
-        const dateFrom = $('#dateFrom').val() || '';
-        const dateTo = $('#dateTo').val() || '';
-        const dept = $('#deptFilter').val() || '';
-        const category = $('#categoryFilter').val() || '';
-
-        const url = new URL("{{ route('dashboard.internal-audit.export') }}");
-        if (search) url.searchParams.append('search', search);
-        if (dateFrom) url.searchParams.append('date_from', dateFrom);
-        if (dateTo) url.searchParams.append('date_to', dateTo);
-        if (dept) url.searchParams.append('dept', dept);
-        if (category) url.searchParams.append('finding_category', category);
-
-        // Use a hidden iframe to trigger the download so that the main window's beforeunload event is not fired
-        let iframe = document.getElementById('download-iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'download-iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-        }
-        iframe.src = url.toString();
+        showToast('Export to Excel placeholder', 'info');
     }
 
     function exportToPdf() {
-        const search = $('input[type="search"]').val() || $('#searchInput').val() || '';
-        const dateFrom = $('#dateFrom').val() || '';
-        const dateTo = $('#dateTo').val() || '';
-        const dept = $('#deptFilter').val() || '';
-        const category = $('#categoryFilter').val() || '';
-
-        const url = new URL("{{ route('dashboard.internal-audit.print') }}");
-        if (search) url.searchParams.append('search', search);
-        if (dateFrom) url.searchParams.append('date_from', dateFrom);
-        if (dateTo) url.searchParams.append('date_to', dateTo);
-        if (dept) url.searchParams.append('dept', dept);
-        if (category) url.searchParams.append('finding_category', category);
-
-        // Open in new tab so user can see preview and print to PDF
-        window.open(url.toString(), '_blank');
+        showToast('Export PDF placeholder', 'info');
     }
 </script>
 @endpush

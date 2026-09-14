@@ -1321,7 +1321,25 @@ class DashboardController extends Controller
 
     public function kpi_chart_data(Request $request, $year)
     {
-        $year = (int)$year;
+        $month = null;
+        if (strpos($year, '-') !== false) {
+            [$yearVal, $monthVal] = explode('-', $year);
+            $year = (int)$yearVal;
+            $month = (int)$monthVal;
+        } else {
+            $year = (int)$year;
+            if ($request->filled('month')) {
+                $month = (int)$request->input('month');
+            }
+        }
+
+        $monthNames = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
+            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
+        ];
+        $selectedBulan = $month ? ($monthNames[$month] ?? null) : null;
+
         $pillarFilter = $request->pillar;
         $deptFilter = $request->dept;
 
@@ -1357,6 +1375,7 @@ class DashboardController extends Controller
                 $kpiCompanies = DB::table('KPICompany')
                     ->whereIn('kpi_list_id', $kpiIds)
                     ->where('department_code', $dept)
+                    ->where('periode', $year)
                     ->get();
 
                 $achieved = 0;
@@ -1364,9 +1383,12 @@ class DashboardController extends Controller
                 $total = 0;
 
                 foreach ($kpiCompanies as $kc) {
-                    $activities = DB::table('KPICompanyActivity')
-                        ->where('kpi_company_id', $kc->id)
-                        ->get();
+                    $actQuery = DB::table('KPICompanyActivity')
+                        ->where('kpi_company_id', $kc->id);
+                    if ($selectedBulan) {
+                        $actQuery->where('bulan', $selectedBulan);
+                    }
+                    $activities = $actQuery->get();
 
                     if ($activities->count() > 0) {
                         foreach ($activities as $act) {
@@ -1405,26 +1427,36 @@ class DashboardController extends Controller
 
     public function kpi_summary_cards(Request $request, $year)
     {
-        $year = (int)$year;
+        $month = null;
+        if (strpos($year, '-') !== false) {
+            [$yearVal, $monthVal] = explode('-', $year);
+            $year = (int)$yearVal;
+            $month = (int)$monthVal;
+        } else {
+            $year = (int)$year;
+            if ($request->filled('month')) {
+                $month = (int)$request->input('month');
+            }
+        }
+
+        $monthNames = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
+            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
+        ];
+        $selectedBulan = $month ? ($monthNames[$month] ?? null) : null;
+
         $pillarFilter = $request->pillar;
         $deptFilter = $request->dept;
 
-        $query = DB::table('KPICompany as kc')
-            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id');
-
-        if ($pillarFilter) {
-            $query->where('kl.pillar', $pillarFilter);
-        }
-        if ($deptFilter) {
-            $query->where('kc.department_code', $deptFilter);
-        }
-
-        $kpiCompanies = $query->select('kc.id', 'kc.kpi_list_id')->get();
-        $totalKpi = $kpiCompanies->count();
         $activities = DB::table('KPICompanyActivity as kca')
             ->join('KPICompany as kc', 'kca.kpi_company_id', '=', 'kc.id')
-            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id');
+            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id')
+            ->where('kc.periode', $year);
 
+        if ($selectedBulan) {
+            $activities->where('kca.bulan', $selectedBulan);
+        }
         if ($pillarFilter) {
             $activities->where('kl.pillar', $pillarFilter);
         }

@@ -151,31 +151,14 @@
             </div>
 
             <!-- Table -->
-            <style>
-                #monthlySummaryTable thead th.sticky-col {
-                    position: sticky !important;
-                    background-color: #f1f5f9 !important;
-                    z-index: 20 !important;
-                }
-                #monthlySummaryTable tbody td.sticky-col {
-                    position: sticky !important;
-                    z-index: 10 !important;
-                }
-                #monthlySummaryTable tbody tr.even td {
-                    background-color: #f8fafc !important;
-                }
-                #monthlySummaryTable tbody tr.odd td {
-                    background-color: #ffffff !important;
-                }
-            </style>
             <div class="p-6 overflow-x-auto">
-                <table id="monthlySummaryTable" class="qms-table w-full min-w-[1740px]" style="table-layout: fixed !important;">
+                <table id="monthlySummaryTable" class="qms-table w-full min-w-[1740px]">
                     <thead>
                         <tr>
-                            <th style="left: 0px;" class="sticky-col w-[50px] min-w-[50px] max-w-[50px] text-left whitespace-nowrap pl-3">No</th>
-                            <th style="left: 50px;" class="sticky-col w-[320px] min-w-[320px] max-w-[320px] text-left whitespace-nowrap">KPI Name</th>
-                            <th style="left: 370px;" class="sticky-col w-[110px] min-w-[110px] max-w-[110px] text-left whitespace-nowrap">Pillar</th>
-                            <th style="left: 480px;" class="sticky-col w-[120px] min-w-[120px] max-w-[120px] text-left whitespace-nowrap">Target</th>
+                            <th class="w-[50px] min-w-[50px] max-w-[50px] text-left whitespace-nowrap pl-3">No</th>
+                            <th class="w-[320px] min-w-[320px] max-w-[320px] text-left whitespace-nowrap">KPI Name</th>
+                            <th class="w-[110px] min-w-[110px] max-w-[110px] text-left whitespace-nowrap">Pillar</th>
+                            <th class="w-[120px] min-w-[120px] max-w-[120px] text-left whitespace-nowrap">Target</th>
                             @foreach($months as $m)
                                 <th class="text-left whitespace-nowrap min-w-[85px] w-[85px] px-3">{{ $m }}</th>
                             @endforeach
@@ -244,10 +227,10 @@
                 }
             },
             columns: [
-                { data: 'no', name: 'no', orderable: false, searchable: false, className: 'text-left font-base text-slate-700 sticky-col w-[50px] min-w-[50px] max-w-[50px] pl-3', createdCell: function(td) { $(td).css('left', '0px'); } },
-                { data: 'objective', name: 'kl.objective', className: 'font-medium text-slate-800 sticky-col w-[320px] min-w-[320px] max-w-[320px] text-left leading-snug', createdCell: function(td) { $(td).css('left', '50px'); } },
-                { data: 'pillar', name: 'kl.pillar', className: 'text-xs font-normal text-slate-500 whitespace-nowrap sticky-col w-[110px] min-w-[110px] max-w-[110px] text-left', createdCell: function(td) { $(td).css('left', '370px'); } },
-                { data: 'target', name: 'target', className: 'text-slate-600 font-normal whitespace-nowrap sticky-col w-[120px] min-w-[120px] max-w-[120px] text-left', createdCell: function(td) { $(td).css('left', '480px'); } },
+                { data: 'no', name: 'no', orderable: false, searchable: false, className: 'text-left font-base text-slate-700 w-[50px] min-w-[50px] max-w-[50px] pl-3' },
+                { data: 'objective', name: 'kl.objective', className: 'font-medium text-slate-800 w-[320px] min-w-[320px] max-w-[320px] text-left leading-snug' },
+                { data: 'pillar', name: 'kl.pillar', className: 'text-xs font-normal text-slate-500 whitespace-nowrap w-[110px] min-w-[110px] max-w-[110px] text-left' },
+                { data: 'target', name: 'target', className: 'text-slate-600 font-normal whitespace-nowrap w-[120px] min-w-[120px] max-w-[120px] text-left' },
                 @foreach($months as $m)
                     { data: '{{ $m }}', name: '{{ $m }}', className: 'text-left whitespace-nowrap px-3 w-[85px] min-w-[85px]', orderable: false, searchable: false },
                 @endforeach
