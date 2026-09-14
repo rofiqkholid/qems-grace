@@ -28,17 +28,19 @@ return new class extends Migration
             ]
         );
 
-        // Copy permissions from parent menu (ID 95) to the new menu
+        // Copy permissions from parent menu (ID 95) to the new menu only for ICT department users
         $permissions = DB::table('t100_user_menus_permission')->where('id_menus', 95)->get();
         foreach ($permissions as $perm) {
+            $u = DB::table('users')->where('id', $perm->id_user)->first();
+            $isIct = $u ? \App\Http\Controllers\NotificationController::isIctUser($u) : false;
             DB::table('t100_user_menus_permission')->updateOrInsert(
                 [
                     'id_user' => $perm->id_user,
                     'id_menus' => 124
                 ],
                 [
-                    'is_view' => $perm->is_view,
-                    'is_delete' => $perm->is_delete
+                    'is_view' => $isIct ? $perm->is_view : 0,
+                    'is_delete' => $isIct ? $perm->is_delete : 0
                 ]
             );
         }

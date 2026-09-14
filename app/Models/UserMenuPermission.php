@@ -47,6 +47,13 @@ class UserMenuPermission extends Model
             return false;
         }
 
+        if ($menuId == 124) {
+            $user = $userId ? \App\Models\User::find($userId) : Auth::user();
+            if (!\App\Http\Controllers\NotificationController::isIctUser($user)) {
+                return false;
+            }
+        }
+
         return self::where('id_user', $uid)
             ->where('id_menus', $menuId)
             ->where('is_view', 1)
@@ -65,6 +72,13 @@ class UserMenuPermission extends Model
         $uid = $userId ?? (Auth::check() ? Auth::user()->id : null);
         if (!$uid) {
             return false;
+        }
+
+        if ($menuId == 124) {
+            $user = $userId ? \App\Models\User::find($userId) : Auth::user();
+            if (!\App\Http\Controllers\NotificationController::isIctUser($user)) {
+                return false;
+            }
         }
 
         return self::where('id_user', $uid)

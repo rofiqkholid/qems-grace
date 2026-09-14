@@ -1508,8 +1508,15 @@ class MasterController extends Controller
             ->get()
             ->keyBy('id_menus');
 
+        $isTargetIct = \App\Http\Controllers\NotificationController::isIctUser($user);
+
         // Map menus to their permissions
-        $permissionsMapped = $allMenus->map(function($menu) use ($userPermissions) {
+        $permissionsMapped = $allMenus->filter(function($menu) use ($isTargetIct) {
+            if (($menu->id == 124 || $menu->menu === 'data-master/notification' || strtolower($menu->menu_name) === 'notification') && !$isTargetIct) {
+                return false;
+            }
+            return true;
+        })->map(function($menu) use ($userPermissions) {
             $perm = $userPermissions->get($menu->id);
             return [
                 'id' => $menu->id,
@@ -1518,7 +1525,7 @@ class MasterController extends Controller
                 'is_view' => $perm ? $perm->is_view : 0,
                 'is_delete' => $perm ? $perm->is_delete : 0,
             ];
-        });
+        })->values();
 
         $userRole = DB::table('user_role')->where('id_user', $id)->first();
         $roles = $userRole ? json_decode($userRole->role, true) : [];

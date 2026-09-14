@@ -19,8 +19,6 @@ class NotificationController extends Controller
         if (!$user) return false;
 
         $dept = strtoupper($user->department ?? '');
-        $roles = strtoupper($user->roles ?? '');
-        $username = strtoupper($user->username ?? '');
 
         // Fetch department from t100_user_dept if empty on user model
         if (empty($dept)) {
@@ -32,10 +30,7 @@ class NotificationController extends Controller
             str_contains($dept, 'ICT') ||
             str_contains($dept, 'INFORMATION') ||
             str_contains($dept, 'IT') ||
-            str_contains($dept, 'MIS') ||
-            str_contains($roles, 'ICT') ||
-            str_contains($roles, 'ADMIN') ||
-            in_array($username, ['ADMINISTRATOR', 'ADMIN', 'ICT'])
+            str_contains($dept, 'MIS')
         ) {
             return true;
         }
