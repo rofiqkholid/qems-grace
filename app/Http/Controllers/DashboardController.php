@@ -1343,8 +1343,8 @@ class DashboardController extends Controller
         $pillarFilter = $request->pillar;
         $deptFilter = $request->dept;
 
-        // Selalu gunakan 6 Pilar lengkap baku
-        $allStandardPillars = ['Safety', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
+        // Selalu gunakan 7 Pilar lengkap baku
+        $allStandardPillars = ['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
         if ($pillarFilter) {
             $pillars = array_values(array_filter($allStandardPillars, fn($p) => strtolower($p) === strtolower($pillarFilter)));
         } else {
@@ -1365,7 +1365,13 @@ class DashboardController extends Controller
 
         foreach ($pillars as $pillar) {
             // Ambil KPI per pilar
-            $kpiIds = DB::table('KPIList')->where('pillar', $pillar)->pluck('id')->toArray();
+            $kpiIds = DB::table('KPIList')
+                ->where(function($q) use ($pillar) {
+                    $q->where('pillar', $pillar)
+                      ->orWhere('pillar', 'LIKE', $pillar . '%');
+                })
+                ->pluck('id')
+                ->toArray();
 
             $deptAchieved = [];
             $deptNotAchieved = [];
