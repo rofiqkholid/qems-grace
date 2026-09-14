@@ -309,7 +309,9 @@ class NotificationController extends Controller
             ];
         }
 
-        DB::table('t100_notification')->insert($insertData);
+        foreach (array_chunk($insertData, 100) as $chunk) {
+            DB::table('t100_notification')->insert($chunk);
+        }
 
         return response()->json([
             'success' => true,
