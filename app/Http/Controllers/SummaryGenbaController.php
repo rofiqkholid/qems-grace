@@ -6,8 +6,16 @@ use App\Models\GenbaManagement;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\DB;
+
 class SummaryGenbaController extends Controller
 {
+    public function index()
+    {
+        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->pluck('Key1')->toArray();
+        return view('summary.summary-verif', compact('departments'));
+    }
+
     public function table(Request $request)
     {
         $search = $request->search;

@@ -203,13 +203,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/clauses/update', [MasterController::class, 'update_clauses'])->name('master.clauses.update');
         Route::post('/clauses/delete', [MasterController::class, 'delete_clauses'])->name('master.clauses.delete');
 
-        Route::view('/check-item', 'master.check-item')->name('master.check-item');
+        Route::get('/check-item', [MasterController::class, 'check_item'])->name('master.check-item');
         Route::post('/check-item/table', [MasterController::class, 'check_item_table'])->name('master.check-item.table');
         Route::post('/check-item/store', [MasterController::class, 'store_check_item'])->name('master.check-item.store');
         Route::post('/check-item/update', [MasterController::class, 'update_check_item'])->name('master.check-item.update');
         Route::post('/check-item/delete', [MasterController::class, 'delete_check_item'])->name('master.check-item.delete');
 
-        Route::view('/intr-check-item', 'master.intr-check-item')->name('master.intr-check-item');
+        Route::get('/intr-check-item', [MasterController::class, 'intr_check_item'])->name('master.intr-check-item');
         Route::post('/intr-check-item/table', [MasterController::class, 'intr_check_item_table'])->name('master.intr-check-item.table');
         Route::post('/intr-check-item/store', [MasterController::class, 'store_intr_check_item'])->name('master.intr-check-item.store');
         Route::post('/intr-check-item/update', [MasterController::class, 'update_intr_check_item'])->name('master.intr-check-item.update');
