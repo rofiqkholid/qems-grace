@@ -457,11 +457,6 @@ class KPICompanyController extends Controller
         $items = $query->orderBy('Key1', 'asc')->skip($offset)->take($limit)->get();
 
         $formattedItems = [];
-        $referer = $request->header('referer');
-        $includeAll = $request->boolean('include_all') || ($referer && strpos($referer, 'monthly-summary') !== false);
-        if ($page == 1 && empty($search) && $includeAll) {
-            $formattedItems[] = ['id' => '', 'name' => 'All Departments'];
-        }
 
         foreach ($items as $item) {
             $formattedItems[] = [
@@ -492,9 +487,6 @@ class KPICompanyController extends Controller
         }));
 
         $formattedItems = [];
-        if ($page == 1 && empty($search)) {
-            $formattedItems[] = ['id' => '', 'name' => 'All Pillars'];
-        }
 
         $slice = array_slice($filtered, $offset, $limit);
         foreach ($slice as $p) {
@@ -1523,11 +1515,14 @@ class KPICompanyController extends Controller
             $query->whereRaw('1 = 0');
         }
 
-        if (!empty($selectedDept)) {
+        if (!empty($selectedDept) && strtolower($selectedDept) !== 'all departments' && strtolower($selectedDept) !== 'all') {
             $query->where('kc.department_code', $selectedDept);
         }
-        if (!empty($selectedPillar)) {
-            $query->where('kl.pillar', $selectedPillar);
+        if (!empty($selectedPillar) && strtolower($selectedPillar) !== 'all pillars' && strtolower($selectedPillar) !== 'all') {
+            $query->where(function($q) use ($selectedPillar) {
+                $q->where('kl.pillar', $selectedPillar)
+                  ->orWhere('kl.pillar', 'LIKE', $selectedPillar . '%');
+            });
         }
 
         $kpiCompanies = $query->orderBy('kc.department_code', 'asc')->orderBy('kl.no_kpi', 'asc')->get();
@@ -1647,10 +1642,10 @@ class KPICompanyController extends Controller
             $query->whereRaw('1 = 0');
         }
 
-        if (!empty($selectedDept)) {
+        if (!empty($selectedDept) && strtolower($selectedDept) !== 'all departments' && strtolower($selectedDept) !== 'all') {
             $query->where('kc.department_code', $selectedDept);
         }
-        if (!empty($selectedPillar)) {
+        if (!empty($selectedPillar) && strtolower($selectedPillar) !== 'all pillars' && strtolower($selectedPillar) !== 'all') {
             $query->where(function($q) use ($selectedPillar) {
                 $q->where('kl.pillar', $selectedPillar)
                   ->orWhere('kl.pillar', 'LIKE', $selectedPillar . '%');
@@ -1689,13 +1684,18 @@ class KPICompanyController extends Controller
         // Calculate summary statistics for filtered query before pagination
         $allFilteredKpiCompanies = (clone $query)->get();
         $totalKpiCount = $allFilteredKpiCompanies->count();
-        $companyKpiCount = $allFilteredKpiCompanies->where('category', 'Company')->count();
-        $deptKpiCount = $allFilteredKpiCompanies->where('category', 'Dept')->count();
+        $companyKpiCount = $allFilteredKpiCompanies->filter(function($item) {
+            $cat = strtolower($item->category ?? '');
+            return str_contains($cat, 'company') || $cat === 'company';
+        })->count();
+        $deptKpiCount = $allFilteredKpiCompanies->filter(function($item) {
+            $cat = strtolower($item->category ?? '');
+            return str_contains($cat, 'dept') || str_contains($cat, 'department');
+        })->count();
         
-        // If category is not explicitly set, calculate based on department_code or fallback
-        if ($companyKpiCount === 0 && $deptKpiCount === 0) {
-            $companyKpiCount = $allFilteredKpiCompanies->whereIn('department_code', ['BOD', 'CORP', 'ALL'])->count();
-            $deptKpiCount = $totalKpiCount - $companyKpiCount;
+        // Fallback: if category is not explicitly set, default all KPICompany records to Company KPI
+        if ($companyKpiCount === 0 && $deptKpiCount === 0 && $totalKpiCount > 0) {
+            $companyKpiCount = $totalKpiCount;
         }
 
         $allCompanyIds = $allFilteredKpiCompanies->pluck('kpi_company_id');

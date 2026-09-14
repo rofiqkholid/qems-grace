@@ -122,7 +122,7 @@
                                 label="Department"
                                 apiUrl="{{ route('kpi.company.departments') }}"
                                 updateEvent="set-filter-department"
-                                :initialOptions="array_merge([['id' => '', 'name' => 'All Departments']], $departments->map(fn($dept) => ['id' => $dept->Key1, 'name' => $dept->Key1])->toArray())"
+                                :initialOptions="$departments->map(fn($dept) => ['id' => $dept->Key1, 'name' => $dept->Key1])->toArray()"
                                 hideLabel="true" />
                         </div>
 
@@ -134,7 +134,7 @@
                                 label="Pillar"
                                 apiUrl="{{ route('kpi.monthly-summary.pillars') }}"
                                 updateEvent="set-filter-pillar"
-                                :initialOptions="array_merge([['id' => '', 'name' => 'All Pillars']], $pillars->map(fn($p) => ['id' => $p, 'name' => $p])->toArray())"
+                                :initialOptions="$pillars->map(fn($p) => ['id' => $p, 'name' => $p])->toArray()"
                                 hideLabel="true" />
                         </div>
 
@@ -147,6 +147,14 @@
                                 updateEvent="set-filter-year"
                                 :initialOptions="collect($years)->map(fn($y) => ['id' => $y, 'name' => 'Year ' . $y])->toArray()"
                                 hideLabel="true" />
+                        </div>
+
+                        <!-- Reset Filter Button -->
+                        <div>
+                            <button type="button" id="btnResetFilter" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 border border-slate-200">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                                <span>Reset Filter</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -198,8 +206,8 @@
             $yearName = 'Year ' . $selectedYear;
         @endphp
 
-        window.dispatchEvent(new CustomEvent('set-filter-department', { detail: { id: "{{ $selectedDept ?? '' }}", name: "{{ $deptName }}" } }));
-        window.dispatchEvent(new CustomEvent('set-filter-pillar', { detail: { id: "{{ $selectedPillar ?? '' }}", name: "{{ $pillarName }}" } }));
+        window.dispatchEvent(new CustomEvent('set-filter-department', { detail: { id: "{{ $selectedDept ?? '' }}", name: "{{ !empty($selectedDept) ? $deptName : '' }}" } }));
+        window.dispatchEvent(new CustomEvent('set-filter-pillar', { detail: { id: "{{ $selectedPillar ?? '' }}", name: "{{ !empty($selectedPillar) ? $selectedPillar : '' }}" } }));
         window.dispatchEvent(new CustomEvent('set-filter-year', { detail: { id: "{{ $selectedYear }}", name: "{{ $yearName }}" } }));
 
         var table = $('#monthlySummaryTable').DataTable({
@@ -247,6 +255,19 @@
 
         $('#filter_department, #filter_pillar, #filter_year').on('change', function() {
             table.ajax.reload();
+        });
+
+        $('#btnResetFilter').on('click', function() {
+            $('#searchInput').val('');
+            $('#filter_department').val('');
+            $('#filter_pillar').val('');
+            $('#filter_year').val('{{ date("Y") }}');
+
+            window.dispatchEvent(new CustomEvent('set-filter-department', { detail: { id: '', name: '' } }));
+            window.dispatchEvent(new CustomEvent('set-filter-pillar', { detail: { id: '', name: '' } }));
+            window.dispatchEvent(new CustomEvent('set-filter-year', { detail: { id: '{{ date("Y") }}', name: 'Year {{ date("Y") }}' } }));
+
+            table.search('').draw();
         });
 
         var searchTimer;
