@@ -15,6 +15,10 @@ class InternalAuditController extends Controller
     {
         $departments = DB::table('GenbaDept')
             ->where('CheckBox01', 1)
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->get()
             ->map(function ($item) {
                 return (object)[
@@ -31,6 +35,10 @@ class InternalAuditController extends Controller
     {
         $departments = DB::table('GenbaDept')
             ->where('CheckBox01', 1)
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->get()
             ->map(function ($item) {
                 return (object)[
@@ -170,6 +178,8 @@ class InternalAuditController extends Controller
         $departments = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1', 'asc')
             ->pluck('Key1');
         
@@ -2369,6 +2379,10 @@ class InternalAuditController extends Controller
 
         $departments = DB::table('GenbaDept')
             ->where('CheckBox01', 1)
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->get();
 
         $requirements = DB::table('CsKlausul')

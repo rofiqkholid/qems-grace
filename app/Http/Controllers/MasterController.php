@@ -1076,7 +1076,13 @@ class MasterController extends Controller
 
     public function intr_check_item()
     {
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
         return view('master.intr-check-item', compact('departments'));
     }
 

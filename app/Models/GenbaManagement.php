@@ -14,6 +14,10 @@ class GenbaManagement extends Model
     {
         // 1. Fetch from Master Department (Just Codes)
         $masterDepts = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1')
             ->pluck('Key1')
             ->toArray();
@@ -24,6 +28,10 @@ class GenbaManagement extends Model
             ->select('asign_to_dept')
             ->distinct()
             ->whereNotNull('asign_to_dept')
+            ->where('asign_to_dept', '!=', 'BOD, AGM, GM')
+            ->where('asign_to_dept', 'NOT LIKE', '%BOD%')
+            ->where('asign_to_dept', 'NOT LIKE', '%AGM%')
+            ->where('asign_to_dept', 'NOT LIKE', '%GM%')
             ->pluck('asign_to_dept')
             ->toArray();
 
@@ -38,6 +46,10 @@ class GenbaManagement extends Model
         // Fetch from Master Department with Name
         return DB::table('GenbaDept')
             ->select('Key1 as id', 'Desc as name')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1')
             ->get()
             ->map(function ($item) {

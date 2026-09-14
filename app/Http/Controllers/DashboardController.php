@@ -400,6 +400,8 @@ class DashboardController extends Controller
             ->where('Checkbox01', 1)
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->pluck('Key1')
             ->toArray();
 
@@ -628,6 +630,8 @@ class DashboardController extends Controller
         $departments = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1')
             ->pluck('Key1')
             ->toArray();
@@ -710,6 +714,8 @@ class DashboardController extends Controller
         $departments = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1')
             ->pluck('Key1')
             ->toArray();
@@ -1312,6 +1318,8 @@ class DashboardController extends Controller
         $departments = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1', 'asc')
             ->pluck('Key1')
             ->toArray();
@@ -1355,6 +1363,8 @@ class DashboardController extends Controller
         $deptsQuery = DB::table('GenbaDept')
             ->where('Key1', '!=', 'BOD, AGM, GM')
             ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1', 'asc');
         if ($deptFilter) {
             $deptsQuery->where('Key1', $deptFilter);

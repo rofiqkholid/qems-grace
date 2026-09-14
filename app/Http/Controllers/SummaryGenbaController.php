@@ -12,7 +12,14 @@ class SummaryGenbaController extends Controller
 {
     public function index()
     {
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->pluck('Key1')->toArray();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->pluck('Key1')
+            ->toArray();
         return view('summary.summary-verif', compact('departments'));
     }
 

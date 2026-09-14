@@ -81,7 +81,13 @@ class KPICompanyController extends Controller
     public function index()
     {
         $kpiList = DB::table('KPIList')->select('id', 'no_kpi', 'objective', 'pillar', 'target', 'unit', 'operator', 'calculation_method')->get();
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
         $pillars = DB::table('KPIList')->distinct()->pluck('pillar')->filter()->values();
         
         $periods = DB::table('KPICompany')->distinct()->pluck('periode')->filter()->values();
@@ -434,7 +440,11 @@ class KPICompanyController extends Controller
         $limit = 10;
         $offset = ($page - 1) * $limit;
 
-        $query = DB::table('GenbaDept');
+        $query = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%');
 
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -534,7 +544,13 @@ class KPICompanyController extends Controller
             }
         }
 
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
 
         // Reset status to null if actual is null to clean up corrupted data
         DB::table('KPICompanyActivity')
@@ -620,7 +636,13 @@ class KPICompanyController extends Controller
             }
         }
 
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
 
         $activityPlans = DB::table('KPIActivityPlan')
             ->where('kpi_company_id', $dbId)
@@ -886,7 +908,13 @@ class KPICompanyController extends Controller
             }
         }
 
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
         $problem = DB::table('KPICompanyActivityProblem')->where('kpi_company_activity_id', $dbId)->first();
 
         return view('kpi.detail-kpi-company.company-kpi-insert', compact('activity', 'departments', 'problem', 'components', 'formula'));
@@ -1461,7 +1489,13 @@ class KPICompanyController extends Controller
         $selectedDept = $request->get('department', '');
         $selectedPillar = $request->get('pillar', '');
 
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
         $pillars = collect(['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery']);
 
         $query = DB::table('KPICompany as kc')

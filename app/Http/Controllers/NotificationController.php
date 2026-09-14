@@ -52,7 +52,13 @@ class NotificationController extends Controller
             abort(403, 'Access denied. Notification Master is only accessible by ICT Department.');
         }
 
-        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $departments = DB::table('GenbaDept')
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%')
+            ->orderBy('Key1', 'asc')
+            ->get();
         $users = DB::table('users')->orderBy('full_name', 'asc')->get();
 
         $stats = [
