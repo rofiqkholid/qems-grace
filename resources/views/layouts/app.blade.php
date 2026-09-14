@@ -41,6 +41,19 @@
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('js/jquery.dataTables-1.13.7.min.js') }}"></script>
 
+    <script>
+        // Suppress default DataTables browser alert popups globally across all tables
+        if (typeof $.fn.dataTable !== 'undefined') {
+            $.fn.dataTable.ext.errMode = 'none';
+        }
+        $(document).ajaxError(function(event, xhr, settings, thrownError) {
+            if (xhr.status === 419) {
+                // CSRF Token Mismatch - automatically reload page to refresh session
+                window.location.reload();
+            }
+        });
+    </script>
+
     @stack('scripts')
 
     <script>
