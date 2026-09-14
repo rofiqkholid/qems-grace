@@ -22,7 +22,7 @@
                 <p class="text-slate-500 text-xs sm:text-sm mt-1">Detailed track record of quality metrics and KPI progress across months</p>
             </div>
             <div class="shrink-0">
-                <button type="button" id="btnExportPdf" onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow-sm transition-colors duration-200">
+                <button type="button" id="btnExportPdf" onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-lg transition-colors duration-200">
                     <i class="fa-solid fa-file-pdf text-sm"></i>
                     <span>Export PDF</span>
                 </button>
@@ -32,7 +32,7 @@
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
             <!-- Total KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-list-check text-lg"></i>
                 </div>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Company KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-building text-lg"></i>
                 </div>
@@ -54,7 +54,7 @@
             </div>
 
             <!-- Dept KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-users-gear text-lg"></i>
                 </div>
@@ -65,7 +65,7 @@
             </div>
 
             <!-- Achieved Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-circle-check text-lg"></i>
                 </div>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Not Achieved Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-circle-xmark text-lg"></i>
                 </div>
@@ -87,7 +87,7 @@
             </div>
 
             <!-- Waiting Data Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-clock text-lg"></i>
                 </div>
@@ -120,6 +120,7 @@
                                 name="department"
                                 id="filter_department"
                                 label="Department"
+                                apiUrl="{{ route('kpi.company.departments') }}"
                                 updateEvent="set-filter-department"
                                 :initialOptions="array_merge([['id' => '', 'name' => 'All Departments']], $departments->map(fn($dept) => ['id' => $dept->Key1, 'name' => $dept->Key1])->toArray())"
                                 hideLabel="true" />
@@ -131,6 +132,7 @@
                                 name="pillar"
                                 id="filter_pillar"
                                 label="Pillar"
+                                apiUrl="{{ route('kpi.monthly-summary.pillars') }}"
                                 updateEvent="set-filter-pillar"
                                 :initialOptions="array_merge([['id' => '', 'name' => 'All Pillars']], $pillars->map(fn($p) => ['id' => $p, 'name' => $p])->toArray())"
                                 hideLabel="true" />

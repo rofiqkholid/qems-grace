@@ -446,17 +446,58 @@ class KPICompanyController extends Controller
         $total = $query->count();
         $items = $query->orderBy('Key1', 'asc')->skip($offset)->take($limit)->get();
 
-        $formattedItems = $items->map(function($item) {
-            return [
+        $formattedItems = [];
+        $referer = $request->header('referer');
+        $includeAll = $request->boolean('include_all') || ($referer && strpos($referer, 'monthly-summary') !== false);
+        if ($page == 1 && empty($search) && $includeAll) {
+            $formattedItems[] = ['id' => '', 'name' => 'All Departments'];
+        }
+
+        foreach ($items as $item) {
+            $formattedItems[] = [
                 'id' => $item->Key1,
                 'name' => $item->Key1
             ];
-        });
+        }
 
         return response()->json([
             'items' => $formattedItems,
             'pagination' => [
                 'more' => ($offset + $limit) < $total
+            ]
+        ]);
+    }
+
+    public function pillars(Request $request)
+    {
+        $search = $request->input('search');
+        $page = $request->input('page', 1);
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        $allStandardPillars = ['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
+
+        $filtered = array_values(array_filter($allStandardPillars, function($p) use ($search) {
+            return empty($search) || stripos($p, $search) !== false;
+        }));
+
+        $formattedItems = [];
+        if ($page == 1 && empty($search)) {
+            $formattedItems[] = ['id' => '', 'name' => 'All Pillars'];
+        }
+
+        $slice = array_slice($filtered, $offset, $limit);
+        foreach ($slice as $p) {
+            $formattedItems[] = [
+                'id' => $p,
+                'name' => $p
+            ];
+        }
+
+        return response()->json([
+            'items' => $formattedItems,
+            'pagination' => [
+                'more' => ($offset + $limit) < count($filtered)
             ]
         ]);
     }
@@ -1421,7 +1462,7 @@ class KPICompanyController extends Controller
         $selectedPillar = $request->get('pillar', '');
 
         $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
-        $pillars = DB::table('KPIList')->distinct()->pluck('pillar')->filter()->values();
+        $pillars = collect(['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery']);
 
         $query = DB::table('KPICompany as kc')
             ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id')
@@ -1576,7 +1617,10 @@ class KPICompanyController extends Controller
             $query->where('kc.department_code', $selectedDept);
         }
         if (!empty($selectedPillar)) {
-            $query->where('kl.pillar', $selectedPillar);
+            $query->where(function($q) use ($selectedPillar) {
+                $q->where('kl.pillar', $selectedPillar)
+                  ->orWhere('kl.pillar', 'LIKE', $selectedPillar . '%');
+            });
         }
 
         $totalRecords = $query->count();
