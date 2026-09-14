@@ -116,8 +116,8 @@ class="relative inline-block {{ $class }}">
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span x-text="formattedDisplayShort" class="inline sm:hidden text-slate-800 font-semibold whitespace-nowrap"></span>
-            <span x-text="formattedDisplay" class="hidden sm:inline text-slate-800 font-semibold whitespace-nowrap"></span>
+            <span x-text="formattedDisplayShort" class="inline sm:hidden text-slate-700 font-normal whitespace-nowrap"></span>
+            <span x-text="formattedDisplay" class="hidden sm:inline text-slate-700 font-normal whitespace-nowrap"></span>
         </span>
         <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

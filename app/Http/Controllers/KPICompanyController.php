@@ -1404,4 +1404,368 @@ class KPICompanyController extends Controller
         }
         return (float) filter_var($val, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     }
+
+    /**
+     * Display the Monthly Summary KPI report page.
+     */
+    public function monthlySummary(Request $request)
+    {
+        $user = Auth::user();
+        $userDept = $user ? DB::table('t100_user_dept')->where('id_user', $user->id)->value('department') : null;
+
+        $currentYear = (int) date('Y');
+        $years = collect(range($currentYear, $currentYear - 4));
+
+        $selectedYear = $request->get('year', $currentYear);
+        $selectedDept = $request->get('department', '');
+        $selectedPillar = $request->get('pillar', '');
+
+        $departments = DB::table('GenbaDept')->orderBy('Key1', 'asc')->get();
+        $pillars = DB::table('KPIList')->distinct()->pluck('pillar')->filter()->values();
+
+        $query = DB::table('KPICompany as kc')
+            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id')
+            ->select(
+                'kc.id as kpi_company_id',
+                'kc.department_code',
+                'kc.periode',
+                'kl.no_kpi',
+                'kl.objective',
+                'kl.pillar',
+                'kl.category',
+                'kl.target',
+                'kl.unit',
+                'kl.operator',
+                'kl.calculation_method'
+            )
+            ->where('kc.periode', $selectedYear);
+
+        if (!$user || in_array($userDept, ['ICT', 'QMS'])) {
+            // ICT / QMS can view all departments
+        } elseif (!empty($userDept)) {
+            $query->where('kc.department_code', $userDept);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        if (!empty($selectedDept)) {
+            $query->where('kc.department_code', $selectedDept);
+        }
+        if (!empty($selectedPillar)) {
+            $query->where('kl.pillar', $selectedPillar);
+        }
+
+        $kpiCompanies = $query->orderBy('kc.department_code', 'asc')->orderBy('kl.no_kpi', 'asc')->get();
+
+        $companyIds = $kpiCompanies->pluck('kpi_company_id');
+        $activitiesGrouped = DB::table('KPICompanyActivity')
+            ->whereIn('kpi_company_id', $companyIds)
+            ->get()
+            ->groupBy('kpi_company_id');
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        $kpiData = $kpiCompanies->map(function ($item) use ($activitiesGrouped, $months) {
+            $companyActivities = $activitiesGrouped->get($item->kpi_company_id, collect());
+            
+            $monthlyMap = [];
+            $numericVals = [];
+            $achievedCount = 0;
+            $filledCount = 0;
+
+            foreach ($months as $m) {
+                $act = $companyActivities->firstWhere('bulan', $m);
+                $actual = $act ? $act->actual : null;
+                $status = $act ? $act->status : null;
+
+                $monthlyMap[$m] = [
+                    'actual' => $actual,
+                    'status' => $status,
+                ];
+
+                if ($actual !== null && $actual !== '') {
+                    $filledCount++;
+                    $num = $this->parseLocalNumber($actual);
+                    $numericVals[] = $num;
+                    if (in_array(strtolower(trim($status ?? '')), ['achieved', 'achieve', 'ok', 'met'])) {
+                        $achievedCount++;
+                    }
+                }
+            }
+
+            $ytdAvg = count($numericVals) > 0 ? (array_sum($numericVals) / count($numericVals)) : null;
+
+            $ytdStatus = 'No Data';
+            if ($filledCount > 0) {
+                if ($ytdAvg !== null) {
+                    $targetVal = $this->parseLocalNumber($item->target);
+                    $operator = trim(htmlspecialchars_decode($item->operator));
+                    $isAchieved = false;
+                    switch ($operator) {
+                        case '>=': $isAchieved = ($ytdAvg >= $targetVal); break;
+                        case '<=': $isAchieved = ($ytdAvg <= $targetVal); break;
+                        case '>':  $isAchieved = ($ytdAvg > $targetVal); break;
+                        case '<':  $isAchieved = ($ytdAvg < $targetVal); break;
+                        case '=':
+                        default:   $isAchieved = ($ytdAvg == $targetVal); break;
+                    }
+                    $ytdStatus = $isAchieved ? 'Met' : 'Critical';
+                } else {
+                    $ytdStatus = ($achievedCount / $filledCount >= 0.5) ? 'Met' : 'Critical';
+                }
+            }
+
+            $item->monthly_activities = $monthlyMap;
+            $item->ytd_avg = $ytdAvg;
+            $item->ytd_status = $ytdStatus;
+
+            return $item;
+        });
+
+        return view('kpi.monthly-summary', compact(
+            'kpiData',
+            'years',
+            'selectedYear',
+            'departments',
+            'selectedDept',
+            'pillars',
+            'selectedPillar',
+            'months'
+        ));
+    }
+
+    /**
+     * Server-side DataTables endpoint for Monthly Summary KPI report page.
+     */
+    public function monthlySummaryTable(Request $request)
+    {
+        $user = Auth::user();
+        $userDept = $user ? DB::table('t100_user_dept')->where('id_user', $user->id)->value('department') : null;
+
+        $selectedYear = $request->input('year', date('Y'));
+        $selectedDept = $request->input('department', '');
+        $selectedPillar = $request->input('pillar', '');
+        $searchValue = $request->input('search.value', '');
+
+        $query = DB::table('KPICompany as kc')
+            ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id')
+            ->select(
+                'kc.id as kpi_company_id',
+                'kc.department_code',
+                'kc.periode',
+                'kl.no_kpi',
+                'kl.objective',
+                'kl.pillar',
+                'kl.category',
+                'kl.target',
+                'kl.unit',
+                'kl.operator',
+                'kl.calculation_method'
+            )
+            ->where('kc.periode', $selectedYear);
+
+        if (!$user || in_array($userDept, ['ICT', 'QMS'])) {
+            // ICT / QMS can view all departments
+        } elseif (!empty($userDept)) {
+            $query->where('kc.department_code', $userDept);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        if (!empty($selectedDept)) {
+            $query->where('kc.department_code', $selectedDept);
+        }
+        if (!empty($selectedPillar)) {
+            $query->where('kl.pillar', $selectedPillar);
+        }
+
+        $totalRecords = $query->count();
+
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('kc.department_code', 'like', "%{$searchValue}%")
+                  ->orWhere('kl.objective', 'like', "%{$searchValue}%")
+                  ->orWhere('kl.pillar', 'like', "%{$searchValue}%")
+                  ->orWhere('kl.no_kpi', 'like', "%{$searchValue}%");
+            });
+        }
+
+        $filteredRecords = $query->count();
+
+        // Server-side ordering
+        $columnsMap = [
+            0 => 'kc.department_code',
+            1 => 'kl.objective',
+            2 => 'kl.pillar',
+            3 => 'kl.target'
+        ];
+
+        $orderColIndex = $request->input('order.0.column', 0);
+        $orderDir = $request->input('order.0.dir', 'asc');
+        if (isset($columnsMap[$orderColIndex])) {
+            $query->orderBy($columnsMap[$orderColIndex], $orderDir);
+        } else {
+            $query->orderBy('kc.department_code', 'asc')->orderBy('kl.no_kpi', 'asc');
+        }
+
+        // Calculate summary statistics for filtered query before pagination
+        $allFilteredKpiCompanies = (clone $query)->get();
+        $totalKpiCount = $allFilteredKpiCompanies->count();
+        $companyKpiCount = $allFilteredKpiCompanies->where('category', 'Company')->count();
+        $deptKpiCount = $allFilteredKpiCompanies->where('category', 'Dept')->count();
+        
+        // If category is not explicitly set, calculate based on department_code or fallback
+        if ($companyKpiCount === 0 && $deptKpiCount === 0) {
+            $companyKpiCount = $allFilteredKpiCompanies->whereIn('department_code', ['BOD', 'CORP', 'ALL'])->count();
+            $deptKpiCount = $totalKpiCount - $companyKpiCount;
+        }
+
+        $allCompanyIds = $allFilteredKpiCompanies->pluck('kpi_company_id');
+        $allActivities = DB::table('KPICompanyActivity')
+            ->whereIn('kpi_company_id', $allCompanyIds)
+            ->whereNotNull('actual')
+            ->where('actual', '!=', '')
+            ->get();
+
+        $achievedCountTotal = 0;
+        $notAchievedCountTotal = 0;
+
+        foreach ($allActivities as $actItem) {
+            $stLower = strtolower(trim($actItem->status ?? ''));
+            if (in_array($stLower, ['achieved', 'achieve', 'ok', 'met'])) {
+                $achievedCountTotal++;
+            } elseif (in_array($stLower, ['not achieved', 'not_achieved', 'ng', 'critical'])) {
+                $notAchievedCountTotal++;
+            }
+        }
+
+        // Apply pagination
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        if ($length > 0) {
+            $query->skip($start)->take($length);
+        }
+
+        $kpiCompanies = $query->get();
+
+        $companyIds = $kpiCompanies->pluck('kpi_company_id');
+        $activitiesGrouped = DB::table('KPICompanyActivity')
+            ->whereIn('kpi_company_id', $companyIds)
+            ->get()
+            ->groupBy('kpi_company_id');
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        $data = $kpiCompanies->map(function ($item, $key) use ($start, $activitiesGrouped, $months) {
+            $companyActivities = $activitiesGrouped->get($item->kpi_company_id, collect());
+            
+            $monthlyMap = [];
+            $numericVals = [];
+            $achievedCount = 0;
+            $filledCount = 0;
+
+            foreach ($months as $m) {
+                $act = $companyActivities->firstWhere('bulan', $m);
+                $actual = $act ? $act->actual : null;
+                $status = $act ? $act->status : null;
+
+                $htmlVal = '-';
+                if ($actual !== null && $actual !== '') {
+                    $filledCount++;
+                    $num = $this->parseLocalNumber($actual);
+                    $numericVals[] = $num;
+                    $stLower = strtolower(trim($status ?? ''));
+                    if (in_array($stLower, ['achieved', 'achieve', 'ok', 'met'])) {
+                        $achievedCount++;
+                        $badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                    } elseif (in_array($stLower, ['not achieved', 'not_achieved', 'ng', 'critical'])) {
+                        $badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200';
+                    } else {
+                        $badgeClass = 'bg-slate-100 text-slate-700 border border-slate-200';
+                    }
+
+                    $unitChar = (strpos($actual, '%') === false && strtolower(trim($item->unit)) == '%') ? '%' : '';
+                    $htmlVal = '<span class="inline-block font-medium text-xs rounded-md px-2.5 py-1 ' . $badgeClass . '">' . e($actual) . $unitChar . '</span>';
+                } else {
+                    $htmlVal = '';
+                }
+
+                $monthlyMap[$m] = $htmlVal;
+            }
+
+            $ytdAvg = count($numericVals) > 0 ? (array_sum($numericVals) / count($numericVals)) : null;
+
+            $ytdStatusHtml = '';
+            if ($filledCount > 0) {
+                if ($ytdAvg !== null) {
+                    $targetVal = $this->parseLocalNumber($item->target);
+                    $operator = trim(htmlspecialchars_decode($item->operator));
+                    $isAchieved = false;
+                    switch ($operator) {
+                        case '>=': $isAchieved = ($ytdAvg >= $targetVal); break;
+                        case '<=': $isAchieved = ($ytdAvg <= $targetVal); break;
+                        case '>':  $isAchieved = ($ytdAvg > $targetVal); break;
+                        case '<':  $isAchieved = ($ytdAvg < $targetVal); break;
+                        case '=':
+                        default:   $isAchieved = ($ytdAvg == $targetVal); break;
+                    }
+                    if ($isAchieved) {
+                        $ytdStatusHtml = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Met</span>';
+                    } else {
+                        $ytdStatusHtml = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-rose-100 text-rose-800 rounded-full"><span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>Critical</span>';
+                    }
+                } else {
+                    $isAchieved = ($achievedCount / $filledCount >= 0.5);
+                    if ($isAchieved) {
+                        $ytdStatusHtml = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Met</span>';
+                    } else {
+                        $ytdStatusHtml = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-rose-100 text-rose-800 rounded-full"><span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>Critical</span>';
+                    }
+                }
+            }
+
+            $ytdAvgFormatted = '';
+            if ($ytdAvg !== null) {
+                if (floor($ytdAvg) == $ytdAvg) {
+                    $formattedNum = number_format($ytdAvg, 0, ',', '');
+                } else {
+                    $formattedNum = rtrim(rtrim(number_format($ytdAvg, 2, ',', ''), '0'), ',');
+                }
+                $ytdAvgFormatted = $formattedNum . (strtolower(trim($item->unit)) == '%' ? '%' : ($item->unit ? ' ' . e($item->unit) : ''));
+            }
+
+            $row = [
+                "no" => $start + $key + 1,
+                "dept" => e($item->department_code),
+                "objective" => '<div class="font-semibold text-slate-800">' . e($item->objective) . '</div>',
+                "pillar" => e($item->pillar ?? ''),
+                "target" => e($item->operator) . ' ' . e($item->target) . ' ' . e($item->unit),
+            ];
+
+            foreach ($months as $m) {
+                $row[$m] = $monthlyMap[$m];
+            }
+
+            $row["ytd_avg"] = '<span class="font-medium text-slate-700">' . $ytdAvgFormatted . '</span>';
+            $row["ytd_status"] = $ytdStatusHtml;
+
+            return $row;
+        });
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $filteredRecords,
+            "summary" => [
+                "total_kpi" => $totalKpiCount,
+                "company_kpi" => $companyKpiCount,
+                "dept_kpi" => $deptKpiCount,
+                "achieved" => $achievedCountTotal,
+                "not_achieved" => $notAchievedCountTotal,
+                "waiting_data" => 0
+            ],
+            "data" => $data
+        ]);
+    }
 }
+

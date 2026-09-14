@@ -277,9 +277,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/department', function () {
             return view('errors.coming-soon');
         })->name('kpi.department');
-        Route::get('/monthly-summary', function () {
-            return view('kpi.monthly-summary');
-        })->name('kpi.monthly-summary');
+        Route::get('/monthly-summary', [KPICompanyController::class, 'monthlySummary'])->name('kpi.monthly-summary');
+        Route::post('/monthly-summary/table', [KPICompanyController::class, 'monthlySummaryTable'])->name('kpi.monthly-summary.table');
         Route::get('/print-report', function () {
             return view('errors.coming-soon');
         })->name('kpi.print-report');

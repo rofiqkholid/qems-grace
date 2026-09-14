@@ -41,40 +41,7 @@
                             <p class="text-[10px] sm:text-sm text-slate-500">KPI achievement status per department</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            @php
-                                $currentYear = (int)date('Y');
-                                $yearsOptions = [];
-                                for ($y = $currentYear; $y >= $currentYear - 7; $y--) {
-                                    $yearsOptions[] = ['id' => (string)$y, 'name' => (string)$y];
-                                }
-                                $auditTypesOptions = [
-                                    ['id' => '', 'name' => 'All Audit Types'],
-                                    ['id' => 'Product', 'name' => 'Audit Quality - Product'],
-                                    ['id' => 'Process', 'name' => 'Audit Quality - Process'],
-                                    ['id' => 'System', 'name' => 'Audit Quality - System'],
-                                    ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
-                                ];
-                            @endphp
-                            <div class="w-[200px] sm:w-[250px] text-left">
-                                <x-searchable-select
-                                    name="auditTypeFilter"
-                                    id="auditTypeFilter"
-                                    label="Internal Audit"
-                                    hideLabel="true"
-                                    updateEvent="update-audit-type-filter"
-                                    changeEvent="audit-type-filter-changed"
-                                    :initialOptions="$auditTypesOptions" />
-                            </div>
-                            <div class="w-[110px] sm:w-[130px] text-left">
-                                <x-searchable-select
-                                    name="chartFilterDate"
-                                    id="chartFilterDate"
-                                    label="Year"
-                                    hideLabel="true"
-                                    updateEvent="update-year-filter"
-                                    changeEvent="year-filter-changed"
-                                    :initialOptions="$yearsOptions" />
-                            </div>
+                            <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                             <!-- Chart Pagination (Visible on Mobile only) -->
                             <div id="chartPagination" class="hidden items-center gap-1.5">
                                 <span id="chartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
@@ -346,8 +313,9 @@
         if (!lastPieData) return;
 
         if (statsPieChart) {
-            statsPieChart.destroy();
-            statsPieChart = null;
+            statsPieChart.data.datasets[0].data = lastPieData;
+            statsPieChart.update();
+            return;
         }
 
         const canvas = document.getElementById('statsPieChart');
@@ -368,14 +336,9 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '70%',
-                resizeDelay: 1500,
                 animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart',
-                    onComplete: function() {
-                        this.options.resizeDelay = 0;
-                        clearTimeout(this._resizeDelay);
-                    }
+                    duration: 600,
+                    easing: 'easeOutQuart'
                 },
                 plugins: {
                     legend: { display: false }
@@ -404,9 +367,7 @@
                     response.totalKpi || 0
                 ];
 
-                if (deptChart) {
-                    renderPieChart();
-                }
+                renderPieChart();
             },
             error: function(xhr, status, error) {
                 console.error(error);
@@ -1405,29 +1366,15 @@
  
     // Initialize Chart
     $(document).ready(function() {
-        const initialDate = '{{ date("Y") }}';
+        const initialDate = $('#chartFilterDate').val() || '{{ date("Y-m") }}';
+        selectedMonthYear = initialDate;
         loadDeptChart(initialDate);
         loadClosedDeptChart(initialDate);
         loadClauseChart(initialDate);
         loadDataCards(initialDate);
- 
-        setTimeout(function() {
-            window.dispatchEvent(new CustomEvent('update-year-filter', {
-                detail: {
-                    id: initialDate,
-                    name: initialDate
-                }
-            }));
-            window.dispatchEvent(new CustomEvent('update-audit-type-filter', {
-                detail: {
-                    id: '',
-                    name: 'All Audit Types'
-                }
-            }));
-        }, 100);
 
-        window.addEventListener('year-filter-changed', function(e) {
-            const val = e.detail.value;
+        $(document).on('change', '#chartFilterDate', function() {
+            const val = $(this).val();
             selectedMonthYear = val;
             loadDeptChart(val);
             loadClosedDeptChart(val);
@@ -1438,18 +1385,6 @@
             }
         });
 
-        window.addEventListener('audit-type-filter-changed', function(e) {
-            const val = e.detail.value;
-            selectedAuditType = val;
-            const currentYear = selectedMonthYear || '{{ date("Y") }}';
-            loadDeptChart(currentYear);
-            loadClosedDeptChart(currentYear);
-            loadClauseChart(currentYear);
-            loadDataCards(currentYear);
-            if (table) {
-                table.ajax.reload();
-            }
-        });
  
         // Pagination buttons
         $('#btnChartPrev').click(function() {
