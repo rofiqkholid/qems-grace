@@ -16,6 +16,11 @@
         '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
         '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
     },
+    monthShortNames: {
+        '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+        '05': 'Mei', '06': 'Jun', '07': 'Jul', '08': 'Agu',
+        '09': 'Sept', '10': 'Okt', '11': 'Nov', '12': 'Des'
+    },
     monthShort: [
         { code: '01', label: 'Jan' },
         { code: '02', label: 'Feb' },
@@ -38,6 +43,15 @@
         const y = parts[0];
         const m = parts[1];
         return (this.monthNames[m] || m) + ' ' + y;
+    },
+
+    get formattedDisplayShort() {
+        if (!this.value) return '{{ $placeholder }}';
+        const parts = this.value.split('-');
+        if (parts.length < 2) return this.value;
+        const y = parts[0];
+        const m = parts[1];
+        return (this.monthShortNames[m] || m) + ' ' + y;
     },
 
     selectMonth(mCode) {
@@ -97,14 +111,15 @@ class="relative inline-block {{ $class }}">
     <!-- Trigger Button -->
     <button type="button" 
         @click="open = !open" 
-        class="flex items-center justify-between gap-2.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-slate-300 rounded hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-xs sm:text-sm font-medium text-slate-700 transition-all duration-150 min-w-[140px] sm:min-w-[160px]">
-        <span class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="flex items-center justify-between gap-1.5 sm:gap-2.5 px-2.5 py-1.5 sm:px-4 sm:py-2 bg-white border border-slate-300 rounded hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-xs sm:text-sm font-medium text-slate-700 transition-all duration-150">
+        <span class="flex items-center gap-1.5 sm:gap-2">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span x-text="formattedDisplay" class="text-slate-800 font-semibold whitespace-nowrap"></span>
+            <span x-text="formattedDisplayShort" class="inline sm:hidden text-slate-800 font-semibold whitespace-nowrap"></span>
+            <span x-text="formattedDisplay" class="hidden sm:inline text-slate-800 font-semibold whitespace-nowrap"></span>
         </span>
-        <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
     </button>
