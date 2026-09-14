@@ -28,8 +28,7 @@
                             <p class="text-[10px] sm:text-sm text-slate-500">Findings status per department</p>
                         </div>
                         <div class="flex flex-col items-end gap-2">
-                            <input type="month" id="chartFilterDate" value="{{ date('Y-m') }}"
-                                class="w-[95px] sm:w-auto px-2 py-1.5 sm:px-4 sm:py-2 border border-slate-300 rounded-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm outline-none bg-slate-50">
+                            <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                             <!-- Chart Pagination (Visible on Mobile only) -->
                             <div id="chartPagination" class="hidden items-center gap-1.5">
                                 <span id="chartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
@@ -341,11 +340,7 @@
                     response.dueDateCount
                 ];
 
-                // Only render pie chart now if bar chart already exists.
-                // If not, renderDeptChart() will call renderPieChart() once it finishes.
-                if (deptChart) {
-                    renderPieChart();
-                }
+                renderPieChart();
             },
             error: function(xhr, status, error) {
                 console.error(error);
@@ -361,8 +356,9 @@
         if (!lastPieData) return;
 
         if (statsPieChart) {
-            statsPieChart.destroy();
-            statsPieChart = null;
+            statsPieChart.data.datasets[0].data = lastPieData;
+            statsPieChart.update();
+            return;
         }
 
         const canvas = document.getElementById('statsPieChart');
@@ -713,7 +709,7 @@
 
     // Initialize Chart
     $(document).ready(function() {
-        const initialDate = $('#chartFilterDate').val();
+        const initialDate = $('#chartFilterDate').val() || "{{ date('Y-m') }}";
         loadDeptChart(initialDate);
         loadDataCards(initialDate);
 
