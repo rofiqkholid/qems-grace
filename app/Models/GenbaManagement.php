@@ -359,7 +359,11 @@ class GenbaManagement extends Model
     {
         $result = DB::connection('sqlsrv')->table('GenbaDept')
             ->select('Key1 as id', 'Desc as desc')
-            ->where('CheckBox01', 1);
+            ->where('CheckBox01', 1)
+            ->where('Key1', '!=', 'BOD, AGM, GM')
+            ->where('Key1', 'NOT LIKE', '%BOD%')
+            ->where('Key1', 'NOT LIKE', '%AGM%')
+            ->where('Key1', 'NOT LIKE', '%GM%');
         return $result;
     }
 
