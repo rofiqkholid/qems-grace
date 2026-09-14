@@ -226,7 +226,7 @@
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
             @scroll.passive="$el.scrollTop + $el.clientHeight >= $el.scrollHeight - 50 ? loadMore() : null"
-            class="absolute z-10 w-full bg-white border border-slate-200 rounded-lg max-h-60 overflow-y-auto shadow-lg {{ $position === 'up' ? 'bottom-full mb-1' : 'top-full mt-1' }}">
+            class="absolute z-50 w-full bg-white border border-slate-200 rounded-lg max-h-60 overflow-y-auto shadow-lg {{ $position === 'up' ? 'bottom-full mb-1' : 'top-full mt-1' }}">
 
             <template x-if="items.length === 0 && !loading">
                 <div class="px-4 py-3 text-sm text-slate-500 text-center">No {{ strtolower($label) }} found</div>
