@@ -225,7 +225,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/user-auditor/table', [MasterController::class, 'user_auditor_table'])->name('master.user-auditor.table');
         Route::post('/user-auditor/toggle', [MasterController::class, 'toggle_user_auditor'])->name('master.user-auditor.toggle');
 
-        Route::view('/kpi-list', 'master.kpi-list')->name('master.kpi_list');
+        Route::get('/kpi-list', [MasterController::class, 'kpi_list'])->name('master.kpi_list');
         Route::post('/kpi-list/table', [MasterController::class, 'kpi_list_table'])->name('master.kpi_list.table');
         Route::post('/kpi-list/store', [MasterController::class, 'store_kpi_list'])->name('master.kpi_list.store');
         Route::post('/kpi-list/update', [MasterController::class, 'update_kpi_list'])->name('master.kpi_list.update');

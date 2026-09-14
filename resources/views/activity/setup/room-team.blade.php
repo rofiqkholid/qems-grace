@@ -77,6 +77,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Data Count Component -->
+                <x-data-table tableId="genbaRoomTable" />
             </div>
         </div>
     </main>

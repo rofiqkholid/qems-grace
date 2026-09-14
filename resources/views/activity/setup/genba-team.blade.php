@@ -84,6 +84,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Data Count Component -->
+                <x-data-table tableId="genbaFormTable" />
             </div>
         </div>
 
