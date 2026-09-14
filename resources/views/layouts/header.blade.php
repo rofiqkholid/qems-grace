@@ -4,7 +4,7 @@
 </div>
 
 <!-- Header -->
-<header class="sticky top-0 z-30 bg-white border-b border-slate-200">
+<header class="sticky top-0 z-[100] bg-white border-b border-slate-200">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Left: Mobile menu button & Search -->
@@ -43,7 +43,7 @@
                 </a>
 
                 <!-- Notification Dropdown -->
-                <div class="relative" id="notif-menu-container">
+                <div class="relative z-[100]" id="notif-menu-container">
                     <button type="button" id="notif-menu-button" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center focus:outline-none" title="Notifications">
                         <i class="fa-solid fa-bell text-base sm:text-lg"></i>
                         <span id="notif-badge" class="hidden absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-rose-500 rounded-full leading-none shadow-sm">
@@ -52,7 +52,7 @@
                     </button>
 
                     <!-- Notification Dropdown Panel -->
-                    <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-xl py-2 z-50 transform transition-all duration-200">
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-2xl py-2 z-[9999] transform transition-all duration-200">
                         <!-- Header -->
                         <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                             <div class="flex items-center gap-2">
