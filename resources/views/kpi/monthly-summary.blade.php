@@ -101,7 +101,7 @@
         <!-- Main Card -->
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
             <!-- Filter Section -->
-            <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
+            <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50 relative z-30">
                 <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
                     <!-- Search Input -->
                     <div class="flex-1">
