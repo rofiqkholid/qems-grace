@@ -56,9 +56,13 @@ class NotificationController extends Controller
             ->get();
         $users = DB::table('users')->orderBy('full_name', 'asc')->get();
 
+        $currentUserId = Auth::user()?->id;
         $stats = [
             'total_sent' => DB::table('t100_notification')->count(),
-            'total_unread' => DB::table('t100_notification')->where('is_read', 0)->count(),
+            'total_unread' => DB::table('t100_notification')
+                ->whereNotIn('id', function($q) use ($currentUserId) {
+                    $q->select('notification_id')->from('t100_notification_reads')->where('user_id', $currentUserId);
+                })->count(),
             'total_users' => DB::table('users')->count(),
         ];
 
@@ -74,24 +78,17 @@ class NotificationController extends Controller
             return response()->json(['data' => [], 'recordsTotal' => 0, 'recordsFiltered' => 0]);
         }
 
-        // Group notifications by batch_id if present, otherwise group by title, message, created_at, target_type
         $query = DB::table('t100_notification as n')
-            ->leftJoin('users as u', 'u.id', '=', 'n.user_id')
-            ->leftJoin('t100_user_dept as ud', 'ud.id_user', '=', 'u.id')
             ->select(
-                DB::raw("MIN(n.id) as id"),
+                'n.id',
                 'n.title',
                 'n.message',
                 'n.type',
                 'n.url',
                 'n.target_type',
                 'n.target_value',
-                'n.created_at',
-                DB::raw("COUNT(n.id) as recipient_count"),
-                DB::raw("MIN(u.full_name) as sample_fullname"),
-                DB::raw("MIN(u.username) as sample_username")
-            )
-            ->groupBy('n.title', 'n.message', 'n.type', 'n.url', 'n.target_type', 'n.target_value', 'n.created_at');
+                'n.created_at'
+            );
 
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
@@ -99,15 +96,12 @@ class NotificationController extends Controller
                 $q->where('n.title', 'LIKE', "%{$searchValue}%")
                   ->orWhere('n.message', 'LIKE', "%{$searchValue}%")
                   ->orWhere('n.type', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('u.full_name', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('u.username', 'LIKE', "%{$searchValue}%")
-                  ->orWhere('ud.department', 'LIKE', "%{$searchValue}%");
+                  ->orWhere('n.target_type', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('n.target_value', 'LIKE', "%{$searchValue}%");
             });
         }
 
-        $totalFiltered = DB::table(DB::raw("({$query->toSql()}) as sub"))
-            ->mergeBindings($query)
-            ->count();
+        $totalFiltered = $query->count();
             
         $limit = $request->input('length', 10);
         $start = $request->input('start', 0);
@@ -128,16 +122,12 @@ class NotificationController extends Controller
             };
 
             // Format recipient label
-            if ($post->target_type === 'all' || ($post->recipient_count > 10 && empty($post->target_type))) {
-                $targetLabel = 'All Registered Users (' . $post->recipient_count . ' users)';
+            if (empty($post->target_type) || $post->target_type === 'all') {
+                $targetLabel = 'All Registered Users';
             } elseif ($post->target_type === 'department') {
-                $targetLabel = 'Department: ' . ($post->target_value ?? 'N/A') . ' (' . $post->recipient_count . ' users)';
+                $targetLabel = 'Department: ' . ($post->target_value ?? 'N/A');
             } else {
-                if ($post->recipient_count > 1) {
-                    $targetLabel = ($post->sample_fullname ?: $post->sample_username) . ' + ' . ($post->recipient_count - 1) . ' other(s)';
-                } else {
-                    $targetLabel = $post->sample_fullname ?: ($post->sample_username ?: ('User #' . $post->id));
-                }
+                $targetLabel = 'User Target (' . ($post->target_value ?? 'N/A') . ')';
             }
 
             $sys_id = $post->id;
@@ -179,11 +169,7 @@ class NotificationController extends Controller
             ];
         }
 
-        $recordsTotal = DB::table('t100_notification')
-            ->select('title', 'message', 'type', 'url', 'target_type', 'target_value', 'created_at')
-            ->groupBy('title', 'message', 'type', 'url', 'target_type', 'target_value', 'created_at')
-            ->get()
-            ->count();
+        $recordsTotal = DB::table('t100_notification')->count();
 
         return response()->json([
             'draw' => intval($request->input('draw')),
@@ -253,69 +239,41 @@ class NotificationController extends Controller
         $target = $request->target;
         $url = $request->url;
 
-        $targetUserIds = [];
-
-        if ($target === 'all') {
-            $targetUserIds = DB::table('users')->pluck('id')->toArray();
-        } elseif ($target === 'department') {
+        $targetValue = null;
+        if ($target === 'department') {
             if (empty($request->department)) {
                 return response()->json(['success' => false, 'message' => 'Please select a department.']);
             }
-            $targetUserIds = DB::table('t100_user_dept')
-                ->where('department', $request->department)
-                ->pluck('id_user')
-                ->toArray();
+            $targetValue = $request->department;
         } elseif ($target === 'user') {
             $userVal = $request->input('target_user_id');
             if (empty($userVal)) {
                 return response()->json(['success' => false, 'message' => 'Please select at least one target user.']);
             }
-            if (is_array($userVal)) {
-                $targetUserIds = array_map('intval', $userVal);
-            } else {
-                $targetUserIds = array_filter(array_map('intval', explode(',', $userVal)));
-            }
-        }
-
-        if (empty($targetUserIds)) {
-            return response()->json(['success' => false, 'message' => 'No target users found.']);
+            $targetValue = is_array($userVal) ? implode(',', $userVal) : $userVal;
         }
 
         $now = Carbon::now();
         $batchId = (string) Str::uuid();
-        $targetValue = null;
-        if ($target === 'department') {
-            $targetValue = $request->department;
-        } elseif ($target === 'user') {
-            $targetValue = is_array($request->input('target_user_id')) 
-                ? implode(',', $request->input('target_user_id')) 
-                : $request->input('target_user_id');
-        }
 
-        $insertData = [];
-        foreach ($targetUserIds as $uId) {
-            $insertData[] = [
-                'batch_id' => $batchId,
-                'user_id' => $uId,
-                'target_type' => $target,
-                'target_value' => $targetValue,
-                'title' => $title,
-                'message' => $message,
-                'type' => $type,
-                'url' => $url,
-                'is_read' => 0,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
-
-        foreach (array_chunk($insertData, 100) as $chunk) {
-            DB::table('t100_notification')->insert($chunk);
-        }
+        // Create exactly 1 notification record in DB
+        DB::table('t100_notification')->insert([
+            'batch_id' => $batchId,
+            'user_id' => ($target === 'user' && is_numeric($targetValue)) ? intval($targetValue) : null,
+            'target_type' => $target,
+            'target_value' => $targetValue,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'url' => $url,
+            'is_read' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Notification broadcasted successfully to ' . count($targetUserIds) . ' user(s).'
+            'message' => 'Notification broadcasted successfully.'
         ]);
     }
 
@@ -331,6 +289,7 @@ class NotificationController extends Controller
         $id = $request->input('id');
         if ($id) {
             DB::table('t100_notification')->where('id', $id)->delete();
+            DB::table('t100_notification_reads')->where('notification_id', $id)->delete();
             return response()->json(['success' => true, 'message' => 'Notification deleted successfully.']);
         }
 
@@ -352,22 +311,59 @@ class NotificationController extends Controller
         }
 
         $userId = $user->id;
-
-        // Check if user has any notifications, if not seed initial sample notifications for testing
-        $count = DB::table('t100_notification')->where('user_id', $userId)->count();
-        if ($count === 0) {
-            $this->seedInitialNotifications($userId);
+        $userDept = $user->department ?? null;
+        if (empty($userDept)) {
+            $userDept = DB::table('t100_user_dept')->where('id_user', $userId)->value('department');
         }
 
-        $notifications = DB::table('t100_notification')
-            ->where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
+        $notifications = DB::table('t100_notification as n')
+            ->leftJoin('t100_notification_reads as nr', function ($join) use ($userId) {
+                $join->on('nr.notification_id', '=', 'n.id')
+                     ->where('nr.user_id', '=', $userId);
+            })
+            ->where(function ($q) use ($userId, $userDept) {
+                $q->whereNull('n.target_type')
+                  ->orWhere('n.target_type', 'all')
+                  ->orWhere('n.user_id', $userId);
+
+                if (!empty($userDept)) {
+                    $q->orWhere(function ($sub) use ($userDept) {
+                        $sub->where('n.target_type', 'department')
+                            ->where('n.target_value', $userDept);
+                    });
+                }
+            })
+            ->select(
+                'n.id',
+                'n.title',
+                'n.message',
+                'n.type',
+                'n.url',
+                'n.created_at',
+                DB::raw("CASE WHEN nr.id IS NOT NULL THEN 1 ELSE 0 END as is_read")
+            )
+            ->orderBy('n.created_at', 'desc')
             ->limit(15)
             ->get();
 
-        $unreadCount = DB::table('t100_notification')
-            ->where('user_id', $userId)
-            ->where('is_read', 0)
+        $unreadCount = DB::table('t100_notification as n')
+            ->leftJoin('t100_notification_reads as nr', function ($join) use ($userId) {
+                $join->on('nr.notification_id', '=', 'n.id')
+                     ->where('nr.user_id', '=', $userId);
+            })
+            ->whereNull('nr.id')
+            ->where(function ($q) use ($userId, $userDept) {
+                $q->whereNull('n.target_type')
+                  ->orWhere('n.target_type', 'all')
+                  ->orWhere('n.user_id', $userId);
+
+                if (!empty($userDept)) {
+                    $q->orWhere(function ($sub) use ($userDept) {
+                        $sub->where('n.target_type', 'department')
+                            ->where('n.target_value', $userDept);
+                    });
+                }
+            })
             ->count();
 
         $formatted = $notifications->map(function ($notif) {
@@ -394,28 +390,58 @@ class NotificationController extends Controller
 
         $userId = $user->id;
         $notifId = $request->input('id');
+        $now = Carbon::now();
 
         if ($notifId) {
-            DB::table('t100_notification')
-                ->where('id', $notifId)
-                ->where('user_id', $userId)
-                ->update([
-                    'is_read' => 1,
-                    'updated_at' => Carbon::now()
-                ]);
+            DB::table('t100_notification_reads')->updateOrInsert(
+                ['notification_id' => $notifId, 'user_id' => $userId],
+                ['created_at' => $now]
+            );
         } else {
-            DB::table('t100_notification')
-                ->where('user_id', $userId)
-                ->where('is_read', 0)
-                ->update([
-                    'is_read' => 1,
-                    'updated_at' => Carbon::now()
-                ]);
+            $userDept = $user->department ?? DB::table('t100_user_dept')->where('id_user', $userId)->value('department');
+
+            $allNotifIds = DB::table('t100_notification')
+                ->where(function ($q) use ($userId, $userDept) {
+                    $q->whereNull('target_type')
+                      ->orWhere('target_type', 'all')
+                      ->orWhere('user_id', $userId);
+                    if (!empty($userDept)) {
+                        $q->orWhere(function ($sub) use ($userDept) {
+                            $sub->where('target_type', 'department')
+                                ->where('target_value', $userDept);
+                        });
+                    }
+                })
+                ->pluck('id');
+
+            foreach ($allNotifIds as $nid) {
+                DB::table('t100_notification_reads')->updateOrInsert(
+                    ['notification_id' => $nid, 'user_id' => $userId],
+                    ['created_at' => $now]
+                );
+            }
         }
 
-        $unreadCount = DB::table('t100_notification')
-            ->where('user_id', $userId)
-            ->where('is_read', 0)
+        $userDept = $user->department ?? DB::table('t100_user_dept')->where('id_user', $userId)->value('department');
+
+        $unreadCount = DB::table('t100_notification as n')
+            ->leftJoin('t100_notification_reads as nr', function ($join) use ($userId) {
+                $join->on('nr.notification_id', '=', 'n.id')
+                     ->where('nr.user_id', '=', $userId);
+            })
+            ->whereNull('nr.id')
+            ->where(function ($q) use ($userId, $userDept) {
+                $q->whereNull('n.target_type')
+                  ->orWhere('n.target_type', 'all')
+                  ->orWhere('n.user_id', $userId);
+
+                if (!empty($userDept)) {
+                    $q->orWhere(function ($sub) use ($userDept) {
+                        $sub->where('n.target_type', 'department')
+                            ->where('n.target_value', $userDept);
+                    });
+                }
+            })
             ->count();
 
         return response()->json([
@@ -425,12 +451,14 @@ class NotificationController extends Controller
     }
 
     /**
-     * Helper to send notification to a specific user
+     * Helper to send notification (app updates / info)
      */
     public static function sendNotification($userId, $title, $message = null, $type = 'info', $url = null)
     {
         return DB::table('t100_notification')->insertGetId([
             'user_id' => $userId,
+            'target_type' => $userId ? 'user' : 'all',
+            'target_value' => $userId ? (string)$userId : null,
             'title' => $title,
             'message' => $message,
             'type' => $type,
@@ -438,46 +466,6 @@ class NotificationController extends Controller
             'is_read' => 0,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
-        ]);
-    }
-
-    /**
-     * Seed initial notifications for a new user
-     */
-    private function seedInitialNotifications($userId)
-    {
-        $now = Carbon::now();
-        DB::table('t100_notification')->insert([
-            [
-                'user_id' => $userId,
-                'title' => 'Internal Audit Finding Created',
-                'message' => 'New Minor finding requires corrective action review.',
-                'type' => 'warning',
-                'url' => route('dashboard.internal-audit'),
-                'is_read' => 0,
-                'created_at' => (clone $now)->subMinutes(10),
-                'updated_at' => (clone $now)->subMinutes(10)
-            ],
-            [
-                'user_id' => $userId,
-                'title' => 'Approval Required',
-                'message' => 'CAR #CAR-2026-002 is waiting for Superior Approval.',
-                'type' => 'info',
-                'url' => route('dashboard.internal-audit'),
-                'is_read' => 0,
-                'created_at' => (clone $now)->subHours(1),
-                'updated_at' => (clone $now)->subHours(1)
-            ],
-            [
-                'user_id' => $userId,
-                'title' => 'CAR Closed Successfully',
-                'message' => 'CAR #CAR-2026-001 has been approved and closed by QMR.',
-                'type' => 'success',
-                'url' => route('dashboard.internal-audit'),
-                'is_read' => 0,
-                'created_at' => (clone $now)->subHours(3),
-                'updated_at' => (clone $now)->subHours(3)
-            ]
         ]);
     }
 }
