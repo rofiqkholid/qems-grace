@@ -7,7 +7,7 @@
 @include('components.toast')
 
 <!-- Main Content -->
-<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50">
+<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50 overflow-x-hidden max-w-full">
     @include('layouts.header')
 
     <!-- Page Content -->
@@ -18,16 +18,16 @@
             <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Genba Safety audit findings and performance in real-time.</p>
         </div>
 
-        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-4">
-                    <div class="flex items-center justify-between gap-4 mb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                          <div>
                              <h3 class="text-base sm:text-lg font-bold text-slate-800">Department Performance</h3>
                              <p class="text-[10px] sm:text-sm text-slate-500">Findings status per department</p>
                          </div>
-                         <div class="flex flex-col items-end gap-2">
+                         <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                              <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                              <!-- Chart Pagination (Visible on Mobile only) -->
                              <div id="chartPagination" class="hidden items-center gap-1.5">

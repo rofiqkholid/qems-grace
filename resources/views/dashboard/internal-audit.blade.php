@@ -7,7 +7,7 @@
 @include('components.toast')
 
 <!-- Main Content -->
-<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50">
+<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50 overflow-x-hidden max-w-full">
     @include('layouts.header')
 
     <!-- Page Content -->
@@ -18,12 +18,12 @@
                 <h1 class="text-xl md:text-2xl font-bold text-slate-800">Internal Audit Dashboard</h1>
                 <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Internal Audit findings and performance in real-time.</p>
             </div>
-            <div class="flex-shrink-0 flex items-center justify-end w-full sm:w-auto self-end sm:self-auto gap-1.5 sm:gap-3">
-                <button type="button" id="btnExportExcel" onclick="exportToExcel(this)" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button type="button" id="btnExportExcel" onclick="exportToExcel(this)" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export to Excel</span>
                 </button>
-                <button type="button" id="btnExportPdf" onclick="exportToPdf(this)" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                <button type="button" id="btnExportPdf" onclick="exportToPdf(this)" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-75 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export PDF</span>
                 </button>
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Department Performance & Overview Grid -->
-        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-4">
@@ -40,7 +40,7 @@
                             <h3 class="text-base sm:text-lg font-bold text-slate-800">Department Performance</h3>
                             <p class="text-[10px] sm:text-sm text-slate-500">Findings status per department</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                             @php
                                 $currentYear = (int)date('Y');
                                 $yearsOptions = [];
@@ -55,7 +55,7 @@
                                     ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
                                 ];
                             @endphp
-                            <div class="w-[200px] sm:w-[250px] text-left">
+                            <div class="flex-1 sm:flex-initial min-w-[140px] sm:w-[250px] text-left">
                                 <x-searchable-select
                                     name="auditTypeFilter"
                                     id="auditTypeFilter"
@@ -65,7 +65,7 @@
                                     changeEvent="audit-type-filter-changed"
                                     :initialOptions="$auditTypesOptions" />
                             </div>
-                            <div class="w-[110px] sm:w-[130px] text-left">
+                            <div class="flex-initial w-[100px] sm:w-[130px] text-left">
                                 <x-searchable-select
                                     name="chartFilterDate"
                                     id="chartFilterDate"

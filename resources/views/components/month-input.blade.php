@@ -132,7 +132,7 @@ class="relative inline-block {{ $class }}">
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-        class="absolute right-0 mt-2 w-64 bg-white rounded-xl border border-slate-200 p-4 z-50 text-slate-800"
+        class="absolute left-0 sm:left-auto sm:right-0 mt-2 w-64 bg-white rounded-xl border border-slate-200 p-4 z-50 shadow-xl text-slate-800"
         style="display: none;">
         
         <!-- Header: Year Selector -->

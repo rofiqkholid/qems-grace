@@ -7,36 +7,35 @@
 @include('components.toast')
 
 <!-- Main Content -->
-<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50">
+<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50 overflow-x-hidden max-w-full">
     @include('layouts.header')
 
     <!-- Page Content -->
     <main class="flex-1 px-4 py-2 lg:px-6 lg:py-3">
         <!-- Page Title -->
-        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-slate-800">Genba Management Dashboard</h1>
-                <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Genba Management audit findings and performance in real-time.</p>
+                <p class="text-xs md:text-sm text-slate-500 mt-0.5 sm:mt-1">Monitor Genba Management audit findings and performance in real-time.</p>
             </div>
-            <div class="flex-shrink-0 flex items-center justify-end w-full sm:w-auto self-end sm:self-auto gap-2">
-                <button type="button" id="btnExport" onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-sm font-semibold rounded-none shadow-sm transition-colors disabled:opacity-50">
+            <div class="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+                <button type="button" id="btnExport" onclick="exportToExcel()" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-none shadow-sm transition-colors disabled:opacity-50">
                     <i id="exportIcon" class="fa-solid fa-file-excel text-xs sm:text-base"></i>
                     <span id="exportText">Export to Excel</span>
                 </button>
             </div>
         </div>
 
-
-        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-4">
-                    <div class="flex items-center justify-between gap-4 mb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
                             <h3 class="text-base sm:text-lg font-bold text-slate-800">Department Performance</h3>
                             <p class="text-[10px] sm:text-sm text-slate-500">Findings status per department</p>
                         </div>
-                        <div class="flex flex-col items-end gap-2">
+                        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                             <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                             <!-- Chart Pagination (Visible on Mobile only) -->
                             <div id="chartPagination" class="hidden items-center gap-1.5">

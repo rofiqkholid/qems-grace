@@ -7,23 +7,23 @@
 @include('components.toast')
 
 <!-- Main Content -->
-<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50">
+<div class="lg:ml-20 min-h-screen flex flex-col bg-slate-50 overflow-x-hidden max-w-full">
     @include('layouts.header')
 
     <!-- Page Content -->
     <main class="flex-1 px-4 py-2 lg:px-6 lg:py-3">
-        <!-- Page Title -->
-        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <!-- Page Title & Export Buttons -->
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-slate-800">Key Performance Indicators</h1>
-                <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor KPI achievements per department in real-time.</p>
+                <p class="text-xs md:text-sm text-slate-500 mt-0.5 sm:mt-1">Monitor KPI achievements per department in real-time.</p>
             </div>
-            <div class="flex-shrink-0 flex items-center justify-end w-full sm:w-auto self-end sm:self-auto gap-1.5 sm:gap-3">
-                <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button type="button" onclick="exportToExcel()" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export to Excel</span>
                 </button>
-                <button type="button" onclick="exportToPdf()" class="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[10px] sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                <button type="button" onclick="exportToPdf()" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-colors">
                     <i class="fa-solid fa-download text-xs sm:text-sm"></i>
                     <span>Export PDF</span>
                 </button>
@@ -31,88 +31,88 @@
         </div>
 
         <!-- Summary Cards Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5 mb-5">
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3.5 mb-5">
             <!-- 1. Total KPI -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
                 <i class="fa-solid fa-list-check absolute -right-2 -bottom-3 text-6xl text-blue-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100/60 relative z-10">
-                    <i class="fa-solid fa-list-check text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100/60 relative z-10">
+                    <i class="fa-solid fa-list-check text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Total KPI</p>
-                    <p id="card_total_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Total KPI</p>
+                    <p id="card_total_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
             <!-- 2. Company KPI -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all"></div>
                 <i class="fa-solid fa-building absolute -right-2 -bottom-3 text-6xl text-indigo-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100/60 relative z-10">
-                    <i class="fa-solid fa-building text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100/60 relative z-10">
+                    <i class="fa-solid fa-building text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Company KPI</p>
-                    <p id="card_company_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Company KPI</p>
+                    <p id="card_company_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
             <!-- 3. Dept KPI -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
                 <i class="fa-solid fa-users-gear absolute -right-2 -bottom-3 text-6xl text-purple-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 border border-purple-100/60 relative z-10">
-                    <i class="fa-solid fa-users-gear text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 border border-purple-100/60 relative z-10">
+                    <i class="fa-solid fa-users-gear text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Dept KPI</p>
-                    <p id="card_dept_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Dept KPI</p>
+                    <p id="card_dept_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
             <!-- 4. Achieved -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
                 <i class="fa-solid fa-circle-check absolute -right-2 -bottom-3 text-6xl text-emerald-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/60 relative z-10">
-                    <i class="fa-solid fa-circle-check text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-check text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Achieved</p>
-                    <p id="card_achieved" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Achieved</p>
+                    <p id="card_achieved" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
             <!-- 5. Not Achieved -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
                 <i class="fa-solid fa-circle-xmark absolute -right-2 -bottom-3 text-6xl text-rose-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100/60 relative z-10">
-                    <i class="fa-solid fa-circle-xmark text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-xmark text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Not Achieved</p>
-                    <p id="card_not_achieved" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Not Achieved</p>
+                    <p id="card_not_achieved" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
             <!-- 6. Waiting Data -->
-            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
                 <i class="fa-solid fa-clock absolute -right-2 -bottom-3 text-6xl text-amber-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
-                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100/60 relative z-10">
-                    <i class="fa-solid fa-clock text-lg"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100/60 relative z-10">
+                    <i class="fa-solid fa-clock text-base sm:text-lg"></i>
                 </div>
                 <div class="min-w-0 flex-1 relative z-10">
-                    <p class="text-xs font-semibold text-slate-500 truncate">Waiting Data</p>
-                    <p id="card_waiting_data" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Waiting Data</p>
+                    <p id="card_waiting_data" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
         </div>
 
         <!-- Department Performance & Overview Grid -->
-        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
+        <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-4">
@@ -121,7 +121,7 @@
                             <h3 class="text-base sm:text-lg font-bold text-slate-800">KPI Performance per Department</h3>
                             <p class="text-[10px] sm:text-sm text-slate-500">KPI achievement status per department</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                             <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                             <!-- Chart Pagination (Visible on Mobile only) -->
                             <div id="chartPagination" class="hidden items-center gap-1.5">
@@ -166,13 +166,6 @@
                                 <span class="font-semibold text-slate-700 text-xs whitespace-nowrap">Not Achieved</span>
                             </div>
                             <span id="val_minor" class="font-bold text-slate-800 text-xs">0</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 col-span-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-[#008FFB]"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Total KPI</span>
-                            </div>
-                            <span id="val_ofi" class="font-bold text-slate-800 text-xs">0</span>
                         </div>
                     </div>
                 </div>
@@ -235,24 +228,12 @@
                                 </div>
                                 <span id="val_major_close" class="font-bold text-slate-800 text-xs">0</span>
                             </div>
-                            <!-- Total KPI -->
-                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 col-span-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-[#008FFB]"></span>
-                                    <span class="font-semibold text-slate-700 text-xs text-nowrap">Total KPI</span>
-                                </div>
-                                <span id="val_need_verif" class="font-bold text-slate-800 text-xs">0</span>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
-    </main>
-
-
-
     </main>
     @include('layouts.footer')
 </div>
@@ -630,8 +611,7 @@
         const allValues = [
             ...okData,
             ...minorData,
-            ...majorData,
-            ...ofiData
+            ...majorData
         ];
         const maxValue = Math.max(...allValues, 0);
         const suggestedMax = maxValue + 1;
@@ -651,11 +631,6 @@
                         label: 'Not Achieved',
                         data: minorData,
                         backgroundColor: '#FEB019', // Yellow
-                    },
-                    {
-                        label: 'Total KPI',
-                        data: ofiData,
-                        backgroundColor: '#008FFB', // Blue
                     }
                 ]
             },
@@ -875,32 +850,45 @@
         }
  
         const isMobile = window.innerWidth < 1280;
- 
+
         // Dynamic page size based on screen width
         const width = window.innerWidth;
         if (width < 380) closedChartPageSize = 3;
-        else if (width < 480) closedChartPageSize = 4;
-        else if (width < 640) closedChartPageSize = 5;
-        else if (width < 768) closedChartPageSize = 6;
-        else if (width < 1024) closedChartPageSize = 7;
+        else if (width < 480) closedChartPageSize = 3;
+        else if (width < 640) closedChartPageSize = 4;
+        else if (width < 768) closedChartPageSize = 5;
+        else if (width < 1024) closedChartPageSize = 6;
         else closedChartPageSize = 9;
- 
+
         let labels = rawClosedChartData.data_name_dept;
         let minorData = rawClosedChartData.data_total_minor;
         let majorData = rawClosedChartData.data_total_major;
-        let minorOverdueData = rawClosedChartData.data_total_minor_overdue || [];
-        let majorOverdueData = rawClosedChartData.data_total_major_overdue || [];
-        let needVerifData = rawClosedChartData.data_total_need_verif || [];
- 
-        // Ke-6 Pilar selalu ditampilkan lengkap
-        $('#closedChartPagination').removeClass('flex').addClass('hidden');
- 
+
+        if (isMobile) {
+            const totalItems = labels.length;
+            const totalPages = Math.ceil(totalItems / closedChartPageSize) || 1;
+
+            if (currentClosedChartPage < 1) currentClosedChartPage = 1;
+            if (currentClosedChartPage > totalPages) currentClosedChartPage = totalPages;
+
+            const startIndex = (currentClosedChartPage - 1) * closedChartPageSize;
+            const endIndex = startIndex + closedChartPageSize;
+
+            labels = labels.slice(startIndex, endIndex);
+            minorData = minorData.slice(startIndex, endIndex);
+            majorData = majorData.slice(startIndex, endIndex);
+
+            $('#closedChartPageIndicator').text(currentClosedChartPage + '/' + totalPages);
+            $('#btnClosedChartPrev').prop('disabled', currentClosedChartPage === 1);
+            $('#btnClosedChartNext').prop('disabled', currentClosedChartPage === totalPages);
+            $('#closedChartPagination').removeClass('hidden').addClass('flex');
+        } else {
+            $('#closedChartPagination').removeClass('flex').addClass('hidden');
+        }
+
         const allValues = [
             ...minorData,
-            ...majorData,
-            ...minorOverdueData,
-            ...majorOverdueData,
-            ...needVerifData
+            ...majorData
         ];
         const maxValue = Math.max(...allValues, 0);
         const suggestedMax = maxValue + 1;
