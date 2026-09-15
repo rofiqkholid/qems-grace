@@ -160,9 +160,9 @@
                             </div>
                             <span id="val_ok" class="font-bold text-slate-800 text-xs">0</span>
                         </div>
-                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-rose-50/60 border border-rose-100">
                             <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-[#FEB019]"></span>
+                                <span class="w-3 h-3 rounded-full bg-[#ef4444]"></span>
                                 <span class="font-semibold text-slate-700 text-xs whitespace-nowrap">Not Achieved</span>
                             </div>
                             <span id="val_minor" class="font-bold text-slate-800 text-xs">0</span>
@@ -221,9 +221,9 @@
                                 <span id="val_minor_close" class="font-bold text-slate-800 text-xs">0</span>
                             </div>
                             <!-- Not Achieved -->
-                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-rose-50/60 border border-rose-100">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-[#FEB019]"></span>
+                                    <span class="w-3 h-3 rounded-full bg-[#ef4444]"></span>
                                     <span class="font-semibold text-slate-700 text-xs text-nowrap">Not Achieved</span>
                                 </div>
                                 <span id="val_major_close" class="font-bold text-slate-800 text-xs">0</span>
@@ -396,7 +396,7 @@
         if (statsPieChart) {
             statsPieChart.data.labels = ['Achieved', 'Not Achieved'];
             statsPieChart.data.datasets[0].data = lastPieData;
-            statsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#FEB019'];
+            statsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#ef4444'];
             statsPieChart.update();
             return;
         }
@@ -407,7 +407,7 @@
                 labels: ['Achieved', 'Not Achieved'],
                 datasets: [{
                     data: lastPieData,
-                    backgroundColor: ['#22c55e', '#FEB019'],
+                    backgroundColor: ['#22c55e', '#ef4444'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -630,7 +630,7 @@
                     {
                         label: 'Not Achieved',
                         data: minorData,
-                        backgroundColor: '#FEB019', // Yellow
+                        backgroundColor: '#ef4444', // Red
                     }
                 ]
             },
@@ -908,7 +908,7 @@
                     {
                         label: 'Not Achieved',
                         data: majorData,
-                        backgroundColor: '#FEB019', // Yellow
+                        backgroundColor: '#ef4444', // Red
                     }
                 ]
             },
@@ -1094,7 +1094,7 @@
             } else if (closedStatsPieChart) {
                 closedStatsPieChart.data.labels = ['Achieved', 'Not Achieved'];
                 closedStatsPieChart.data.datasets[0].data = [sumAchieved, sumNotAchieved];
-                closedStatsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#FEB019'];
+                closedStatsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#ef4444'];
                 closedStatsPieChart.update();
             } else {
                 closedStatsPieChart = new Chart(pieCtx, {
@@ -1103,7 +1103,7 @@
                         labels: ['Achieved', 'Not Achieved'],
                         datasets: [{
                             data: [sumAchieved, sumNotAchieved],
-                            backgroundColor: ['#22c55e', '#FEB019'],
+                            backgroundColor: ['#22c55e', '#ef4444'],
                             borderWidth: 0,
                             hoverOffset: 4
                         }]
