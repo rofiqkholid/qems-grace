@@ -1465,32 +1465,47 @@ class DashboardController extends Controller
         $pillarFilter = $request->pillar;
         $deptFilter = $request->dept;
 
-        $activities = DB::table('KPICompanyActivity as kca')
+        // Fetch activities filtered by selected month and year
+        $actQuery = DB::table('KPICompanyActivity as kca')
             ->join('KPICompany as kc', 'kca.kpi_company_id', '=', 'kc.id')
             ->join('KPIList as kl', 'kc.kpi_list_id', '=', 'kl.id')
             ->where('kc.periode', $year);
 
         if ($selectedBulan) {
-            $activities->where('kca.bulan', $selectedBulan);
+            $actQuery->where('kca.bulan', $selectedBulan);
         }
         if ($pillarFilter) {
-            $activities->where('kl.pillar', $pillarFilter);
+            $actQuery->where('kl.pillar', $pillarFilter);
         }
         if ($deptFilter) {
-            $activities->where('kc.department_code', $deptFilter);
+            $actQuery->where('kc.department_code', $deptFilter);
         }
 
-        $allActs = $activities->whereNotNull('kca.status')->where('kca.status', '!=', '')->get(['kca.status']);
+        $allActs = $actQuery->get(['kca.status', 'kl.category']);
 
         $achieved = 0;
         $notAchieved = 0;
+        $companyKpi = 0;
+        $deptKpi = 0;
 
         foreach ($allActs as $act) {
             $st = strtolower(trim($act->status ?? ''));
+            $isComp = str_contains(strtolower($act->category ?? ''), 'company');
+
             if (in_array($st, ['achieve', 'achieved', 'ok', 'good'])) {
                 $achieved++;
+                if ($isComp) {
+                    $companyKpi++;
+                } else {
+                    $deptKpi++;
+                }
             } elseif (in_array($st, ['not achieve', 'not achieved', 'not_achieved', 'ng', 'bad'])) {
                 $notAchieved++;
+                if ($isComp) {
+                    $companyKpi++;
+                } else {
+                    $deptKpi++;
+                }
             }
         }
 
@@ -1499,8 +1514,11 @@ class DashboardController extends Controller
 
         return response()->json([
             'totalKpi' => $totalKpi,
+            'companyKpi' => $companyKpi,
+            'deptKpi' => $deptKpi,
             'achieved' => $achieved,
             'notAchieved' => $notAchieved,
+            'waitingData' => 0,
             'noData' => 0,
             'achievementRate' => $achievementRate
         ]);

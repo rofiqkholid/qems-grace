@@ -30,6 +30,87 @@
             </div>
         </div>
 
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5 mb-5">
+            <!-- 1. Total KPI -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
+                <i class="fa-solid fa-list-check absolute -right-2 -bottom-3 text-6xl text-blue-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100/60 relative z-10">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Total KPI</p>
+                    <p id="card_total_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 2. Company KPI -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all"></div>
+                <i class="fa-solid fa-building absolute -right-2 -bottom-3 text-6xl text-indigo-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100/60 relative z-10">
+                    <i class="fa-solid fa-building text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Company KPI</p>
+                    <p id="card_company_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 3. Dept KPI -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
+                <i class="fa-solid fa-users-gear absolute -right-2 -bottom-3 text-6xl text-purple-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 border border-purple-100/60 relative z-10">
+                    <i class="fa-solid fa-users-gear text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Dept KPI</p>
+                    <p id="card_dept_kpi" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 4. Achieved -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+                <i class="fa-solid fa-circle-check absolute -right-2 -bottom-3 text-6xl text-emerald-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Achieved</p>
+                    <p id="card_achieved" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 5. Not Achieved -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
+                <i class="fa-solid fa-circle-xmark absolute -right-2 -bottom-3 text-6xl text-rose-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-xmark text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Not Achieved</p>
+                    <p id="card_not_achieved" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 6. Waiting Data -->
+            <div class="relative overflow-hidden bg-white p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
+                <i class="fa-solid fa-clock absolute -right-2 -bottom-3 text-6xl text-amber-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100/60 relative z-10">
+                    <i class="fa-solid fa-clock text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-xs font-semibold text-slate-500 truncate">Waiting Data</p>
+                    <p id="card_waiting_data" class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Department Performance & Overview Grid -->
         <div class="bg-white p-5 border border-gray-200 rounded-none mb-8 lg:overflow-x-hidden">
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
@@ -64,32 +145,34 @@
                 </div>
 
                 <!-- Right Column: Findings Overview (20%) -->
-                <div class="xl:col-span-1 pt-8 xl:pt-0">
-                    <h3 class="text-lg font-bold text-slate-800 mb-3">Overview</h3>
-                    <div class="relative h-52 w-full flex justify-center mb-3">
-                        <canvas id="statsPieChart"></canvas>
+                <div class="xl:col-span-1 pt-8 xl:pt-0 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-3">Overview</h3>
+                        <div class="relative h-52 w-full flex justify-center mb-3">
+                            <canvas id="statsPieChart"></canvas>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                        <div class="flex items-center justify-between p-3 rounded-none bg-green-50/50 border border-green-100">
-                            <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-none bg-[#22c55e] -green-200"></span>
+                    <div class="grid grid-cols-2 gap-3 text-sm text-slate-600 mt-auto">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Achieved</span>
                             </div>
-                            <span id="val_ok" class="font-bold text-slate-800 text-xs">...</span>
+                            <span id="val_ok" class="font-bold text-slate-800 text-xs">0</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-none bg-amber-50/50 border border-amber-100">
-                            <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-none bg-[#FEB019] -amber-200"></span>
-                                <span class="font-semibold text-slate-700 text-xs text-nowrap">Not Achieved</span>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-[#FEB019]"></span>
+                                <span class="font-semibold text-slate-700 text-xs whitespace-nowrap">Not Achieved</span>
                             </div>
-                            <span id="val_minor" class="font-bold text-slate-800 text-xs">...</span>
+                            <span id="val_minor" class="font-bold text-slate-800 text-xs">0</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-none bg-blue-50/50 border border-blue-100 col-span-2">
-                            <div class="flex items-center gap-3">
-                                <span class="w-3 h-3 rounded-none bg-[#008FFB] -blue-200"></span>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 col-span-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-[#008FFB]"></span>
                                 <span class="font-semibold text-slate-700 text-xs">Total KPI</span>
                             </div>
-                            <span id="val_ofi" class="font-bold text-slate-800 text-xs">...</span>
+                            <span id="val_ofi" class="font-bold text-slate-800 text-xs">0</span>
                         </div>
                     </div>
                 </div>
@@ -128,35 +211,37 @@
                     </div>
 
                     <!-- Right Column: Closed Findings Overview Pie Chart (20%) -->
-                    <div class="xl:col-span-1 pt-8 xl:pt-0">
-                        <h3 class="text-lg font-bold text-slate-800 mb-3">Overview</h3>
-                        <div class="relative h-52 w-full flex justify-center mb-3">
-                            <canvas id="closedStatsPieChart"></canvas>
+                    <div class="xl:col-span-1 pt-8 xl:pt-0 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 mb-3">Overview</h3>
+                            <div class="relative h-52 w-full flex justify-center mb-3">
+                                <canvas id="closedStatsPieChart"></canvas>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
+                        <div class="grid grid-cols-2 gap-3 text-sm text-slate-600 mt-auto">
                             <!-- Achieved -->
-                            <div class="flex items-center justify-between p-3 rounded-none bg-green-50/50 border border-green-100">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-none bg-[#22c55e] -green-200"></span>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>
                                     <span class="font-semibold text-slate-700 text-xs text-nowrap">Achieved</span>
                                 </div>
-                                <span id="val_minor_close" class="font-bold text-slate-800 text-xs">...</span>
+                                <span id="val_minor_close" class="font-bold text-slate-800 text-xs">0</span>
                             </div>
                             <!-- Not Achieved -->
-                            <div class="flex items-center justify-between p-3 rounded-none bg-amber-50/50 border border-amber-100">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-none bg-[#FEB019] -amber-200"></span>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-[#FEB019]"></span>
                                     <span class="font-semibold text-slate-700 text-xs text-nowrap">Not Achieved</span>
                                 </div>
-                                <span id="val_major_close" class="font-bold text-slate-800 text-xs">...</span>
+                                <span id="val_major_close" class="font-bold text-slate-800 text-xs">0</span>
                             </div>
                             <!-- Total KPI -->
-                            <div class="flex items-center justify-between p-3 rounded-none bg-blue-50/50 border border-blue-100 col-span-2">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-none bg-[#008FFB] -blue-200"></span>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 col-span-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-[#008FFB]"></span>
                                     <span class="font-semibold text-slate-700 text-xs text-nowrap">Total KPI</span>
                                 </div>
-                                <span id="val_need_verif" class="font-bold text-slate-800 text-xs">...</span>
+                                <span id="val_need_verif" class="font-bold text-slate-800 text-xs">0</span>
                             </div>
                         </div>
                     </div>
@@ -312,22 +397,36 @@
     function renderPieChart() {
         if (!lastPieData) return;
 
+        const canvas = document.getElementById('statsPieChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const totalSum = lastPieData.reduce((a, b) => a + b, 0);
+
+        if (totalSum === 0) {
+            if (statsPieChart) {
+                statsPieChart.destroy();
+                statsPieChart = null;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
         if (statsPieChart) {
+            statsPieChart.data.labels = ['Achieved', 'Not Achieved'];
             statsPieChart.data.datasets[0].data = lastPieData;
+            statsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#FEB019'];
             statsPieChart.update();
             return;
         }
 
-        const canvas = document.getElementById('statsPieChart');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
         statsPieChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['OK', 'Minor', 'Major', 'OFI'],
+                labels: ['Achieved', 'Not Achieved'],
                 datasets: [{
                     data: lastPieData,
-                    backgroundColor: ['#22c55e', '#FEB019', '#FF4560', '#008FFB'],
+                    backgroundColor: ['#22c55e', '#FEB019'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -354,26 +453,37 @@
             type: "GET",
             dataType: "json",
             success: function(response) {
-                // Update text values untuk overview KPI
+                // Update text values untuk summary cards atas
+                $('#card_total_kpi').text(new Intl.NumberFormat().format(response.totalKpi || 0));
+                $('#card_company_kpi').text(new Intl.NumberFormat().format(response.companyKpi || 0));
+                $('#card_dept_kpi').text(new Intl.NumberFormat().format(response.deptKpi || 0));
+                $('#card_achieved').text(new Intl.NumberFormat().format(response.achieved || 0));
+                $('#card_not_achieved').text(new Intl.NumberFormat().format(response.notAchieved || 0));
+                $('#card_waiting_data').text(new Intl.NumberFormat().format(response.waitingData || 0));
+
+                // Update text values untuk overview KPI kanan
                 $('#val_ok').text(new Intl.NumberFormat().format(response.achieved || 0));
                 $('#val_minor').text(new Intl.NumberFormat().format(response.notAchieved || 0));
-                $('#val_major').text(new Intl.NumberFormat().format(response.noData || 0));
                 $('#val_ofi').text(new Intl.NumberFormat().format(response.totalKpi || 0));
 
                 lastPieData = [
                     response.achieved || 0,
-                    response.notAchieved || 0,
-                    response.noData || 0,
-                    response.totalKpi || 0
+                    response.notAchieved || 0
                 ];
 
                 renderPieChart();
             },
             error: function(xhr, status, error) {
                 console.error(error);
+                $('#card_total_kpi').text('0');
+                $('#card_company_kpi').text('0');
+                $('#card_dept_kpi').text('0');
+                $('#card_achieved').text('0');
+                $('#card_not_achieved').text('0');
+                $('#card_waiting_data').text('0');
+
                 $('#val_ok').text('0');
                 $('#val_minor').text('0');
-                $('#val_major').text('0');
                 $('#val_ofi').text('0');
             }
         });
