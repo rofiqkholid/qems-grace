@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<aside id="sidebar" class="group fixed top-0 left-0 z-40 h-screen transition-all duration-300 w-72 lg:w-20 lg:hover:w-72 -translate-x-full lg:translate-x-0">
+<aside id="sidebar" class="group fixed top-0 left-0 z-50 h-screen transition-all duration-300 w-72 lg:w-20 lg:hover:w-72 -translate-x-full lg:translate-x-0">
     <div class="h-full px-3 py-6 overflow-y-auto overflow-x-hidden no-scrollbar bg-white border-r border-slate-200">
         <!-- Logo -->
         <a href="{{ url('/') }}" class="flex items-center justify-center mb-8 px-2 h-12">

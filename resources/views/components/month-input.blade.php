@@ -168,10 +168,10 @@ class="relative inline-block {{ $class }}">
         <!-- Footer Action -->
         <div class="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
             <button type="button" @click="selectCurrentMonth()" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
-                Bulan Ini
+                This month
             </button>
             <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600">
-                Tutup
+                Close
             </button>
         </div>
     </div>
