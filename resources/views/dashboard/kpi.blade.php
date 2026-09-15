@@ -1094,55 +1094,49 @@
         $('#val_major_close').text(new Intl.NumberFormat().format(sumNotAchieved));
         $('#val_need_verif').text(new Intl.NumberFormat().format(sumTotal));
 
-        const closedPieData = [
-            sumAchieved,
-            sumNotAchieved,
-            sumTotal
-        ];
-
-        if (closedStatsPieChart) {
-            closedStatsPieChart.destroy();
-        }
-
-        setTimeout(function() {
-            const canvas = document.getElementById('closedStatsPieChart');
-            if (!canvas) return;
-            const pieCtx = canvas.getContext('2d');
-            closedStatsPieChart = new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Achieved', 'Not Achieved', 'Total KPI'],
-                    datasets: [{
-                        data: [sumAchieved, sumNotAchieved, sumTotal],
-                        backgroundColor: ['#22c55e', '#FEB019', '#008FFB'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    animations: {
-                        circumference: {
-                            duration: 1500,
-                            easing: 'easeOutQuart',
-                            from: 0
-                        },
-                        rotation: {
-                            duration: 1500,
-                            easing: 'easeOutQuart',
-                            from: 0
-                        }
+        const pieCanvas = document.getElementById('closedStatsPieChart');
+        if (pieCanvas) {
+            const pieCtx = pieCanvas.getContext('2d');
+            if (sumTotal === 0) {
+                if (closedStatsPieChart) {
+                    closedStatsPieChart.destroy();
+                    closedStatsPieChart = null;
+                }
+                pieCtx.clearRect(0, 0, pieCanvas.width, pieCanvas.height);
+            } else if (closedStatsPieChart) {
+                closedStatsPieChart.data.labels = ['Achieved', 'Not Achieved'];
+                closedStatsPieChart.data.datasets[0].data = [sumAchieved, sumNotAchieved];
+                closedStatsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#FEB019'];
+                closedStatsPieChart.update();
+            } else {
+                closedStatsPieChart = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Achieved', 'Not Achieved'],
+                        datasets: [{
+                            data: [sumAchieved, sumNotAchieved],
+                            backgroundColor: ['#22c55e', '#FEB019'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
                     },
-                    plugins: {
-                        legend: {
-                            display: false
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        animation: {
+                            duration: 600,
+                            easing: 'easeOutQuart'
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         }
                     }
-                }
-            });
-        }, 100);
+                });
+            }
+        }
     }
 
     // Initialize Chart
