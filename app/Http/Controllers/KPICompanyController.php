@@ -1815,7 +1815,7 @@ class KPICompanyController extends Controller
             $row = [
                 "no" => $start + $key + 1,
                 "dept" => e($item->department_code),
-                "objective" => '<div class="font-semibold text-slate-800">' . e($item->objective) . '</div>',
+                "objective" => '<div class="font-normal text-slate-800">' . e($item->objective) . '</div>',
                 "pillar" => e($item->pillar ?? ''),
                 "target" => e($item->operator) . ' ' . e($item->target) . ' ' . e($item->unit),
             ];

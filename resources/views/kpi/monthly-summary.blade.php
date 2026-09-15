@@ -145,7 +145,7 @@
                                 id="filter_year"
                                 label="Year"
                                 updateEvent="set-filter-year"
-                                :initialOptions="collect($years)->map(fn($y) => ['id' => $y, 'name' => 'Year ' . $y])->toArray()"
+                                :initialOptions="collect($years)->map(fn($y) => ['id' => $y, 'name' => (string)$y])->toArray()"
                                 hideLabel="true" />
                         </div>
 
@@ -203,7 +203,7 @@
                 }
             }
             $pillarName = !empty($selectedPillar) ? $selectedPillar : 'All Pillars';
-            $yearName = 'Year ' . $selectedYear;
+            $yearName = $selectedYear;
         @endphp
 
         window.dispatchEvent(new CustomEvent('set-filter-department', { detail: { id: "{{ $selectedDept ?? '' }}", name: "{{ !empty($selectedDept) ? $deptName : '' }}" } }));
@@ -238,7 +238,7 @@
             },
             columns: [
                 { data: 'no', name: 'no', orderable: false, searchable: false, className: 'text-left font-base text-slate-700 w-[50px] min-w-[50px] max-w-[50px] pl-3' },
-                { data: 'objective', name: 'kl.objective', className: 'font-medium text-slate-800 w-[320px] min-w-[320px] max-w-[320px] text-left leading-snug' },
+                { data: 'objective', name: 'kl.objective', className: 'font-normal text-slate-800 w-[320px] min-w-[320px] max-w-[320px] text-left leading-snug' },
                 { data: 'pillar', name: 'kl.pillar', className: 'text-xs font-normal text-slate-500 whitespace-nowrap w-[110px] min-w-[110px] max-w-[110px] text-left' },
                 { data: 'target', name: 'target', className: 'text-slate-600 font-normal whitespace-nowrap w-[120px] min-w-[120px] max-w-[120px] text-left' },
                 @foreach($months as $m)
@@ -265,7 +265,7 @@
 
             window.dispatchEvent(new CustomEvent('set-filter-department', { detail: { id: '', name: '' } }));
             window.dispatchEvent(new CustomEvent('set-filter-pillar', { detail: { id: '', name: '' } }));
-            window.dispatchEvent(new CustomEvent('set-filter-year', { detail: { id: '{{ date("Y") }}', name: 'Year {{ date("Y") }}' } }));
+            window.dispatchEvent(new CustomEvent('set-filter-year', { detail: { id: '{{ date("Y") }}', name: '{{ date("Y") }}' } }));
 
             table.search('').draw();
         });
