@@ -28,6 +28,26 @@ class CheckPageMaintenance
             return $next($request);
         }
 
+        // Whitelist QMS and ICT department users
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $userDepts = DB::table('t100_user_dept')
+                ->where('id_user', $user->id)
+                ->pluck('department')
+                ->map(fn($d) => strtoupper(trim($d)))
+                ->toArray();
+            
+            if (!empty($user->department)) {
+                $userDepts[] = strtoupper(trim($user->department));
+            }
+
+            foreach ($userDepts as $d) {
+                if (str_contains($d, 'QMS') || str_contains($d, 'ICT') || str_contains($d, 'INFORMATION') || str_contains($d, 'IT') || str_contains($d, 'MIS')) {
+                    return $next($request);
+                }
+            }
+        }
+
         // Fetch menu_ids that are currently marked as under maintenance
         $maintenanceMenuIds = DB::table('t100_page_maintenance')
             ->where('is_maintenance', 1)
