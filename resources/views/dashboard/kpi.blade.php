@@ -684,9 +684,9 @@
                         if (!meta.hidden) {
                             meta.data.forEach((element, index) => {
                                 const pctVal = dataset.data[index];
-                                if (pctVal > 0) {
-                                    const pctRound = Math.round(pctVal);
-                                    const labelText = `${pctRound}%`;
+                                const rawVal = (dataset.rawCounts && dataset.rawCounts[index] !== undefined) ? dataset.rawCounts[index] : pctVal;
+                                if (rawVal > 0) {
+                                    const labelText = `${rawVal}`;
                                     const yPos = (element.y + element.base) / 2;
                                     
                                     ctx.fillStyle = '#ffffff';
