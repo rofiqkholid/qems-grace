@@ -2280,4 +2280,109 @@ class MasterController extends Controller
             ], 500);
         }
     }
+
+    public function page_maintenance()
+    {
+        $hierarchy = Menu::getMenuHierarchyMaps();
+        return view('setting.page-maintenance', compact('hierarchy'));
+    }
+
+    public function page_maintenance_table(Request $request)
+    {
+        $orderedIds = Menu::getOrderedIds();
+
+        $query = DB::table('t100_menus as m')
+            ->leftJoin('t100_page_maintenance as pm', 'm.id', '=', 'pm.menu_id')
+            ->where('m.level_menu_id', '!=', 1)
+            ->select(
+                'm.id',
+                'm.menu_name',
+                'm.menu',
+                'm.level_menu_id',
+                DB::raw("COALESCE(pm.is_maintenance, 0) as is_maintenance"),
+                'pm.updated_at'
+            );
+
+        if ($request->filled('search')) {
+            $searchValue = strtolower($request->input('search'));
+            $query->where(function ($q) use ($searchValue) {
+                $q->where(DB::raw('LOWER(m.menu_name)'), 'LIKE', "%{$searchValue}%")
+                  ->orWhere(DB::raw('LOWER(m.menu)'), 'LIKE', "%{$searchValue}%");
+            });
+        }
+
+        $allRecords = $query->get()->keyBy('id');
+
+        $orderedMenus = collect();
+        foreach ($orderedIds as $mId) {
+            if (isset($allRecords[$mId])) {
+                $orderedMenus->push($allRecords[$mId]);
+            }
+        }
+        foreach ($allRecords as $mId => $record) {
+            if (!$orderedMenus->contains('id', $mId)) {
+                $orderedMenus->push($record);
+            }
+        }
+
+        $result = [];
+        foreach ($orderedMenus as $index => $row) {
+            $result[] = [
+                'no' => $index + 1,
+                'id' => $row->id,
+                'menu_name' => $row->menu_name,
+                'menu' => $row->menu,
+                'level_menu_id' => $row->level_menu_id,
+                'is_maintenance' => (int) $row->is_maintenance,
+                'updated_at' => $row->updated_at ? date('Y-m-d H:i', strtotime($row->updated_at)) : '-'
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
+        ]);
+    }
+
+    public function toggle_page_maintenance(Request $request)
+    {
+        $menuIds = [];
+        if ($request->has('menu_ids') && is_array($request->menu_ids)) {
+            $menuIds = array_map('intval', $request->menu_ids);
+        } elseif ($request->has('menu_id')) {
+            $menuIds = [(int)$request->menu_id];
+        }
+
+        if (empty($menuIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada menu yang dipilih.'
+            ], 400);
+        }
+
+        $isMaintenance = (int) $request->input('is_maintenance', 0);
+        $user = Auth::user();
+        $username = $user ? $user->username : 'system';
+        $now = \Carbon\Carbon::now();
+
+        foreach ($menuIds as $mId) {
+            DB::table('t100_page_maintenance')->updateOrInsert(
+                ['menu_id' => $mId],
+                [
+                    'is_maintenance' => $isMaintenance,
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                    'created_at' => $now
+                ]
+            );
+        }
+
+        $count = count($menuIds);
+        $statusText = $isMaintenance ? 'Under Maintenance' : 'Active (Normal Access)';
+
+        return response()->json([
+            'success' => true,
+            'message' => "Status {$count} menu telah diperbarui menjadi: {$statusText}."
+        ]);
+    }
 }

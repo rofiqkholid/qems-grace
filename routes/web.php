@@ -256,6 +256,10 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/menu-management', 'setting.menu-management')->name('master.menu_management');
     Route::post('/menu-management/table', [MasterController::class, 'menu_management_table'])->name('master.menu_management.table');
 
+    Route::get('/page-maintenance', [MasterController::class, 'page_maintenance'])->name('master.page_maintenance');
+    Route::post('/page-maintenance/table', [MasterController::class, 'page_maintenance_table'])->name('master.page_maintenance.table');
+    Route::post('/page-maintenance/toggle', [MasterController::class, 'toggle_page_maintenance'])->name('master.page_maintenance.toggle');
+
     // Key Performance Indicator Routes
     Route::prefix('kpi')->group(function () {
         Route::get('/company', [KPICompanyController::class, 'index'])->name('kpi.company');
