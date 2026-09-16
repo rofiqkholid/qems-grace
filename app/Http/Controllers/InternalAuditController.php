@@ -252,6 +252,15 @@ class InternalAuditController extends Controller
         if ($request->filled('dept')) {
             $query->where('a.department', $request->dept);
         }
+        if ($request->filled('audit_type')) {
+            $typeVal = $request->audit_type;
+            if (str_contains($typeVal, 'Product')) $typeVal = 'Product';
+            elseif (str_contains($typeVal, 'Process')) $typeVal = 'Process';
+            elseif (str_contains($typeVal, 'System')) $typeVal = 'System';
+            elseif (str_contains($typeVal, 'Environment')) $typeVal = 'Environment';
+
+            $query->where('c.audit_type', $typeVal);
+        }
 
         $filteredRecords = $query->count();
 
@@ -260,7 +269,7 @@ class InternalAuditController extends Controller
             $query->skip($request->start)->take($request->length);
         }
 
-        $data = $query->select('a.*', 'd.action_status', 'd.id as action_id', 'd.auditee_superior_name', 'c.auditee as header_auditee')
+        $data = $query->select('a.*', 'd.action_status', 'd.id as action_id', 'd.auditee_superior_name', 'c.auditee as header_auditee', 'c.audit_type')
             ->orderBy('a.id', 'desc')
             ->get();
 
@@ -418,10 +427,25 @@ class InternalAuditController extends Controller
                     $auditorHtml .= '</div>';
                 }
 
+                $rawAuditType = $item->audit_type ?? '';
+                $auditTypeFormatted = '-';
+                if ($rawAuditType === 'Product') {
+                    $auditTypeFormatted = 'Audit Quality - Product';
+                } elseif ($rawAuditType === 'Process') {
+                    $auditTypeFormatted = 'Audit Quality - Process';
+                } elseif ($rawAuditType === 'System') {
+                    $auditTypeFormatted = 'Audit Quality - System';
+                } elseif ($rawAuditType === 'Environment') {
+                    $auditTypeFormatted = 'Audit Lingkungan - Environment';
+                } elseif (!empty($rawAuditType)) {
+                    $auditTypeFormatted = $rawAuditType;
+                }
+
                 return [
                     "no" => $start + $key + 1,
                     "id" => $item->id,
                     "req_number" => $item->req_number,
+                    "audit_type" => $auditTypeFormatted,
                     "external" => $item->external,
                     "department" => $item->department,
                     "finding" => $item->finding,
@@ -1596,7 +1620,7 @@ class InternalAuditController extends Controller
                 ->whereNotNull('a.clause_title')
                 ->where('a.clause_title', '<>', '');
 
-            $query->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee', 'b.note', 'c.audit_date');
+            $query->select('a.*', 'b.checksheet_item_id', 'c.hash_id as schedule_hash_id', 'c.auditee as header_auditee', 'b.note', 'c.audit_date', 'c.audit_type');
 
             if ($category === 'CAR') {
                 $query->whereIn('a.finding_category', ['Minor', 'Mayor']);
@@ -1616,7 +1640,8 @@ class InternalAuditController extends Controller
                     'a.req_number',
                     'a.id as id',
                     'b.checksheet_item_id',
-                    'c.audit_date'
+                    'c.audit_date',
+                    'c.audit_type'
                 );
         }
 
@@ -1735,7 +1760,13 @@ class InternalAuditController extends Controller
 
         // Apply audit_type filter if present
         if ($request->has('audit_type') && !empty($request->audit_type)) {
-            $query->where('c.audit_type', $request->audit_type);
+            $typeVal = $request->audit_type;
+            if (str_contains($typeVal, 'Product')) $typeVal = 'Product';
+            elseif (str_contains($typeVal, 'Process')) $typeVal = 'Process';
+            elseif (str_contains($typeVal, 'System')) $typeVal = 'System';
+            elseif (str_contains($typeVal, 'Environment')) $typeVal = 'Environment';
+
+            $query->where('c.audit_type', $typeVal);
         }
 
         // Apply requirement_no filter if present (can match requirement_no or clause_title)
@@ -1857,10 +1888,25 @@ class InternalAuditController extends Controller
                 $auditorHtml .= '</div>';
             }
 
+            $rawAuditType = $post->audit_type ?? '';
+            $auditTypeFormatted = '-';
+            if ($rawAuditType === 'Product') {
+                $auditTypeFormatted = 'Audit Quality - Product';
+            } elseif ($rawAuditType === 'Process') {
+                $auditTypeFormatted = 'Audit Quality - Process';
+            } elseif ($rawAuditType === 'System') {
+                $auditTypeFormatted = 'Audit Quality - System';
+            } elseif ($rawAuditType === 'Environment') {
+                $auditTypeFormatted = 'Audit Lingkungan - Environment';
+            } elseif (!empty($rawAuditType)) {
+                $auditTypeFormatted = $rawAuditType;
+            }
+
             $data[] = [
                 'no' => $no++,
                 'req_number' => $post->req_number ?? '',
                 'note' => $post->note ?? '',
+                'audit_type' => $auditTypeFormatted,
                 'department' => $post->department ?? '',
                 'finding_category' => $statusBadge,
                 'auditor' => $auditorHtml,

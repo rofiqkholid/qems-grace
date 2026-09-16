@@ -83,22 +83,41 @@
                         </div>
                     </div>
 
-                    <!-- Dept & Reset Container (Side-by-Side on Mobile) -->
-                    <div class="flex flex-row gap-2 w-full lg:w-auto">
+                    <!-- Audit Type & Dept & Reset Container -->
+                    <div class="flex flex-row flex-wrap gap-2 w-full lg:w-auto">
+                        <!-- Audit Type Filter -->
+                        <div class="flex-1 lg:w-[200px] min-w-[150px]">
+                            <x-searchable-select
+                                name="audit_type"
+                                id="auditTypeFilter"
+                                label="Internal Audit"
+                                :initialOptions="[
+                                    ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                    ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                    ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                    ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                                ]"
+                                valueField="id"
+                                updateEvent="reset-audit-type"
+                                hideLabel="true"
+                                placeholder="Select Audit Type..." />
+                        </div>
+
                         <!-- Department Filter -->
-                        <div class="flex-1 lg:w-[200px]">
+                        <div class="flex-1 lg:w-[200px] min-w-[150px]">
                             <x-searchable-select
                                 name="dept"
                                 id="deptFilter"
                                 label="Department"
                                 :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
                                 valueField="name"
+                                updateEvent="reset-dept"
                                 hideLabel="true"
                                 placeholder="Select Department..." />
                         </div>
 
                         <!-- Reset Button -->
-                        <div class="flex-1 lg:w-auto">
+                        <div class="flex-1 lg:w-auto min-w-[100px]">
                             <button type="button" id="btnReset"
                                 class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
                                 <i class="fa-solid fa-rotate-right text-sm"></i>
@@ -114,15 +133,16 @@
                 <table id="findingsTable" class="qms-table w-full min-w-[1200px]">
                     <thead>
                         <tr>
-                            <th class="w-[5%] text-center">No</th>
-                            <th class="w-[12%] text-left">Req Number</th>
-                            <th class="w-[10%] text-left">Department</th>
-                            <th class="w-[12%] text-left">Finding Category</th>
+                            <th class="w-[4%] text-center">No</th>
+                            <th class="w-[11%] text-left">Req Number</th>
+                            <th class="w-[12%] text-left">Audit Type</th>
+                            <th class="w-[9%] text-left">Department</th>
+                            <th class="w-[10%] text-left">Finding Category</th>
                             <th class="w-[12%] text-left">Auditor</th>
                             <th class="w-[12%] text-left">Auditee</th>
-                            <th class="w-[12%] text-left">Superior</th>
-                            <th class="w-[15%] text-left">Status</th>
-                            <th class="w-[10%] text-left">Action</th>
+                            <th class="w-[11%] text-left">Superior</th>
+                            <th class="w-[11%] text-left">Status</th>
+                            <th class="w-[8%] text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -192,6 +212,42 @@
     }
 
     $(document).ready(function() {
+        // Restore persisted filters from localStorage
+        const savedAuditType = localStorage.getItem('verif_internal_audit_type') || '';
+        const savedDept = localStorage.getItem('verif_internal_dept') || '';
+        const savedDateFrom = localStorage.getItem('verif_internal_date_from') || '';
+        const savedDateTo = localStorage.getItem('verif_internal_date_to') || '';
+        const savedSearch = localStorage.getItem('verif_internal_search') || '';
+
+        if (savedDateFrom) {
+            $('#dateFrom').val(savedDateFrom).attr('data-has-value', 'true');
+        }
+        if (savedDateTo) {
+            $('#dateTo').val(savedDateTo).attr('data-has-value', 'true');
+        }
+        if (savedSearch) {
+            $('#searchInput').val(savedSearch);
+        }
+
+        const auditTypeNames = {
+            'Product': 'Audit Quality - Product',
+            'Process': 'Audit Quality - Process',
+            'System': 'Audit Quality - System',
+            'Environment': 'Audit Lingkungan - Environment'
+        };
+
+        if (savedAuditType) {
+            setTimeout(() => {
+                const name = auditTypeNames[savedAuditType] || savedAuditType;
+                window.dispatchEvent(new CustomEvent('reset-audit-type', { detail: { id: savedAuditType, name: name } }));
+            }, 100);
+        }
+        if (savedDept) {
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('reset-dept', { detail: { id: savedDept, name: savedDept } }));
+            }, 100);
+        }
+
         // Initialize tab styles
         setRoleTab(currentRole);
 
@@ -207,6 +263,7 @@
                     d.search.value = $('#searchInput').val();
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
+                    d.audit_type = $('#auditTypeFilter').val();
                     d.dept = $('#deptFilter').val();
                     d.role = currentRole;
                 },
@@ -231,7 +288,10 @@
                         return data ? `<span class="font-semibold text-slate-800">${data}</span>` : '-';
                     }
                 },
-
+                {
+                    data: 'audit_type',
+                    className: 'text-slate-700 font-medium'
+                },
                 {
                     data: 'department',
                     className: 'text-slate-700 font-semibold',
@@ -294,8 +354,12 @@
             $('#page-loader').addClass('hidden');
         });
 
-        // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        // Auto-filter on change and persist to localStorage
+        $('#dateFrom, #dateTo, #auditTypeFilter, #deptFilter').on('change', function() {
+            localStorage.setItem('verif_internal_audit_type', $('#auditTypeFilter').val() || '');
+            localStorage.setItem('verif_internal_dept', $('#deptFilter').val() || '');
+            localStorage.setItem('verif_internal_date_from', $('#dateFrom').val() || '');
+            localStorage.setItem('verif_internal_date_to', $('#dateTo').val() || '');
             table.ajax.reload();
         });
 
@@ -304,8 +368,17 @@
             $('#searchInput').val('');
             $('#dateFrom').val('').removeAttr('data-has-value');
             $('#dateTo').val('').removeAttr('data-has-value');
-            $('#deptFilter').val('');
-            window.dispatchEvent(new CustomEvent('update-dept', {
+
+            localStorage.removeItem('verif_internal_audit_type');
+            localStorage.removeItem('verif_internal_dept');
+            localStorage.removeItem('verif_internal_date_from');
+            localStorage.removeItem('verif_internal_date_to');
+            localStorage.removeItem('verif_internal_search');
+
+            window.dispatchEvent(new CustomEvent('reset-audit-type', {
+                detail: { id: '', name: '' }
+            }));
+            window.dispatchEvent(new CustomEvent('reset-dept', {
                 detail: { id: '', name: '' }
             }));
             table.ajax.reload();
@@ -321,6 +394,7 @@
         }
 
         $('#searchInput').on('keyup', debounce(function() {
+            localStorage.setItem('verif_internal_search', $('#searchInput').val() || '');
             table.ajax.reload();
         }, 500));
 

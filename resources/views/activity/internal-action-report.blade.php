@@ -73,6 +73,23 @@
                         </div>
                     </div>
 
+                    <!-- Audit Type Filter -->
+                    <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
+                        <x-searchable-select
+                            name="audit_type"
+                            id="auditTypeFilter"
+                            label="Internal Audit"
+                            :initialOptions="[
+                                ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                            ]"
+                            valueField="id"
+                            updateEvent="reset-audit-type"
+                            hideLabel="true" />
+                    </div>
+
                     <!-- Department Filter -->
                     <div class="col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[200px]">
                         <x-searchable-select
@@ -102,13 +119,14 @@
                 <table id="findingsTable" class="qms-table w-full min-w-[1000px]" style="table-layout: auto !important;">
                     <thead>
                         <tr>
-                            <th class="w-[5%] text-center">No</th>
+                            <th class="w-[4%] text-center">No</th>
                             <th class="w-[5%]">Req Number</th>
                             <th class="w-[6%]">Date</th>
+                            <th class="w-[12%]">Audit Type</th>
                             <th class="w-[5%]">Dept</th>
                             <th class="w-[4%]">Finding Cat.</th>
-                            <th class="w-[15%]">Auditor</th>
-                            <th class="w-[43%]">Auditee</th>
+                            <th class="w-[14%]">Auditor</th>
+                            <th class="w-[40%]">Auditee</th>
                             <th class="w-[10%]">Action</th>
                         </tr>
                     </thead>
@@ -163,9 +181,24 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        // Load persisted tab from localStorage
+        // Restore persisted filters from localStorage
         const initialTab = localStorage.getItem('internal_action_report_active_tab') || 'CAR';
+        const savedAuditType = localStorage.getItem('internal_action_report_audit_type') || '';
+        const savedDept = localStorage.getItem('internal_action_report_dept') || '';
+        const savedDateFrom = localStorage.getItem('internal_action_report_date_from') || '';
+        const savedDateTo = localStorage.getItem('internal_action_report_date_to') || '';
+        const savedSearch = localStorage.getItem('internal_action_report_search') || '';
+
         $('#categoryFilter').val(initialTab);
+        if (savedDateFrom) {
+            $('#dateFrom').val(savedDateFrom).attr('data-has-value', 'true');
+        }
+        if (savedDateTo) {
+            $('#dateTo').val(savedDateTo).attr('data-has-value', 'true');
+        }
+        if (savedSearch) {
+            $('#searchInput').val(savedSearch);
+        }
         
         // Update tab styles based on persisted tab
         const tabs = ['CAR', 'OKE', 'OFI'];
@@ -184,6 +217,26 @@
                          .addClass('bg-slate-100 text-slate-600');
             }
         });
+
+        // Restore searchable-select components
+        const auditTypeNames = {
+            'Product': 'Audit Quality - Product',
+            'Process': 'Audit Quality - Process',
+            'System': 'Audit Quality - System',
+            'Environment': 'Audit Lingkungan - Environment'
+        };
+
+        if (savedAuditType) {
+            setTimeout(() => {
+                const name = auditTypeNames[savedAuditType] || savedAuditType;
+                window.dispatchEvent(new CustomEvent('reset-audit-type', { detail: { id: savedAuditType, name: name } }));
+            }, 100);
+        }
+        if (savedDept) {
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('reset-dept', { detail: { id: savedDept, name: savedDept } }));
+            }, 100);
+        }
         
         // Clear widths on ready
         $('#findingsTable th, #findingsTable td').css('width', '');
@@ -201,6 +254,7 @@
                     d.search = { value: $('#searchInput').val() };
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
+                    d.audit_type = $('#auditTypeFilter').val();
                     d.dept = $('#deptFilter').val();
                     d.finding_category = $('#categoryFilter').val();
                 },
@@ -227,6 +281,10 @@
                 {
                     data: 'audit_date',
                     className: 'text-slate-700'
+                },
+                {
+                    data: 'audit_type',
+                    className: 'text-slate-700 font-medium'
                 },
                 {
                     data: 'department',
@@ -273,10 +331,10 @@
                 const category = $('#categoryFilter').val() || 'CAR';
                 if (category === 'OKE' || category === 'OFI') {
                     $('#findingsTable thead th').eq(1).css('width', '35%');
-                    $('#findingsTable thead th').eq(6).css('width', '23%');
+                    $('#findingsTable thead th').eq(7).css('width', '20%');
                 } else {
                     $('#findingsTable thead th').eq(1).css('width', '15%');
-                    $('#findingsTable thead th').eq(6).css('width', '43%');
+                    $('#findingsTable thead th').eq(7).css('width', '38%');
                 }
             }
         });
@@ -293,20 +351,24 @@
         });
 
         if (initialTab === 'OKE' || initialTab === 'OFI') {
-            table.column(7).visible(false);
+            table.column(8).visible(false);
             $('#findingsTable th, #findingsTable td').css('width', '');
             $('#findingsTable thead th').eq(1).text('Note').css('width', '35%');
-            $('#findingsTable thead th').eq(6).css('width', '23%');
+            $('#findingsTable thead th').eq(7).css('width', '20%');
         } else {
-            table.column(7).visible(true);
+            table.column(8).visible(true);
             $('#findingsTable th, #findingsTable td').css('width', '');
             $('#findingsTable thead th').eq(1).text('Req Number').css('width', '15%');
-            $('#findingsTable thead th').eq(6).css('width', '43%');
+            $('#findingsTable thead th').eq(7).css('width', '38%');
         }
         table.columns.adjust().draw(false);
 
-        // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter, #categoryFilter').on('change', function() {
+        // Auto-filter on change and persist to localStorage
+        $('#dateFrom, #dateTo, #auditTypeFilter, #deptFilter, #categoryFilter').on('change', function() {
+            localStorage.setItem('internal_action_report_audit_type', $('#auditTypeFilter').val() || '');
+            localStorage.setItem('internal_action_report_dept', $('#deptFilter').val() || '');
+            localStorage.setItem('internal_action_report_date_from', $('#dateFrom').val() || '');
+            localStorage.setItem('internal_action_report_date_to', $('#dateTo').val() || '');
             table.ajax.reload();
         });
 
@@ -315,8 +377,15 @@
             $('#searchInput').val('');
             $('#dateFrom').val('').removeAttr('data-has-value');
             $('#dateTo').val('').removeAttr('data-has-value');
+
+            localStorage.removeItem('internal_action_report_audit_type');
+            localStorage.removeItem('internal_action_report_dept');
+            localStorage.removeItem('internal_action_report_date_from');
+            localStorage.removeItem('internal_action_report_date_to');
+            localStorage.removeItem('internal_action_report_search');
             
             // Reset searchable-select components
+            window.dispatchEvent(new CustomEvent('reset-audit-type', { detail: '' }));
             window.dispatchEvent(new CustomEvent('reset-dept', { detail: '' }));
             
             setCategoryTab('CAR');
@@ -336,6 +405,7 @@
         }
 
         $('#searchInput').on('keyup', debounce(function() {
+            localStorage.setItem('internal_action_report_search', $('#searchInput').val() || '');
             table.ajax.reload();
         }, 500));
     });
@@ -409,10 +479,10 @@
         // Dynamically change table header and widths
         if (category === 'OKE' || category === 'OFI') {
             $('#findingsTable thead th').eq(1).text('Note').css('width', '35%');
-            $('#findingsTable thead th').eq(6).css('width', '23%');
+            $('#findingsTable thead th').eq(7).css('width', '20%');
         } else {
             $('#findingsTable thead th').eq(1).text('Req Number').css('width', '15%');
-            $('#findingsTable thead th').eq(6).css('width', '43%');
+            $('#findingsTable thead th').eq(7).css('width', '38%');
         }
         
         const tabs = ['CAR', 'OKE', 'OFI'];
@@ -433,19 +503,19 @@
         });
 
         if (category === 'OKE' || category === 'OFI') {
-            $('#findingsTable').DataTable().column(7).visible(false);
+            $('#findingsTable').DataTable().column(8).visible(false);
         } else {
-            $('#findingsTable').DataTable().column(7).visible(true);
+            $('#findingsTable').DataTable().column(8).visible(true);
         }
 
         $('#findingsTable').DataTable().ajax.reload(function() {
             $('#findingsTable th, #findingsTable td').css('width', '');
             if (category === 'OKE' || category === 'OFI') {
                 $('#findingsTable thead th').eq(1).css('width', '35%');
-                $('#findingsTable thead th').eq(6).css('width', '23%');
+                $('#findingsTable thead th').eq(7).css('width', '20%');
             } else {
                 $('#findingsTable thead th').eq(1).css('width', '15%');
-                $('#findingsTable thead th').eq(6).css('width', '43%');
+                $('#findingsTable thead th').eq(7).css('width', '38%');
             }
             $('#findingsTable').DataTable().columns.adjust();
         });

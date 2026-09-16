@@ -43,14 +43,15 @@
                     <thead>
                         <tr class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider">
                             <th class="px-4 sm:px-6 py-4 text-left">Menu Structure</th>
+                            <th class="px-4 sm:px-6 py-4 text-left w-[180px]">Maintenance Status</th>
                             <th class="px-4 sm:px-6 py-4 text-left w-[30%]">URL Route</th>
-                            <th class="px-4 sm:px-6 py-4 text-center w-[20%]">Maintenance Status</th>
+                            <th class="px-4 sm:px-6 py-4 text-center w-[160px]">Maintenance Action</th>
                         </tr>
                     </thead>
                     <tbody id="maintenanceTableBody" class="bg-white divide-y divide-slate-100 text-sm text-slate-700">
                         <!-- Loaded dynamically -->
                         <tr>
-                            <td colspan="3" class="text-center py-12 text-slate-400">
+                            <td colspan="4" class="text-center py-12 text-slate-400">
                                 <i class="fa-solid fa-circle-notch animate-spin text-xl text-blue-500 mb-2"></i>
                                 <p class="text-xs">Loading menu directory...</p>
                             </td>
@@ -96,7 +97,7 @@
                 } else {
                     $('#maintenanceTableBody').html(`
                         <tr>
-                            <td colspan="3" class="text-center py-8 text-slate-400 text-xs">Gagal memuat daftar menu.</td>
+                            <td colspan="4" class="text-center py-8 text-slate-400 text-xs">Gagal memuat daftar menu.</td>
                         </tr>
                     `);
                 }
@@ -104,7 +105,7 @@
             error: function() {
                 $('#maintenanceTableBody').html(`
                     <tr>
-                        <td colspan="3" class="text-center py-8 text-rose-500 text-xs">Terjadi kesalahan saat memuat data.</td>
+                        <td colspan="4" class="text-center py-8 text-rose-500 text-xs">Terjadi kesalahan saat memuat data.</td>
                     </tr>
                 `);
             }
@@ -127,7 +128,7 @@
         if (filtered.length === 0) {
             tbody.html(`
                 <tr>
-                    <td colspan="3" class="text-center py-8 text-slate-400 text-xs">No menus matched search criteria</td>
+                    <td colspan="4" class="text-center py-8 text-slate-400 text-xs">No menus matched search criteria</td>
                 </tr>
             `);
             return;
@@ -136,7 +137,9 @@
         filtered.forEach(item => {
             const isChecked = item.is_maintenance == 1 ? 'checked' : '';
             const statusLabel = item.is_maintenance == 1 ? 'Maintenance' : 'Active';
-            const badgeStyle = item.is_maintenance == 1 ? 'bg-amber-100 text-amber-700 font-semibold' : 'bg-emerald-100 text-emerald-700 font-semibold';
+            const badgeStyle = item.is_maintenance == 1 
+                ? 'bg-amber-50 text-amber-500 border border-amber-200 font-medium' 
+                : 'bg-emerald-50 text-emerald-500 border border-emerald-200 font-medium';
 
             let rowClass = 'hover:bg-slate-50/50';
             let indentClass = 'pl-4 sm:pl-6';
@@ -161,22 +164,22 @@
                             <span class="${labelClass}">${item.menu_name}</span>
                         </div>
                     </td>
+                    <td class="px-4 sm:px-6 py-3.5 text-left align-middle">
+                        <span class="w-28 py-1 rounded text-xs inline-block text-center ${badgeStyle} status-badge-${item.id}">
+                            ${statusLabel}
+                        </span>
+                    </td>
                     <td class="px-4 sm:px-6 py-3.5 align-middle text-slate-600 text-xs sm:text-sm">
                         ${item.menu || '-'}
                     </td>
                     <td class="px-4 sm:px-6 py-3.5 text-center align-middle">
-                        <div class="flex items-center justify-center gap-2">
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="${item.id}" ${isChecked}
-                                    data-menu-id="${item.id}"
-                                    onchange="toggleMaintenanceHierarchy(${item.id}, this)"
-                                    class="sr-only peer toggle-cb-${item.id}">
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                            </label>
-                            <span class="px-2.5 py-0.5 rounded-full text-xs ${badgeStyle} status-badge-${item.id}">
-                                ${statusLabel}
-                            </span>
-                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="${item.id}" ${isChecked}
+                                data-menu-id="${item.id}"
+                                onchange="toggleMaintenanceHierarchy(${item.id}, this)"
+                                class="sr-only peer toggle-cb-${item.id}">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
                     </td>
                 </tr>
             `;
@@ -203,7 +206,7 @@
         }
         collectChildren(menuId);
 
-        // Update DOM checkboxes & data
+        // Update DOM checkboxes, badges & data
         affectedIds.forEach(id => {
             const cb = document.querySelector(`input[data-menu-id="${id}"]`);
             if (cb) {
@@ -213,13 +216,16 @@
             if (itemData) {
                 itemData.is_maintenance = isChecked ? 1 : 0;
             }
-            // Update badge UI
             const badge = $('.status-badge-' + id);
             if (badge.length) {
                 if (isChecked) {
-                    badge.removeClass('bg-emerald-100 text-emerald-700').addClass('bg-amber-100 text-amber-700 font-semibold').text('Maintenance');
+                    badge.removeClass('bg-emerald-50 text-emerald-500 border-emerald-200')
+                         .addClass('bg-amber-50 text-amber-500 border-amber-200')
+                         .text('Maintenance');
                 } else {
-                    badge.removeClass('bg-amber-100 text-amber-700').addClass('bg-emerald-100 text-emerald-700 font-semibold').text('Active');
+                    badge.removeClass('bg-amber-50 text-amber-500 border-amber-200')
+                         .addClass('bg-emerald-50 text-emerald-500 border-emerald-200')
+                         .text('Active');
                 }
             }
         });
