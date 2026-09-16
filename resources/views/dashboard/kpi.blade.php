@@ -113,6 +113,37 @@
 
         <!-- Department Performance & Overview Grid -->
         <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
+            <!-- Stacked Bar Chart Section (At Very Top - Full Width) -->
+            <div class="border-b border-slate-200 pb-8 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800">KPI Performance Overview (Stacked)</h3>
+                        <p class="text-[10px] sm:text-sm text-slate-500">Stacked achievement status per department</p>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                        <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
+                        <!-- Chart Pagination (Visible on Mobile only) -->
+                        <div id="stackedChartPagination" class="hidden items-center gap-1.5">
+                            <span id="stackedChartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
+                            <button type="button" id="btnStackedChartPrev" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button type="button" id="btnStackedChartNext" class="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 rounded-none disabled:opacity-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative h-[280px] w-full">
+                    <canvas id="stackedDeptChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Department Performance Section (Side-by-side Bar Chart) -->
             <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
                 <!-- Left Column: Chart & Table (80%) -->
                 <div class="xl:col-span-4 border-b border-gray-100 pb-8 xl:pb-0 xl:border-b-0 xl:border-r pr-0 xl:pr-4">
@@ -122,7 +153,6 @@
                             <p class="text-[10px] sm:text-sm text-slate-500">KPI achievement status per department</p>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-                            <x-month-input id="chartFilterDate" name="chartFilterDate" value="{{ date('Y-m') }}" />
                             <!-- Chart Pagination (Visible on Mobile only) -->
                             <div id="chartPagination" class="hidden items-center gap-1.5">
                                 <span id="chartPageIndicator" class="text-xs sm:text-sm text-slate-600 font-medium mr-1 text-nowrap">1/2</span>
@@ -472,6 +502,8 @@
 
     // --- Department Chart Logic ---
     let deptChart = null;
+    let stackedDeptChart = null;
+    let stackedStatsPieChart = null;
     let table = null; 
     let selectedStatus = ''; 
     let selectedMonthYear = '';
@@ -480,7 +512,323 @@
     let rawChartData = null;
     let currentChartPage = 1;
     let chartPageSize = 5;
+    let currentStackedChartPage = 1;
+    let stackedChartPageSize = 5;
     let isMobileMode = null;
+
+    function renderStackedPieChart() {
+        if (!rawChartData) return;
+
+        const sumOk = rawChartData.data_total_ok.reduce((a, b) => a + b, 0);
+        const sumMinor = rawChartData.data_total_minor.reduce((a, b) => a + b, 0);
+        const totalSum = sumOk + sumMinor;
+
+        $('#val_ok_stacked').text(new Intl.NumberFormat().format(sumOk));
+        $('#val_minor_stacked').text(new Intl.NumberFormat().format(sumMinor));
+
+        const canvas = document.getElementById('stackedStatsPieChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (totalSum === 0) {
+            if (stackedStatsPieChart) {
+                stackedStatsPieChart.destroy();
+                stackedStatsPieChart = null;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        if (stackedStatsPieChart) {
+            stackedStatsPieChart.data.labels = ['Achieved', 'Not Achieved'];
+            stackedStatsPieChart.data.datasets[0].data = [sumOk, sumMinor];
+            stackedStatsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#ef4444'];
+            stackedStatsPieChart.update();
+            return;
+        }
+
+        stackedStatsPieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Achieved', 'Not Achieved'],
+                datasets: [{
+                    data: [sumOk, sumMinor],
+                    backgroundColor: ['#22c55e', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                animation: {
+                    duration: 600,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    function renderStackedDeptChart() {
+        if (!rawChartData) return;
+
+        const canvas = document.getElementById('stackedDeptChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (stackedDeptChart) {
+            stackedDeptChart.destroy();
+        }
+
+        const isMobile = window.innerWidth < 1280;
+
+        const width = window.innerWidth;
+        if (width < 380) stackedChartPageSize = 3;
+        else if (width < 480) stackedChartPageSize = 4;
+        else if (width < 640) stackedChartPageSize = 5;
+        else if (width < 768) stackedChartPageSize = 6;
+        else if (width < 1024) stackedChartPageSize = 7;
+        else stackedChartPageSize = 9;
+
+        let labels = rawChartData.data_name_dept;
+        let okData = rawChartData.data_total_ok;
+        let minorData = rawChartData.data_total_minor;
+
+        if (isMobile) {
+            let zipped = [];
+            for (let i = 0; i < labels.length; i++) {
+                zipped.push({
+                    name: labels[i],
+                    ok: okData[i] || 0,
+                    minor: minorData[i] || 0
+                });
+            }
+
+            zipped.sort((a, b) => (b.ok + b.minor) - (a.ok + a.minor));
+
+            labels = zipped.map(item => item.name);
+            okData = zipped.map(item => item.ok);
+            minorData = zipped.map(item => item.minor);
+
+            const totalItems = labels.length;
+            const totalPages = Math.ceil(totalItems / stackedChartPageSize) || 1;
+
+            if (currentStackedChartPage < 1) currentStackedChartPage = 1;
+            if (currentStackedChartPage > totalPages) currentStackedChartPage = totalPages;
+
+            const startIndex = (currentStackedChartPage - 1) * stackedChartPageSize;
+            const endIndex = startIndex + stackedChartPageSize;
+
+            labels = labels.slice(startIndex, endIndex);
+            okData = okData.slice(startIndex, endIndex);
+            minorData = minorData.slice(startIndex, endIndex);
+
+            $('#stackedChartPageIndicator').text(currentStackedChartPage + '/' + totalPages);
+            $('#btnStackedChartPrev').prop('disabled', currentStackedChartPage === 1);
+            $('#btnStackedChartNext').prop('disabled', currentStackedChartPage === totalPages);
+            $('#stackedChartPagination').removeClass('hidden').addClass('flex');
+        } else {
+            $('#stackedChartPagination').removeClass('flex').addClass('hidden');
+        }
+
+        // Calculate 100% percentage datasets for stacked bar
+        let rawOkList = okData;
+        let rawMinorList = minorData;
+        let pctOkData = [];
+        let pctMinorData = [];
+
+        for (let i = 0; i < labels.length; i++) {
+            let ach = rawOkList[i] || 0;
+            let notAch = rawMinorList[i] || 0;
+            let total = ach + notAch;
+            if (total > 0) {
+                pctOkData.push((ach / total) * 100);
+                pctMinorData.push((notAch / total) * 100);
+            } else {
+                pctOkData.push(0);
+                pctMinorData.push(0);
+            }
+        }
+
+        let delayed;
+
+        stackedDeptChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Achieved',
+                        data: pctOkData,
+                        rawCounts: rawOkList,
+                        backgroundColor: '#22c55e', // Green
+                    },
+                    {
+                        label: 'Not Achieved',
+                        data: pctMinorData,
+                        rawCounts: rawMinorList,
+                        backgroundColor: '#ef4444', // Red
+                    }
+                ]
+            },
+            plugins: [{
+                id: 'customLabelsStacked',
+                afterDatasetsDraw: (chart) => {
+                    const { ctx } = chart;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        if (!meta.hidden) {
+                            meta.data.forEach((element, index) => {
+                                const pctVal = dataset.data[index];
+                                if (pctVal > 0) {
+                                    const pctRound = Math.round(pctVal);
+                                    const labelText = `${pctRound}%`;
+                                    const yPos = (element.y + element.base) / 2;
+                                    
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.font = 'bold 11px sans-serif';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(labelText, element.x, yPos);
+                                }
+                            });
+                        }
+                    });
+                }
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animations: {
+                    y: {
+                        duration: 1000,
+                        easing: 'easeOutQuart',
+                        delay: context => {
+                            let delay = 0;
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                delay = context.dataIndex * 0 + 100;
+                            }
+                            return delay;
+                        },
+                        from: (context) => {
+                            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                                const scale = context.chart.scales.y;
+                                if (scale) return scale.getPixelForValue(0);
+                            }
+                            return undefined;
+                        },
+                        loop: false
+                    }
+                },
+                onClick: (e, elements, chart) => {
+                    const points = chart.getElementsAtEventForMode(e, 'nearest', {
+                        intersect: true
+                    }, true);
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const label = chart.data.labels[firstPoint.index];
+                        const datasetLabel = chart.data.datasets[firstPoint.datasetIndex].label;
+
+                        selectedStatus = '';
+                        selectedClause = '';
+                        selectedMonthYear = $('#chartFilterDate').val();
+
+                        window.dispatchEvent(new CustomEvent('updateDeptFilter', {
+                            detail: { id: label, name: label }
+                        }));
+
+                        window.dispatchEvent(new CustomEvent('updateCategoryFilter', {
+                            detail: { id: datasetLabel, name: datasetLabel }
+                        }));
+
+                        if (table) {
+                            table.ajax.reload();
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            color: 'rgba(203, 213, 225, 0.4)',
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            borderDash: [2, 2]
+                        },
+                        ticks: {
+                            precision: 0,
+                            stepSize: 20,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                const index = context.dataIndex;
+                                const count = context.dataset.rawCounts ? context.dataset.rawCounts[index] : 0;
+                                const pct = context.parsed.y !== null ? Math.round(context.parsed.y) : 0;
+
+                                return `${label}${count} (${pct}%)`;
+                            },
+                            footer: function(tooltipItems) {
+                                if (!tooltipItems.length) return '';
+                                const index = tooltipItems[0].dataIndex;
+                                const ach = tooltipItems[0].chart.data.datasets[0].rawCounts[index] || 0;
+                                const notAch = tooltipItems[0].chart.data.datasets[1].rawCounts[index] || 0;
+                                const total = ach + notAch;
+                                return `Total KPI: ${total}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        setTimeout(() => {
+            delayed = true;
+        }, 1500);
+
+        requestAnimationFrame(function() {
+            renderStackedPieChart();
+        });
+    }
 
     function loadDeptChart(yearMonth) {
         let param = yearMonth || "{{ date('Y-m') }}";
@@ -520,6 +868,8 @@
                     data_total_ofi: totalList
                 };
                 currentChartPage = 1;
+                currentStackedChartPage = 1;
+                renderStackedDeptChart();
                 renderDeptChart();
             },
             error: function(xhr) {
@@ -1143,6 +1493,25 @@
             loadDataCards(val);
         });
 
+        // Stacked Chart Pagination buttons
+        $('#btnStackedChartPrev').click(function() {
+            if (currentStackedChartPage > 1) {
+                currentStackedChartPage--;
+                renderStackedDeptChart();
+            }
+        });
+
+        $('#btnStackedChartNext').click(function() {
+            if (rawChartData) {
+                const totalItems = rawChartData.data_name_dept.length;
+                const totalPages = Math.ceil(totalItems / stackedChartPageSize) || 1;
+                if (currentStackedChartPage < totalPages) {
+                    currentStackedChartPage++;
+                    renderStackedDeptChart();
+                }
+            }
+        });
+
         // Pagination buttons
         $('#btnChartPrev').click(function() {
             if (currentChartPage > 1) {
@@ -1185,6 +1554,8 @@
         $(window).resize(function() {
             const currentMobile = window.innerWidth < 1280;
             if (currentMobile !== isMobileMode) {
+                currentStackedChartPage = 1;
+                renderStackedDeptChart();
                 currentChartPage = 1;
                 renderDeptChart();
                 renderPieChart();
