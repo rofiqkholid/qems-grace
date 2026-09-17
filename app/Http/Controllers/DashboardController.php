@@ -1321,10 +1321,25 @@ class DashboardController extends Controller
             ->where('Key1', 'NOT LIKE', '%AGM%')
             ->where('Key1', 'NOT LIKE', '%GM%')
             ->orderBy('Key1', 'asc')
-            ->pluck('Key1')
-            ->toArray();
+            ->get();
 
-        return view('dashboard.kpi', compact('departments'));
+        $pillars = collect(['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery']);
+        $currentYear = (int) date('Y');
+        $years = collect(range($currentYear, $currentYear - 4));
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $selectedYear = $currentYear;
+        $selectedDept = '';
+        $selectedPillar = '';
+
+        return view('dashboard.kpi', compact(
+            'departments',
+            'pillars',
+            'years',
+            'months',
+            'selectedYear',
+            'selectedDept',
+            'selectedPillar'
+        ));
     }
 
     public function kpi_chart_data(Request $request, $year)
