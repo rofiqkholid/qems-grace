@@ -380,8 +380,9 @@
                                                      {{ $formatNumWithUnit($valVal) }}
                                                  </button>
                                              @else
-                                                 <a href="{{ $editRoute }}" class="inline-block w-full h-full min-h-[24px] cursor-pointer hover:bg-slate-100/50 transition-colors" title="Input Actual {{ $m }}">
-                                                     &nbsp;
+                                                 <a href="{{ $editRoute }}" class="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 border border-dashed border-slate-300 hover:border-blue-300 rounded-lg transition-all cursor-pointer" title="Input Actual {{ $m }}">
+                                                     <i class="fa-solid fa-plus text-[10px]"></i>
+                                                     <span>Input</span>
                                                  </a>
                                              @endif
                                          @else

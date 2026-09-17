@@ -44,7 +44,7 @@
         <div class="bg-white rounded-lg border border-slate-200">
             <!-- Filter Section -->
             <div class="p-4 md:p-6 border-b border-slate-200 bg-slate-50/50">
-                <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
                         <div class="relative">
@@ -55,13 +55,13 @@
                     </div>
 
                     <!-- Dates Container (Side-by-Side on Mobile) -->
-                    <div class="flex flex-row gap-2 w-full lg:w-auto">
+                    <div class="flex flex-row gap-2 shrink-0">
                         <!-- Date From -->
-                        <div class="flex-1 min-w-0 lg:w-auto">
-                            <div class="date-input-container relative w-full lg:w-auto">
+                        <div class="w-full lg:w-[135px]">
+                            <div class="date-input-container relative w-full">
                                 <input type="date" id="dateFrom" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                     style="min-width: 0;"
-                                    class="w-full lg:w-[150px] pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
+                                    class="w-full pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
                                 <span class="placeholder-overlay absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-sm pointer-events-none">dd/mm/yyyy</span>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-3 pointer-events-none text-slate-400">
                                     <i class="fa-regular fa-calendar text-sm"></i>
@@ -70,11 +70,11 @@
                         </div>
 
                         <!-- Date To -->
-                        <div class="flex-1 min-w-0 lg:w-auto">
-                            <div class="date-input-container relative w-full lg:w-auto">
+                        <div class="w-full lg:w-[135px]">
+                            <div class="date-input-container relative w-full">
                                 <input type="date" id="dateTo" oninput="this.setAttribute('data-has-value', this.value ? 'true' : '')" onchange="this.setAttribute('data-has-value', this.value ? 'true' : '')" onfocus="try { this.showPicker(); } catch(e) {}" onclick="try { this.showPicker(); } catch(e) {}" onkeydown="return false;"
                                     style="min-width: 0;"
-                                    class="w-full lg:w-[150px] pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
+                                    class="w-full pl-3 pr-8 md:pl-4 md:pr-10 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm outline-none bg-white">
                                 <span class="placeholder-overlay absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-sm pointer-events-none">dd/mm/yyyy</span>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-3 pointer-events-none text-slate-400">
                                     <i class="fa-regular fa-calendar text-sm"></i>
@@ -83,47 +83,44 @@
                         </div>
                     </div>
 
-                    <!-- Audit Type & Dept & Reset Container -->
-                    <div class="flex flex-row flex-wrap gap-2 w-full lg:w-auto">
-                        <!-- Audit Type Filter -->
-                        <div class="flex-1 lg:w-[200px] min-w-[150px]">
-                            <x-searchable-select
-                                name="audit_type"
-                                id="auditTypeFilter"
-                                label="Internal Audit"
-                                :initialOptions="[
-                                    ['id' => 'Product', 'name' => 'Audit Quality - Product'],
-                                    ['id' => 'Process', 'name' => 'Audit Quality - Process'],
-                                    ['id' => 'System', 'name' => 'Audit Quality - System'],
-                                    ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
-                                ]"
-                                valueField="id"
-                                updateEvent="reset-audit-type"
-                                hideLabel="true"
-                                placeholder="Select Audit Type..." />
-                        </div>
+                    <!-- Audit Type Filter -->
+                    <div class="w-full lg:w-[205px] shrink-0">
+                        <x-searchable-select
+                            name="audit_type"
+                            id="auditTypeFilter"
+                            label="Internal Audit"
+                            :initialOptions="[
+                                ['id' => 'Product', 'name' => 'Audit Quality - Product'],
+                                ['id' => 'Process', 'name' => 'Audit Quality - Process'],
+                                ['id' => 'System', 'name' => 'Audit Quality - System'],
+                                ['id' => 'Environment', 'name' => 'Audit Lingkungan - Environment']
+                            ]"
+                            valueField="id"
+                            updateEvent="reset-audit-type"
+                            hideLabel="true"
+                            placeholder="Select Audit Type..." />
+                    </div>
 
-                        <!-- Department Filter -->
-                        <div class="flex-1 lg:w-[200px] min-w-[150px]">
-                            <x-searchable-select
-                                name="dept"
-                                id="deptFilter"
-                                label="Department"
-                                :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
-                                valueField="name"
-                                updateEvent="reset-dept"
-                                hideLabel="true"
-                                placeholder="Select Department..." />
-                        </div>
+                    <!-- Department Filter -->
+                    <div class="w-full lg:w-[170px] shrink-0">
+                        <x-searchable-select
+                            name="dept"
+                            id="deptFilter"
+                            label="Department"
+                            :initialOptions="collect($departments)->map(fn($d) => ['id' => $d, 'name' => $d])->values()->toArray()"
+                            valueField="name"
+                            updateEvent="reset-dept"
+                            hideLabel="true"
+                            placeholder="Select Department..." />
+                    </div>
 
-                        <!-- Reset Button -->
-                        <div class="flex-1 lg:w-auto min-w-[100px]">
-                            <button type="button" id="btnReset"
-                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
-                                <i class="fa-solid fa-rotate-right text-sm"></i>
-                                Reset
-                            </button>
-                        </div>
+                    <!-- Reset Button -->
+                    <div class="shrink-0 min-w-[90px]">
+                        <button type="button" id="btnReset"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm font-medium transition-colors h-[38px]">
+                            <i class="fa-solid fa-rotate-right text-sm"></i>
+                            Reset
+                        </button>
                     </div>
                 </div>
             </div>
