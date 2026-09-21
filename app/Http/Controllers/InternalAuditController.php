@@ -212,10 +212,45 @@ class InternalAuditController extends Controller
     {
         $role = $request->role ?? 'superior';
 
-        $query = DB::table('CsAuditCar as a')
-            ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-            ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
-            ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id');
+        $applyFilters = function ($q) use ($request) {
+            if ($request->has('search') && !empty($request->search['value'])) {
+                $searchValue = $request->search['value'];
+                $q->where(function ($sub) use ($searchValue) {
+                    $sub->where('a.req_number', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('a.external', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('a.finding', 'LIKE', "%{$searchValue}%");
+                });
+            }
+
+            if ($request->filled('date_from')) {
+                $q->whereDate('a.created_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $q->whereDate('a.created_at', '<=', $request->date_to);
+            }
+            if ($request->filled('dept')) {
+                $q->where('a.department', $request->dept);
+            }
+            if ($request->filled('audit_type')) {
+                $typeVal = $request->audit_type;
+                if (str_contains($typeVal, 'Product')) $typeVal = 'Product';
+                elseif (str_contains($typeVal, 'Process')) $typeVal = 'Process';
+                elseif (str_contains($typeVal, 'System')) $typeVal = 'System';
+                elseif (str_contains($typeVal, 'Environment')) $typeVal = 'Environment';
+
+                $q->where('c.audit_type', $typeVal);
+            }
+        };
+
+        $buildCountQuery = function () {
+            return DB::table('CsAuditCar as a')
+                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
+                ->leftJoin('CsAuditDetail as b', 'b.id', '=', 'a.audit_detail_id')
+                ->leftJoin('CsAuditHeader as c', 'c.id', '=', 'b.audit_header_id');
+        };
+
+        $query = $buildCountQuery();
 
         // Apply role filter (show all CARs at this stage)
         if ($role === 'superior') {
@@ -231,38 +266,26 @@ class InternalAuditController extends Controller
 
         $totalRecords = $query->count();
 
-        // Search
-        if ($request->has('search') && !empty($request->search['value'])) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('a.req_number', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('a.department', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('a.external', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('a.finding', 'LIKE', "%{$searchValue}%");
-            });
-        }
-
-        // Apply filters
-        if ($request->filled('date_from')) {
-            $query->whereDate('a.created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('a.created_at', '<=', $request->date_to);
-        }
-        if ($request->filled('dept')) {
-            $query->where('a.department', $request->dept);
-        }
-        if ($request->filled('audit_type')) {
-            $typeVal = $request->audit_type;
-            if (str_contains($typeVal, 'Product')) $typeVal = 'Product';
-            elseif (str_contains($typeVal, 'Process')) $typeVal = 'Process';
-            elseif (str_contains($typeVal, 'System')) $typeVal = 'System';
-            elseif (str_contains($typeVal, 'Environment')) $typeVal = 'Environment';
-
-            $query->where('c.audit_type', $typeVal);
-        }
+        $applyFilters($query);
 
         $filteredRecords = $query->count();
+
+        // Tab counts filtered by active search/filters
+        $superiorQuery = $buildCountQuery()->where('d.action_status', 'open_verif')->where('a.status', 'Under Review');
+        $applyFilters($superiorQuery);
+        $superiorCount = $superiorQuery->count();
+
+        $auditorQuery = $buildCountQuery()->where('d.action_status', 'approve_superior')->where('a.status', 'Need Verification');
+        $applyFilters($auditorQuery);
+        $auditorCount = $auditorQuery->count();
+
+        $closedQuery = $buildCountQuery()->where('d.action_status', 'verified')->where('a.status', 'Closed');
+        $applyFilters($closedQuery);
+        $closedCount = $closedQuery->count();
+
+        $allQuery = $buildCountQuery();
+        $applyFilters($allQuery);
+        $allCount = $allQuery->count();
 
         // Pagination
         if ($request->has('start') && $request->has('length')) {
@@ -460,24 +483,10 @@ class InternalAuditController extends Controller
                     "action" => $actionBtn
                 ];
             }),
-            "superiorCount" => DB::table('CsAuditCar as a')
-                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'open_verif')
-                ->where('a.status', 'Under Review')
-                ->count(),
-            "auditorCount" => DB::table('CsAuditCar as a')
-                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'approve_superior')
-                ->where('a.status', 'Need Verification')
-                ->count(),
-            "closedCount" => DB::table('CsAuditCar as a')
-                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->where('d.action_status', 'verified')
-                ->where('a.status', 'Closed')
-                ->count(),
-            "allCount" => DB::table('CsAuditCar as a')
-                ->join('CsAuditAction as d', 'd.audit_car_id', '=', 'a.id')
-                ->count()
+            "superiorCount" => $superiorCount,
+            "auditorCount" => $auditorCount,
+            "closedCount" => $closedCount,
+            "allCount" => $allCount
         ];
 
         return response()->json($response);
