@@ -405,18 +405,10 @@
             initForm() {
                 console.log('Genba Form Initialized');
 
-
-
-                // Initialize finding status (can be populated via API later if needed, 
-                // but for now we rely on user interaction or fetching data)
-                // We'll fetch status for all items on load if needed, or just lazy load.
-                // For better UX, we might want to know immediately which findings exist.
-                // For now, let's keep it simple and update on save.
             },
 
             hasFinding(itemId, index) {
-                // Check if we have record of this finding being filled
-                // This logic might need to be robustly hydrated from server on load
+             
                 const key = `${itemId}_${index}`;
                 return this.findingStatus[key] === true;
             },
@@ -424,12 +416,10 @@
             updateAnswer(itemId, val) {
                 this.answers[itemId] = val;
 
-                // AJAX Sync to Backend
                 let scopeId = document.getElementById(`scope_id_${itemId}`).value;
                 let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 let activityId = document.getElementById('activity_id').value;
 
-                // Optimistic update - no loader for radio clicks to feel snappy
                 fetch("{{ route('genba.post_form_spv') }}", {
                         method: 'POST',
                         headers: {

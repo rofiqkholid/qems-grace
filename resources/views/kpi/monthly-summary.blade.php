@@ -29,71 +29,83 @@
             </div>
         </div>
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-            <!-- Total KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-list-check text-lg"></i>
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3.5 mb-6">
+            <!-- 1. Total KPI -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
+                <i class="fa-solid fa-list-check absolute -right-2 -bottom-3 text-6xl text-blue-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100/60 relative z-10">
+                    <i class="fa-solid fa-list-check text-base sm:text-lg"></i>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Total KPI</p>
-                    <h3 id="card_total_kpi" class="text-lg font-bold text-slate-800">0</h3>
-                </div>
-            </div>
-
-            <!-- Company KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-building text-lg"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Company KPI</p>
-                    <h3 id="card_company_kpi" class="text-lg font-bold text-slate-800">0</h3>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Total KPI</p>
+                    <p id="card_total_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
-            <!-- Dept KPI Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-users-gear text-lg"></i>
+            <!-- 2. Company KPI -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all"></div>
+                <i class="fa-solid fa-building absolute -right-2 -bottom-3 text-6xl text-indigo-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100/60 relative z-10">
+                    <i class="fa-solid fa-building text-base sm:text-lg"></i>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Dept KPI</p>
-                    <h3 id="card_dept_kpi" class="text-lg font-bold text-slate-800">0</h3>
-                </div>
-            </div>
-
-            <!-- Achieved Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-circle-check text-lg"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Achieved</p>
-                    <h3 id="card_achieved" class="text-lg font-bold text-slate-800">0</h3>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Company KPI</p>
+                    <p id="card_company_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
-            <!-- Not Achieved Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-circle-xmark text-lg"></i>
+            <!-- 3. Dept KPI -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
+                <i class="fa-solid fa-users-gear absolute -right-2 -bottom-3 text-6xl text-purple-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 border border-purple-100/60 relative z-10">
+                    <i class="fa-solid fa-users-gear text-base sm:text-lg"></i>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Not Achieved</p>
-                    <h3 id="card_not_achieved" class="text-lg font-bold text-slate-800">0</h3>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Dept KPI</p>
+                    <p id="card_dept_kpi" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
 
-            <!-- Waiting Data Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-clock text-lg"></i>
+            <!-- 4. Achieved -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+                <i class="fa-solid fa-circle-check absolute -right-2 -bottom-3 text-6xl text-emerald-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-check text-base sm:text-lg"></i>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">Waiting Data</p>
-                    <h3 id="card_waiting_data" class="text-lg font-bold text-slate-800">0</h3>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Achieved</p>
+                    <p id="card_achieved" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 5. Not Achieved -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
+                <i class="fa-solid fa-circle-xmark absolute -right-2 -bottom-3 text-6xl text-rose-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100/60 relative z-10">
+                    <i class="fa-solid fa-circle-xmark text-base sm:text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Not Achieved</p>
+                    <p id="card_not_achieved" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
+                </div>
+            </div>
+
+            <!-- 6. Waiting Data -->
+            <div class="relative overflow-hidden bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
+                <i class="fa-solid fa-clock absolute -right-2 -bottom-3 text-6xl text-amber-600/[0.07] -rotate-12 pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-all duration-300"></i>
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100/60 relative z-10">
+                    <i class="fa-solid fa-clock text-base sm:text-lg"></i>
+                </div>
+                <div class="min-w-0 flex-1 relative z-10">
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">Waiting Data</p>
+                    <p id="card_waiting_data" class="text-lg sm:text-2xl font-bold text-slate-800 leading-tight">0</p>
                 </div>
             </div>
         </div>
