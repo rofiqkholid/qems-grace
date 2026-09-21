@@ -89,18 +89,18 @@
                     @endif
 
                     @if(!empty($components))
-                    <div class="md:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="md:col-span-2 flex justify-start pt-2">
+                        <button type="button" id="check_result_btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                            <i class="fa-solid fa-calculator mr-1.5"></i> Check Result
+                        </button>
+                    </div>
+                    <div class="md:col-span-2 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <span class="block text-sm font-bold text-slate-700">Calculated Actual Result</span>
+                            <span class="block text-md font-bold text-slate-700">Calculated Actual Result</span>
                             <span class="block text-xs text-slate-500 mt-1">
-                                Calculated based on formula: <span class="font-mono bg-white px-2 py-0.5 rounded border border-slate-100 text-slate-600">{{ $activity->calc_operator ?: ($formula->calc_operator ?? 'Sum of all components') }}</span> 
-                                Result: <span id="actual_preview_value" class="font-mono bg-white px-2 py-0.5 rounded border border-slate-100 text-slate-600 font-bold">-</span>
+                                Calculated based on formula: <span class="font-mono px-2 py-0.5 text-slate-600">{{ $activity->calc_operator ?: ($formula->calc_operator ?? 'Sum of all components') }}</span> 
+                                Result: <span id="actual_preview_value" class="font-mono bg-white px-2 py-0.5 text-slate-600 font-bold"></span>
                             </span>
-                        </div>
-                        <div class="shrink-0 flex justify-end">
-                            <button type="button" id="check_result_btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
-                                <i class="fa-solid fa-calculator mr-1.5"></i> Check Result
-                            </button>
                         </div>
                     </div>
                     @endif
@@ -696,7 +696,7 @@
                         : actualVal.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     previewValEl.textContent = unitStr ? `${formatted} ${unitStr}` : formatted;
                 } else {
-                    previewValEl.textContent = '-';
+                    previewValEl.textContent = '';
                 }
             }
 
