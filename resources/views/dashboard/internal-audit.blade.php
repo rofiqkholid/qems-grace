@@ -274,14 +274,6 @@
                                 </div>
                                 <span id="val_clause_major" class="font-bold text-slate-800 text-xs">...</span>
                             </div>
-                            <!-- OFI -->
-                            <div class="flex items-center justify-between p-3 rounded-none bg-blue-50/50 border border-blue-100 col-span-2">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-none bg-[#008FFB] -blue-200"></span>
-                                    <span class="font-semibold text-slate-700 text-xs text-nowrap">OFI</span>
-                                </div>
-                                <span id="val_clause_ofi" class="font-bold text-slate-800 text-xs">...</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1333,28 +1325,25 @@
         let labels = rawClauseChartData.labels;
         let minorData = rawClauseChartData.minor;
         let majorData = rawClauseChartData.major;
-        let ofiData = rawClauseChartData.ofi;
 
         let zipped = [];
         for (let i = 0; i < labels.length; i++) {
             zipped.push({
                 name: labels[i],
                 minor: minorData[i] || 0,
-                major: majorData[i] || 0,
-                ofi: ofiData[i] || 0
+                major: majorData[i] || 0
             });
         }
 
         zipped.sort((a, b) => {
-            const bTotal = b.minor + b.major + b.ofi;
-            const aTotal = a.minor + a.major + a.ofi;
+            const bTotal = b.minor + b.major;
+            const aTotal = a.minor + a.major;
             return bTotal - aTotal;
         });
 
         labels = zipped.map(item => item.name);
         minorData = zipped.map(item => item.minor);
         majorData = zipped.map(item => item.major);
-        ofiData = zipped.map(item => item.ofi);
 
         const totalItems = labels.length;
         if (totalItems > clauseChartPageSize) {
@@ -1369,7 +1358,6 @@
             labels = labels.slice(startIndex, endIndex);
             minorData = minorData.slice(startIndex, endIndex);
             majorData = majorData.slice(startIndex, endIndex);
-            ofiData = ofiData.slice(startIndex, endIndex);
 
             $('#clauseChartPageIndicator').text(currentClauseChartPage + '/' + totalPages);
             $('#btnClauseChartPrev').prop('disabled', currentClauseChartPage === 1);
@@ -1381,8 +1369,7 @@
 
         const allValues = [
             ...minorData,
-            ...majorData,
-            ...ofiData
+            ...majorData
         ];
         const maxValue = Math.max(...allValues, 0);
         const suggestedMax = maxValue + 1;
@@ -1403,11 +1390,6 @@
                         label: 'Major',
                         data: majorData,
                         backgroundColor: '#FF4560',
-                    },
-                    {
-                        label: 'OFI',
-                        data: ofiData,
-                        backgroundColor: '#008FFB',
                     }
                 ]
             },
@@ -1569,13 +1551,11 @@
         // Compute Overview Totals for Clause Pie Chart
         const sumMinor = rawClauseChartData.minor.reduce((a, b) => a + b, 0);
         const sumMajor = rawClauseChartData.major.reduce((a, b) => a + b, 0);
-        const sumOfi = rawClauseChartData.ofi.reduce((a, b) => a + b, 0);
 
         $('#val_clause_minor').text(new Intl.NumberFormat().format(sumMinor));
         $('#val_clause_major').text(new Intl.NumberFormat().format(sumMajor));
-        $('#val_clause_ofi').text(new Intl.NumberFormat().format(sumOfi));
 
-        const clausePieData = [sumMinor, sumMajor, sumOfi];
+        const clausePieData = [sumMinor, sumMajor];
 
         if (clauseStatsPieChart) {
             clauseStatsPieChart.destroy();
@@ -1588,10 +1568,10 @@
             clauseStatsPieChart = new Chart(pieCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Minor', 'Major', 'OFI'],
+                    labels: ['Minor', 'Major'],
                     datasets: [{
                         data: clausePieData,
-                        backgroundColor: ['#FEB019', '#FF4560', '#008FFB'],
+                        backgroundColor: ['#FEB019', '#FF4560'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
