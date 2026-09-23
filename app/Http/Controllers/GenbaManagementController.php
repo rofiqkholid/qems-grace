@@ -16,7 +16,7 @@ class GenbaManagementController extends Controller
 {
     public function findingsGenba()
     {
-        return view('activity.findings-genba');
+        return view('genba-biq-intr.genba-mng.findings-genba');
     }
 
     public function front_mng_table(Request $request)
@@ -276,7 +276,7 @@ class GenbaManagementController extends Controller
 
             $canEditDept = UserMenuPermission::canView(95);
 
-            return view('activity.findings-genba-preview', compact('genba', 'departments', 'canEditDept'));
+            return view('genba-biq-intr.genba-mng.findings-genba-preview', compact('genba', 'departments', 'canEditDept'));
         } catch (\Exception $e) {
             abort(404, 'Data tidak valid: ' . $e->getMessage());
         }
@@ -501,7 +501,7 @@ class GenbaManagementController extends Controller
                 abort(404, 'Data tidak ditemukan');
             }
 
-            return view('activity.genba_header_view', compact('genba'));
+            return view('genba-biq-intr.genba-mng.genba_header_view', compact('genba'));
         } catch (\Exception $e) {
             abort(404, 'Data tidak valid: ' . $e->getMessage());
         }
@@ -796,8 +796,13 @@ class GenbaManagementController extends Controller
                 $data["finding_types"] = collect(['Safety', 'Quality', 'Delivery/Productivity', 'Cost/Waste', 'Moral (SDM)', 'Environment', '5S'])->map(function ($t) {
                     return ['id' => $t, 'name' => $t];
                 })->toArray();
-                // Double check view path for standard activity
-                return view('activity.form-checksheet.activity-form', $data); // Assuming standard path
+
+                if (in_array($category_id, [7, 8, 9])) {
+                    return view('genba-biq-intr.genba-biq.activity-biq-form', $data);
+                }
+
+                // Default logic for standard genba activity form
+                return view('genba-biq-intr.genba-mng.form-checksheet.activity-form', $data);
             }
         } else {
             $data["code"] = 500;
@@ -880,9 +885,9 @@ class GenbaManagementController extends Controller
             return ['id' => $t, 'name' => $t];
         })->toArray();
 
-        $viewName = 'activity.no-checksheet.activity-etc';
+        $viewName = 'genba-biq-intr.genba-mng.no-checksheet.activity-etc';
         if ($category_id == 10) {
-            $viewName = 'activity.no-checksheet.activity-safety';
+            $viewName = 'genba-biq-intr.genba-mng.no-checksheet.activity-safety';
         }
 
         return view($viewName, [

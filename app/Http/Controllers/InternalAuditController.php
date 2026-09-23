@@ -28,7 +28,7 @@ class InternalAuditController extends Controller
                     'name' => $item->Desc
                 ];
             });
-        return view('activity.internal-audit', compact('departments'));
+        return view('genba-biq-intr.internal-audit.internal-audit', compact('departments'));
     }
 
     public function actionReport()
@@ -67,7 +67,7 @@ class InternalAuditController extends Controller
             ->where('judgment', 'OFI')
             ->count();
 
-        return view('activity.internal-action-report', compact('departments', 'carCount', 'okeCount', 'ofiCount'));
+        return view('genba-biq-intr.internal-audit.internal-action-report', compact('departments', 'carCount', 'okeCount', 'ofiCount'));
     }
 
     public function actionReportPreview($id)
@@ -167,7 +167,7 @@ class InternalAuditController extends Controller
                 $qmrUser = DB::table('users')->where('username', $car->qmr_nik)->first();
             }
 
-            return view('activity.internal-action-preview', compact('car', 'action', 'qmrUser', 'approve'));
+            return view('genba-biq-intr.internal-audit.internal-action-preview', compact('car', 'action', 'qmrUser', 'approve'));
         } catch (\Exception $e) {
             return redirect()->route('internal_audit.action_report')->with('error', $e->getMessage());
         }
@@ -1330,7 +1330,7 @@ class InternalAuditController extends Controller
             ->get()
             ->keyBy('checksheet_item_id');
 
-        return view('activity.form-checksheet-intr.activity-intr-form', compact('schedule', 'items', 'details'));
+        return view('genba-biq-intr.internal-audit.form-checksheet-intr.activity-intr-form', compact('schedule', 'items', 'details'));
     }
 
     public function getUsers(\Illuminate\Http\Request $request)
@@ -2462,7 +2462,7 @@ class InternalAuditController extends Controller
                 ];
             });
 
-        return view('activity.form-checksheet-intr.car-form', compact('schedule', 'item', 'detail', 'car', 'departments', 'requirements', 'clauseTitles'));
+        return view('genba-biq-intr.internal-audit.form-checksheet-intr.car-form', compact('schedule', 'item', 'detail', 'car', 'departments', 'requirements', 'clauseTitles'));
     }
 
     public function sendDraftCarForm(Request $request, $schedule_id, $item_id)

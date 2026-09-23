@@ -581,9 +581,41 @@
 
                 if (files.length > 0) {
                     for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
                         const reader = new FileReader();
-                        reader.onload = (e) => this.addThumbnail(itemId, e.target.result);
-                        reader.readAsDataURL(files[i]);
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                // Auto compress / resize image on client canvas
+                                const canvas = document.createElement('canvas');
+                                const maxDim = 1200; // max width/height
+                                let width = img.width;
+                                let height = img.height;
+
+                                if (width > height) {
+                                    if (width > maxDim) {
+                                        height = Math.round((height * maxDim) / width);
+                                        width = maxDim;
+                                    }
+                                } else {
+                                    if (height > maxDim) {
+                                        width = Math.round((width * maxDim) / height);
+                                        height = maxDim;
+                                    }
+                                }
+
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                // Convert to compressed JPEG data URL (quality 0.7)
+                                const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                this.addThumbnail(itemId, compressedUrl);
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
                     }
                 }
             },
@@ -591,7 +623,7 @@
             addThumbnail(itemId, url) {
                 const container = document.getElementById(`preview_container_${itemId}`);
                 const div = document.createElement('div');
-                div.className="relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
+                div.className = "relative group rounded-lg overflow-hidden aspect-square bg-slate-100 border border-slate-200";
                 div.innerHTML = `
                         <img src="${url}" class="w-full h-full object-cover">
                         <button onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -678,11 +710,20 @@
                             _token: token
                         })
                     })
-                    .then(res => {
-                        if (!res.ok) {
-                            return res.json().then(data => Promise.reject(data));
+                    .then(async res => {
+                        const contentType = res.headers.get('content-type');
+                        let data = {};
+                        if (contentType && contentType.includes('application/json')) {
+                            data = await res.json();
                         }
-                        return res.json();
+
+                        if (!res.ok) {
+                            if (res.status === 413) {
+                                return Promise.reject({ message: 'Photo size is too large (Maximum payload size exceeded). Please reduce photo size or quantity.' });
+                            }
+                            return Promise.reject(data.message ? data : { message: `Failed to save evidence (HTTP Error ${res.status})` });
+                        }
+                        return data;
                     })
                     .then(data => {
                         this.isLoading = false;
@@ -698,10 +739,10 @@
                     .catch(err => {
                         this.isLoading = false;
                         console.error('Error saving evidence:', err);
-                        if (err.message) {
+                        if (err && err.message) {
                             showToast(err.message, 'error');
                         } else {
-                            showToast('Gagal menyimpan evidence', 'error');
+                            showToast('Failed to save evidence', 'error');
                         }
                     });
             },

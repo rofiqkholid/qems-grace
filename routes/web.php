@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard-mng', 'dashboard.genba-mng')->name('dashboard');
 
     Route::get('/genba-management', function () {
-        return view('activity.genba-header-form');
+        return view('genba-biq-intr.genba-mng.genba-header-form');
     })->name('genba-management');
 
     Route::get('/internal-audit', [InternalAuditController::class, 'index'])->name('internal_audit');
@@ -73,11 +73,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/detail/save-note', [InternalAuditController::class, 'saveDetailNote'])->name('internal_audit.detail.save_note');
 
     Route::get('/team', function () {
-        return view('activity.setup.genba-team');
+        return view('genba-biq-intr.setup.genba-team');
     })->name('genba-team');
 
     Route::get('/room-team', function () {
-        return view('activity.setup.room-team');
+        return view('genba-biq-intr.setup.room-team');
     })->name('room-team');
     Route::get('/team_member', function () {
         return redirect()->route('room-team');
@@ -87,7 +87,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/genba-mng-management', function () {
-        return view('activity.findings-genba');
+        return view('genba-biq-intr.genba-mng.findings-genba');
     })->name('genba-mng-management');
 
     Route::get('/verifikasi-genba', function () {
