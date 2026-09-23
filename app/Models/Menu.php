@@ -93,6 +93,7 @@ class Menu extends Model
                         ['menu' => 97, 'children' => []],
                         ['menu' => 98, 'children' => []],
                         ['menu' => 99, 'children' => []],
+                        ['menu' => 126, 'children' => []],
                         ['menu' => 109, 'children' => []],
                         ['menu' => 111, 'children' => []],
                         ['menu' => 114, 'children' => []],
@@ -100,6 +101,7 @@ class Menu extends Model
                         ['menu' => 121, 'children' => []],
                         ['menu' => 122, 'children' => []],
                         ['menu' => 124, 'children' => []],
+                        ['menu' => 126, 'children' => []],
                     ]
                 ],
                 [

@@ -185,6 +185,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/line-checked/update', [MasterController::class, 'update_line_checked'])->name('master.line-checked.update');
         Route::post('/line-checked/delete', [MasterController::class, 'delete_line_checked'])->name('master.line-checked.delete');
 
+        Route::view('/station-mech', 'master.station-mech')->name('master.station-mech');
+        Route::post('/station-mech/table', [MasterController::class, 'station_mech_table'])->name('master.station-mech.table');
+        Route::post('/station-mech/store', [MasterController::class, 'store_station_mech'])->name('master.station-mech.store');
+        Route::post('/station-mech/update', [MasterController::class, 'update_station_mech'])->name('master.station-mech.update');
+        Route::post('/station-mech/delete', [MasterController::class, 'delete_station_mech'])->name('master.station-mech.delete');
+
         Route::view('/category', 'master.category')->name('master.category');
         Route::post('/category/table', [MasterController::class, 'category_table'])->name('master.category.table');
         Route::post('/category/store', [MasterController::class, 'store_category'])->name('master.category.store');
