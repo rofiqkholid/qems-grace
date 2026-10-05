@@ -257,6 +257,7 @@
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     // Search on keyup (debounce)
@@ -271,6 +272,7 @@
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleEdit(btn) {
@@ -282,10 +284,12 @@
         $('#edit_process').val(process);
         $('#edit_area_name').val(areaName);
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     let deleteId = null;
@@ -294,10 +298,12 @@
         deleteId = sysId;
         deleteNo = no;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
         deleteId = null;
         deleteNo = null;
     }

@@ -627,7 +627,7 @@
                                                 : 'bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500'" 
                                             placeholder="Comp {{ $i }}" class="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-center text-sm outline-none font-medium transition-all"
                                             @click="if (isLocked && vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) appendToken({{ $i }})">
-                                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-none bg-slate-700/70 text-white text-[11px] font-semibold tracking-wider pointer-events-none select-none">
+                                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-5 flex items-center justify-center rounded-none bg-slate-200/70 text-slate-500 text-[11px] font-semibold tracking-wider pointer-events-none select-none">
                                             C{{ $i }}
                                         </span>
                                     </div>
@@ -638,12 +638,9 @@
                         <!-- Notice & Lock Button Row -->
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <!-- Left: Info Notice (shown only when locked) -->
-                            <div x-show="isLocked" class="text-xs text-blue-700 font-semibold bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-start gap-2.5 flex-1">
-                                <i class="fa-solid fa-circle-info text-sm mt-0.5 text-blue-500"></i>
-                                <div>
-                                    <span class="font-bold">Locked Mode Active:</span>
-                                    <span class="font-normal text-slate-600">Click on the Component boxes above to insert them into the formula.</span>
-                                </div>
+                            <div x-show="isLocked" class="text-xs text-slate-600 flex items-center gap-2 flex-1">
+                                <i class="fa-solid fa-circle-info text-sm text-blue-500 shrink-0"></i>
+                                <span><strong class="font-bold text-slate-800">Locked Mode Active:</strong> Click on the Component boxes above to insert them into the formula.</span>
                             </div>
                             <div x-show="!isLocked" class="flex-1"></div> <!-- Spacer when unlocked -->
 
@@ -675,15 +672,15 @@
 
                             <!-- Calculator buttons -->
                             <div class="flex flex-wrap gap-2.5 items-center">
-                                <button type="button" @click="appendOperator('+')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">+</button>
-                                <button type="button" @click="appendOperator('-')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">-</button>
-                                <button type="button" @click="appendOperator('*')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">*</button>
-                                <button type="button" @click="appendOperator('/')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">/</button>
-                                <button type="button" @click="appendOperator('(')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">(</button>
-                                <button type="button" @click="appendOperator(')')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150 shadow-sm">)</button>
+                                <button type="button" @click="appendOperator('+')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">+</button>
+                                <button type="button" @click="appendOperator('-')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">-</button>
+                                <button type="button" @click="appendOperator('*')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">*</button>
+                                <button type="button" @click="appendOperator('/')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">/</button>
+                                <button type="button" @click="appendOperator('(')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">(</button>
+                                <button type="button" @click="appendOperator(')')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">)</button>
                                 
                                 <!-- Backspace button -->
-                                <button type="button" @click="calcOperator = calcOperator.trim().includes(' ') ? calcOperator.trim().substring(0, calcOperator.trim().lastIndexOf(' ')) + ' ' : ''" class="px-4 h-12 flex items-center justify-center bg-slate-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-150 shadow-sm">
+                                <button type="button" @click="calcOperator = calcOperator.trim().includes(' ') ? calcOperator.trim().substring(0, calcOperator.trim().lastIndexOf(' ')) + ' ' : ''" class="px-4 h-12 flex items-center justify-center bg-slate-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-150">
                                     <i class="fa-solid fa-delete-left mr-1.5 text-base"></i> Backspace
                                 </button>
                             </div>
@@ -965,6 +962,7 @@
         }
 
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
         setTimeout(() => {
             if (window.autoResizeTextarea) {
                 window.autoResizeTextarea(document.getElementById('create_definition'));
@@ -974,6 +972,7 @@
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleEdit(btn) {
@@ -1091,10 +1090,12 @@
         }, 50);
 
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     let deleteId = null;
@@ -1104,11 +1105,13 @@
         deleteId = id;
         deleteNo = no;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     // Modal dismiss logic
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
         deleteId = null;
         deleteNo = null;
     }
@@ -1184,10 +1187,12 @@
     });
     function openFormulaModal() {
         $('#formulaModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeFormulaModal() {
         $('#formulaModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleFormula(btn) {

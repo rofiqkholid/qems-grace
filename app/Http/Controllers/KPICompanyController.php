@@ -1193,6 +1193,12 @@ class KPICompanyController extends Controller
 
             DB::commit();
 
+            if ($status === 'Not Achieved' || $request->filled('problem_description')) {
+                return redirect()
+                    ->to(route('kpi.company.manage_activity_plan', self::encodeId($activity->kpi_company_id)))
+                    ->with('success', 'Monthly performance and problem solving details updated successfully. Redirected to Activity Plan.');
+            }
+
             return redirect()
                 ->to(route('kpi.company.detail', self::encodeId($activity->kpi_company_id)))
                 ->with('success', 'Monthly performance and problem solving details updated successfully.');

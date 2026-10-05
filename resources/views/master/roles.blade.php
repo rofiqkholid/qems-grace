@@ -268,10 +268,12 @@
     function openCreateModal() {
         $('#createForm')[0].reset();
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleEdit(btn) {
@@ -282,20 +284,24 @@
         $('#edit_role_name').val(role_name);
 
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleDelete(id, rowNo) {
         deleteId = id;
         deleteRowNo = rowNo;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 </script>
 @endpush

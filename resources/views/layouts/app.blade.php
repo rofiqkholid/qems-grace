@@ -80,6 +80,19 @@
             const loader = document.getElementById('page-loader');
             if (loader) loader.classList.remove('hidden');
         });
+        // Global Helper to prevent background scrolling when modal is open
+        window.toggleBodyScroll = function(showModal) {
+            if (showModal) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                // Only remove overflow-hidden if no other modals are currently visible
+                const visibleModals = document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden), [id*="Modal"]:not(.hidden)');
+                if (visibleModals.length <= 1) {
+                    document.body.classList.remove('overflow-hidden');
+                }
+            }
+        };
+
         // Global DataTable Resize Adjustment
         $(window).on('resize', function() {
             $('.dataTable').each(function() {
