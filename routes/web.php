@@ -32,8 +32,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/', function () {
-        return redirect()->route('dashboard');
+        return redirect()->route('introducing');
     });
+    Route::get('/introducing', function () {
+        return view('introducing');
+    })->name('introducing');
     Route::view('/dashboard-mng', 'dashboard.genba-mng')->name('dashboard');
 
     Route::get('/genba-management', function () {

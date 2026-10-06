@@ -9,14 +9,10 @@
     <title>@yield('title', config('app.name', 'GRACE'))</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/sai_logo_circle.png') }}">
-
-    <!-- DataTables CSS (loaded before Vite so custom styles can override) -->
     <link rel="stylesheet" href="{{ asset('css/jquery.dataTables-1.13.7.min.css') }}">
 
-    <!-- Vite Assets (loads last to override CDN styles) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Preload styles to prevent transition flickers on load -->
     <style>
         .preload, .preload * {
             -webkit-transition: none !important;
@@ -37,18 +33,15 @@
         @include('components.central-toast')
     @endif
 
-    <!-- jQuery and DataTables must load before @stack('scripts') -->
     <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('js/jquery.dataTables-1.13.7.min.js') }}"></script>
 
     <script>
-        // Suppress default DataTables browser alert popups globally across all tables
         if (typeof $.fn.dataTable !== 'undefined') {
             $.fn.dataTable.ext.errMode = 'none';
         }
         $(document).ajaxError(function(event, xhr, settings, thrownError) {
             if (xhr.status === 419) {
-                // CSRF Token Mismatch - automatically reload page to refresh session
                 window.location.reload();
             }
         });
@@ -61,7 +54,6 @@
             document.body.classList.remove('preload');
         });
 
-        // Global Loading Bar Logic
         window.addEventListener('load', function() {
             const loader = document.getElementById('page-loader');
             if (loader && !document.body.classList.contains('data-loading')) {
@@ -69,23 +61,20 @@
             }
         });
 
-        // Handle bfcache (back/forward navigation)
         window.addEventListener('pageshow', function(event) {
             const loader = document.getElementById('page-loader');
             if (loader) loader.classList.add('hidden');
         });
 
-        // Show loader on navigation
         window.addEventListener('beforeunload', function() {
             const loader = document.getElementById('page-loader');
             if (loader) loader.classList.remove('hidden');
         });
-        // Global Helper to prevent background scrolling when modal is open
+
         window.toggleBodyScroll = function(showModal) {
             if (showModal) {
                 document.body.classList.add('overflow-hidden');
             } else {
-                // Only remove overflow-hidden if no other modals are currently visible
                 const visibleModals = document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden), [id*="Modal"]:not(.hidden)');
                 if (visibleModals.length <= 1) {
                     document.body.classList.remove('overflow-hidden');
@@ -93,7 +82,6 @@
             }
         };
 
-        // Global DataTable Resize Adjustment
         $(window).on('resize', function() {
             $('.dataTable').each(function() {
                 if ($.fn.DataTable.isDataTable(this)) {
