@@ -11,6 +11,7 @@ use App\Http\Controllers\InternalAuditController;
 use App\Http\Controllers\AgentChatController;
 use App\Http\Controllers\KPICompanyController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\IntroducingController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -34,9 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', function () {
         return redirect()->route('introducing');
     });
-    Route::get('/introducing', function () {
-        return view('introducing');
-    })->name('introducing');
+    Route::get('/introducing', [IntroducingController::class, 'index'])->name('introducing');
     Route::view('/dashboard-mng', 'dashboard.genba-mng')->name('dashboard');
 
     Route::get('/genba-management', function () {

@@ -91,6 +91,7 @@
         showCentralAlert("{{ session('success') }}", 'success');
     });
 </script>
+@php session()->forget('success'); @endphp
 @endif
 
 @if(session('error'))
@@ -99,5 +100,6 @@
         showCentralAlert("{{ session('error') }}", 'error');
     });
 </script>
+@php session()->forget('error'); @endphp
 @endif
 @endonce

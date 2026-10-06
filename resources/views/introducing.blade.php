@@ -47,21 +47,21 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800">Kalender Hari Kerja & Libur Nasional</h2>
-                            <p class="text-xs text-slate-500 mt-0.5" id="calendarSourceText">Data Resmi Libur SKB 3 Menteri</p>
+                            <p class="text-xs text-slate-500 mt-0.5" id="calendarSourceText">Data Resmi SKB 3 Menteri</p>
                         </div>
 
                         <!-- Calendar Navigation Controls -->
                         <div class="flex items-center gap-2">
-                            <button type="button" id="btnPrevMonth" class="px-3 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none transition-colors flex items-center gap-1.5">
+                            <button type="button" id="btnPrevMonth" class="px-3 py-2 text-xs font-normal bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none transition-colors flex items-center gap-1.5">
                                 <i class="fa-solid fa-chevron-left"></i> Prev
                             </button>
-                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-none text-xs font-semibold text-slate-800 min-w-[130px] text-center" id="currentMonthYearLabel">
+                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-none text-xs font-normal text-slate-800 min-w-[130px] text-center" id="currentMonthYearLabel">
                                 Agustus 2026
                             </div>
-                            <button type="button" id="btnNextMonth" class="px-3 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none transition-colors flex items-center gap-1.5">
+                            <button type="button" id="btnNextMonth" class="px-3 py-2 text-xs font-normal bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none transition-colors flex items-center gap-1.5">
                                 Next <i class="fa-solid fa-chevron-right"></i>
                             </button>
-                            <button type="button" id="btnToday" class="px-3.5 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-none transition-colors ml-1">
+                            <button type="button" id="btnToday" class="px-3.5 py-2 text-xs font-normal bg-blue-600 hover:bg-blue-700 text-white rounded-none transition-colors ml-1">
                                 This Month
                             </button>
                         </div>
@@ -99,55 +99,76 @@
 
             <!-- Right Column (6 Cols): Informasi Pengguna -->
             <div class="lg:col-span-6 bg-white p-6 sm:p-8 rounded-none border border-slate-200">
-                @php
-                    $user = Auth::user();
-                    $userDept = $user?->department ?? \Illuminate\Support\Facades\DB::table('t100_user_dept')->where('id_user', $user?->id)->value('department');
-                    $userRoleData = \Illuminate\Support\Facades\DB::table('user_role')->where('id_user', $user?->id)->first();
-                    $decodedRoles = $userRoleData ? json_decode($userRoleData->role, true) : [];
-                    $userRoleText = is_array($decodedRoles) ? implode(', ', array_filter($decodedRoles)) : ($userRoleData->role ?? '');
-                    if (empty($userRoleText)) {
-                        $userRoleText = $user?->role_id ?? '-';
-                    }
-                @endphp
+
                 <div class="pb-4 mb-4 border-b border-slate-200">
                     <h2 class="text-xl font-bold text-slate-800">Informasi Pengguna</h2>
                     <p class="text-xs text-slate-500 mt-0.5">Detail akun dan sesi login pengguna saat ini</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-xs text-slate-700">
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">NIK</span>
-                        <span class="font-semibold text-slate-800">{{ $user?->username ?? '-' }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">NIK</span>
+                        <span class="font-normal text-slate-800">{{ $user?->username ?? '-' }}</span>
                     </div>
 
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">Nama Lengkap</span>
-                        <span class="font-semibold text-slate-800 truncate block" title="{{ $user?->full_name }}">{{ $user?->full_name ?? '-' }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Nama Lengkap</span>
+                        <span class="font-normal text-slate-800 break-words block">{{ $user?->full_name ?? '-' }}</span>
                     </div>
 
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">Role</span>
-                        <span class="font-semibold text-slate-800 truncate block" title="{{ $userRoleText }}">{{ $userRoleText ?: '-' }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Role</span>
+                        <span class="font-normal text-slate-800 break-words block">{{ $userRoleText ?: 'Not Set' }}</span>
                     </div>
 
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">Departemen</span>
-                        <span class="font-semibold text-slate-800">{{ $userDept ?? '-' }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Departemen</span>
+                        <span class="font-normal text-slate-800 break-words block">{{ $userDept ?: 'Not Set' }}</span>
                     </div>
 
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">Email</span>
-                        <span class="font-semibold text-slate-800 truncate block" title="{{ $user?->email }}">{{ $user?->email ?? '-' }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Hak Akses Modul</span>
+                        <span class="font-normal text-slate-800 break-words block">{{ $accessLevel }}</span>
                     </div>
 
-                    <div class="pb-2 border-b border-slate-100">
-                        <span class="block text-slate-400 font-medium mb-0.5">IP Address</span>
-                        <span class="font-semibold text-slate-800">{{ request()->ip() }}</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Email</span>
+                        <span class="font-normal text-slate-800 break-words block">{{ $user?->email ?? '-' }}</span>
                     </div>
 
-                    <div class="pb-2 sm:pb-0 sm:col-span-2">
-                        <span class="block text-slate-400 font-medium mb-0.5">Waktu Login</span>
-                        <span class="font-semibold text-slate-800">{{ date('d M Y, H:i') }} WIB</span>
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Perangkat / Browser</span>
+                        <span class="font-normal text-slate-800">{{ $deviceInfo }}</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">IP Address</span>
+                        <span class="font-normal text-slate-800">{{ request()->ip() }}</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Zona Waktu</span>
+                        <span class="font-normal text-slate-800">Asia/Jakarta (WIB)</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Status Akun</span>
+                        <span class="font-normal text-slate-800">Aktif</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Lingkungan Sistem</span>
+                        <span class="font-normal text-slate-800">{{ ucfirst(config('app.env', 'production')) }}</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Waktu Login</span>
+                        <span class="font-normal text-slate-800">{{ date('d M Y, H:i') }} WIB</span>
+                    </div>
+
+                    <div>
+                        <span class="block text-slate-400 font-normal mb-0.5">Versi Aplikasi</span>
+                        <span class="font-normal text-slate-800">GRACE v2.4.0</span>
                     </div>
                 </div>
             </div>
@@ -325,13 +346,12 @@
             }
 
             const isToday = (dateFormatted === todayStr);
-            const todayRing = isToday ? 'ring-2 ring-blue-500 ring-offset-1' : '';
+            const todayRing = isToday ? '!bg-blue-50 !border-blue-400' : '';
 
             grid.insertAdjacentHTML('beforeend', `
-                <div class="h-14 sm:h-16 p-1 border rounded-none flex flex-col justify-between transition-all duration-150 relative ${bgClass} ${todayRing}" title="${holidayItem ? holidayItem.name : (isWeekend ? 'Akhir Pekan' : 'Hari Kerja')}">
+                <div class="h-14 sm:h-16 px-2 py-1 border rounded-none flex flex-col justify-between transition-all duration-150 relative ${bgClass} ${todayRing}" title="${holidayItem ? holidayItem.name : (isWeekend ? 'Akhir Pekan' : 'Hari Kerja')}">
                     <div class="flex items-center justify-between">
                         <span class="${dayNumberClass}">${day}</span>
-                        ${isToday ? '<span class="text-[9px] bg-blue-600 text-white px-1.5 py-0.5 rounded-none font-normal">Today</span>' : ''}
                     </div>
                     <div>
                         ${badgeHtml}

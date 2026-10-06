@@ -17,14 +17,17 @@
         </div>
 
         <!-- Add User Button -->
+        @if($isMasterSetting ?? false)
         <button type="button" onclick="initCreateUser()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5 shrink-0">
             <i class="fa-solid fa-user-plus text-xs"></i>
             <span>Add User</span>
         </button>
+        @endif
     </div>
 
     <!-- Main Container -->
     <main class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+        @if($isMasterSetting ?? false)
         <!-- LEFT PANEL: User List -->
         <section id="userListSection" class="w-full lg:w-[380px] shrink-0 border-r border-slate-200 bg-white flex flex-col h-full lg:flex">
             <!-- Filter & Header Search -->
@@ -55,10 +58,12 @@
                 </div>
             </div>
         </section>
+        @endif
 
         <!-- RIGHT PANEL: Edit Settings Form -->
-        <section id="userDetailSection" class="flex-1 flex flex-col bg-slate-50/50 h-full overflow-y-auto hidden lg:flex">
+        <section id="userDetailSection" class="flex-1 flex flex-col bg-slate-50/50 h-full overflow-y-auto {{ ($isMasterSetting ?? false) ? 'hidden lg:flex' : 'flex' }}">
             <!-- Empty State -->
+            @if($isMasterSetting ?? false)
             <div id="emptyStatePanel" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div class="w-16 h-16 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-300 shadow-sm mb-4">
                     <i class="fa-solid fa-user-gear text-3xl"></i>
@@ -66,21 +71,24 @@
                 <h3 class="text-slate-700 font-bold text-base">No User Selected</h3>
                 <p class="text-slate-400 text-xs max-w-sm mt-1">Select a user from the list on the left to edit their details and credentials.</p>
             </div>
+            @endif
 
-            <!-- Form Panel (Hidden by default) -->
-            <div id="userDetailPanel" class="hidden flex-1 flex flex-col h-full">
+            <!-- Form Panel -->
+            <div id="userDetailPanel" class="{{ ($isMasterSetting ?? false) ? 'hidden' : '' }} flex-1 flex flex-col h-full">
                 <!-- Header with details -->
                 <div class="px-4 sm:px-6 border-b border-slate-200 bg-white flex items-center justify-between gap-4 shrink-0 h-[60px]">
                     <div class="flex items-center gap-3">
+                        @if($isMasterSetting ?? false)
                         <button type="button" onclick="backToUserList()" class="lg:hidden p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors mr-1">
                             <i class="fa-solid fa-arrow-left text-base"></i>
                         </button>
+                        @endif
                         <div id="detailAvatar" class="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-white">
-                            <img src="{{ asset('image/blank.png') }}" alt="Avatar" class="w-full h-full object-cover">
+                            <img src="{{ $user?->avatar ? asset('image/' . $user->avatar) : asset('image/blank.png') }}" alt="Avatar" class="w-full h-full object-cover">
                         </div>
                         <div>
-                            <h2 id="detailFullName" class="text-lg font-bold text-slate-800 leading-tight">-</h2>
-                            <p id="detailEmail" class="text-slate-500 text-xs">-</p>
+                            <h2 id="detailFullName" class="text-lg font-bold text-slate-800 leading-tight">{{ $user?->full_name ?? '-' }}</h2>
+                            <p id="detailEmail" class="text-slate-500 text-xs">{{ $user?->email ?? 'No email registered' }}</p>
                         </div>
                     </div>
                     <!-- Save Status Notification -->
@@ -121,7 +129,7 @@
 
                     <form id="userSettingsForm" action="{{ route('master.user_setting.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6 w-full">
                         @csrf
-                        <input type="hidden" name="user_id" id="form_user_id">
+                        <input type="hidden" name="user_id" id="form_user_id" value="{{ $user?->id }}">
 
                         <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col w-full relative">
                             <!-- Card Header -->
@@ -140,7 +148,7 @@
                                     <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
                                         <div class="relative">
                                             <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center shadow-inner">
-                                                <img id="avatar-preview" src="{{ asset('image/blank.png') }}" alt="Avatar Preview" class="w-full h-full object-cover">
+                                                <img id="avatar-preview" src="{{ $user?->avatar ? asset('image/' . $user->avatar) : asset('image/blank.png') }}" alt="Avatar Preview" class="w-full h-full object-cover">
                                             </div>
                                             <button type="button" onclick="showFeatureNotAvailableAlert()" class="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer shadow-md transition-colors border border-white">
                                                 <i class="fa-solid fa-camera text-xs"></i>
@@ -160,17 +168,17 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div class="flex flex-col">
                                             <label for="full_name" class="block text-xs font-bold text-slate-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
-                                            <input type="text" name="full_name" id="full_name" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
+                                            <input type="text" name="full_name" id="full_name" value="{{ $user?->full_name }}" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
                                         </div>
 
                                         <div class="flex flex-col">
                                             <label for="username" class="block text-xs font-bold text-slate-700 mb-1.5">Username/NIK <span class="text-red-500">*</span></label>
-                                            <input type="text" id="username" name="username" disabled class="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-50 cursor-not-allowed text-slate-500 text-xs outline-none transition-all">
+                                            <input type="text" id="username" name="username" value="{{ $user?->username }}" disabled class="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-50 cursor-not-allowed text-slate-500 text-xs outline-none transition-all">
                                         </div>
 
                                         <div class="flex flex-col sm:col-span-2">
                                             <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">Email Address</label>
-                                            <input type="email" name="email" id="email" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
+                                            <input type="email" name="email" id="email" value="{{ $user?->email }}" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs outline-none transition-all">
                                         </div>
                                     </div>
                                 </div>
@@ -240,7 +248,25 @@
     let searchTimer = null;
 
     $(document).ready(function() {
-        fetchUsers();
+        // Initialize roles and department for current user
+        const initRoles = "{{ $userRoleText ?? '' }}";
+        const initDept = "{{ $userDept ?? '' }}";
+        if (initRoles) {
+            window.dispatchEvent(new CustomEvent('update-user-roles', { 
+                detail: { id: initRoles, name: initRoles } 
+            }));
+        }
+        if (initDept) {
+            window.dispatchEvent(new CustomEvent('update-user-department', { 
+                detail: { id: initDept, name: initDept } 
+            }));
+        }
+
+        @if($isMasterSetting ?? false)
+            fetchUsers();
+        @else
+            selectUser("{{ Auth::user()->id }}", true);
+        @endif
 
         // Search keyup
         $('#userSearchInput').on('keyup', function() {
@@ -326,8 +352,10 @@
                         // Scroll detail section to top
                         $('#userDetailSection').scrollTop(0);
                         
-                        // Re-fetch users to reflect changes in the left pane list
-                        fetchUsers();
+                        // Re-fetch users to reflect changes in the left pane list if master user
+                        @if($isMasterSetting ?? false)
+                            fetchUsers();
+                        @endif
                     } else {
                         updateSaveStatus('Failed to update profile', 'error');
                     }
