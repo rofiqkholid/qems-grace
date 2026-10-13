@@ -1794,7 +1794,7 @@ class MasterController extends Controller
         $query = DB::table('KPIList as child')
             ->leftJoin('KPIList as parent', 'child.parent_objective_id', '=', 'parent.id')
             ->select('child.*', 'parent.objective as parent_objective')
-            ->orderBy('child.id', 'asc');
+            ->orderBy('child.id', 'desc');
 
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
