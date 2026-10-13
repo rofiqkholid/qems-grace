@@ -130,9 +130,13 @@
 
         $calculatedActuals[$m] = ($calculatedActual !== null) ? $calculatedActual : ($act ? ($act->actual !== null && is_numeric($act->actual) ? round((float) $act->actual, 2) : $act->actual) : null);
     }
+
+    $kpiCategory = trim($kpi->category ?? '');
+    $isDeptKpi = (stripos($kpiCategory, 'dept') !== false || stripos($kpiCategory, 'department') !== false);
+    $kpiTitle = $isDeptKpi ? 'Detail KPI Department' : 'Detail KPI Company';
 @endphp
 
-@section('title', 'Detail KPI Company')
+@section('title', $kpiTitle)
 
 @section('content')
 @include('layouts.sidebar')
@@ -157,7 +161,7 @@
                 <i class="fa-solid fa-arrow-left text-[11px] sm:text-sm text-slate-600"></i>
             </a>
             <div>
-                <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Detail KPI Company</h1>
+                <h1 class="text-lg sm:text-2xl font-bold text-slate-800">{{ $kpiTitle }}</h1>
                 <p class="text-slate-500 text-sm">Detailed performance tracking, objective details and monthly actual trend.</p>
             </div>
         </div>

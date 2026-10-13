@@ -13,6 +13,10 @@
     <main class="flex-1 p-6">
         @php
             $isViewMode = request('mode') === 'view';
+            $actCategory = trim($activity->category ?? '');
+            $isDeptKpi = (stripos($actCategory, 'dept') !== false || stripos($actCategory, 'department') !== false);
+            $typeLabel = $isDeptKpi ? 'KPI Department' : 'KPI Company';
+            $pageTitle = $isViewMode ? "{$typeLabel} Activity Details" : "{$typeLabel} Activity Input";
         @endphp
         <style>
             #closed_status ~ div[x-show="open"],
@@ -30,7 +34,7 @@
                 <i class="fa-solid fa-arrow-left text-[11px] sm:text-sm text-slate-600"></i>
             </a>
             <div>
-                <h1 class="text-lg sm:text-2xl font-bold text-slate-800">{{ $isViewMode ? 'KPI Company Activity Details' : 'KPI Company Activity Input' }}</h1>
+                <h1 class="text-lg sm:text-2xl font-bold text-slate-800">{{ $pageTitle }}</h1>
                 <p class="text-slate-500 text-sm">{{ $isViewMode ? 'View actual performance, status, and corrective action for this month.' : 'Insert actual performance, status, and corrective action for this month.' }}</p>
             </div>
         </div>
