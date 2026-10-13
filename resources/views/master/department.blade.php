@@ -258,6 +258,7 @@
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     // Search on keyup (debounce)
@@ -272,6 +273,7 @@
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleEdit(btn) {
@@ -281,10 +283,12 @@
         $('#edit_key1').val(key1);
         $('#edit_desc').val(desc);
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     let deleteKey1 = null;
@@ -293,10 +297,12 @@
         deleteKey1 = key1;
         deleteNo = no;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
         deleteKey1 = null;
         deleteNo = null;
     }

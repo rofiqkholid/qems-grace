@@ -191,19 +191,6 @@
                     <!-- Right side: Buttons -->
                     <div class="lg:flex-initial flex items-center lg:justify-end w-full lg:w-auto">
                         <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                            <div class="flex gap-2 w-full sm:w-auto">
-                                <!-- Print PDF Button -->
-                                <button type="button" class="inline-flex items-center justify-center gap-2 flex-1 sm:flex-none sm:w-32 py-3 text-xs font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-file-pdf text-sm"></i>
-                                    Print
-                                </button>
-                                <!-- Export Excel Button -->
-                                <button type="button" class="inline-flex items-center justify-center gap-2 flex-1 sm:flex-none sm:w-36 py-3 text-xs font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-file-excel text-sm"></i>
-                                    Export Excel
-                                </button>
-                            </div>
-                            <div class="hidden sm:block w-px h-6 bg-slate-200 mx-1"></div>
                             <!-- Manage Activity Button -->
                             <a href="{{ route('kpi.company.manage_activity_plan', \App\Http\Controllers\KPICompanyController::encodeId($kpi->id)) }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-3 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
                                 <i class="fa-solid fa-bars-progress text-sm"></i>

@@ -399,6 +399,7 @@
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
         
         window.dispatchEvent(new CustomEvent('create-audit-type-event', {
             detail: {
@@ -418,6 +419,7 @@
 
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     function handleEdit(btn) {
@@ -466,10 +468,12 @@
         $('#edit_scope_item').val(scopeItem);
         $('#edit_is_active').val(isActive);
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     let deleteId = null;
@@ -479,10 +483,12 @@
         deleteId = id;
         deleteNo = no;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
         deleteId = null;
         deleteNo = null;
     }

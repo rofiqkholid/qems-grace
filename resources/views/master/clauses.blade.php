@@ -300,6 +300,7 @@
 
     function openCreateModal() {
         $('#createModal').removeClass('hidden');
+        toggleBodyScroll(true);
         const ta = document.querySelector('#createModal .autogrow-textarea');
         if (ta) {
             setTimeout(function() {
@@ -311,6 +312,7 @@
     // Reset create modal fields
     function closeCreateModal() {
         $('#createModal').addClass('hidden');
+        toggleBodyScroll(false);
         $('#createModal').find('form')[0].reset();
     }
 
@@ -325,6 +327,7 @@
         $('#edit_clause_title').val(clause_title);
         $('#edit_clauses').val(clauses);
         $('#editModal').removeClass('hidden');
+        toggleBodyScroll(true);
         
         // Trigger auto-grow for edit clauses textarea after value is loaded
         const editClauses = document.getElementById('edit_clauses');
@@ -337,6 +340,7 @@
 
     function closeEditModal() {
         $('#editModal').addClass('hidden');
+        toggleBodyScroll(false);
     }
 
     let deleteId = null;
@@ -346,10 +350,12 @@
         deleteId = id;
         deleteNo = no;
         $('#deleteModal').removeClass('hidden');
+        toggleBodyScroll(true);
     }
 
     function closeDeleteModal() {
         $('#deleteModal').addClass('hidden');
+        toggleBodyScroll(false);
         deleteId = null;
         deleteNo = null;
     }

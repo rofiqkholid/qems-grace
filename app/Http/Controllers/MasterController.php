@@ -21,7 +21,7 @@ class MasterController extends Controller
             if ($request->is('*user-management*')) {
                 $menuId = 103;
             } elseif ($request->is('*user-setting*')) {
-                $menuId = 105;
+                $menuId = null;
             } elseif ($request->is('*menu-management*')) {
                 $menuId = 105;
             } elseif ($request->is('*intr-check-item*')) {
@@ -29,7 +29,7 @@ class MasterController extends Controller
             } elseif ($request->is('*station-mech*')) {
                 $menuId = 126;
             }
-            if (!UserMenuPermission::canView($menuId)) {
+            if ($menuId !== null && !UserMenuPermission::canView($menuId)) {
                 return response()->view('direct-403.direct-403');
             }
             return $next($request);
@@ -1439,6 +1439,11 @@ class MasterController extends Controller
         $search = $request->input('search');
         $query = DB::table('users');
 
+        $isMasterSetting = UserMenuPermission::canView(105) || NotificationController::isIctUser(Auth::user());
+        if (!$isMasterSetting) {
+            $query->where('id', Auth::id());
+        }
+
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('username', 'LIKE', "%{$search}%")
@@ -1489,10 +1494,17 @@ class MasterController extends Controller
 
     public function get_user_permissions($id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
+        $isMasterSetting = UserMenuPermission::canView(105) || NotificationController::isIctUser(Auth::user());
+        if (!$isMasterSetting) {
+            $id = Auth::id();
+        }
+
+        $user = DB::table('users')->where(is_numeric($id) ? 'id' : 'username', $id)->first();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'User not found.'], 404);
         }
+
+        $realUserId = $user->id;
 
         $orderedIds = Menu::getOrderedIds();
         $menusKeyed = DB::table('t100_menus')->get()->keyBy('id');
@@ -1506,7 +1518,7 @@ class MasterController extends Controller
 
         // Get permissions for this user
         $userPermissions = DB::table('t100_user_menus_permission')
-            ->where('id_user', $id)
+            ->where('id_user', $realUserId)
             ->get()
             ->keyBy('id_menus');
 
@@ -1529,13 +1541,13 @@ class MasterController extends Controller
             ];
         })->values();
 
-        $userRole = DB::table('user_role')->where('id_user', $id)->first();
+        $userRole = DB::table('user_role')->where('id_user', $realUserId)->first();
         $roles = $userRole ? json_decode($userRole->role, true) : [];
         if (!is_array($roles)) {
             $roles = [];
         }
 
-        $userDept = DB::table('t100_user_dept')->where('id_user', $id)->value('department');
+        $userDept = DB::table('t100_user_dept')->where('id_user', $realUserId)->value('department');
 
         return response()->json([
             'success' => true,
@@ -1555,6 +1567,14 @@ class MasterController extends Controller
     public function user_setting()
     {
         $user = Auth::user();
+        $isMasterSetting = UserMenuPermission::canView(105) || NotificationController::isIctUser($user);
+
+        $userRoleData = DB::table('user_role')->where('id_user', $user?->id)->first();
+        $decodedRoles = $userRoleData ? json_decode($userRoleData->role, true) : [];
+        $userRoleText = is_array($decodedRoles) ? implode(', ', array_filter($decodedRoles)) : ($userRoleData->role ?? '');
+
+        $userDept = DB::table('t100_user_dept')->where('id_user', $user?->id)->value('department') ?? ($user?->department ?? '');
+
         $rolesList = DB::table('GraceRole')->get()->map(function ($item) {
             return [
                 'id' => $item->role_name,
@@ -1569,13 +1589,13 @@ class MasterController extends Controller
             ];
         })->toArray();
 
-        return view('setting.user-setting', compact('user', 'rolesList', 'departmentsList'));
+        return view('setting.user-setting', compact('user', 'rolesList', 'departmentsList', 'isMasterSetting', 'userRoleText', 'userDept'));
     }
 
      public function update_user_setting(Request $request)
      {
          $request->validate([
-             'user_id' => 'required|integer',
+             'user_id' => 'required',
              'full_name' => 'required|string|max:255',
              'call_name' => 'nullable|string|max:50',
              'email' => 'nullable|email|max:255',
@@ -1584,13 +1604,24 @@ class MasterController extends Controller
              'roles' => 'nullable|string',
              'department' => 'nullable|string|max:50',
          ]);
- 
-         $userId = $request->user_id;
-         $user = DB::table('users')->where('id', $userId)->first();
+
+         $isMasterSetting = UserMenuPermission::canView(105) || NotificationController::isIctUser(Auth::user());
+
+         $rawUserId = $request->user_id;
+         if (!$isMasterSetting) {
+             $rawUserId = Auth::id();
+         }
+
+         $user = DB::table('users')->where(is_numeric($rawUserId) ? 'id' : 'username', $rawUserId)->first();
          if (!$user) {
              return redirect()->back()->withErrors(['user_id' => 'User not found.']);
          }
- 
+
+         $userId = $user->id;
+         if (!$user) {
+             return redirect()->back()->withErrors(['user_id' => 'User not found.']);
+         }
+
          $data = [
              'full_name' => strtoupper($request->full_name),
              'call_name' => $request->filled('call_name') ? strtoupper($request->call_name) : null,
@@ -1616,42 +1647,46 @@ class MasterController extends Controller
 
         DB::table('users')->where('id', $userId)->update($data);
 
-        $deptExisting = DB::table('t100_user_dept')->where('id_user', $userId)->first();
-        if ($deptExisting) {
-            DB::table('t100_user_dept')->where('id_user', $userId)->update([
-                'department' => $request->department,
-                'updated_at' => \Carbon\Carbon::now()
-            ]);
-        } else {
-            DB::table('t100_user_dept')->insert([
-                'id_user' => $userId,
-                'department' => $request->department,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now()
-            ]);
+        if ($request->has('department')) {
+            $deptExisting = DB::table('t100_user_dept')->where('id_user', $userId)->first();
+            if ($deptExisting) {
+                DB::table('t100_user_dept')->where('id_user', $userId)->update([
+                    'department' => $request->department,
+                    'updated_at' => \Carbon\Carbon::now()
+                ]);
+            } else {
+                DB::table('t100_user_dept')->insert([
+                    'id_user' => $userId,
+                    'department' => $request->department,
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now()
+                ]);
+            }
         }
 
-        $rolesInput = $request->roles;
-        if (is_array($rolesInput)) {
-            $roles = $rolesInput;
-        } elseif (is_string($rolesInput)) {
-            $roles = array_map('trim', explode(',', $rolesInput));
-        } else {
-            $roles = [];
-        }
-        $existing = DB::table('user_role')->where('id_user', $userId)->first();
-        if ($existing) {
-            DB::table('user_role')->where('id_user', $userId)->update([
-                'role' => json_encode(array_values(array_filter($roles))),
-                'updated_at' => \Carbon\Carbon::now()
-            ]);
-        } else {
-            DB::table('user_role')->insert([
-                'id_user' => $userId,
-                'role' => json_encode(array_values(array_filter($roles))),
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now()
-            ]);
+        if ($request->has('roles')) {
+            $rolesInput = $request->roles;
+            if (is_array($rolesInput)) {
+                $roles = $rolesInput;
+            } elseif (is_string($rolesInput)) {
+                $roles = array_map('trim', explode(',', $rolesInput));
+            } else {
+                $roles = [];
+            }
+            $existing = DB::table('user_role')->where('id_user', $userId)->first();
+            if ($existing) {
+                DB::table('user_role')->where('id_user', $userId)->update([
+                    'role' => json_encode(array_values(array_filter($roles))),
+                    'updated_at' => \Carbon\Carbon::now()
+                ]);
+            } else {
+                DB::table('user_role')->insert([
+                    'id_user' => $userId,
+                    'role' => json_encode(array_values(array_filter($roles))),
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now()
+                ]);
+            }
         }
 
         if ($request->ajax()) {
@@ -1667,6 +1702,11 @@ class MasterController extends Controller
 
      public function store_user(Request $request)
      {
+         $isMasterSetting = UserMenuPermission::canView(105) || NotificationController::isIctUser(Auth::user());
+         if (!$isMasterSetting) {
+             return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+         }
+
          $request->validate([
              'full_name' => 'required|string|max:255',
              'username' => 'required|string|max:50|unique:users,username',

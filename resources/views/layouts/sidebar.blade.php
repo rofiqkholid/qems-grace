@@ -26,6 +26,7 @@
                                 ($mainItem['menu']->menu === 'internal-audit-main' && (request()->is('internal-audit*') || request()->is('verifikasi-internal-audit*'))) ||
                                 ($mainItem['menu']->menu === 'setting' && (request()->is('setting*') || request()->is('user-management*') || request()->is('menu-management*') || request()->is('user-setting*')));
                     $iconClass = match($mainItem['menu']->menu) {
+                        'introducing' => 'fa-hand',
                         'genba' => 'fa-users',
                         'data-master' => 'fa-database',
                         'dashboard' => 'fa-chart-pie',

@@ -412,10 +412,12 @@ function openSendModal() {
     window.dispatchEvent(new CustomEvent('set-user-value', { detail: '' }));
     toggleTargetFields();
     $('#sendModal').removeClass('hidden');
+    toggleBodyScroll(true);
 }
 
 function closeSendModal() {
     $('#sendModal').addClass('hidden');
+    toggleBodyScroll(false);
 }
 
 function handleSendSubmit(e) {
@@ -472,10 +474,12 @@ function openEditModal(id, notif) {
 
     $('#btnEditSubmit').prop('disabled', false);
     $('#editModal').removeClass('hidden');
+    toggleBodyScroll(true);
 }
 
 function closeEditModal() {
     $('#editModal').addClass('hidden');
+    toggleBodyScroll(false);
 }
 
 function handleEditSubmit(e) {
@@ -514,11 +518,13 @@ function handleEditSubmit(e) {
 function confirmDeleteNotif(id) {
     targetDeleteId = id;
     $('#deleteModal').removeClass('hidden');
+    toggleBodyScroll(true);
 }
 
 function closeDeleteModal() {
     targetDeleteId = null;
     $('#deleteModal').addClass('hidden');
+    toggleBodyScroll(false);
 }
 
 function executeDelete() {

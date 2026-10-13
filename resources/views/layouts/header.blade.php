@@ -107,10 +107,10 @@
                             </button>
 
                             <!-- Dropdown Menu -->
-                            <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl border border-slate-200 py-2 z-50">
+                            <div id="user-dropdown" class="hidden absolute right-0 mt-3 w-64 bg-white rounded-xl border border-slate-200 py-2 shadow-lg z-50">
                                 <div class="px-4 py-2 border-b border-slate-100">
-                                    <p class="text-sm font-medium text-slate-700">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
-                                    <p class="text-xs text-slate-500">{{ Auth::user()?->email ?? '' }}</p>
+                                    <p class="text-sm font-medium text-slate-700 truncate" title="{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}">{{ Auth::user()?->full_name ?? Auth::user()?->username ?? 'Guest' }}</p>
+                                    <p class="text-xs text-slate-500 truncate" title="{{ Auth::user()?->email ?? '' }}">{{ Auth::user()?->email ?? '' }}</p>
                                 </div>
                                 <a href="{{ route('master.user_setting') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                                     <i class="fa-solid fa-user w-4"></i>
