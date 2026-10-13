@@ -163,10 +163,8 @@
                                 label="Category"
                                 required="true"
                                 :initialOptions="[
-                                    ['id' => 'Company KPI', 'name' => 'Company KPI'],
-                                    ['id' => 'KPI Department', 'name' => 'KPI Department'],
-                                    ['id' => 'Activity Plan', 'name' => 'Activity Plan']
-                                ]"
+                                    ['id' => 'Company KPI', 'name' => 'KPI Company'],
+                                    ['id' => 'KPI Department', 'name' => 'KPI Department']                                ]"
                                 updateEvent="set-create-category-kpilist"
                                 hideLabel="true" />
                         </div>
