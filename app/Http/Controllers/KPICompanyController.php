@@ -95,7 +95,7 @@ class KPICompanyController extends Controller
             $periods = collect([date('Y')]);
         }
 
-        return view('kpi.company-kpi', compact('kpiList', 'departments', 'pillars', 'periods'));
+        return view('kpi.form-kpi', compact('kpiList', 'departments', 'pillars', 'periods'));
     }
 
     /**
