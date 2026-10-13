@@ -37,7 +37,7 @@
             <!-- Page Title -->
             <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800">Company KPI</h1>
+                    <h1 class="text-2xl font-bold text-slate-800">Key Performance Indicators Form</h1>
                     <p class="text-slate-500 mt-1">Real-time overview of organization-wide strategic goals and target achievements.</p>
                 </div>
             </div>
