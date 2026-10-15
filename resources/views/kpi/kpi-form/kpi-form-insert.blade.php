@@ -471,23 +471,39 @@
 
     @include('layouts.footer')
 </div>
+
+<!-- Sync Data Info Modal -->
+<div id="syncDataModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeSyncModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm transform transition-all shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-6 text-center">
+                <div class="w-14 h-14 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 shadow-sm">
+                    <i class="fa-solid fa-arrows-rotate text-xl animate-spin-slow"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800 mb-1.5">Data Synchronization</h3>
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    Fitur sinkronisasi belum terhubung ke sumber data eksternal. Hubungi administrator sistem jika integrasi data diperlukan.
+                </p>
+            </div>
+            <div class="px-6 pb-6 pt-0">
+                <button type="button" onclick="closeSyncModal()" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-xl transition-colors shadow-sm shadow-blue-200">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
     function syncComponentData() {
-        if (typeof showToast === 'function') {
-            showToast('Sync feature is currently not connected to an external source.', 'info');
-        } else if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'info',
-                title: 'Sync Data',
-                text: 'Fitur sinkronisasi belum terhubung ke sumber data eksternal.',
-                confirmButtonColor: '#2563eb'
-            });
-        } else {
-            alert('Fitur sinkronisasi belum terhubung ke sumber data eksternal.');
-        }
+        $('#syncDataModal').removeClass('hidden').addClass('flex');
+    }
+
+    function closeSyncModal() {
+        $('#syncDataModal').addClass('hidden').removeClass('flex');
     }
 
     function handleFileSelect(input, previewId) {
