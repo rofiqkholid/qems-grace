@@ -239,7 +239,7 @@
                                 hideLabel="true" />
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Operator <span class="text-red-500">*</span></label>
                             <x-searchable-select
@@ -270,6 +270,20 @@
                                 ]"
                                 updateEvent="set-create-calculation-method-kpilist"
                                 changeEvent="create-calculation-method-changed"
+                                hideLabel="true" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Source Data <span class="text-red-500">*</span></label>
+                            <x-searchable-select
+                                name="source_data"
+                                id="create_source_data_kpilist"
+                                label="Source Data"
+                                required="true"
+                                :initialOptions="[
+                                    ['id' => 'Manual', 'name' => 'Manual'],
+                                    ['id' => 'Auto', 'name' => 'Auto']
+                                ]"
+                                updateEvent="set-create-source-data-kpilist"
                                 hideLabel="true" />
                         </div>
                     </div>
@@ -608,7 +622,7 @@
                                 hideLabel="true" />
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Operator <span class="text-red-500">*</span></label>
                             <x-searchable-select
@@ -639,6 +653,20 @@
                                 ]"
                                 updateEvent="set-edit-calculation-method-kpilist"
                                 changeEvent="edit-calculation-method-changed"
+                                hideLabel="true" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Source Data <span class="text-red-500">*</span></label>
+                            <x-searchable-select
+                                name="source_data"
+                                id="edit_source_data_kpilist"
+                                label="Source Data"
+                                required="true"
+                                :initialOptions="[
+                                    ['id' => 'Manual', 'name' => 'Manual'],
+                                    ['id' => 'Auto', 'name' => 'Auto']
+                                ]"
+                                updateEvent="set-edit-source-data-kpilist"
                                 hideLabel="true" />
                         </div>
                     </div>
@@ -1131,6 +1159,9 @@
         window.dispatchEvent(new CustomEvent('set-create-arrow-target-kpilist', {
             detail: { id: "", name: "" }
         }));
+        window.dispatchEvent(new CustomEvent('set-create-source-data-kpilist', {
+            detail: { id: "Manual", name: "Manual" }
+        }));
         window.dispatchEvent(new CustomEvent('set-create-result-kpilist', {
             detail: { id: "", name: "" }
         }));
@@ -1176,6 +1207,7 @@
         const operator_val = btn.getAttribute('data-operator') || '';
         const calculation_method = btn.getAttribute('data-calculation_method') || '';
         const arrow_target = btn.getAttribute('data-arrow_target') || '';
+        const source_data = btn.getAttribute('data-source_data') || 'Manual';
         const result = btn.getAttribute('data-result') || '';
 
         const parent_objective_name = btn.getAttribute('data-parent_objective_name') || "";
@@ -1221,6 +1253,9 @@
         }));
         window.dispatchEvent(new CustomEvent('set-edit-arrow-target-kpilist', {
             detail: { id: arrow_target || "", name: arrow_target || "" }
+        }));
+        window.dispatchEvent(new CustomEvent('set-edit-source-data-kpilist', {
+            detail: { id: source_data || "Manual", name: source_data || "Manual" }
         }));
         window.dispatchEvent(new CustomEvent('set-edit-result-kpilist', {
             detail: { id: result || "", name: result || "" }

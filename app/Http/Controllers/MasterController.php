@@ -1870,6 +1870,7 @@ class MasterController extends Controller
                                      data-operator="' . htmlspecialchars($item->operator ?? '') . '"
                                      data-calculation_method="' . htmlspecialchars($item->calculation_method ?? '') . '"
                                      data-arrow_target="' . htmlspecialchars($item->arrow_target ?? '') . '"
+                                     data-source_data="' . htmlspecialchars($item->source_data ?? 'Manual') . '"
                                      data-result="' . htmlspecialchars($item->result ?? '') . '">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
@@ -1926,6 +1927,7 @@ class MasterController extends Controller
                 'unit' => $request->unit,
                 'operator' => $request->operator,
                 'calculation_method' => $request->calculation_method,
+                'source_data' => $request->source_data ?: 'Manual',
                 'arrow_target' => $request->arrow_target,
                 'result' => $request->result,
                 'created_at' => \Carbon\Carbon::now(),
@@ -2012,6 +2014,7 @@ class MasterController extends Controller
                 'unit' => $request->unit,
                 'operator' => $request->operator,
                 'calculation_method' => $request->calculation_method,
+                'source_data' => $request->source_data ?: 'Manual',
                 'arrow_target' => $request->arrow_target,
                 'result' => $request->result,
                 'updated_at' => \Carbon\Carbon::now()

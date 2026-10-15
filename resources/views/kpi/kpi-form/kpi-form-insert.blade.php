@@ -96,10 +96,15 @@
                     @endif
 
                     @if(!empty($components))
-                    <div class="md:col-span-2 flex justify-start pt-2">
-                        <button type="button" id="check_result_btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                    <div class="md:col-span-2 flex flex-wrap items-center gap-2.5 pt-2">
+                        <button type="button" id="check_result_btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm flex items-center">
                             <i class="fa-solid fa-calculator mr-1.5"></i> Check Result
                         </button>
+                        @if(strtolower($activity->source_data ?? 'manual') === 'auto')
+                            <button type="button" id="sync_data_btn" onclick="syncComponentData()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 text-sm font-semibold rounded-lg transition-all shadow-sm flex items-center">
+                                <i class="fa-solid fa-arrows-rotate mr-1.5 text-blue-600"></i> Sync Data
+                            </button>
+                        @endif
                     </div>
                     <div class="md:col-span-2 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -470,6 +475,21 @@
 
 @push('scripts')
 <script>
+    function syncComponentData() {
+        if (typeof showToast === 'function') {
+            showToast('Sync feature is currently not connected to an external source.', 'info');
+        } else if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sync Data',
+                text: 'Fitur sinkronisasi belum terhubung ke sumber data eksternal.',
+                confirmButtonColor: '#2563eb'
+            });
+        } else {
+            alert('Fitur sinkronisasi belum terhubung ke sumber data eksternal.');
+        }
+    }
+
     function handleFileSelect(input, previewId) {
         const previewDiv = document.getElementById(previewId);
         if (previewDiv) {

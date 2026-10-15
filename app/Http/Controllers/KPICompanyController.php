@@ -595,7 +595,7 @@ class KPICompanyController extends Controller
 
         $hasDeletePermission = UserMenuPermission::canDelete(117);
 
-        return view('kpi.detail-kpi-company.company-kpi-detail', compact('kpi', 'departments', 'activities', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
+        return view('kpi.kpi-form.kpi-form-detail', compact('kpi', 'departments', 'activities', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
     }
 
     /**
@@ -649,7 +649,7 @@ class KPICompanyController extends Controller
 
         $hasDeletePermission = UserMenuPermission::canDelete(117);
 
-        return view('kpi.detail-kpi-company.manage-activity-plan', compact('kpi', 'departments', 'activityPlans', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
+        return view('kpi.kpi-form.manage-activity-plan', compact('kpi', 'departments', 'activityPlans', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
     }
 
     public function storeActivityPlan(Request $request)
@@ -883,6 +883,7 @@ class KPICompanyController extends Controller
                 'parent.category as category',
                 'child.periode as periode',
                 'parent.objective',
+                'parent.source_data as source_data',
                 'parent.target as master_target'
             )
             ->where('act.id', $dbId)
@@ -919,7 +920,7 @@ class KPICompanyController extends Controller
             ->get();
         $problem = DB::table('KPICompanyActivityProblem')->where('kpi_company_activity_id', $dbId)->first();
 
-        return view('kpi.detail-kpi-company.company-kpi-insert', compact('activity', 'departments', 'problem', 'components', 'componentUnits', 'formula'));
+        return view('kpi.kpi-form.kpi-form-insert', compact('activity', 'departments', 'problem', 'components', 'componentUnits', 'formula'));
     }
 
     public function updateActivity(Request $request, string $id)

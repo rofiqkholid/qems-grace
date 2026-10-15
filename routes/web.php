@@ -270,6 +270,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Key Performance Indicator Routes
     Route::prefix('kpi')->group(function () {
+        Route::get('/kpi-form', [KPICompanyController::class, 'index'])->name('kpi.form');
         Route::get('/company', [KPICompanyController::class, 'index'])->name('kpi.company');
         Route::get('/company/detail/{id}', [KPICompanyController::class, 'detail'])->name('kpi.company.detail');
         Route::get('/company/manage-activity-plan/{id}', [KPICompanyController::class, 'manageActivityPlan'])->name('kpi.company.manage_activity_plan');
