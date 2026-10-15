@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'KPI Company Activity Input')
+@section('title', 'KPI Form Activity Input')
 
 @section('content')
 @include('layouts.sidebar')
@@ -15,7 +15,7 @@
             $isViewMode = request('mode') === 'view';
             $actCategory = trim($activity->category ?? '');
             $isDeptKpi = (stripos($actCategory, 'dept') !== false || stripos($actCategory, 'department') !== false);
-            $typeLabel = $isDeptKpi ? 'KPI Department' : 'KPI Company';
+            $typeLabel = $isDeptKpi ? 'KPI Department' : 'KPI Form';
             $pageTitle = $isViewMode ? "{$typeLabel} Activity Details" : "{$typeLabel} Activity Input";
         @endphp
         <style>

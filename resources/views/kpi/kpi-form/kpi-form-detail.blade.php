@@ -133,7 +133,7 @@
 
     $kpiCategory = trim($kpi->category ?? '');
     $isDeptKpi = (stripos($kpiCategory, 'dept') !== false || stripos($kpiCategory, 'department') !== false);
-    $kpiTitle = $isDeptKpi ? 'Detail KPI Department' : 'Detail KPI Company';
+    $kpiTitle = $isDeptKpi ? 'Detail KPI Department' : 'Detail KPI Form';
 @endphp
 
 @section('title', $kpiTitle)

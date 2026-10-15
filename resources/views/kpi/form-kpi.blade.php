@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Company KPI')
+@section('title', 'KPI Form')
 
 @section('content')
 @include('layouts.sidebar')
@@ -118,7 +118,7 @@
                             <button type="button" onclick="showCreateForm()"
                                 class="w-full inline-flex items-center justify-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm shadow-blue-200 whitespace-nowrap">
                                 <i class="fa-solid fa-plus text-sm"></i>
-                                <span>Add New Company KPI</span>
+                                <span>Add New KPI</span>
                             </button>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
                         <i class="fa-solid fa-arrow-left text-[11px] sm:text-sm"></i>
                     </button>
                     <div>
-                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Add Company KPI</h1>
+                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Add KPI</h1>
                         <p class="text-slate-500 text-sm">Define and assign new strategic goals for the organization</p>
                     </div>
                 </div>
@@ -316,7 +316,7 @@
                         <i class="fa-solid fa-arrow-left text-[11px] sm:text-sm"></i>
                     </button>
                     <div>
-                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Edit Company KPI</h1>
+                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800">Edit KPI</h1>
                         <p class="text-slate-500 text-sm">Modify strategic goals and target achievements for the organization</p>
                     </div>
                 </div>
@@ -458,7 +458,7 @@
                     <i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Delete</h3>
-                <p class="text-slate-500 text-sm">Are you sure you want to delete this specific Company KPI? This action cannot be undone.</p>
+                <p class="text-slate-500 text-sm">Are you sure you want to delete this specific KPI? This action cannot be undone.</p>
             </div>
             <div class="p-6 pt-0 flex gap-3">
                 <button type="button" onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
@@ -671,7 +671,7 @@
                 data: $(form).serialize(),
                 success: function(response) {
                     hideCreateForm();
-                    showToast('Company KPI added successfully.', 'success');
+                    showToast('KPI added successfully.', 'success');
                     table.ajax.reload();
                     form.reset();
                     // Reset searchable selects visually
@@ -683,7 +683,7 @@
                     window.dispatchEvent(new CustomEvent('set-create-calculation-method', { detail: { id: '', name: '' } }));
                 },
                 error: function(xhr) {
-                    showToast(xhr.responseJSON?.message || 'Failed to add Company KPI.', 'error');
+                    showToast(xhr.responseJSON?.message || 'Failed to add KPI.', 'error');
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false).html('<span>Save KPI</span>');
@@ -705,11 +705,11 @@
                 data: $(form).serialize(),
                 success: function(response) {
                     hideEditForm();
-                    showToast('Company KPI updated successfully.', 'success');
+                    showToast('KPI updated successfully.', 'success');
                     table.ajax.reload(null, false);
                 },
                 error: function(xhr) {
-                    showToast(xhr.responseJSON?.message || 'Failed to update Company KPI.', 'error');
+                    showToast(xhr.responseJSON?.message || 'Failed to update KPI.', 'error');
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false).html('Update');
@@ -844,10 +844,10 @@
                 $('#loader_delete_' + no).addClass('hidden');
 
                 if (response.success) {
-                    showToast('Company KPI deleted successfully', 'success');
+                    showToast('KPI deleted successfully', 'success');
                     $('#companyKpiTable').DataTable().ajax.reload();
                 } else {
-                    showToast('Failed to delete Company KPI', 'error');
+                    showToast('Failed to delete KPI', 'error');
                 }
             },
             error: function() {
