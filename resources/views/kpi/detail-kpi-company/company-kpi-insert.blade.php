@@ -86,7 +86,10 @@
                     @if(!empty($components))
                         @foreach($components as $index => $name)
                             <div class="col-span-1">
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5"><span class="text-slate-400 font-normal">[Component {{ $index }}]</span> {{ $name }} <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                    <span class="text-slate-400 font-normal">[Component {{ $index }}]</span> {{ $name }}
+                                    <span class="text-red-500">*</span>
+                                </label>
                                 <input type="text" name="comp_{{ $index }}" value="{{ old('comp_' . $index, $activity->{'comp_' . $index}) }}" required placeholder="Enter {{ $name }}" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300" {{ $isViewMode ? 'disabled' : '' }}>
                             </div>
                         @endforeach

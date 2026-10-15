@@ -308,6 +308,15 @@
                                             $compSum = 0;
                                             $hasComp = false;
                                             $compCount = 0;
+                                            $cUnit = isset($componentUnits[$index]) ? trim($componentUnits[$index] ?? '') : '';
+                                            $isNumU = in_array(strtolower($cUnit), ['number', 'num']);
+                                            $cSuffix = (!empty($cUnit) && !$isNumU) ? ' ' . $cUnit : ($cUnit === '' ? $unitSuffix : '');
+                                            $formatCompNum = function($num) use ($parseLocalNum, $cSuffix) {
+                                                if ($num === null || $num === '' || $num === '-') return $num;
+                                                $val = $parseLocalNum($num);
+                                                $formatted = (floor($val) == $val) ? number_format($val, 0, ',', '.') : number_format($val, 2, ',', '.');
+                                                return $formatted . $cSuffix;
+                                            };
                                         @endphp
                                         @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
                                             @php
@@ -322,7 +331,7 @@
                                                     $compCount++;
                                                 @endphp
                                                 <td class="p-3 text-center border-r border-slate-200 font-normal text-slate-700">
-                                                    {{ $formatNumWithUnit($compVal) }}
+                                                    {{ $formatCompNum($compVal) }}
                                                 </td>
                                             @else
                                                 <td class="p-3 text-center border-r border-slate-200 text-slate-300 select-none"></td>
@@ -332,7 +341,7 @@
                                             $compFinal = $hasComp ? (($kpi->result === 'Average') ? ($compCount > 0 ? ($compSum / $compCount) : 0) : $compSum) : '';
                                         @endphp
                                         <td class="p-3 text-center font-semibold text-slate-700">
-                                            {{ $compFinal !== '' ? $formatNumWithUnit($compFinal) : '' }}
+                                            {{ $compFinal !== '' ? $formatCompNum($compFinal) : '' }}
                                         </td>
                                     </tr>
                                 @endforeach

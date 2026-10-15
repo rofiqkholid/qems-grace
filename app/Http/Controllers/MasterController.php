@@ -1783,8 +1783,9 @@ class MasterController extends Controller
             $categories = collect(['Company KPI', 'KPI Department', 'Activity Plan']);
         }
         $calculationMethods = collect(['Direct Actual (Input Actual Data)', 'Custom (Using Formula Components)']);
+        $kpiUnits = DB::table('KPIUnit')->orderBy('name', 'asc')->get();
 
-        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'calculationMethods'));
+        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'calculationMethods', 'kpiUnits'));
     }
 
     public function kpi_list_table(Request $request)
@@ -1874,13 +1875,8 @@ class MasterController extends Controller
                                     <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
                                     <path opacity="0.3" d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z" fill="currentColor"></path><path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z" fill="currentColor"></path>
                                 </svg>
-                                <button type="button" title="Formula" class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 hover:bg-amber-100 hover:text-amber-600 transition-all duration-200"
-                                    onclick="handleFormula(this)"
-                                    data-id="' . $item->id . '"
-                                    data-kpi_name="' . htmlspecialchars($item->no_kpi . ' - ' . $item->objective) . '">
-                                    <i class="fa-solid fa-square-root-variable text-base"></i>
                                 </button>' . 
-                                ($canDelete ? '
+($canDelete ? '
                                 <button type="button" title="Delete" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200" 
                                     id="btn_delete_' . ($start + $key + 1) . '" 
                                     onclick="handleDelete(' . $item->id . ',' . ($start + $key + 1) . ')">
@@ -1935,6 +1931,30 @@ class MasterController extends Controller
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now()
             ]);
+
+            if ($request->calculation_method === 'Custom (Using Formula Components)') {
+                $formulaData = [
+                    'kpi_list_id' => $insertedId,
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now()
+                ];
+                for ($i = 1; $i <= 20; $i++) {
+                    $compVal = $request->input('comp_' . $i);
+                    if ($compVal !== null && trim($compVal) !== '') {
+                        $formulaData['comp_' . $i] = trim($compVal);
+                        $formulaData['comp_' . $i . '_unit'] = $request->input('comp_' . $i . '_unit') ?: null;
+                    } else {
+                        $formulaData['comp_' . $i] = null;
+                        $formulaData['comp_' . $i . '_unit'] = null;
+                    }
+                }
+                $calcOp = $request->input('calc_operator');
+                if (!empty($calcOp)) {
+                    $calcOp = preg_replace('/\[?[Cc](\d+)\]?/', '[comp_$1]', $calcOp);
+                }
+                $formulaData['calc_operator'] = $calcOp;
+                DB::table('KPIFormula')->insert($formulaData);
+            }
 
             if ($request->has('history') && is_array($request->history)) {
                 foreach ($request->history as $year => $data) {
@@ -1996,6 +2016,36 @@ class MasterController extends Controller
                 'result' => $request->result,
                 'updated_at' => \Carbon\Carbon::now()
             ]);
+
+            if ($request->calculation_method === 'Custom (Using Formula Components)') {
+                $formulaData = [
+                    'updated_at' => \Carbon\Carbon::now()
+                ];
+                for ($i = 1; $i <= 20; $i++) {
+                    $compVal = $request->input('comp_' . $i);
+                    if ($compVal !== null && trim($compVal) !== '') {
+                        $formulaData['comp_' . $i] = trim($compVal);
+                        $formulaData['comp_' . $i . '_unit'] = $request->input('comp_' . $i . '_unit') ?: null;
+                    } else {
+                        $formulaData['comp_' . $i] = null;
+                        $formulaData['comp_' . $i . '_unit'] = null;
+                    }
+                }
+                $calcOp = $request->input('calc_operator');
+                if (!empty($calcOp)) {
+                    $calcOp = preg_replace('/\[?[Cc](\d+)\]?/', '[comp_$1]', $calcOp);
+                }
+                $formulaData['calc_operator'] = $calcOp;
+
+                $existsFormula = DB::table('KPIFormula')->where('kpi_list_id', $request->id)->exists();
+                if ($existsFormula) {
+                    DB::table('KPIFormula')->where('kpi_list_id', $request->id)->update($formulaData);
+                } else {
+                    $formulaData['kpi_list_id'] = $request->id;
+                    $formulaData['created_at'] = \Carbon\Carbon::now();
+                    DB::table('KPIFormula')->insert($formulaData);
+                }
+            }
 
             if ($request->has('history') && is_array($request->history)) {
                 foreach ($request->history as $year => $data) {
@@ -2292,7 +2342,14 @@ class MasterController extends Controller
             ];
 
             for ($i = 1; $i <= 20; $i++) {
-                $data['comp_' . $i] = $request->input('comp_' . $i);
+                $compVal = $request->input('comp_' . $i);
+                if ($compVal !== null && trim($compVal) !== '') {
+                    $data['comp_' . $i] = trim($compVal);
+                    $data['comp_' . $i . '_unit'] = $request->input('comp_' . $i . '_unit') ?: null;
+                } else {
+                    $data['comp_' . $i] = null;
+                    $data['comp_' . $i . '_unit'] = null;
+                }
             }
             $calcOp = $request->input('calc_operator');
             if (!empty($calcOp)) {

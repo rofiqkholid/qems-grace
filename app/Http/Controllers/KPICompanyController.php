@@ -527,11 +527,14 @@ class KPICompanyController extends Controller
         // Fetch formula components from KPIFormula
         $formula = DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first();
         $components = [];
+        $componentUnits = [];
         if ($formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
+                $uCol = 'comp_' . $i . '_unit';
                 if (!empty($formula->$col)) {
                     $components[$i] = $formula->$col;
+                    $componentUnits[$i] = $formula->$uCol ?? null;
                 }
             }
         }
@@ -592,7 +595,7 @@ class KPICompanyController extends Controller
 
         $hasDeletePermission = UserMenuPermission::canDelete(117);
 
-        return view('kpi.detail-kpi-company.company-kpi-detail', compact('kpi', 'departments', 'activities', 'hasDeletePermission', 'components', 'formula'));
+        return view('kpi.detail-kpi-company.company-kpi-detail', compact('kpi', 'departments', 'activities', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
     }
 
     /**
@@ -619,11 +622,14 @@ class KPICompanyController extends Controller
 
         $formula = DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first();
         $components = [];
+        $componentUnits = [];
         if ($formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
+                $uCol = 'comp_' . $i . '_unit';
                 if (!empty($formula->$col)) {
                     $components[$i] = $formula->$col;
+                    $componentUnits[$i] = $formula->$uCol ?? null;
                 }
             }
         }
@@ -643,7 +649,7 @@ class KPICompanyController extends Controller
 
         $hasDeletePermission = UserMenuPermission::canDelete(117);
 
-        return view('kpi.detail-kpi-company.manage-activity-plan', compact('kpi', 'departments', 'activityPlans', 'hasDeletePermission', 'components', 'formula'));
+        return view('kpi.detail-kpi-company.manage-activity-plan', compact('kpi', 'departments', 'activityPlans', 'hasDeletePermission', 'components', 'componentUnits', 'formula'));
     }
 
     public function storeActivityPlan(Request $request)
@@ -892,11 +898,14 @@ class KPICompanyController extends Controller
         // Fetch formula components mapping from KPIFormula
         $formula = DB::table('KPIFormula')->where('kpi_list_id', $activity->kpi_list_id)->first();
         $components = [];
+        $componentUnits = [];
         if ($formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
+                $uCol = 'comp_' . $i . '_unit';
                 if (!empty($formula->$col)) {
                     $components[$i] = $formula->$col;
+                    $componentUnits[$i] = $formula->$uCol ?? null;
                 }
             }
         }
@@ -910,7 +919,7 @@ class KPICompanyController extends Controller
             ->get();
         $problem = DB::table('KPICompanyActivityProblem')->where('kpi_company_activity_id', $dbId)->first();
 
-        return view('kpi.detail-kpi-company.company-kpi-insert', compact('activity', 'departments', 'problem', 'components', 'formula'));
+        return view('kpi.detail-kpi-company.company-kpi-insert', compact('activity', 'departments', 'problem', 'components', 'componentUnits', 'formula'));
     }
 
     public function updateActivity(Request $request, string $id)

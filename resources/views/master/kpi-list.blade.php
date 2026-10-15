@@ -116,18 +116,18 @@
     </main>
 </div>
 
-<!-- Create Modal -->
-<div id="createModal" class="fixed inset-0 z-50 hidden">
-    <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeCreateModal()"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full h-[92vh] flex flex-col transform transition-all overflow-hidden shadow-2xl" style="max-width: 90%;">
-            <!-- Modal Header (Sticky) -->
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                <h3 class="text-lg font-bold text-slate-800">Add KPI</h3>
-                <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+<!-- Create Modal (Full Screen) -->
+<div id="createModal" class="fixed inset-0 z-50 hidden bg-white flex flex-col">
+    <!-- Modal Header (Sticky) -->
+    <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
+        <div>
+            <h3 class="text-lg font-bold text-slate-800">Add KPI</h3>
+            <p class="text-xs text-slate-500">Create new KPI definition, formula components, and historical achievement data.</p>
+        </div>
+        <button onclick="closeCreateModal()" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
             <!-- Modal Body (Scrollable with slate bg) -->
             <form id="createForm" action="{{ route('master.kpi_list.store') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-100">
                 @csrf
@@ -269,10 +269,163 @@
                                     ['id' => 'Custom (Using Formula Components)', 'name' => 'Custom (Using Formula Components)']
                                 ]"
                                 updateEvent="set-create-calculation-method-kpilist"
+                                changeEvent="create-calculation-method-changed"
                                 hideLabel="true" />
                         </div>
                     </div>
-                    <div>
+                                                            <!-- Manage Formula Section -->
+                    <div id="create_formula_container" 
+                        x-data="{
+                            showFormula: false,
+                            defaultUnit: '',
+                            vals: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                            units: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                            isLocked: false,
+                            calcOperator: '',
+                            appendToken(index) {
+                                this.calcOperator += ' C' + index + ' ';
+                            },
+                            appendOperator(op) {
+                                let cur = this.calcOperator.trim();
+                                if (!cur) {
+                                    this.calcOperator += ' ' + op + ' ';
+                                    return;
+                                }
+                                if (op === '*' || op === '/') {
+                                    if ((cur.includes('+') || cur.includes('-')) && !(cur.startsWith('(') && cur.endsWith(')'))) {
+                                        this.calcOperator = '(' + cur + ') ' + op + ' ';
+                                        return;
+                                    }
+                                }
+                                this.calcOperator += ' ' + op + ' ';
+                            },
+                            init() {
+                                window.addEventListener('create-calculation-method-changed', (e) => {
+                                    const val = e.detail && (e.detail.name || e.detail.id || e.detail.value) ? (e.detail.name || e.detail.id || e.detail.value) : '';
+                                    this.showFormula = (val === 'Custom (Using Formula Components)');
+                                });
+                                window.addEventListener('set-create-calculation-method-kpilist', (e) => {
+                                    const val = e.detail && (e.detail.name || e.detail.id || e.detail.value) ? (e.detail.name || e.detail.id || e.detail.value) : '';
+                                    this.showFormula = (val === 'Custom (Using Formula Components)');
+                                });
+                                window.addEventListener('set-create-unit-kpilist', (e) => {
+                                    this.defaultUnit = e.detail && (e.detail.name || e.detail.id) ? (e.detail.name || e.detail.id) : '';
+                                });
+                            }
+                        }" 
+                        x-show="showFormula" 
+                        x-cloak 
+                        class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <div>
+                                <h4 class="text-base font-bold text-slate-800">Manage Formula</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Define formula components, individual units, and calculation expression for this KPI.</p>
+                            </div>
+                            <!-- Lock Button -->
+                            <div class="shrink-0">
+                                <button type="button" @click="isLocked = !isLocked" class="w-44 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 border shadow-sm"
+                                    :class="isLocked 
+                                        ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700' 
+                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    <span x-show="isLocked" class="flex items-center gap-2">
+                                        <i class="fa-solid fa-lock"></i> Unlock Component
+                                    </span>
+                                    <span x-show="!isLocked" class="flex items-center gap-2">
+                                        <i class="fa-solid fa-lock-open"></i> Lock Component
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 20 Varchar Input Fields with Combined Unit Dropdown -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-800 mb-2.5">Value Inputs & Units (20 Columns)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 transition-all">
+                                @for($i = 1; $i <= 20; $i++)
+                                    <div class="flex items-stretch rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden transition-all focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500"
+                                         :class="isLocked ? (vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim() ? 'hover:border-blue-400' : 'opacity-40') : ''">
+                                        <!-- Left: C{i} Label with divider and matching background -->
+                                        <div class="w-10 shrink-0 border-r border-slate-200 bg-slate-50/70 flex items-center justify-center self-stretch select-none pointer-events-none">
+                                            <span class="text-xs font-bold text-slate-600">C{{ $i }}</span>
+                                        </div>
+
+                                        <!-- Middle: Component Name Input -->
+                                        <div class="relative flex-1 min-w-0 flex items-center">
+                                            <input type="text" name="comp_{{ $i }}" x-model="vals[{{ $i - 1 }}]" :readonly="isLocked" 
+                                                :class="isLocked 
+                                                    ? (vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim() 
+                                                        ? 'bg-white text-slate-800 cursor-pointer font-bold hover:bg-slate-50' 
+                                                        : 'bg-slate-50 text-slate-300 cursor-not-allowed')
+                                                    : 'bg-white text-slate-700'" 
+                                                placeholder="Comp {{ $i }}" 
+                                                class="w-full px-3 py-[9px] text-sm font-medium outline-none border-0"
+                                                @click="if (isLocked && vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) appendToken({{ $i }})">
+                                        </div>
+
+                                        <!-- Right: Unit section -->
+                                        <!-- When NOT locked: interactive dropdown -->
+                                        <div x-show="!isLocked" class="w-24 shrink-0 border-l border-slate-200 relative flex items-center self-stretch transition-opacity"
+                                             :class="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) ? 'pointer-events-none opacity-40 bg-slate-100/60' : 'bg-slate-50/70'">
+                                            <select name="comp_{{ $i }}_unit" x-model="units[{{ $i - 1 }}]" 
+                                                :disabled="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim())"
+                                                class="w-full appearance-none py-[9px] pl-2.5 pr-6 text-sm text-slate-700 bg-transparent outline-none cursor-pointer border-0 font-medium disabled:cursor-not-allowed">
+                                                <option value="">Unit</option>
+                                                @foreach($kpiUnits as $u)
+                                                    <option value="{{ $u->name }}">{{ $u->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="absolute right-2 pointer-events-none text-slate-400">
+                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- When LOCKED: clean read-only badge (no dropdown) -->
+                                        <div x-show="isLocked" class="w-24 shrink-0 border-l border-slate-200 bg-slate-50/80 px-2.5 flex items-center justify-center self-stretch select-none pointer-events-none"
+                                             :class="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) ? 'opacity-40' : ''">
+                                            <!-- Hidden input to ensure value submits if form submitted while locked -->
+                                            <input type="hidden" name="comp_{{ $i }}_unit" :value="units[{{ $i - 1 }}]">
+                                            <span class="text-xs font-semibold text-slate-700 truncate" 
+                                                  x-text="units[{{ $i - 1 }}] ? units[{{ $i - 1 }}] : (defaultUnit ? defaultUnit : 'Default')"></span>
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+                        </div>
+
+                        <!-- Notice Row (shown only when locked) -->
+                        <div x-show="isLocked" class="text-xs text-slate-600 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-sm text-blue-500 shrink-0"></i>
+                            <span><strong class="font-bold text-slate-800">Locked Mode Active:</strong> Click on the Component boxes above to insert them into the formula.</span>
+                        </div>
+
+                        <!-- Formula Editor Section (shown when locked) -->
+                        <div x-show="isLocked" class="pt-4 border-t border-slate-100 space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-800 mb-2">Formula Editor</label>
+                                <div class="flex gap-3 items-stretch">
+                                    <textarea id="create_custom_formula_input" name="calc_operator" x-model="calcOperator" rows="2" class="flex-1 rounded-xl border border-slate-200 p-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 font-normal placeholder-slate-400" placeholder="Click active components above or use the calculator buttons below to build your formula. E.g. C2 * C3 + C4"></textarea>
+                                    <button type="button" @click="calcOperator = ''" class="px-5 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-500 border border-slate-200 rounded-xl text-sm font-semibold transition-all shrink-0 flex items-center justify-center">Clear</button>
+                                </div>
+                            </div>
+
+                            <!-- Calculator buttons -->
+                            <div class="flex flex-wrap gap-2.5 items-center">
+                                <button type="button" @click="appendOperator('+')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">+</button>
+                                <button type="button" @click="appendOperator('-')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">-</button>
+                                <button type="button" @click="appendOperator('*')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">*</button>
+                                <button type="button" @click="appendOperator('/')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">/</button>
+                                <button type="button" @click="appendOperator('(')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">(</button>
+                                <button type="button" @click="appendOperator(')')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">)</button>
+                                
+                                <!-- Backspace button -->
+                                <button type="button" @click="calcOperator = calcOperator.trim().includes(' ') ? calcOperator.trim().substring(0, calcOperator.trim().lastIndexOf(' ')) + ' ' : ''" class="px-4 h-12 flex items-center justify-center bg-slate-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-150">
+                                    <i class="fa-solid fa-delete-left mr-1.5 text-base"></i> Backspace
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+<div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Achievement History (Last 5 Years)</label>
                         <div id="create_history_container" class="grid grid-cols-5 gap-3">
                             @php
@@ -322,27 +475,25 @@
                     </div>
                 </div>
                 <!-- Modal Footer (Sticky) -->
-                <div class="p-6 border-t border-slate-100 bg-white flex justify-end gap-3 rounded-b-xl shrink-0">
-                    <button type="button" onclick="closeCreateModal()" class="px-4 py-2 text-slate-700 font-medium hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">Save</button>
+                <div class="px-6 py-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0">
+                    <button type="button" onclick="closeCreateModal()" class="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors text-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-sm shadow-blue-200">Save</button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="fixed inset-0 z-50 hidden">
-    <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeEditModal()"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full h-[92vh] flex flex-col transform transition-all overflow-hidden shadow-2xl" style="max-width: 90%;">
-            <!-- Modal Header (Sticky) -->
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                <h3 class="text-lg font-bold text-slate-800">Edit KPI</h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+<!-- Edit Modal (Full Screen) -->
+<div id="editModal" class="fixed inset-0 z-50 hidden bg-white flex flex-col">
+    <!-- Modal Header (Sticky) -->
+    <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
+        <div>
+            <h3 class="text-lg font-bold text-slate-800">Edit KPI</h3>
+            <p class="text-xs text-slate-500">Manage definitions, targets, objectives, formula, and categories of KPIs.</p>
+        </div>
+        <button onclick="closeEditModal()" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
             <!-- Modal Body (Scrollable with slate bg) -->
             <form id="editForm" action="{{ route('master.kpi_list.update') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-100">
                 @csrf
@@ -487,10 +638,163 @@
                                     ['id' => 'Custom (Using Formula Components)', 'name' => 'Custom (Using Formula Components)']
                                 ]"
                                 updateEvent="set-edit-calculation-method-kpilist"
+                                changeEvent="edit-calculation-method-changed"
                                 hideLabel="true" />
                         </div>
                     </div>
-                    <div>
+                                                            <!-- Manage Formula Section -->
+                    <div id="edit_formula_container" 
+                        x-data="{
+                            showFormula: false,
+                            defaultUnit: '',
+                            vals: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                            units: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                            isLocked: false,
+                            calcOperator: '',
+                            appendToken(index) {
+                                this.calcOperator += ' C' + index + ' ';
+                            },
+                            appendOperator(op) {
+                                let cur = this.calcOperator.trim();
+                                if (!cur) {
+                                    this.calcOperator += ' ' + op + ' ';
+                                    return;
+                                }
+                                if (op === '*' || op === '/') {
+                                    if ((cur.includes('+') || cur.includes('-')) && !(cur.startsWith('(') && cur.endsWith(')'))) {
+                                        this.calcOperator = '(' + cur + ') ' + op + ' ';
+                                        return;
+                                    }
+                                }
+                                this.calcOperator += ' ' + op + ' ';
+                            },
+                            init() {
+                                window.addEventListener('edit-calculation-method-changed', (e) => {
+                                    const val = e.detail && (e.detail.name || e.detail.id || e.detail.value) ? (e.detail.name || e.detail.id || e.detail.value) : '';
+                                    this.showFormula = (val === 'Custom (Using Formula Components)');
+                                });
+                                window.addEventListener('set-edit-calculation-method-kpilist', (e) => {
+                                    const val = e.detail && (e.detail.name || e.detail.id || e.detail.value) ? (e.detail.name || e.detail.id || e.detail.value) : '';
+                                    this.showFormula = (val === 'Custom (Using Formula Components)');
+                                });
+                                window.addEventListener('set-edit-unit-kpilist', (e) => {
+                                    this.defaultUnit = e.detail && (e.detail.name || e.detail.id) ? (e.detail.name || e.detail.id) : '';
+                                });
+                            }
+                        }" 
+                        x-show="showFormula" 
+                        x-cloak 
+                        class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <div>
+                                <h4 class="text-base font-bold text-slate-800">Manage Formula</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Define formula components, individual units, and calculation expression for this KPI.</p>
+                            </div>
+                            <!-- Lock Button -->
+                            <div class="shrink-0">
+                                <button type="button" @click="isLocked = !isLocked" class="w-44 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 border shadow-sm"
+                                    :class="isLocked 
+                                        ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700' 
+                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    <span x-show="isLocked" class="flex items-center gap-2">
+                                        <i class="fa-solid fa-lock"></i> Unlock Component
+                                    </span>
+                                    <span x-show="!isLocked" class="flex items-center gap-2">
+                                        <i class="fa-solid fa-lock-open"></i> Lock Component
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 20 Varchar Input Fields with Combined Unit Dropdown -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-800 mb-2.5">Value Inputs & Units (20 Columns)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 transition-all">
+                                @for($i = 1; $i <= 20; $i++)
+                                    <div class="flex items-stretch rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden transition-all focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500"
+                                         :class="isLocked ? (vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim() ? 'hover:border-blue-400' : 'opacity-40') : ''">
+                                        <!-- Left: C{i} Label with divider and matching background -->
+                                        <div class="w-10 shrink-0 border-r border-slate-200 bg-slate-50/70 flex items-center justify-center self-stretch select-none pointer-events-none">
+                                            <span class="text-xs font-bold text-slate-600">C{{ $i }}</span>
+                                        </div>
+
+                                        <!-- Middle: Component Name Input -->
+                                        <div class="relative flex-1 min-w-0 flex items-center">
+                                            <input type="text" name="comp_{{ $i }}" x-model="vals[{{ $i - 1 }}]" :readonly="isLocked" 
+                                                :class="isLocked 
+                                                    ? (vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim() 
+                                                        ? 'bg-white text-slate-800 cursor-pointer font-bold hover:bg-slate-50' 
+                                                        : 'bg-slate-50 text-slate-300 cursor-not-allowed')
+                                                    : 'bg-white text-slate-700'" 
+                                                placeholder="Comp {{ $i }}" 
+                                                class="w-full px-3 py-[9px] text-sm font-medium outline-none border-0"
+                                                @click="if (isLocked && vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) appendToken({{ $i }})">
+                                        </div>
+
+                                        <!-- Right: Unit section -->
+                                        <!-- When NOT locked: interactive dropdown -->
+                                        <div x-show="!isLocked" class="w-24 shrink-0 border-l border-slate-200 relative flex items-center self-stretch transition-opacity"
+                                             :class="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) ? 'pointer-events-none opacity-40 bg-slate-100/60' : 'bg-slate-50/70'">
+                                            <select name="comp_{{ $i }}_unit" x-model="units[{{ $i - 1 }}]" 
+                                                :disabled="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim())"
+                                                class="w-full appearance-none py-[9px] pl-2.5 pr-6 text-sm text-slate-700 bg-transparent outline-none cursor-pointer border-0 font-medium disabled:cursor-not-allowed">
+                                                <option value="">Unit</option>
+                                                @foreach($kpiUnits as $u)
+                                                    <option value="{{ $u->name }}">{{ $u->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="absolute right-2 pointer-events-none text-slate-400">
+                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- When LOCKED: clean read-only badge (no dropdown) -->
+                                        <div x-show="isLocked" class="w-24 shrink-0 border-l border-slate-200 bg-slate-50/80 px-2.5 flex items-center justify-center self-stretch select-none pointer-events-none"
+                                             :class="!(vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) ? 'opacity-40' : ''">
+                                            <!-- Hidden input to ensure value submits if form submitted while locked -->
+                                            <input type="hidden" name="comp_{{ $i }}_unit" :value="units[{{ $i - 1 }}]">
+                                            <span class="text-xs font-semibold text-slate-700 truncate" 
+                                                  x-text="units[{{ $i - 1 }}] ? units[{{ $i - 1 }}] : (defaultUnit ? defaultUnit : 'Default')"></span>
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+                        </div>
+
+                        <!-- Notice Row (shown only when locked) -->
+                        <div x-show="isLocked" class="text-xs text-slate-600 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-sm text-blue-500 shrink-0"></i>
+                            <span><strong class="font-bold text-slate-800">Locked Mode Active:</strong> Click on the Component boxes above to insert them into the formula.</span>
+                        </div>
+
+                        <!-- Formula Editor Section (shown when locked) -->
+                        <div x-show="isLocked" class="pt-4 border-t border-slate-100 space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-800 mb-2">Formula Editor</label>
+                                <div class="flex gap-3 items-stretch">
+                                    <textarea id="edit_custom_formula_input" name="calc_operator" x-model="calcOperator" rows="2" class="flex-1 rounded-xl border border-slate-200 p-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 font-normal placeholder-slate-400" placeholder="Click active components above or use the calculator buttons below to build your formula. E.g. C2 * C3 + C4"></textarea>
+                                    <button type="button" @click="calcOperator = ''" class="px-5 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-500 border border-slate-200 rounded-xl text-sm font-semibold transition-all shrink-0 flex items-center justify-center">Clear</button>
+                                </div>
+                            </div>
+
+                            <!-- Calculator buttons -->
+                            <div class="flex flex-wrap gap-2.5 items-center">
+                                <button type="button" @click="appendOperator('+')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">+</button>
+                                <button type="button" @click="appendOperator('-')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">-</button>
+                                <button type="button" @click="appendOperator('*')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">*</button>
+                                <button type="button" @click="appendOperator('/')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">/</button>
+                                <button type="button" @click="appendOperator('(')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">(</button>
+                                <button type="button" @click="appendOperator(')')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">)</button>
+                                
+                                <!-- Backspace button -->
+                                <button type="button" @click="calcOperator = calcOperator.trim().includes(' ') ? calcOperator.trim().substring(0, calcOperator.trim().lastIndexOf(' ')) + ' ' : ''" class="px-4 h-12 flex items-center justify-center bg-slate-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-150">
+                                    <i class="fa-solid fa-delete-left mr-1.5 text-base"></i> Backspace
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+<div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Achievement History (Last 5 Years)</label>
                         <div id="edit_history_container" class="grid grid-cols-5 gap-3">
                             @php
@@ -540,13 +844,11 @@
                     </div>
                 </div>
                 <!-- Modal Footer (Sticky) -->
-                <div class="p-6 border-t border-slate-100 bg-white flex justify-end gap-3 rounded-b-xl shrink-0">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-slate-700 font-medium hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">Update</button>
+                <div class="px-6 py-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors text-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-sm shadow-blue-200">Update</button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -565,133 +867,6 @@
                 <button type="button" onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
                 <button type="button" onclick="executeDelete()" class="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">Delete</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Formula Modal -->
-<div id="formulaModal" class="fixed inset-0 z-50 hidden">
-    <div class="fixed inset-0 bg-slate-900/50 transition-opacity" onclick="closeFormulaModal()"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full h-[92vh] flex flex-col transform transition-all overflow-hidden shadow-2xl" style="max-width: 90%;">
-            <!-- Modal Header -->
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                <h3 class="text-lg font-bold text-slate-800" id="formulaModalTitle">Manage Formula</h3>
-                <button onclick="closeFormulaModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            <!-- Modal Body -->
-            <form id="formulaForm" action="{{ route('master.kpi_list.formula.save') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-100"
-                x-data="{
-                    vals: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-                    isLocked: false,
-                    calcOperator: '',
-                    appendToken(index) {
-                        this.calcOperator += ' C' + index + ' ';
-                    },
-                    appendOperator(op) {
-                        let cur = this.calcOperator.trim();
-                        if (!cur) {
-                            this.calcOperator += ' ' + op + ' ';
-                            return;
-                        }
-                        if (op === '*' || op === '/') {
-                            // If the current expression has + or - and isn't already fully enclosed in (), wrap the entire expression in ()
-                            if ((cur.includes('+') || cur.includes('-')) && !(cur.startsWith('(') && cur.endsWith(')'))) {
-                                this.calcOperator = '(' + cur + ') ' + op + ' ';
-                                return;
-                            }
-                        }
-                        this.calcOperator += ' ' + op + ' ';
-                    }
-                }">
-                @csrf
-                <input type="hidden" name="kpi_list_id" id="formula_kpi_list_id">
-
-                <div class="p-6 overflow-y-auto flex-1 min-h-0">
-                    <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
-                        <!-- 20 Varchar Input Fields -->
-                        <div>
-                            <label class="block text-base font-bold text-slate-800 mb-2.5">Value Inputs (20 Columns)</label>
-                            <div class="grid grid-cols-5 gap-2.5 transition-all">
-                                @for($i = 1; $i <= 20; $i++)
-                                    <div class="relative">
-                                        <input type="text" name="comp_{{ $i }}" x-model="vals[{{ $i - 1 }}]" :readonly="isLocked" 
-                                            :class="isLocked 
-                                                ? (vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim() 
-                                                    ? 'bg-white text-slate-800 cursor-pointer font-semibold hover:bg-slate-50 focus:outline-none focus:ring-0 border-slate-200' 
-                                                    : 'bg-slate-50 text-slate-300 cursor-not-allowed border-slate-100 opacity-40 focus:outline-none focus:ring-0')
-                                                : 'bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500'" 
-                                            placeholder="Comp {{ $i }}" class="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-center text-sm outline-none font-medium transition-all"
-                                            @click="if (isLocked && vals[{{ $i - 1 }}] && vals[{{ $i - 1 }}].trim()) appendToken({{ $i }})">
-                                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-5 flex items-center justify-center rounded-none bg-slate-200/70 text-slate-500 text-[11px] font-semibold tracking-wider pointer-events-none select-none">
-                                            C{{ $i }}
-                                        </span>
-                                    </div>
-                                @endfor
-                            </div>
-                        </div>
-
-                        <!-- Notice & Lock Button Row -->
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <!-- Left: Info Notice (shown only when locked) -->
-                            <div x-show="isLocked" class="text-xs text-slate-600 flex items-center gap-2 flex-1">
-                                <i class="fa-solid fa-circle-info text-sm text-blue-500 shrink-0"></i>
-                                <span><strong class="font-bold text-slate-800">Locked Mode Active:</strong> Click on the Component boxes above to insert them into the formula.</span>
-                            </div>
-                            <div x-show="!isLocked" class="flex-1"></div> <!-- Spacer when unlocked -->
-
-                            <!-- Right: Lock Button -->
-                            <div class="shrink-0 flex justify-end">
-                                <button type="button" @click="isLocked = !isLocked" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border shadow-sm"
-                                    :class="isLocked 
-                                        ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700' 
-                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
-                                    <span x-show="isLocked" class="flex items-center gap-2">
-                                        <i class="fa-solid fa-lock"></i> Unlock Component
-                                    </span>
-                                    <span x-show="!isLocked" class="flex items-center gap-2">
-                                        <i class="fa-solid fa-lock-open"></i> Lock Component
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Formula Editor Section (shown when locked) -->
-                        <div x-show="isLocked" class="pt-4 border-t border-slate-100 space-y-4">
-                            <div>
-                                <label class="block text-base font-bold text-slate-800 mb-2">Formula Editor</label>
-                                <div class="flex gap-3 items-stretch">
-                                    <textarea id="custom_formula_input" name="calc_operator" x-model="calcOperator" rows="2" class="flex-1 rounded-xl border border-slate-200 p-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 font-normal placeholder-slate-400" placeholder="Click active components above or use the calculator buttons below to build your formula. E.g. C2 * C3 + C4"></textarea>
-                                    <button type="button" @click="calcOperator = ''" class="px-5 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-500 border border-slate-200 rounded-xl text-sm font-semibold transition-all shrink-0 flex items-center justify-center">Clear</button>
-                                </div>
-                            </div>
-
-                            <!-- Calculator buttons -->
-                            <div class="flex flex-wrap gap-2.5 items-center">
-                                <button type="button" @click="appendOperator('+')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">+</button>
-                                <button type="button" @click="appendOperator('-')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">-</button>
-                                <button type="button" @click="appendOperator('*')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">*</button>
-                                <button type="button" @click="appendOperator('/')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">/</button>
-                                <button type="button" @click="appendOperator('(')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">(</button>
-                                <button type="button" @click="appendOperator(')')" class="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-blue-600 hover:text-white hover:border-blue-600 border border-slate-200 text-slate-700 rounded-xl text-lg font-bold transition-all duration-150">)</button>
-                                
-                                <!-- Backspace button -->
-                                <button type="button" @click="calcOperator = calcOperator.trim().includes(' ') ? calcOperator.trim().substring(0, calcOperator.trim().lastIndexOf(' ')) + ' ' : ''" class="px-4 h-12 flex items-center justify-center bg-slate-50 hover:bg-amber-600 hover:text-white hover:border-amber-600 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-150">
-                                    <i class="fa-solid fa-delete-left mr-1.5 text-base"></i> Backspace
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="p-6 border-t border-slate-100 bg-white flex justify-end gap-3 rounded-b-xl shrink-0">
-                    <button type="button" onclick="closeFormulaModal()" class="px-5 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-semibold shadow-sm shadow-blue-200">Save</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -921,6 +1096,20 @@
     });
 
     function openCreateModal() {
+        const createFormulaEl = document.getElementById('create_formula_container');
+        if (createFormulaEl && window.Alpine) {
+            const alpineData = window.Alpine.$data(createFormulaEl);
+            if (alpineData) {
+                alpineData.showFormula = false;
+                alpineData.defaultUnit = '';
+                alpineData.calcOperator = '';
+                alpineData.isLocked = false;
+                for (let i = 0; i < 20; i++) {
+                    alpineData.vals[i] = '';
+                    alpineData.units[i] = '';
+                }
+            }
+        }
         window.dispatchEvent(new CustomEvent('set-create-parent-objective', {
             detail: { id: "", name: "" }
         }));
@@ -1036,6 +1225,47 @@
         window.dispatchEvent(new CustomEvent('set-edit-result-kpilist', {
             detail: { id: result || "", name: result || "" }
         }));
+
+        // Reset and populate edit formula
+        const editFormulaEl = document.getElementById('edit_formula_container');
+        if (editFormulaEl && window.Alpine) {
+            const alpineData = window.Alpine.$data(editFormulaEl);
+            if (alpineData) {
+                alpineData.showFormula = (calculation_method === 'Custom (Using Formula Components)');
+                alpineData.defaultUnit = unit || '';
+                alpineData.calcOperator = '';
+                alpineData.isLocked = false;
+                for (let i = 0; i < 20; i++) {
+                    alpineData.vals[i] = '';
+                    alpineData.units[i] = '';
+                }
+            }
+        }
+
+        $.ajax({
+            url: `{{ route('master.kpi_list.formula', '') }}/${id}`,
+            type: 'GET',
+            success: function(response) {
+                const formula = response.formula || {};
+                const el = document.getElementById('edit_formula_container');
+                if (el && window.Alpine) {
+                    const alpineData = window.Alpine.$data(el);
+                    if (alpineData) {
+                        const hasFormula = formula.calc_operator !== null && formula.calc_operator !== undefined && formula.calc_operator.trim() !== '';
+                        let rawOp = hasFormula ? formula.calc_operator : '';
+                        if (rawOp) {
+                            rawOp = rawOp.replace(/\[?comp_(\d+)\]?/g, 'C$1');
+                        }
+                        alpineData.calcOperator = rawOp;
+                        alpineData.isLocked = hasFormula;
+                        for (let i = 1; i <= 20; i++) {
+                            alpineData.vals[i - 1] = formula['comp_' + i] !== null && formula['comp_' + i] !== undefined ? formula['comp_' + i] : '';
+                            alpineData.units[i - 1] = formula['comp_' + i + '_unit'] !== null && formula['comp_' + i + '_unit'] !== undefined ? formula['comp_' + i + '_unit'] : '';
+                        }
+                    }
+                }
+            }
+        });
 
         // Reset edit achievements and load data
         const currentYear = new Date().getFullYear();
@@ -1183,52 +1413,6 @@
             });
         }
     });
-    function openFormulaModal() {
-        $('#formulaModal').removeClass('hidden');
-        toggleBodyScroll(true);
-    }
-
-    function closeFormulaModal() {
-        $('#formulaModal').addClass('hidden');
-        toggleBodyScroll(false);
-    }
-
-    function handleFormula(btn) {
-        const kpiId = btn.getAttribute('data-id');
-        const kpiName = btn.getAttribute('data-kpi_name');
-        $('#formulaModalTitle').text('Manage Formula: ' + kpiName);
-        $('#formula_kpi_list_id').val(kpiId);
-
-        $.ajax({
-            url: `{{ route('master.kpi_list.formula', '') }}/${kpiId}`,
-            type: 'GET',
-            success: function(response) {
-                const formula = response.formula || {};
-                
-                const formEl = document.getElementById('formulaForm');
-                if (formEl && window.Alpine) {
-                    const alpineData = window.Alpine.$data(formEl);
-                    if (alpineData) {
-                        const hasFormula = formula.calc_operator !== null && formula.calc_operator !== undefined && formula.calc_operator.trim() !== '';
-                        let rawOp = hasFormula ? formula.calc_operator : '';
-                        if (rawOp) {
-                            rawOp = rawOp.replace(/\[?comp_(\d+)\]?/g, 'C$1');
-                        }
-                        alpineData.calcOperator = rawOp;
-                        alpineData.isLocked = hasFormula;
-                        for (let i = 1; i <= 20; i++) {
-                            alpineData.vals[i - 1] = formula['comp_' + i] !== null && formula['comp_' + i] !== undefined ? formula['comp_' + i] : '';
-                        }
-                    }
-                }
-                
-                openFormulaModal();
-            },
-            error: function() {
-                showToast('Failed to fetch formula data.', 'error');
-            }
-        });
-    }
 </script>
 @endpush
 @endsection
