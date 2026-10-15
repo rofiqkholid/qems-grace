@@ -230,10 +230,6 @@
                         <span class="font-normal text-slate-800">{{ $deviceInfo }}</span>
                     </div>
 
-                    <div>
-                        <span class="block text-slate-400 font-normal mb-0.5">IP Address</span>
-                        <span class="font-normal text-slate-800">{{ request()->ip() }}</span>
-                    </div>
 
                     <div>
                         <span class="block text-slate-400 font-normal mb-0.5">Timezone</span>
