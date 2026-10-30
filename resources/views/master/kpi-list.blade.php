@@ -52,7 +52,7 @@
                             name="filter_category"
                             id="filter_category"
                             label="Category"
-                            :initialOptions="($categories ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
+                            :initialOptions="$categoryOptions ?? ($categories ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => ($item === 'Company KPI' ? 'KPI Company' : $item)])->toArray()"
                             updateEvent="set-filter-category"
                             changeEvent="filter-category-changed"
                             hideLabel="true" />
@@ -544,7 +544,7 @@
                                 label="Category"
                                 required="true"
                                 :initialOptions="[
-                                    ['id' => 'Company KPI', 'name' => 'Company KPI'],
+                                    ['id' => 'Company KPI', 'name' => 'KPI Company'],
                                     ['id' => 'KPI Department', 'name' => 'KPI Department'],
                                     ['id' => 'Activity Plan', 'name' => 'Activity Plan']
                                 ]"
@@ -1227,8 +1227,12 @@
             detail: { id: pillar || "", name: pillar || "" }
         }));
         
+        let catDisplayName = category || "";
+        if (category === 'Company KPI') {
+            catDisplayName = 'KPI Company';
+        }
         window.dispatchEvent(new CustomEvent('set-edit-category-kpilist', {
-            detail: { id: category || "", name: category || "" }
+            detail: { id: category || "", name: catDisplayName }
         }));
         
         $('#edit_target').val(target);

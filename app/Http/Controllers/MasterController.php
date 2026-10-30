@@ -1780,12 +1780,18 @@ class MasterController extends Controller
         }
         $categories = DB::table('KPIList')->distinct()->whereNotNull('category')->where('category', '!=', '')->pluck('category')->values();
         if ($categories->isEmpty()) {
-            $categories = collect(['Company KPI', 'KPI Department', 'Activity Plan']);
+            $categories = collect(['KPI Company', 'KPI Department', 'Activity Plan']);
         }
+        $categoryOptions = $categories->map(function ($item) {
+            return [
+                'id' => $item,
+                'name' => ($item === 'Company KPI' ? 'KPI Company' : $item)
+            ];
+        })->unique('name')->values()->toArray();
         $calculationMethods = collect(['Direct Actual (Input Actual Data)', 'Custom (Using Formula Components)']);
         $kpiUnits = DB::table('KPIUnit')->orderBy('name', 'asc')->get();
 
-        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'calculationMethods', 'kpiUnits'));
+        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'categoryOptions', 'calculationMethods', 'kpiUnits'));
     }
 
     public function kpi_list_table(Request $request)
@@ -1816,7 +1822,15 @@ class MasterController extends Controller
         }
 
         if ($request->filled('filter_category')) {
-            $query->where('child.category', $request->filter_category);
+            $catFilter = $request->filter_category;
+            if ($catFilter === 'Company KPI' || $catFilter === 'KPI Company') {
+                $query->where(function($q) {
+                    $q->where('child.category', 'Company KPI')
+                      ->orWhere('child.category', 'KPI Company');
+                });
+            } else {
+                $query->where('child.category', $catFilter);
+            }
         }
 
         if ($request->filled('filter_calculation_method')) {
@@ -1847,7 +1861,7 @@ class MasterController extends Controller
                     "objective" => $item->objective,
                     "definition" => $item->definition,
                     "pillar" => $item->pillar,
-                    "category" => $item->category,
+                    "category" => ($item->category === 'Company KPI' ? 'KPI Company' : $item->category),
                     "target" => $item->target . ($item->unit ? ' ' . $item->unit : ''),
                     "unit" => $item->unit,
                     "operator" => $item->operator,
