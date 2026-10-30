@@ -182,20 +182,27 @@
                             <canvas id="statsPieChart"></canvas>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-sm text-slate-600 mt-auto">
-                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>
-                                <span class="font-semibold text-slate-700 text-xs">Achieved</span>
+                    <div class="grid grid-cols-3 gap-2 text-sm text-slate-600 mt-auto">
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50/60 border border-emerald-100">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e] shrink-0"></span>
+                                <span class="font-semibold text-slate-700 text-[11px] truncate">Achieved</span>
                             </div>
-                            <span id="val_ok" class="font-bold text-slate-800 text-xs">0</span>
+                            <span id="val_ok" class="font-bold text-slate-800 text-xs shrink-0 ml-1">0</span>
                         </div>
-                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-rose-50/60 border border-rose-100">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-[#ef4444]"></span>
-                                <span class="font-semibold text-slate-700 text-xs whitespace-nowrap">Not Achieved</span>
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-rose-50/60 border border-rose-100">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444] shrink-0"></span>
+                                <span class="font-semibold text-slate-700 text-[11px] truncate">Not Achieved</span>
                             </div>
-                            <span id="val_minor" class="font-bold text-slate-800 text-xs">0</span>
+                            <span id="val_minor" class="font-bold text-slate-800 text-xs shrink-0 ml-1">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-amber-50/60 border border-amber-100">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b] shrink-0"></span>
+                                <span class="font-semibold text-slate-700 text-[11px] truncate">Overtime</span>
+                            </div>
+                            <span id="val_overtime" class="font-bold text-slate-800 text-xs shrink-0 ml-1">0</span>
                         </div>
                     </div>
                 </div>
@@ -510,9 +517,9 @@
         }
 
         if (statsPieChart) {
-            statsPieChart.data.labels = ['Achieved', 'Not Achieved'];
+            statsPieChart.data.labels = ['Achieved', 'Not Achieved', 'Overtime'];
             statsPieChart.data.datasets[0].data = lastPieData;
-            statsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#ef4444'];
+            statsPieChart.data.datasets[0].backgroundColor = ['#22c55e', '#ef4444', '#f59e0b'];
             statsPieChart.update();
             return;
         }
@@ -520,10 +527,10 @@
         statsPieChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Achieved', 'Not Achieved'],
+                labels: ['Achieved', 'Not Achieved', 'Overtime'],
                 datasets: [{
                     data: lastPieData,
-                    backgroundColor: ['#22c55e', '#ef4444'],
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -561,11 +568,13 @@
                 // Update text values untuk overview KPI kanan
                 $('#val_ok').text(new Intl.NumberFormat().format(response.achieved || 0));
                 $('#val_minor').text(new Intl.NumberFormat().format(response.notAchieved || 0));
+                $('#val_overtime').text(new Intl.NumberFormat().format(response.waitingData || 0));
                 $('#val_ofi').text(new Intl.NumberFormat().format(response.totalKpi || 0));
 
                 lastPieData = [
                     response.achieved || 0,
-                    response.notAchieved || 0
+                    response.notAchieved || 0,
+                    response.waitingData || 0
                 ];
 
                 renderPieChart();
@@ -581,6 +590,7 @@
 
                 $('#val_ok').text('0');
                 $('#val_minor').text('0');
+                $('#val_overtime').text('0');
                 $('#val_ofi').text('0');
             }
         });
@@ -927,11 +937,13 @@
                 let depts = response.departments || [];
                 let okList = [];
                 let notAchievedList = [];
+                let overtimeList = [];
                 let totalList = [];
 
                 depts.forEach(function(d, idx) {
                     let totalAch = 0;
                     let totalNot = 0;
+                    let totalOver = 0;
                     Object.keys(response.data || {}).forEach(function(pilarKey) {
                         let pData = response.data[pilarKey];
                         if (pData && pData.achieved && pData.achieved[idx] !== undefined) {
@@ -940,16 +952,21 @@
                         if (pData && pData.not_achieved && pData.not_achieved[idx] !== undefined) {
                             totalNot += pData.not_achieved[idx];
                         }
+                        if (pData && pData.overtime && pData.overtime[idx] !== undefined) {
+                            totalOver += pData.overtime[idx];
+                        }
                     });
                     okList.push(totalAch);
                     notAchievedList.push(totalNot);
-                    totalList.push(totalAch + totalNot);
+                    overtimeList.push(totalOver);
+                    totalList.push(totalAch + totalNot + totalOver);
                 });
 
                 rawChartData = {
                     data_name_dept: depts,
                     data_total_ok: okList,
                     data_total_minor: notAchievedList,
+                    data_total_overtime: overtimeList,
                     data_total_major: [],
                     data_total_ofi: totalList
                 };
@@ -990,25 +1007,27 @@
         let labels = rawChartData.data_name_dept;
         let okData = rawChartData.data_total_ok;
         let minorData = rawChartData.data_total_minor;
+        let overtimeData = rawChartData.data_total_overtime || [];
         let majorData = rawChartData.data_total_major;
         let ofiData = rawChartData.data_total_ofi;
 
         if (isMobile) {
-            // Zip and sort by major descending, then minor descending
+            // Zip and sort by overtime descending, then minor descending, then ok descending
             let zipped = [];
             for (let i = 0; i < labels.length; i++) {
                 zipped.push({
                     name: labels[i],
                     ok: okData[i] || 0,
                     minor: minorData[i] || 0,
+                    overtime: overtimeData[i] || 0,
                     major: majorData[i] || 0,
                     ofi: ofiData[i] || 0
                 });
             }
 
             zipped.sort((a, b) => {
-                if (b.major !== a.major) {
-                    return b.major - a.major;
+                if (b.overtime !== a.overtime) {
+                    return b.overtime - a.overtime;
                 }
                 return b.minor - a.minor;
             });
@@ -1016,6 +1035,7 @@
             labels = zipped.map(item => item.name);
             okData = zipped.map(item => item.ok);
             minorData = zipped.map(item => item.minor);
+            overtimeData = zipped.map(item => item.overtime);
             majorData = zipped.map(item => item.major);
             ofiData = zipped.map(item => item.ofi);
 
@@ -1032,6 +1052,7 @@
             labels = labels.slice(startIndex, endIndex);
             okData = okData.slice(startIndex, endIndex);
             minorData = minorData.slice(startIndex, endIndex);
+            overtimeData = overtimeData.slice(startIndex, endIndex);
             majorData = majorData.slice(startIndex, endIndex);
             ofiData = ofiData.slice(startIndex, endIndex);
 
@@ -1047,6 +1068,7 @@
         const allValues = [
             ...okData,
             ...minorData,
+            ...overtimeData,
             ...majorData
         ];
         const maxValue = Math.max(...allValues, 0);
@@ -1067,6 +1089,11 @@
                         label: 'Not Achieved',
                         data: minorData,
                         backgroundColor: '#ef4444', // Red
+                    },
+                    {
+                        label: 'Overtime',
+                        data: overtimeData,
+                        backgroundColor: '#f59e0b', // Amber/Orange
                     }
                 ]
             },

@@ -1388,6 +1388,14 @@ class DashboardController extends Controller
 
         $resultByPillar = [];
 
+        $monthOrder = [
+            'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+            'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+            'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+        ];
+        $currentRealYear = (int) date('Y');
+        $currentRealMonth = (int) date('n');
+
         foreach ($pillars as $pillar) {
             // Ambil KPI per pilar
             $kpiIds = DB::table('KPIList')
@@ -1400,6 +1408,7 @@ class DashboardController extends Controller
 
             $deptAchieved = [];
             $deptNotAchieved = [];
+            $deptOvertime = [];
             $deptTotal = [];
 
             foreach ($departments as $dept) {
@@ -1411,6 +1420,7 @@ class DashboardController extends Controller
 
                 $achieved = 0;
                 $notAchieved = 0;
+                $overtime = 0;
                 $total = 0;
 
                 foreach ($kpiCompanies as $kc) {
@@ -1424,11 +1434,18 @@ class DashboardController extends Controller
                     if ($activities->count() > 0) {
                         foreach ($activities as $act) {
                             $st = strtolower(trim($act->status ?? ''));
+                            $hasActual = ($act->actual !== null && $act->actual !== '');
+                            $mNum = $monthOrder[$act->bulan] ?? 0;
+                            $isPastMonth = ($year < $currentRealYear) || ($year === $currentRealYear && $mNum < $currentRealMonth);
+
                             if (in_array($st, ['achieve', 'achieved', 'ok', 'good'])) {
                                 $achieved++;
                                 $total++;
                             } elseif (in_array($st, ['not achieve', 'not achieved', 'not_achieved', 'ng', 'bad'])) {
                                 $notAchieved++;
+                                $total++;
+                            } elseif (!$hasActual && $isPastMonth) {
+                                $overtime++;
                                 $total++;
                             }
                         }
@@ -1437,6 +1454,7 @@ class DashboardController extends Controller
 
                 $deptAchieved[] = $achieved;
                 $deptNotAchieved[] = $notAchieved;
+                $deptOvertime[] = $overtime;
                 $deptTotal[] = $total;
             }
 
@@ -1444,6 +1462,7 @@ class DashboardController extends Controller
                 'departments' => $departments,
                 'achieved' => $deptAchieved,
                 'not_achieved' => $deptNotAchieved,
+                'overtime' => $deptOvertime,
                 'total' => $deptTotal
             ];
         }
@@ -1496,16 +1515,28 @@ class DashboardController extends Controller
             $actQuery->where('kc.department_code', $deptFilter);
         }
 
-        $allActs = $actQuery->get(['kca.status', 'kl.category']);
+        $allActs = $actQuery->get(['kca.status', 'kca.actual', 'kca.bulan', 'kl.category']);
 
         $achieved = 0;
         $notAchieved = 0;
+        $overtime = 0;
         $companyKpi = 0;
         $deptKpi = 0;
+
+        $monthOrder = [
+            'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+            'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+            'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+        ];
+        $currentRealYear = (int) date('Y');
+        $currentRealMonth = (int) date('n');
 
         foreach ($allActs as $act) {
             $st = strtolower(trim($act->status ?? ''));
             $isComp = str_contains(strtolower($act->category ?? ''), 'company');
+            $hasActual = ($act->actual !== null && $act->actual !== '');
+            $mNum = $monthOrder[$act->bulan] ?? 0;
+            $isPastMonth = ($year < $currentRealYear) || ($year === $currentRealYear && $mNum < $currentRealMonth);
 
             if (in_array($st, ['achieve', 'achieved', 'ok', 'good'])) {
                 $achieved++;
@@ -1521,10 +1552,12 @@ class DashboardController extends Controller
                 } else {
                     $deptKpi++;
                 }
+            } elseif (!$hasActual && $isPastMonth) {
+                $overtime++;
             }
         }
 
-        $totalKpi = $achieved + $notAchieved;
+        $totalKpi = $achieved + $notAchieved + $overtime;
         $achievementRate = $totalKpi > 0 ? round(($achieved / $totalKpi) * 100, 1) : 0;
 
         return response()->json([
@@ -1533,7 +1566,7 @@ class DashboardController extends Controller
             'deptKpi' => $deptKpi,
             'achieved' => $achieved,
             'notAchieved' => $notAchieved,
-            'waitingData' => 0,
+            'waitingData' => $overtime,
             'noData' => 0,
             'achievementRate' => $achievementRate
         ]);

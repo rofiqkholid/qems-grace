@@ -399,11 +399,24 @@
                             </tr>
                             <tr class="border-b border-slate-200">
                                  <td class="p-3 font-semibold border-r border-slate-200 whitespace-nowrap">Status</td>
+                                 @php
+                                     $currentYear = (int) date('Y');
+                                     $currentMonthNum = (int) date('n'); // 1 to 12
+                                     $kpiYear = isset($kpi->periode) && is_numeric($kpi->periode) ? (int) $kpi->periode : $currentYear;
+                                     $monthOrder = [
+                                         'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+                                         'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+                                         'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+                                     ];
+                                 @endphp
                                  @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
                                      @php
                                          $act = $activities->firstWhere('bulan', $m);
                                          $valVal = $calculatedActuals[$m];
                                          $hasActVal = ($act && $valVal !== null && $valVal !== '');
+                                         $mNum = $monthOrder[$m] ?? 0;
+                                         $isPastMonth = ($kpiYear < $currentYear) || ($kpiYear === $currentYear && $mNum < $currentMonthNum);
+                                         $isOvertime = !$hasActVal && $isPastMonth;
                                      @endphp
                                      @if($hasActVal)
                                          <td class="p-3 text-center border-r border-slate-200">
@@ -430,6 +443,13 @@
                                                      <i class="fas fa-circle text-[12px]"></i>
                                                  </div>
                                              @endif
+                                         </td>
+                                     @elseif($isOvertime)
+                                         <td class="p-3 text-center border-r border-slate-200">
+                                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold shadow-xs" title="KPI Overtime">
+                                                 <i class="fa-regular fa-calendar-xmark text-[12px]"></i>
+                                                 <span class="whitespace-nowrap">KPI Overtime</span>
+                                             </div>
                                          </td>
                                      @else
                                          <td class="p-3 text-center text-slate-400 border-r border-slate-200"></td>
