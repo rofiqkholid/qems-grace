@@ -1718,19 +1718,38 @@ class KPICompanyController extends Controller
         $allCompanyIds = $allFilteredKpiCompanies->pluck('kpi_company_id');
         $allActivities = DB::table('KPICompanyActivity')
             ->whereIn('kpi_company_id', $allCompanyIds)
-            ->whereNotNull('actual')
-            ->where('actual', '!=', '')
             ->get();
 
         $achievedCountTotal = 0;
         $notAchievedCountTotal = 0;
+        $overtimeCountTotal = 0;
+
+        $monthOrder = [
+            'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+            'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+            'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+        ];
+        $currentRealYear = (int) date('Y');
+        $currentRealMonth = (int) date('n');
+
+        // Create quick lookup for periode per company id
+        $companyPeriodeMap = $allFilteredKpiCompanies->pluck('periode', 'kpi_company_id');
 
         foreach ($allActivities as $actItem) {
+            $hasActual = ($actItem->actual !== null && $actItem->actual !== '');
             $stLower = strtolower(trim($actItem->status ?? ''));
-            if (in_array($stLower, ['achieved', 'achieve', 'ok', 'met'])) {
-                $achievedCountTotal++;
-            } elseif (in_array($stLower, ['not achieved', 'not_achieved', 'ng', 'critical'])) {
-                $notAchievedCountTotal++;
+            $kpiYear = isset($companyPeriodeMap[$actItem->kpi_company_id]) && is_numeric($companyPeriodeMap[$actItem->kpi_company_id]) ? (int) $companyPeriodeMap[$actItem->kpi_company_id] : $currentRealYear;
+            $mNum = $monthOrder[$actItem->bulan] ?? 0;
+            $isPastMonth = ($kpiYear < $currentRealYear) || ($kpiYear === $currentRealYear && $mNum < $currentRealMonth);
+
+            if ($hasActual) {
+                if (in_array($stLower, ['achieved', 'achieve', 'ok', 'met'])) {
+                    $achievedCountTotal++;
+                } elseif (in_array($stLower, ['not achieved', 'not_achieved', 'ng', 'critical'])) {
+                    $notAchievedCountTotal++;
+                }
+            } elseif ($isPastMonth) {
+                $overtimeCountTotal++;
             }
         }
 
@@ -1751,8 +1770,17 @@ class KPICompanyController extends Controller
 
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        $data = $kpiCompanies->map(function ($item, $key) use ($start, $activitiesGrouped, $months) {
+        $monthOrder = [
+            'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+            'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+            'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+        ];
+        $currentRealYear = (int) date('Y');
+        $currentRealMonth = (int) date('n');
+
+        $data = $kpiCompanies->map(function ($item, $key) use ($start, $activitiesGrouped, $months, $monthOrder, $currentRealYear, $currentRealMonth) {
             $companyActivities = $activitiesGrouped->get($item->kpi_company_id, collect());
+            $kpiYear = isset($item->periode) && is_numeric($item->periode) ? (int) $item->periode : $currentRealYear;
             
             $monthlyMap = [];
             $numericVals = [];
@@ -1764,7 +1792,10 @@ class KPICompanyController extends Controller
                 $actual = $act ? $act->actual : null;
                 $status = $act ? $act->status : null;
 
-                $htmlVal = '-';
+                $mNum = $monthOrder[$m] ?? 0;
+                $isPastMonth = ($kpiYear < $currentRealYear) || ($kpiYear === $currentRealYear && $mNum < $currentRealMonth);
+
+                $htmlVal = '';
                 if ($actual !== null && $actual !== '') {
                     $filledCount++;
                     $num = $this->parseLocalNumber($actual);
@@ -1781,6 +1812,8 @@ class KPICompanyController extends Controller
 
                     $unitChar = (strpos($actual, '%') === false && strtolower(trim($item->unit)) == '%') ? '%' : '';
                     $htmlVal = '<span class="inline-block font-medium text-xs rounded-md px-2.5 py-1 ' . $badgeClass . '">' . e($actual) . $unitChar . '</span>';
+                } elseif ($isPastMonth) {
+                    $htmlVal = '<span class="inline-flex items-center gap-1.5 font-medium text-xs rounded-md px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap" title="KPI Overtime"><i class="fa-regular fa-calendar-xmark text-[11px]"></i>Overtime</span>';
                 } else {
                     $htmlVal = '';
                 }
@@ -1857,7 +1890,7 @@ class KPICompanyController extends Controller
                 "dept_kpi" => $deptKpiCount,
                 "achieved" => $achievedCountTotal,
                 "not_achieved" => $notAchievedCountTotal,
-                "waiting_data" => 0
+                "waiting_data" => $overtimeCountTotal
             ],
             "data" => $data
         ]);
