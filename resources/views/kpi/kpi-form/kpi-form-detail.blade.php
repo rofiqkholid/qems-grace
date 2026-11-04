@@ -12,7 +12,8 @@
     };
 
     $unitVal = trim($kpi->unit ?? '');
-    $isNumberUnit = in_array(strtolower($unitVal), ['number', 'num']);
+    $isNumberUnit = in_array(strtolower($unitVal), ['numbe
+    r', 'num']);
     $unitSuffix = (!empty($unitVal) && !$isNumberUnit) ? ' ' . $unitVal : '';
 
     $formatNumWithUnit = function($num) use ($parseLocalNum, $unitSuffix) {
@@ -446,9 +447,9 @@
                                          </td>
                                      @elseif($isOvertime)
                                          <td class="p-3 text-center border-r border-slate-200">
-                                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold shadow-xs" title="KPI Overtime">
+                                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold shadow-xs" title="Overdue">
                                                  <i class="fa-regular fa-calendar-xmark text-[12px]"></i>
-                                                 <span class="whitespace-nowrap">KPI Overtime</span>
+                                                 <span class="whitespace-nowrap">Overdue</span>
                                              </div>
                                          </td>
                                      @else

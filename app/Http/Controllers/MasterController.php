@@ -2062,6 +2062,9 @@ class MasterController extends Controller
                     $formulaData['created_at'] = \Carbon\Carbon::now();
                     DB::table('KPIFormula')->insert($formulaData);
                 }
+            } else {
+                // If calculation_method is changed to 'Direct Actual' or other non-custom method, clean up formula
+                DB::table('KPIFormula')->where('kpi_list_id', $request->id)->delete();
             }
 
             if ($request->has('history') && is_array($request->history)) {

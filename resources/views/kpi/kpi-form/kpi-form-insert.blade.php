@@ -13,6 +13,7 @@
     <main class="flex-1 p-6">
         @php
             $isViewMode = request('mode') === 'view';
+            $isAutoSource = strtolower($activity->source_data ?? 'manual') === 'auto';
             $actCategory = trim($activity->category ?? '');
             $isDeptKpi = (stripos($actCategory, 'dept') !== false || stripos($actCategory, 'department') !== false);
             $typeLabel = $isDeptKpi ? 'KPI Department' : 'KPI Form';
@@ -90,7 +91,11 @@
                                     <span class="text-slate-400 font-normal">[Component {{ $index }}]</span> {{ $name }}
                                     <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" name="comp_{{ $index }}" value="{{ old('comp_' . $index, $activity->{'comp_' . $index}) }}" required placeholder="Enter {{ $name }}" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300" {{ $isViewMode ? 'disabled' : '' }}>
+                                @if($isAutoSource)
+                                    <input type="text" name="comp_{{ $index }}" value="{{ old('comp_' . $index, $activity->{'comp_' . $index}) }}" readonly placeholder="Auto-filled" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-100 text-slate-500 text-sm outline-none cursor-not-allowed">
+                                @else
+                                    <input type="text" name="comp_{{ $index }}" value="{{ old('comp_' . $index, $activity->{'comp_' . $index}) }}" required placeholder="Enter {{ $name }}" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300" {{ $isViewMode ? 'disabled' : '' }}>
+                                @endif
                             </div>
                         @endforeach
                     @endif
@@ -121,7 +126,16 @@
                     <!-- Actual -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-slate-700 mb-1.5">Actual <span class="text-red-500">*</span></label>
-                        <input type="text" name="actual" id="actual_input" value="{{ old('actual', $activity->actual) }}" required placeholder="Enter actual value" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300" {{ $isViewMode ? 'disabled' : '' }}>
+                        @if($isAutoSource)
+                            <input type="text" name="actual" id="actual_input" value="{{ old('actual', $activity->actual) }}" readonly placeholder="Auto-filled from external data" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-100 text-slate-500 text-sm outline-none cursor-not-allowed">
+                            <div class="pt-2">
+                                <button type="button" id="sync_data_btn" onclick="syncComponentData()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 text-sm font-semibold rounded-lg transition-all shadow-sm flex items-center">
+                                    <i class="fa-solid fa-arrows-rotate mr-1.5 text-blue-600"></i> Sync Data
+                                </button>
+                            </div>
+                        @else
+                            <input type="text" name="actual" id="actual_input" value="{{ old('actual', $activity->actual) }}" required placeholder="Enter actual value" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all hover:border-blue-300" {{ $isViewMode ? 'disabled' : '' }}>
+                        @endif
                     </div>
                     @endif
                 </div>

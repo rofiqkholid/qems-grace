@@ -524,11 +524,12 @@ class KPICompanyController extends Controller
             abort(404);
         }
 
-        // Fetch formula components from KPIFormula
-        $formula = DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first();
+        // Fetch formula components from KPIFormula only if calculation_method is Custom
+        $isCustomMethod = ($kpi->calculation_method === 'Custom (Using Formula Components)');
+        $formula = $isCustomMethod ? DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first() : null;
         $components = [];
         $componentUnits = [];
-        if ($formula) {
+        if ($isCustomMethod && $formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
                 $uCol = 'comp_' . $i . '_unit';
@@ -620,10 +621,11 @@ class KPICompanyController extends Controller
 
         $kpi->hash_id = self::encodeId($kpi->id);
 
-        $formula = DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first();
+        $isCustomMethod = ($kpi->calculation_method === 'Custom (Using Formula Components)');
+        $formula = $isCustomMethod ? DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first() : null;
         $components = [];
         $componentUnits = [];
-        if ($formula) {
+        if ($isCustomMethod && $formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
                 $uCol = 'comp_' . $i . '_unit';
@@ -884,6 +886,7 @@ class KPICompanyController extends Controller
                 'child.periode as periode',
                 'parent.objective',
                 'parent.source_data as source_data',
+                'parent.calculation_method as calculation_method',
                 'parent.target as master_target'
             )
             ->where('act.id', $dbId)
@@ -896,11 +899,12 @@ class KPICompanyController extends Controller
         $activity->hash_id = self::encodeId($activity->id);
         $activity->kpi_company_hash_id = self::encodeId($activity->kpi_company_id);
 
-        // Fetch formula components mapping from KPIFormula
-        $formula = DB::table('KPIFormula')->where('kpi_list_id', $activity->kpi_list_id)->first();
+        // Fetch formula components mapping from KPIFormula only if calculation_method is Custom
+        $isCustomMethod = ($activity->calculation_method === 'Custom (Using Formula Components)');
+        $formula = $isCustomMethod ? DB::table('KPIFormula')->where('kpi_list_id', $activity->kpi_list_id)->first() : null;
         $components = [];
         $componentUnits = [];
-        if ($formula) {
+        if ($isCustomMethod && $formula) {
             for ($i = 1; $i <= 20; $i++) {
                 $col = 'comp_' . $i;
                 $uCol = 'comp_' . $i . '_unit';
@@ -946,6 +950,8 @@ class KPICompanyController extends Controller
                     'act.calc_operator',
                     'parent.operator as operator',
                     'parent.unit as unit',
+                    'parent.source_data as source_data',
+                    'parent.calculation_method as calculation_method',
                     'parent.target as master_target'
                 )
                 ->where('act.id', $dbId)
@@ -955,24 +961,26 @@ class KPICompanyController extends Controller
                 return redirect()->back()->with('error', 'Activity record not found.');
             }
 
-            // Dynamically validate based on components
-            $formula = DB::table('KPIFormula')->where('kpi_list_id', $activity->kpi_list_id)->first();
+            // Dynamically validate based on components and source_data
+            $isCustomMethod = ($activity->calculation_method === 'Custom (Using Formula Components)');
+            $formula = $isCustomMethod ? DB::table('KPIFormula')->where('kpi_list_id', $activity->kpi_list_id)->first() : null;
+            $isAuto = strtolower($activity->source_data ?? 'manual') === 'auto';
             $rules = [];
-            if ($formula) {
+            if ($isCustomMethod && $formula) {
                 for ($i = 1; $i <= 20; $i++) {
                     $col = 'comp_' . $i;
                     if (!empty($formula->$col)) {
-                        $rules['comp_' . $i] = 'required';
+                        $rules['comp_' . $i] = $isAuto ? 'nullable' : 'required';
                     }
                 }
             } else {
-                $rules['actual'] = 'required';
+                $rules['actual'] = $isAuto ? 'nullable' : 'required';
             }
             $request->validate($rules);
 
             // Extract actual value
-            $actualValInput = $request->actual;
-            if ($formula) {
+            $actualValInput = $isAuto ? $activity->actual : $request->actual;
+            if ($isCustomMethod && $formula) {
                 $vals = [];
                 for ($i = 1; $i <= 20; $i++) {
                     $col = 'comp_' . $i;
