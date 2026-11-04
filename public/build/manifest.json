@@ -1,0 +1,221 @@
+{
+  "node_modules/@fontsource/outfit/files/outfit-latin-100-normal.woff": {
+    "file": "assets/outfit-latin-100-normal-3d543c22.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-100-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-100-normal.woff2": {
+    "file": "assets/outfit-latin-100-normal-a9100342.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-100-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-200-normal.woff": {
+    "file": "assets/outfit-latin-200-normal-e2d3ad99.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-200-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-200-normal.woff2": {
+    "file": "assets/outfit-latin-200-normal-bdb2ebee.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-200-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-300-normal.woff": {
+    "file": "assets/outfit-latin-300-normal-bcc41559.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-300-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-300-normal.woff2": {
+    "file": "assets/outfit-latin-300-normal-ef88e74f.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-300-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-400-normal.woff": {
+    "file": "assets/outfit-latin-400-normal-f329dc36.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-400-normal.woff2": {
+    "file": "assets/outfit-latin-400-normal-71f028fd.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-500-normal.woff": {
+    "file": "assets/outfit-latin-500-normal-40083be5.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-500-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-500-normal.woff2": {
+    "file": "assets/outfit-latin-500-normal-fc9bff94.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-500-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff": {
+    "file": "assets/outfit-latin-600-normal-3d1cd1b4.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2": {
+    "file": "assets/outfit-latin-600-normal-8cfe15c2.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff": {
+    "file": "assets/outfit-latin-700-normal-fb730df7.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff2": {
+    "file": "assets/outfit-latin-700-normal-5d5e3734.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-800-normal.woff": {
+    "file": "assets/outfit-latin-800-normal-f39dd1c8.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-800-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-800-normal.woff2": {
+    "file": "assets/outfit-latin-800-normal-eabf8cb2.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-800-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-900-normal.woff": {
+    "file": "assets/outfit-latin-900-normal-9f85951f.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-900-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-900-normal.woff2": {
+    "file": "assets/outfit-latin-900-normal-090bdae2.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-900-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-100-normal.woff": {
+    "file": "assets/outfit-latin-ext-100-normal-55894874.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-100-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-100-normal.woff2": {
+    "file": "assets/outfit-latin-ext-100-normal-bcd8593a.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-100-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-200-normal.woff": {
+    "file": "assets/outfit-latin-ext-200-normal-19f8d1e7.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-200-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-200-normal.woff2": {
+    "file": "assets/outfit-latin-ext-200-normal-1b92ec21.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-200-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-300-normal.woff": {
+    "file": "assets/outfit-latin-ext-300-normal-5c78f172.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-300-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-300-normal.woff2": {
+    "file": "assets/outfit-latin-ext-300-normal-463eec2e.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-300-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-400-normal.woff": {
+    "file": "assets/outfit-latin-ext-400-normal-a6697dab.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-400-normal.woff2": {
+    "file": "assets/outfit-latin-ext-400-normal-e279fd50.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-500-normal.woff": {
+    "file": "assets/outfit-latin-ext-500-normal-0bee549f.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-500-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-500-normal.woff2": {
+    "file": "assets/outfit-latin-ext-500-normal-89894a60.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-500-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-600-normal.woff": {
+    "file": "assets/outfit-latin-ext-600-normal-a0c20185.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-600-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-600-normal.woff2": {
+    "file": "assets/outfit-latin-ext-600-normal-a049363d.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-600-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-700-normal.woff": {
+    "file": "assets/outfit-latin-ext-700-normal-8c2539e9.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-700-normal.woff2": {
+    "file": "assets/outfit-latin-ext-700-normal-545d41d8.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-700-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-800-normal.woff": {
+    "file": "assets/outfit-latin-ext-800-normal-99eb2a48.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-800-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-800-normal.woff2": {
+    "file": "assets/outfit-latin-ext-800-normal-76bc5d45.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-800-normal.woff2"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-900-normal.woff": {
+    "file": "assets/outfit-latin-ext-900-normal-ef2542ff.woff",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-900-normal.woff"
+  },
+  "node_modules/@fontsource/outfit/files/outfit-latin-ext-900-normal.woff2": {
+    "file": "assets/outfit-latin-ext-900-normal-cb36e3cc.woff2",
+    "src": "node_modules/@fontsource/outfit/files/outfit-latin-ext-900-normal.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-ff66d1cf.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2": {
+    "file": "assets/fa-regular-400-f4722d10.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-24e5fae2.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2": {
+    "file": "assets/fa-v4compatibility-c776ee1f.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-7064af0d.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.css": {
+    "file": "assets/app-c8fe8961.css",
+    "src": "resources/js/app.css"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/outfit-latin-ext-100-normal-bcd8593a.woff2",
+      "assets/outfit-latin-ext-100-normal-55894874.woff",
+      "assets/outfit-latin-100-normal-a9100342.woff2",
+      "assets/outfit-latin-100-normal-3d543c22.woff",
+      "assets/outfit-latin-ext-200-normal-1b92ec21.woff2",
+      "assets/outfit-latin-ext-200-normal-19f8d1e7.woff",
+      "assets/outfit-latin-200-normal-bdb2ebee.woff2",
+      "assets/outfit-latin-200-normal-e2d3ad99.woff",
+      "assets/outfit-latin-ext-300-normal-463eec2e.woff2",
+      "assets/outfit-latin-ext-300-normal-5c78f172.woff",
+      "assets/outfit-latin-300-normal-ef88e74f.woff2",
+      "assets/outfit-latin-300-normal-bcc41559.woff",
+      "assets/outfit-latin-ext-400-normal-e279fd50.woff2",
+      "assets/outfit-latin-ext-400-normal-a6697dab.woff",
+      "assets/outfit-latin-400-normal-71f028fd.woff2",
+      "assets/outfit-latin-400-normal-f329dc36.woff",
+      "assets/outfit-latin-ext-500-normal-89894a60.woff2",
+      "assets/outfit-latin-ext-500-normal-0bee549f.woff",
+      "assets/outfit-latin-500-normal-fc9bff94.woff2",
+      "assets/outfit-latin-500-normal-40083be5.woff",
+      "assets/outfit-latin-ext-600-normal-a049363d.woff2",
+      "assets/outfit-latin-ext-600-normal-a0c20185.woff",
+      "assets/outfit-latin-600-normal-8cfe15c2.woff2",
+      "assets/outfit-latin-600-normal-3d1cd1b4.woff",
+      "assets/outfit-latin-ext-700-normal-545d41d8.woff2",
+      "assets/outfit-latin-ext-700-normal-8c2539e9.woff",
+      "assets/outfit-latin-700-normal-5d5e3734.woff2",
+      "assets/outfit-latin-700-normal-fb730df7.woff",
+      "assets/outfit-latin-ext-800-normal-76bc5d45.woff2",
+      "assets/outfit-latin-ext-800-normal-99eb2a48.woff",
+      "assets/outfit-latin-800-normal-eabf8cb2.woff2",
+      "assets/outfit-latin-800-normal-f39dd1c8.woff",
+      "assets/outfit-latin-ext-900-normal-cb36e3cc.woff2",
+      "assets/outfit-latin-ext-900-normal-ef2542ff.woff",
+      "assets/outfit-latin-900-normal-090bdae2.woff2",
+      "assets/outfit-latin-900-normal-9f85951f.woff",
+      "assets/fa-brands-400-ff66d1cf.woff2",
+      "assets/fa-regular-400-f4722d10.woff2",
+      "assets/fa-solid-900-24e5fae2.woff2",
+      "assets/fa-v4compatibility-c776ee1f.woff2"
+    ],
+    "css": [
+      "assets/app-c8fe8961.css"
+    ],
+    "file": "assets/app-cbbf89c5.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}
