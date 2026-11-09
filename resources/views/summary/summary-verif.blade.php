@@ -175,7 +175,18 @@
 
     window.handleImageError = function(img) {
         img.onerror = null;
-        img.src = window.noImageThumbSrc;
+        const container = img.closest('.flex.items-center.justify-center') || img.parentElement;
+        if (container) {
+            container.innerHTML = `<div class="w-16 h-16 p-2 rounded-lg border border-slate-300 bg-slate-100 flex flex-col items-center justify-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <path d="M21 15l-5-5L5 21"></path>
+                    <line x1="3" y1="3" x2="21" y2="21"></line>
+                </svg>
+                <span class="text-center font-medium text-slate-600" style="font-size:10px; line-height:1;">No Picture</span>
+            </div>`;
+        }
     };
 
     // Ensure global loader from layout stays active during first paint on this page.
