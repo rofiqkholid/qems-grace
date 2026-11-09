@@ -66,6 +66,19 @@
                             hideLabel="true" />
                     </div>
 
+                    <!-- Checksheet Filter -->
+                    <div class="col-span-2 sm:col-span-1 lg:col-span-auto w-full lg:w-auto min-w-0 lg:min-w-[220px]">
+                        <x-searchable-select
+                            name="category_id"
+                            id="categoryFilter"
+                            label="Checksheet"
+                            :initialOptions="$categories"
+                            valueField="id"
+                            updateEvent="updateCategoryFilter"
+                            hideLabel="true"
+                            placeholder="Select Checksheet..." />
+                    </div>
+
                     <!-- Reset Button -->
                     <div class="col-span-2 sm:col-span-1 lg:col-span-auto">
                         <button type="button" id="btnReset"
@@ -273,6 +286,7 @@
                     d.date_from = $('#dateFrom').val();
                     d.date_to = $('#dateTo').val();
                     d.dept = $('#deptFilter').val();
+                    d.category_id = $('#categoryFilter').val();
                 }
             },
             columns: [{
@@ -406,7 +420,7 @@
         });
  
         // Auto-filter on change
-        $('#dateFrom, #dateTo, #deptFilter').on('change', function() {
+        $('#dateFrom, #dateTo, #deptFilter, #categoryFilter').on('change', function() {
             table.ajax.reload();
         });
  
@@ -416,6 +430,13 @@
             $('#dateFrom').val('').removeAttr('data-has-value');
             $('#dateTo').val('').removeAttr('data-has-value');
             $('#deptFilter').val('');
+            $('#categoryFilter').val('');
+            window.dispatchEvent(new CustomEvent('updateCategoryFilter', {
+                detail: {
+                    id: '',
+                    name: ''
+                }
+            }));
             table.ajax.reload();
         });
  

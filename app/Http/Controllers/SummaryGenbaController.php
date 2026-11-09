@@ -29,6 +29,7 @@ class SummaryGenbaController extends Controller
         $date_from = $request->date_from;
         $date_to = $request->date_to;
         $dept = $request->dept;
+        $category_id = $request->category_id;
 
         $columns = array(
             0 => 'a.created_at',
@@ -46,6 +47,10 @@ class SummaryGenbaController extends Controller
         $query->whereNotNull('a.findings')
             ->where('a.findings', '!=', '');
 
+        if (!empty($category_id)) {
+            $query->where('b.Category_id', $category_id);
+        }
+
         $totalData = $query->count();
         $totalFiltered = $totalData;
 
@@ -59,6 +64,10 @@ class SummaryGenbaController extends Controller
             ->where('a.findings', '!=', '')
             ->addSelect('a.preventive_action')
             ->addSelect('a.verif_img');
+
+        if (!empty($category_id)) {
+            $postsQuery->where('b.Category_id', $category_id);
+        }
 
         $posts = $postsQuery->offset($start)
             ->limit($limit)
