@@ -13,9 +13,17 @@
     <!-- Page Content -->
     <main class="flex-1 px-4 py-2 lg:px-6 lg:py-3">
         <!-- Page Title -->
-        <div class="mb-4">
-            <h1 class="text-xl md:text-2xl font-bold text-slate-800">Genba BIQ Dashboard</h1>
-            <p class="text-xs md:text-sm text-slate-500 mt-1">Monitor Genba BIQ audit findings and performance in real-time.</p>
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Genba BIQ Dashboard</h1>
+                <p class="text-xs md:text-sm text-slate-500 mt-0.5 sm:mt-1">Monitor Genba BIQ audit findings and performance in real-time.</p>
+            </div>
+            <div class="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+                <button type="button" id="btnExport" onclick="exportToExcel()" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-none shadow-sm transition-colors disabled:opacity-50">
+                    <i id="exportIcon" class="fa-solid fa-file-excel text-xs sm:text-base"></i>
+                    <span id="exportText">Export to Excel</span>
+                </button>
+            </div>
         </div>
 
         <div class="bg-white p-5 border border-gray-200 rounded-none mb-8">
@@ -1029,6 +1037,49 @@
             galleryViewer.destroy();
             galleryViewer = null;
         }
+    }
+
+    function exportToExcel() {
+        const btn = $('#btnExport');
+        const icon = $('#exportIcon');
+        const text = $('#exportText');
+
+        // Set loading state
+        btn.prop('disabled', true);
+        icon.removeClass('fa-file-excel').addClass('fa-spinner fa-spin');
+        text.text('Exporting...');
+
+        const search = $('#searchInput').val() || '';
+        const dateFrom = $('#dateFrom').val() || '';
+        const dateTo = $('#dateTo').val() || '';
+        const dept = $('#deptFilter').val() || '';
+        const detail_area = $('#detailAreaFilter').val() || '';
+        const status = currentStatusFilter || '';
+
+        const url = new URL("{{ route('dashboard.biq.export') }}");
+        if (search) url.searchParams.append('search', search);
+        if (dateFrom) url.searchParams.append('date_from', dateFrom);
+        if (dateTo) url.searchParams.append('date_to', dateTo);
+        if (dept) url.searchParams.append('dept', dept);
+        if (detail_area) url.searchParams.append('detail_area', detail_area);
+        if (status) url.searchParams.append('status', status);
+
+        // Use a hidden iframe to trigger the download so that the main window's beforeunload event is not fired
+        let iframe = document.getElementById('download-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'download-iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url.toString();
+
+        // Restore button state after 3 seconds
+        setTimeout(() => {
+            btn.prop('disabled', false);
+            icon.removeClass('fa-spinner fa-spin').addClass('fa-file-excel');
+            text.text('Export to Excel');
+        }, 3000);
     }
 </script>
 @endpush

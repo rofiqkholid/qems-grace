@@ -115,6 +115,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-biq/data_cards', [DashboardController::class, 'biq_data_cards'])->name('dashboard.biq.data_cards');
     Route::post('/dashboard-biq/table', [DashboardController::class, 'biq_table'])->name('dashboard.biq.table');
     Route::get('/dashboard-biq/chart-data/{yearMonth}', [DashboardController::class, 'biq_chart_all_dept'])->name('dashboard.biq.chart_data');
+    Route::get('/dashboard-biq/export', [DashboardController::class, 'genba_biq_export'])->name('dashboard.biq.export');
 
     // Genba Safety Dashboard Routes
     Route::view('/dashboard-safety', 'dashboard.genba-safety')->name('dashboard.safety');

@@ -1186,6 +1186,141 @@ class DashboardController extends Controller
         return view('export.pdf-export', compact('records'));
     }
 
+    public function genba_biq_export(Request $request)
+    {
+        $search = $request->search;
+        $date_from = $request->date_from;
+        $date_to = $request->date_to;
+        $auditor = $request->auditor;
+        $dept = $request->dept;
+        $status_filter = $request->status;
+        $detail_area = $request->detail_area;
+
+        $query = GenbaManagement::get_genba_mng_activity_list($search, $date_from, $date_to, $auditor, $dept, $status_filter, $detail_area, [7, 8, 9])
+            ->whereNotNull('a.asign_to_dept')
+            ->where('a.asign_to_dept', '!=', '');
+
+        $records = $query->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Genba BIQ Findings');
+
+        // Document Title
+        $sheet->setCellValue('A1', 'GENBA BIQ - FINDINGS REPORT');
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF1E293B'));
+        $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        // Subtitle / Export Date
+        $sheet->setCellValue('A2', 'Export Date: ' . date('d/m/Y H:i'));
+        $sheet->mergeCells('A2:G2');
+        $sheet->getStyle('A2')->getFont()->setSize(10)->setItalic(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF64748B'));
+        $sheet->getRowDimension(2)->setRowHeight(18);
+
+        // Spacer
+        $sheet->getRowDimension(3)->setRowHeight(8);
+
+        // Table Header (Row 4)
+        $headers = [
+            'A4' => 'No',
+            'B4' => 'Genba Date',
+            'C4' => 'Auditor',
+            'D4' => 'Line Checked',
+            'E4' => 'Detail Area',
+            'F4' => 'Department',
+            'G4' => 'Findings',
+        ];
+
+        foreach ($headers as $cell => $text) {
+            $sheet->setCellValue($cell, $text);
+        }
+
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+                'size' => 11,
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '059669'], // Emerald color
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '047857'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A4:G4')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(4)->setRowHeight(26);
+
+        $currentRow = 5;
+        foreach ($records as $index => $row) {
+            $dateStr = $row->Date ? \Carbon\Carbon::parse($row->Date)->format('d/m/Y') : '-';
+
+            $sheet->setCellValue('A' . $currentRow, $index + 1);
+            $sheet->setCellValue('B' . $currentRow, $dateStr);
+            $sheet->setCellValue('C' . $currentRow, $row->Auditor ?? '-');
+            $sheet->setCellValue('D' . $currentRow, $row->Area_Checked ?? '-');
+            $sheet->setCellValue('E' . $currentRow, $row->area_detail ?? '-');
+            $sheet->setCellValue('F' . $currentRow, $row->asign_to_dept ?? '-');
+            $sheet->setCellValue('G' . $currentRow, $row->findings ?? '-');
+
+            $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B' . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('F' . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G' . $currentRow)->getAlignment()->setWrapText(true);
+
+            // Zebra striping
+            if ($index % 2 == 1) {
+                $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('F8FAFC');
+            }
+
+            $currentRow++;
+        }
+
+        $lastRow = max(4, $currentRow - 1);
+
+        if ($lastRow >= 5) {
+            $dataRange = "A5:G{$lastRow}";
+            $sheet->getStyle($dataRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setRGB('CBD5E1');
+        }
+
+        // Set column widths
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(14);
+        $sheet->getColumnDimension('C')->setWidth(24);
+        $sheet->getColumnDimension('D')->setWidth(26);
+        $sheet->getColumnDimension('E')->setWidth(26);
+        $sheet->getColumnDimension('F')->setWidth(16);
+        $sheet->getColumnDimension('G')->setWidth(50);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'Genba_BIQ_Export_' . date('Ymd_His') . '.xlsx';
+
+        return response()->stream(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Cache-Control' => 'max-age=0',
+            ]
+        );
+    }
+
     public function genba_mng_export(Request $request, $category_id = 'NOT_BIQ')
     {
         $search = $request->search;
@@ -1207,8 +1342,15 @@ class DashboardController extends Controller
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
             $sheet = $spreadsheet->getActiveSheet();
             
+            if (is_array($category_id) && in_array(7, $category_id)) {
+                $sheet->setCellValue('E2', 'Summary Genba BIQ');
+            } elseif ($category_id === 10 || (is_array($category_id) && in_array(10, $category_id))) {
+                $sheet->setCellValue('E2', 'Summary Genba Safety');
+            }
+
             // Set dynamic header: export date
-            $sheet->setCellValue('K4', date('d-m-Y'));
+            $sheet->setCellValue('K4', 'Tanggal Terbit');
+            $sheet->setCellValue('L4', date('d-m-Y'));
             
             // We want to write data starting from row 11.
             // Copy styling of row 11 before writing.
@@ -1298,7 +1440,14 @@ class DashboardController extends Controller
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $fileName = 'Genba_MNG_Export_' . date('Ymd_His') . '.xlsx';
+        if (is_array($category_id) && in_array(7, $category_id)) {
+            $prefix = 'Genba_BIQ_Export_';
+        } elseif ($category_id === 10 || (is_array($category_id) && in_array(10, $category_id))) {
+            $prefix = 'Genba_Safety_Export_';
+        } else {
+            $prefix = 'Genba_MNG_Export_';
+        }
+        $fileName = $prefix . date('Ymd_His') . '.xlsx';
 
         return response()->stream(
             function () use ($writer) {
