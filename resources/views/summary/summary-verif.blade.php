@@ -171,6 +171,13 @@
 
 @push('scripts')
 <script>
+    window.noImageThumbSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5L5 21'/%3E%3Cline x1='3' y1='21' x2='21' y2='21'/%3E%3C/svg%3E";
+
+    window.handleImageError = function(img) {
+        img.onerror = null;
+        img.src = window.noImageThumbSrc;
+    };
+
     // Ensure global loader from layout stays active during first paint on this page.
     document.body.classList.add('data-loading');
     const initialLoader = document.getElementById('page-loader');
@@ -316,7 +323,7 @@
                         return `<div class="flex items-center justify-center">
                                     <img src="${imageSrc}" alt="Before Image"
                                         decoding="async"
-                                        onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
+                                        onerror="handleImageError(this);"
                                         class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('before', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
@@ -351,7 +358,7 @@
                         return `<div class="flex items-center justify-center">
                                     <img src="${imageSrc}" alt="After Image"
                                         decoding="async"
-                                        onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
+                                        onerror="handleImageError(this);"
                                         class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('after', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
@@ -384,7 +391,7 @@
                         return `<div class="flex items-center justify-center">
                                     <img src="${imageSrc}" alt="Verification Image"
                                         decoding="async"
-                                        onerror="this.onerror=null;this.src='${noImageThumbSrc}';"
+                                        onerror="handleImageError(this);"
                                         class="w-16 h-16 object-cover rounded-lg border border-emerald-200 cursor-pointer hover:opacity-90 transition"
                                         onclick="openSummaryImageModal('verification', '${encodedImages}', '${encodedContext}')">
                                 </div>`;
@@ -463,7 +470,7 @@
     const summaryBeforeBaseUrl = "{{ asset('findings-photo') }}";
     const summaryAfterBaseUrl = "{{ asset('evidence-photo') }}";
     const summaryVerificationBaseUrl = "{{ asset('verif-photo') }}";
-    const noImageThumbSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5L5 21'/%3E%3Cline x1='3' y1='3' x2='21' y2='21'/%3E%3C/svg%3E";
+    const noImageThumbSrc = window.noImageThumbSrc;
 
     function getFirstImagePath(images) {
         if (!images || images.trim() === '') return '';
