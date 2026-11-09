@@ -43,10 +43,8 @@ class SummaryGenbaController extends Controller
         );
 
         $query = GenbaManagement::get_genba_approval_list($search, $date_from, $date_to, null, $dept);
-        $query->where('a.corrective_action', 1)
-            ->where('a.evidence', 1)
-            ->whereNotNull('a.verification_result')
-            ->where('a.verification_result', '!=', '');
+        $query->whereNotNull('a.findings')
+            ->where('a.findings', '!=', '');
 
         $totalData = $query->count();
         $totalFiltered = $totalData;
@@ -57,10 +55,8 @@ class SummaryGenbaController extends Controller
         $dir = ($request->input('order.0.column') == 0 ? 'desc' : $request->input('order.0.dir'));
 
         $postsQuery = GenbaManagement::get_genba_approval_list($search, $date_from, $date_to, null, $dept);
-        $postsQuery->where('a.corrective_action', 1)
-            ->where('a.evidence', 1)
-            ->whereNotNull('a.verification_result')
-            ->where('a.verification_result', '!=', '')
+        $postsQuery->whereNotNull('a.findings')
+            ->where('a.findings', '!=', '')
             ->addSelect('a.preventive_action')
             ->addSelect('a.verif_img');
 

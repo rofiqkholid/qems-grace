@@ -1263,15 +1263,15 @@ class DashboardController extends Controller
 
         $currentRow = 5;
         foreach ($records as $index => $row) {
-            $dateStr = $row->Date ? \Carbon\Carbon::parse($row->Date)->format('d/m/Y') : '-';
+            $dateStr = $row->Date ? \Carbon\Carbon::parse($row->Date)->format('d/m/Y') : '';
 
             $sheet->setCellValue('A' . $currentRow, $index + 1);
             $sheet->setCellValue('B' . $currentRow, $dateStr);
-            $sheet->setCellValue('C' . $currentRow, $row->Auditor ?? '-');
-            $sheet->setCellValue('D' . $currentRow, $row->Area_Checked ?? '-');
-            $sheet->setCellValue('E' . $currentRow, $row->area_detail ?? '-');
-            $sheet->setCellValue('F' . $currentRow, $row->asign_to_dept ?? '-');
-            $sheet->setCellValue('G' . $currentRow, $row->findings ?? '-');
+            $sheet->setCellValue('C' . $currentRow, $row->Auditor ?? '');
+            $sheet->setCellValue('D' . $currentRow, $row->Area_Checked ?? '');
+            $sheet->setCellValue('E' . $currentRow, $row->area_detail ?? '');
+            $sheet->setCellValue('F' . $currentRow, $row->asign_to_dept ?? '');
+            $sheet->setCellValue('G' . $currentRow, $row->findings ?? '');
 
             $sheet->getStyle('A' . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('B' . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);

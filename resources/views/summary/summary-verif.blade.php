@@ -284,7 +284,7 @@
                     data: 'findings',
                     className: 'text-slate-700',
                     render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
+                        return '<span class="text-sm">' + (data || '') + '</span>';
                     }
                 },
                 {
@@ -293,7 +293,7 @@
                     className: 'text-center',
                     render: function(data, type, row) {
                         const firstImage = getFirstImagePath(data);
-                        if (!firstImage) return '<span class="text-slate-300">-</span>';
+                        if (!firstImage) return '';
  
                         const encodedImages = encodeURIComponent(data || '').replace(/'/g, '%27');
                         const encodedContext = encodeURIComponent(row.findings || '').replace(/'/g, '%27');
@@ -312,7 +312,7 @@
                     data: 'execution_comment',
                     className: 'text-slate-700',
                     render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
+                        return '<span class="text-sm">' + (data || '') + '</span>';
                     }
                 },
                 {
@@ -328,7 +328,7 @@
                     className: 'text-center',
                     render: function(data, type, row) {
                         const firstImage = getFirstImagePath(data);
-                        if (!firstImage) return '<span class="text-slate-300">-</span>';
+                        if (!firstImage) return '';
  
                         const encodedImages = encodeURIComponent(data || '').replace(/'/g, '%27');
                         const encodedContext = encodeURIComponent(row.execution_comment || '').replace(/'/g, '%27');
@@ -380,14 +380,14 @@
                     data: 'asign_to_dept',
                     className: 'text-slate-700',
                     render: function(data) {
-                        return '<span class="text-sm">' + (data || '-') + '</span>';
+                        return '<span class="text-sm">' + (data || '') + '</span>';
                     }
                 },
                 {
                     data: 'auditor',
                     className: 'text-slate-700',
                     render: function(data) {
-                        return data || '-';
+                        return data || '';
                     }
                 }
             ],
