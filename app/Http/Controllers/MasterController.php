@@ -1868,6 +1868,8 @@ class MasterController extends Controller
                     "calculation_method" => $item->calculation_method,
                     "arrow_target" => $item->arrow_target,
                     "result" => $item->result,
+                    "is_custom_monthly_target" => $item->is_custom_monthly_target,
+                    "monthly_targets" => $item->monthly_targets,
                     "action" => '<div class="flex items-center justify-start gap-2">
                                 <button type="button" title="Edit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
                                      onclick="handleEdit(this)"
@@ -1885,6 +1887,8 @@ class MasterController extends Controller
                                      data-calculation_method="' . htmlspecialchars($item->calculation_method ?? '') . '"
                                      data-arrow_target="' . htmlspecialchars($item->arrow_target ?? '') . '"
                                      data-source_data="' . htmlspecialchars($item->source_data ?? 'Manual') . '"
+                                     data-is_custom_monthly_target="' . ($item->is_custom_monthly_target ? '1' : '0') . '"
+                                     data-monthly_targets="' . htmlspecialchars($item->monthly_targets ?? '') . '"
                                      data-result="' . htmlspecialchars($item->result ?? '') . '">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z" fill="currentColor"></path>
@@ -1930,6 +1934,22 @@ class MasterController extends Controller
         ]);
 
         try {
+            $isCustomMonthly = $request->boolean('is_custom_monthly_target');
+            $monthlyTargets = null;
+            if ($isCustomMonthly && $request->has('monthly_targets')) {
+                $rawMonthly = $request->input('monthly_targets');
+                if (is_array($rawMonthly)) {
+                    $cleanedMonthly = [];
+                    foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m) {
+                        $val = $rawMonthly[$m] ?? 0;
+                        $cleanedMonthly[$m] = (trim((string)$val) === '') ? 0 : $val;
+                    }
+                    $monthlyTargets = json_encode($cleanedMonthly);
+                } else {
+                    $monthlyTargets = $rawMonthly;
+                }
+            }
+
             $insertedId = DB::table('KPIList')->insertGetId([
                 'parent_objective_id' => $request->parent_objective_id,
                 'no_kpi' => $request->no_kpi,
@@ -1938,6 +1958,8 @@ class MasterController extends Controller
                 'pillar' => $request->pillar,
                 'category' => $request->category,
                 'target' => $request->target,
+                'is_custom_monthly_target' => $isCustomMonthly,
+                'monthly_targets' => $monthlyTargets,
                 'unit' => $request->unit,
                 'operator' => $request->operator,
                 'calculation_method' => $request->calculation_method,
@@ -2017,6 +2039,22 @@ class MasterController extends Controller
         ]);
 
         try {
+            $isCustomMonthly = $request->boolean('is_custom_monthly_target');
+            $monthlyTargets = null;
+            if ($isCustomMonthly && $request->has('monthly_targets')) {
+                $rawMonthly = $request->input('monthly_targets');
+                if (is_array($rawMonthly)) {
+                    $cleanedMonthly = [];
+                    foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m) {
+                        $val = $rawMonthly[$m] ?? 0;
+                        $cleanedMonthly[$m] = (trim((string)$val) === '') ? 0 : $val;
+                    }
+                    $monthlyTargets = json_encode($cleanedMonthly);
+                } else {
+                    $monthlyTargets = $rawMonthly;
+                }
+            }
+
             DB::table('KPIList')->where('id', $request->id)->update([
                 'parent_objective_id' => $request->parent_objective_id,
                 'no_kpi' => $request->no_kpi,
@@ -2025,6 +2063,8 @@ class MasterController extends Controller
                 'pillar' => $request->pillar,
                 'category' => $request->category,
                 'target' => $request->target,
+                'is_custom_monthly_target' => $isCustomMonthly,
+                'monthly_targets' => $monthlyTargets,
                 'unit' => $request->unit,
                 'operator' => $request->operator,
                 'calculation_method' => $request->calculation_method,

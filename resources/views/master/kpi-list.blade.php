@@ -211,7 +211,7 @@
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Target <span class="text-red-500">*</span></label>
-                            <input type="text" name="target" required class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter target">
+                            <input type="text" name="target" id="create_target" required class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter target">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Unit <span class="text-red-500">*</span></label>
@@ -237,6 +237,32 @@
                                 ]"
                                 updateEvent="set-create-result-kpilist"
                                 hideLabel="true" />
+                        </div>
+                    </div>
+
+                    <!-- Custom Monthly Target Checkbox & Inputs for Create -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg space-y-3">
+                        <label class="relative inline-flex items-center gap-3 cursor-pointer select-none">
+                            <input type="checkbox" name="is_custom_monthly_target" id="create_is_custom_monthly_target" value="1" onchange="toggleCustomMonthlyTarget('create')" class="sr-only peer">
+                            <div class="w-6 h-6 rounded-md border border-slate-300 flex items-center justify-center peer-checked:border-sky-400 peer-checked:bg-sky-50 peer-checked:[&_svg]:scale-100 transition-all shrink-0">
+                                <svg class="w-4.5 h-4.5 text-sky-500 scale-0 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-700">
+                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan berbeda / Tidak ada penalti overdue)</span>
+                            </span>
+                        </label>
+                        <div id="create_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
+                            <p class="text-xs text-slate-500 mb-2.5">Tentukan target per bulan. Bulan yang dikosongkan otomatis bernilai <span class="font-semibold text-slate-700">0</span>.</p>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                                @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-500 mb-1 text-center">{{ $m }}</label>
+                                        <input type="text" name="monthly_targets[{{ $m }}]" id="create_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
@@ -620,6 +646,32 @@
                                 ]"
                                 updateEvent="set-edit-result-kpilist"
                                 hideLabel="true" />
+                        </div>
+                    </div>
+
+                    <!-- Custom Monthly Target Checkbox & Inputs for Edit -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg space-y-3">
+                        <label class="relative inline-flex items-center gap-3 cursor-pointer select-none">
+                            <input type="checkbox" name="is_custom_monthly_target" id="edit_is_custom_monthly_target" value="1" onchange="toggleCustomMonthlyTarget('edit')" class="sr-only peer">
+                            <div class="w-6 h-6 rounded-md border border-slate-300 flex items-center justify-center peer-checked:border-sky-400 peer-checked:bg-sky-50 peer-checked:[&_svg]:scale-100 transition-all shrink-0">
+                                <svg class="w-4.5 h-4.5 text-sky-500 scale-0 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-700">
+                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan berbeda / Tidak ada penalti overdue)</span>
+                            </span>
+                        </label>
+                        <div id="edit_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
+                            <p class="text-xs text-slate-500 mb-2.5">Tentukan target per bulan. Bulan yang dikosongkan otomatis bernilai <span class="font-semibold text-slate-700">0</span>.</p>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                                @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-500 mb-1 text-center">{{ $m }}</label>
+                                        <input type="text" name="monthly_targets[{{ $m }}]" id="edit_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
@@ -1123,6 +1175,17 @@
         });
     });
 
+    function toggleCustomMonthlyTarget(prefix) {
+        const checkbox = document.getElementById(`${prefix}_is_custom_monthly_target`);
+        const wrapper = document.getElementById(`${prefix}_monthly_targets_wrapper`);
+        if (!checkbox || !wrapper) return;
+        if (checkbox.checked) {
+            wrapper.classList.remove('hidden');
+        } else {
+            wrapper.classList.add('hidden');
+        }
+    }
+
     function openCreateModal() {
         const createFormulaEl = document.getElementById('create_formula_container');
         if (createFormulaEl && window.Alpine) {
@@ -1179,6 +1242,13 @@
             toggleHistoryStatus(yr, 'create', false);
         }
 
+        // Reset custom monthly target
+        $('#create_is_custom_monthly_target').prop('checked', false);
+        toggleCustomMonthlyTarget('create');
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].forEach(m => {
+            $(`#create_monthly_${m}`).val('');
+        });
+
         $('#createModal').removeClass('hidden');
         toggleBodyScroll(true);
         setTimeout(() => {
@@ -1209,6 +1279,24 @@
         const arrow_target = btn.getAttribute('data-arrow_target') || '';
         const source_data = btn.getAttribute('data-source_data') || 'Manual';
         const result = btn.getAttribute('data-result') || '';
+
+        const is_custom_monthly_target = btn.getAttribute('data-is_custom_monthly_target') === '1';
+        const monthly_targets_raw = btn.getAttribute('data-monthly_targets') || '';
+
+        $('#edit_is_custom_monthly_target').prop('checked', is_custom_monthly_target);
+        toggleCustomMonthlyTarget('edit');
+
+        let monthlyMap = {};
+        if (monthly_targets_raw) {
+            try {
+                monthlyMap = JSON.parse(monthly_targets_raw);
+            } catch (e) {
+                monthlyMap = {};
+            }
+        }
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].forEach(m => {
+            $(`#edit_monthly_${m}`).val(monthlyMap[m] !== undefined ? monthlyMap[m] : '');
+        });
 
         const parent_objective_name = btn.getAttribute('data-parent_objective_name') || "";
 

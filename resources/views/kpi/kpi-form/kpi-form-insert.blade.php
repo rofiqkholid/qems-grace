@@ -513,11 +513,55 @@
 @push('scripts')
 <script>
     function syncComponentData() {
-        $('#syncDataModal').removeClass('hidden').addClass('flex');
-    }
+        const btn = document.getElementById('sync_data_btn');
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1.5 text-blue-600"></i> Syncing...';
+        }
 
-    function closeSyncModal() {
-        $('#syncDataModal').addClass('hidden').removeClass('flex');
+        const notify = function(msg, type) {
+            if (typeof showCentralAlert === 'function') {
+                showCentralAlert(msg, type);
+            } else if (typeof showToast === 'function') {
+                showToast(msg, type);
+            } else {
+                alert(msg);
+            }
+        };
+
+        fetch("{{ route('kpi.company.activity.sync', $activity->hash_id) }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                const actualInput = document.getElementById('actual_input');
+                if (actualInput) {
+                    actualInput.value = res.actual;
+                    actualInput.dispatchEvent(new Event('input'));
+                    actualInput.dispatchEvent(new Event('change'));
+                }
+                notify(res.message || 'Data berhasil disinkronisasi', 'success');
+            } else {
+                notify(res.message || 'Data Tidak tersedia di Dataset', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Sync Error:', err);
+            notify('Terjadi kesalahan saat menghubungi server', 'error');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
     }
 
     function handleFileSelect(input, previewId) {

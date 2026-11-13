@@ -516,7 +516,7 @@ class KPICompanyController extends Controller
 
         $kpi = DB::table('KPICompany as child')
             ->leftJoin('KPIList as parent', 'child.kpi_list_id', '=', 'parent.id')
-            ->select('child.*', 'parent.objective', 'parent.pillar', 'parent.category', 'parent.no_kpi', 'parent.target as target', 'parent.operator', 'parent.unit', 'parent.calculation_method', 'parent.arrow_target', 'parent.result')
+            ->select('child.*', 'parent.objective', 'parent.pillar', 'parent.category', 'parent.no_kpi', 'parent.target as target', 'parent.is_custom_monthly_target', 'parent.monthly_targets', 'parent.operator', 'parent.unit', 'parent.calculation_method', 'parent.arrow_target', 'parent.result')
             ->where('child.id', $dbId)
             ->first();
 
@@ -887,6 +887,8 @@ class KPICompanyController extends Controller
                 'parent.objective',
                 'parent.source_data as source_data',
                 'parent.calculation_method as calculation_method',
+                'parent.is_custom_monthly_target',
+                'parent.monthly_targets',
                 'parent.target as master_target'
             )
             ->where('act.id', $dbId)
@@ -927,6 +929,83 @@ class KPICompanyController extends Controller
         return view('kpi.kpi-form.kpi-form-insert', compact('activity', 'departments', 'problem', 'components', 'componentUnits', 'formula'));
     }
 
+    public function syncActivityData(string $id)
+    {
+        $dbId = self::decodeId($id);
+        if (!$dbId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Activity ID.'
+            ], 400);
+        }
+
+        try {
+            $activity = DB::table('KPICompanyActivity as act')
+                ->join('KPICompany as child', 'act.kpi_company_id', '=', 'child.id')
+                ->leftJoin('KPIList as parent', 'child.kpi_list_id', '=', 'parent.id')
+                ->select(
+                    'act.id',
+                    'act.kpi_company_id',
+                    'child.kpi_list_id',
+                    'act.tahun',
+                    'act.bulan'
+                )
+                ->where('act.id', $dbId)
+                ->first();
+
+            if (!$activity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Activity record not found.'
+                ], 404);
+            }
+
+            // Month mapping between 3-letter abbreviation and numbers
+            $monthNumMap = [
+                'Jan' => '1', 'Feb' => '2', 'Mar' => '3', 'Apr' => '4',
+                'May' => '5', 'Jun' => '6', 'Jul' => '7', 'Aug' => '8',
+                'Sep' => '9', 'Oct' => '10', 'Nov' => '11', 'Dec' => '12'
+            ];
+
+            $curMonthStr = trim($activity->bulan);
+            $monthNumeric = $monthNumMap[$curMonthStr] ?? $curMonthStr;
+            $monthNumericPadded = str_pad($monthNumeric, 2, '0', STR_PAD_LEFT);
+
+            $matchedData = DB::table('KPIDataSource')
+                ->where('kpi_list_id', $activity->kpi_list_id)
+                ->where('kpi_company_id', $activity->kpi_company_id)
+                ->where('tahun', $activity->tahun)
+                ->whereIn('bulan', [$curMonthStr, $monthNumeric, $monthNumericPadded])
+                ->first();
+
+            if (!$matchedData || $matchedData->actual === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data Tidak tersedia di Dataset'
+                ]);
+            }
+
+            // Parse actual value and format appropriately
+            $rawActual = $matchedData->actual;
+            $numActual = is_numeric($rawActual) ? (float)$rawActual : (float)str_replace(',', '.', str_replace('.', '', $rawActual));
+            $formattedActual = (floor($numActual) == $numActual)
+                ? number_format($numActual, 0, ',', '.')
+                : number_format($numActual, 2, ',', '.');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil disinkronisasi dari Dataset.',
+                'actual' => $formattedActual,
+                'raw_actual' => $numActual
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function updateActivity(Request $request, string $id)
     {
         $dbId = self::decodeId($id);
@@ -952,6 +1031,8 @@ class KPICompanyController extends Controller
                     'parent.unit as unit',
                     'parent.source_data as source_data',
                     'parent.calculation_method as calculation_method',
+                    'parent.is_custom_monthly_target',
+                    'parent.monthly_targets',
                     'parent.target as master_target'
                 )
                 ->where('act.id', $dbId)
@@ -1077,6 +1158,12 @@ class KPICompanyController extends Controller
                 // Automatically calculate status based on actual, master_target, and operator
                 $operator = trim(htmlspecialchars_decode($activity->operator ?? '>='));
                 $targetStr = $activity->master_target ?? '0';
+                if (!empty($activity->is_custom_monthly_target) && !empty($activity->monthly_targets)) {
+                    $mTargets = json_decode($activity->monthly_targets, true);
+                    if (is_array($mTargets) && isset($mTargets[$activity->bulan])) {
+                        $targetStr = (string)$mTargets[$activity->bulan];
+                    }
+                }
                 $targetVal = $this->parseLocalNumber($targetStr);
 
                 $isAchieved = false;
@@ -1354,7 +1441,7 @@ class KPICompanyController extends Controller
 
         $kpi = DB::table('KPICompany as child')
             ->leftJoin('KPIList as parent', 'child.kpi_list_id', '=', 'parent.id')
-            ->select('child.*', 'parent.operator', 'parent.target', 'parent.unit')
+            ->select('child.*', 'parent.operator', 'parent.target', 'parent.unit', 'parent.is_custom_monthly_target', 'parent.monthly_targets')
             ->where('child.id', $kpiCompanyId)
             ->first();
 
@@ -1363,8 +1450,11 @@ class KPICompanyController extends Controller
         $formula = DB::table('KPIFormula')->where('kpi_list_id', $kpi->kpi_list_id)->first();
         if (!$formula) return;
 
-        $targetVal = $this->parseLocalNumber($kpi->target);
+        $defaultTargetVal = $this->parseLocalNumber($kpi->target);
         $operator = trim(htmlspecialchars_decode($kpi->operator));
+        $customTargets = (!empty($kpi->is_custom_monthly_target) && !empty($kpi->monthly_targets))
+            ? json_decode($kpi->monthly_targets, true)
+            : null;
 
         foreach ($activities as $activity) {
             $op = !empty($activity->calc_operator) ? $activity->calc_operator : ($formula ? $formula->calc_operator : null);
@@ -1452,6 +1542,10 @@ class KPICompanyController extends Controller
             }
 
             if ($calculatedActual !== null) {
+                $targetVal = (is_array($customTargets) && isset($customTargets[$activity->bulan]))
+                    ? $this->parseLocalNumber((string)$customTargets[$activity->bulan])
+                    : $defaultTargetVal;
+
                 $isAchieved = false;
                 switch ($operator) {
                     case '>=': $isAchieved = ($calculatedActual >= $targetVal); break;

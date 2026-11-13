@@ -280,6 +280,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/company/activity-plan/toggle-remark', [KPICompanyController::class, 'toggleRemark'])->name('kpi.company.activity_plan.toggle_remark');
         Route::post('/company/activity-plan/upload-evidence', [KPICompanyController::class, 'uploadEvidence'])->name('kpi.company.activity_plan.upload_evidence');
         Route::get('/company/activity/edit/{id}', [KPICompanyController::class, 'editActivity'])->name('kpi.company.activity.edit');
+        Route::post('/company/activity/sync/{id}', [KPICompanyController::class, 'syncActivityData'])->name('kpi.company.activity.sync');
         Route::post('/company/activity/update/{id}', [KPICompanyController::class, 'updateActivity'])->name('kpi.company.activity.update');
         Route::get('/company/activity/cancel/{id}', [KPICompanyController::class, 'cancelActivity'])->name('kpi.company.activity.cancel');
         Route::post('/company/formula/operator', [KPICompanyController::class, 'saveCalcOperator'])->name('kpi.company.formula.operator');

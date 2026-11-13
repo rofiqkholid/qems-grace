@@ -132,6 +132,12 @@
         $calculatedActuals[$m] = ($calculatedActual !== null) ? $calculatedActual : ($act ? ($act->actual !== null && is_numeric($act->actual) ? round((float) $act->actual, 2) : $act->actual) : null);
     }
 
+    $isCustomMonthlyTarget = !empty($kpi->is_custom_monthly_target);
+    $monthlyTargetsMap = [];
+    if ($isCustomMonthlyTarget && !empty($kpi->monthly_targets)) {
+        $monthlyTargetsMap = json_decode($kpi->monthly_targets, true) ?: [];
+    }
+
     $kpiCategory = trim($kpi->category ?? '');
     $isDeptKpi = (stripos($kpiCategory, 'dept') !== false || stripos($kpiCategory, 'department') !== false);
     $kpiTitle = $isDeptKpi ? 'Detail KPI Department' : 'Detail KPI Form';
@@ -254,11 +260,16 @@
                     <div class="flex-1 w-full min-w-0 relative h-[280px]">
                         @php
                             $actualList = [];
+                            $targetList = [];
                             foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m) {
                                 $actualList[] = ($calculatedActuals[$m] !== null) ? (float) $calculatedActuals[$m] : null;
+                                $mTargetVal = ($isCustomMonthlyTarget && isset($monthlyTargetsMap[$m]))
+                                    ? $parseLocalNum($monthlyTargetsMap[$m])
+                                    : $parseLocalNum($kpi->target);
+                                $targetList[] = (float) $mTargetVal;
                             }
                         @endphp
-                        <canvas id="kpiPerformanceChart" data-actual='{!! json_encode($actualList) !!}' data-target="{{ $kpi->target }}" data-operator="{!! $kpi->operator !!}" data-arrow-target="{{ strtolower($kpi->arrow_target ?? '') }}"></canvas>
+                        <canvas id="kpiPerformanceChart" data-actual='{!! json_encode($actualList) !!}' data-target-list='{!! json_encode($targetList) !!}' data-target="{{ $kpi->target }}" data-operator="{!! $kpi->operator !!}" data-arrow-target="{{ strtolower($kpi->arrow_target ?? '') }}"></canvas>
                     </div>
                 </div>
 
@@ -287,14 +298,19 @@
                                 @endphp
                                 @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
                                     @php
-                                        $targetSum += $parseLocalNum($kpi->target);
+                                        $curTargetVal = ($isCustomMonthlyTarget && isset($monthlyTargetsMap[$m]))
+                                            ? $parseLocalNum($monthlyTargetsMap[$m])
+                                            : $parseLocalNum($kpi->target);
+                                        $targetSum += $curTargetVal;
                                     @endphp
                                     <td class="p-3 text-center border-r border-slate-200">
-                                        {{ $formatNumWithUnit($kpi->target) }}
+                                        {{ $formatNumWithUnit($curTargetVal) }}
                                     </td>
                                 @endforeach
                                 @php
-                                    $targetFinal = ($kpi->result === 'Average') ? ($parseLocalNum($kpi->target)) : $targetSum;
+                                    $targetFinal = ($kpi->result === 'Average')
+                                        ? ($isCustomMonthlyTarget ? ($targetSum / 12) : ($parseLocalNum($kpi->target)))
+                                        : $targetSum;
                                 @endphp
                                 <td class="p-3 text-center">
                                     {{ $formatNumWithUnit($targetFinal) }}
@@ -417,12 +433,16 @@
                                          $hasActVal = ($act && $valVal !== null && $valVal !== '');
                                          $mNum = $monthOrder[$m] ?? 0;
                                          $isPastMonth = ($kpiYear < $currentYear) || ($kpiYear === $currentYear && $mNum < $currentMonthNum);
-                                         $isOvertime = !$hasActVal && $isPastMonth;
+                                         // Jika custom monthly target aktif, tidak ada status overdue
+                                         $isOvertime = !$isCustomMonthlyTarget && !$hasActVal && $isPastMonth;
                                      @endphp
                                      @if($hasActVal)
                                          <td class="p-3 text-center border-r border-slate-200">
                                              @php
-                                                 $targetVal = $parseLocalNum($kpi->target);
+                                                 $curTargetForStatus = ($isCustomMonthlyTarget && isset($monthlyTargetsMap[$m]))
+                                                     ? $parseLocalNum($monthlyTargetsMap[$m])
+                                                     : $parseLocalNum($kpi->target);
+                                                 $targetVal = $curTargetForStatus;
                                                  $actValNum = $parseLocalNum($valVal);
                                                  $op = trim(htmlspecialchars_decode($kpi->operator));
                                                  $isAchieved = false;
@@ -646,7 +666,8 @@
             updatePageSize();
             const ctx = canvas.getContext('2d');
             const fullActualData = JSON.parse(canvas.dataset.actual || '[]');
-            const targetVal = parseFloat(canvas.dataset.target) || 0;
+            const parsedTargetList = JSON.parse(canvas.dataset.targetList || '[]');
+            const defaultTargetVal = parseFloat(canvas.dataset.target) || 0;
             const operator = canvas.dataset.operator || '';
             const arrowTarget = canvas.dataset.arrowTarget || '';
             const isUp = arrowTarget !== 'down';
@@ -660,7 +681,9 @@
             const targetColor = isUp ? '#475569' : ((decodedOperator === '<=' || decodedOperator === '<') ? '#FF4560' : '#22c55e'); // target line is slate for upper limits, green otherwise
 
             const fullMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const fullTargetData = new Array(12).fill(targetVal);
+            const fullTargetData = (parsedTargetList && parsedTargetList.length === 12)
+                ? parsedTargetList
+                : new Array(12).fill(defaultTargetVal);
 
             const totalItems = 12;
             const totalPages = Math.ceil(totalItems / chartPageSize) || 1;
@@ -700,17 +723,18 @@
                                 const val = actualData[context.dataIndex];
                                 if (val === null || val === undefined) return 'rgba(0, 0, 0, 0)';
                                 
+                                const curTargetVal = targetData[context.dataIndex] !== undefined ? targetData[context.dataIndex] : defaultTargetVal;
                                 let isAchieved = false;
                                 if (decodedOperator === '>=') {
-                                    isAchieved = (val >= targetVal);
+                                    isAchieved = (val >= curTargetVal);
                                 } else if (decodedOperator === '<=') {
-                                    isAchieved = (val <= targetVal);
+                                    isAchieved = (val <= curTargetVal);
                                 } else if (decodedOperator === '>') {
-                                    isAchieved = (val > targetVal);
+                                    isAchieved = (val > curTargetVal);
                                 } else if (decodedOperator === '<') {
-                                    isAchieved = (val < targetVal);
+                                    isAchieved = (val < curTargetVal);
                                 } else {
-                                    isAchieved = (val == targetVal);
+                                    isAchieved = (val == curTargetVal);
                                 }
                                 
                                 return isAchieved ? '#22c55e' : '#FF4560';
@@ -722,17 +746,18 @@
                                 const val = actualData[context.dataIndex];
                                 if (val === null || val === undefined) return 'rgba(0, 0, 0, 0)';
                                 
+                                const curTargetVal = targetData[context.dataIndex] !== undefined ? targetData[context.dataIndex] : defaultTargetVal;
                                 let isAchieved = false;
                                 if (decodedOperator === '>=') {
-                                    isAchieved = (val >= targetVal);
+                                    isAchieved = (val >= curTargetVal);
                                 } else if (decodedOperator === '<=') {
-                                    isAchieved = (val <= targetVal);
+                                    isAchieved = (val <= curTargetVal);
                                 } else if (decodedOperator === '>') {
-                                    isAchieved = (val > targetVal);
+                                    isAchieved = (val > curTargetVal);
                                 } else if (decodedOperator === '<') {
-                                    isAchieved = (val < targetVal);
+                                    isAchieved = (val < curTargetVal);
                                 } else {
-                                    isAchieved = (val == targetVal);
+                                    isAchieved = (val == curTargetVal);
                                 }
                                 
                                 return isAchieved ? '#22c55e' : '#FF4560';
