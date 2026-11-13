@@ -250,7 +250,7 @@
                                 </svg>
                             </div>
                             <span class="text-sm font-medium text-slate-700">
-                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan berbeda / Tidak ada penalti overdue)</span>
+                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan bervariasi / fleksibel)</span>
                             </span>
                         </label>
                         <div id="create_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
@@ -659,7 +659,7 @@
                                 </svg>
                             </div>
                             <span class="text-sm font-medium text-slate-700">
-                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan berbeda / Tidak ada penalti overdue)</span>
+                                Custom Monthly Target <span class="text-xs text-slate-400 font-normal">(Target bulanan bervariasi / fleksibel)</span>
                             </span>
                         </label>
                         <div id="edit_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
