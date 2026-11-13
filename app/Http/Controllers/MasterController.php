@@ -1774,24 +1774,44 @@ class MasterController extends Controller
     public function kpi_list()
     {
         $kpiList = DB::table('KPIList')->select('id', 'no_kpi', 'objective')->get();
-        $pillars = DB::table('KPIList')->distinct()->whereNotNull('pillar')->where('pillar', '!=', '')->pluck('pillar')->values();
+
+        // Load options from resources/data/kpi-options.json
+        $jsonPath = resource_path('data/kpi-options.json');
+        $jsonOptions = file_exists($jsonPath) ? json_decode(file_get_contents($jsonPath), true) : [];
+
+        // Ambil pillar berdasarkan tahun berjalan (contoh: 2026, jika tahun 2027 berganti ke 2027)
+        $currentYear = date('Y');
+        $allPillarsGrouped = $jsonOptions['pillars'] ?? [];
+        if (isset($allPillarsGrouped[$currentYear])) {
+            $rawPillars = $allPillarsGrouped[$currentYear];
+        } elseif (isset($allPillarsGrouped['2026'])) {
+            $rawPillars = $allPillarsGrouped['2026'];
+        } else {
+            $rawPillars = is_array($allPillarsGrouped) && !isset($allPillarsGrouped['2026']) ? $allPillarsGrouped : [];
+        }
+
+        // Simpan pillars untuk dropdown view saat ini
+        $jsonOptions['active_pillars'] = $rawPillars;
+
+        $pillars = collect($rawPillars)->pluck('name')->values();
         if ($pillars->isEmpty()) {
             $pillars = collect(['Safety', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery', 'Environment & Energy']);
         }
-        $categories = DB::table('KPIList')->distinct()->whereNotNull('category')->where('category', '!=', '')->pluck('category')->values();
-        if ($categories->isEmpty()) {
-            $categories = collect(['KPI Company', 'KPI Department', 'Activity Plan']);
-        }
-        $categoryOptions = $categories->map(function ($item) {
-            return [
-                'id' => $item,
-                'name' => ($item === 'Company KPI' ? 'KPI Company' : $item)
-            ];
-        })->unique('name')->values()->toArray();
-        $calculationMethods = collect(['Direct Actual (Input Actual Data)', 'Custom (Using Formula Components)']);
+
+        $categoryOptions = $jsonOptions['categories'] ?? [
+            ['id' => 'Company KPI', 'name' => 'KPI Company'],
+            ['id' => 'KPI Department', 'name' => 'KPI Department']
+        ];
+        $categories = collect($categoryOptions)->pluck('name')->values();
+
+        $calculationMethods = collect($jsonOptions['calculation_methods'] ?? [
+            ['id' => 'Direct Actual (Input Actual Data)', 'name' => 'Direct Actual (Input Actual Data)'],
+            ['id' => 'Custom (Using Formula Components)', 'name' => 'Custom (Using Formula Components)']
+        ])->pluck('name')->values();
+
         $kpiUnits = DB::table('KPIUnit')->orderBy('name', 'asc')->get();
 
-        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'categoryOptions', 'calculationMethods', 'kpiUnits'));
+        return view('master.kpi-list', compact('kpiList', 'pillars', 'categories', 'categoryOptions', 'calculationMethods', 'kpiUnits', 'jsonOptions'));
     }
 
     public function kpi_list_table(Request $request)
@@ -1919,32 +1939,41 @@ class MasterController extends Controller
 
     public function store_kpi_list(Request $request)
     {
-        $request->validate([
+        $rules = [
             'no_kpi' => 'required',
             'objective' => 'required',
             'definition' => 'required',
             'pillar' => 'required',
             'category' => 'required',
-            'target' => 'required',
+            'target' => $request->boolean('is_custom_monthly_target') ? 'nullable' : 'required',
             'unit' => 'required',
             'operator' => 'required',
             'calculation_method' => 'required',
             'arrow_target' => 'required|in:Down,Up',
             'result' => 'required|in:Total,Average',
-        ]);
+        ];
+        $request->validate($rules);
 
         try {
             $isCustomMonthly = $request->boolean('is_custom_monthly_target');
             $monthlyTargets = null;
+            $mainTarget = $request->target;
             if ($isCustomMonthly && $request->has('monthly_targets')) {
                 $rawMonthly = $request->input('monthly_targets');
                 if (is_array($rawMonthly)) {
                     $cleanedMonthly = [];
+                    $sumMonthly = 0;
                     foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m) {
                         $val = $rawMonthly[$m] ?? 0;
                         $cleanedMonthly[$m] = (trim((string)$val) === '') ? 0 : $val;
+                        $numVal = (float)str_replace(',', '.', str_replace('.', '', (string)$cleanedMonthly[$m]));
+                        $sumMonthly += $numVal;
                     }
                     $monthlyTargets = json_encode($cleanedMonthly);
+                    if ($mainTarget === null || trim((string)$mainTarget) === '') {
+                        $mainTarget = ($request->result === 'Average') ? ($sumMonthly / 12) : $sumMonthly;
+                        $mainTarget = (floor($mainTarget) == $mainTarget) ? number_format($mainTarget, 0, ',', '.') : number_format($mainTarget, 2, ',', '.');
+                    }
                 } else {
                     $monthlyTargets = $rawMonthly;
                 }
@@ -1957,7 +1986,7 @@ class MasterController extends Controller
                 'definition' => $request->definition,
                 'pillar' => $request->pillar,
                 'category' => $request->category,
-                'target' => $request->target,
+                'target' => $mainTarget ?: '0',
                 'is_custom_monthly_target' => $isCustomMonthly,
                 'monthly_targets' => $monthlyTargets,
                 'unit' => $request->unit,
@@ -2023,33 +2052,42 @@ class MasterController extends Controller
 
     public function update_kpi_list(Request $request)
     {
-        $request->validate([
+        $rules = [
             'id' => 'required',
             'no_kpi' => 'required',
             'objective' => 'required',
             'definition' => 'required',
             'pillar' => 'required',
             'category' => 'required',
-            'target' => 'required',
+            'target' => $request->boolean('is_custom_monthly_target') ? 'nullable' : 'required',
             'unit' => 'required',
             'operator' => 'required',
             'calculation_method' => 'required',
             'arrow_target' => 'required|in:Down,Up',
             'result' => 'required|in:Total,Average',
-        ]);
+        ];
+        $request->validate($rules);
 
         try {
             $isCustomMonthly = $request->boolean('is_custom_monthly_target');
             $monthlyTargets = null;
+            $mainTarget = $request->target;
             if ($isCustomMonthly && $request->has('monthly_targets')) {
                 $rawMonthly = $request->input('monthly_targets');
                 if (is_array($rawMonthly)) {
                     $cleanedMonthly = [];
+                    $sumMonthly = 0;
                     foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m) {
                         $val = $rawMonthly[$m] ?? 0;
                         $cleanedMonthly[$m] = (trim((string)$val) === '') ? 0 : $val;
+                        $numVal = (float)str_replace(',', '.', str_replace('.', '', (string)$cleanedMonthly[$m]));
+                        $sumMonthly += $numVal;
                     }
                     $monthlyTargets = json_encode($cleanedMonthly);
+                    if ($mainTarget === null || trim((string)$mainTarget) === '') {
+                        $mainTarget = ($request->result === 'Average') ? ($sumMonthly / 12) : $sumMonthly;
+                        $mainTarget = (floor($mainTarget) == $mainTarget) ? number_format($mainTarget, 0, ',', '.') : number_format($mainTarget, 2, ',', '.');
+                    }
                 } else {
                     $monthlyTargets = $rawMonthly;
                 }
@@ -2062,7 +2100,7 @@ class MasterController extends Controller
                 'definition' => $request->definition,
                 'pillar' => $request->pillar,
                 'category' => $request->category,
-                'target' => $request->target,
+                'target' => $mainTarget ?: '0',
                 'is_custom_monthly_target' => $isCustomMonthly,
                 'monthly_targets' => $monthlyTargets,
                 'unit' => $request->unit,
@@ -2377,7 +2415,8 @@ class MasterController extends Controller
             'items' => $formattedItems,
             'pagination' => [
                 'more' => ($offset + $limit) < $total
-            ]
+            ],
+            'total' => $total
         ]);
     }
 

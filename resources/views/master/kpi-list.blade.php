@@ -40,7 +40,7 @@
                             name="filter_pillar"
                             id="filter_pillar"
                             label="Pillar"
-                            :initialOptions="($pillars ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
+                            :initialOptions="$jsonOptions['active_pillars'] ?? ($pillars ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
                             updateEvent="set-filter-pillar"
                             changeEvent="filter-pillar-changed"
                             hideLabel="true" />
@@ -52,7 +52,7 @@
                             name="filter_category"
                             id="filter_category"
                             label="Category"
-                            :initialOptions="$categoryOptions ?? ($categories ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => ($item === 'Company KPI' ? 'KPI Company' : $item)])->toArray()"
+                            :initialOptions="$jsonOptions['categories'] ?? ($categoryOptions ?? ($categories ?? collect([]))->map(fn($item) => ['id' => $item, 'name' => ($item === 'Company KPI' ? 'KPI Company' : $item)])->toArray())"
                             updateEvent="set-filter-category"
                             changeEvent="filter-category-changed"
                             hideLabel="true" />
@@ -64,7 +64,7 @@
                             name="filter_calculation_method"
                             id="filter_calculation_method"
                             label="Calculation Method"
-                            :initialOptions="$calculationMethods->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
+                            :initialOptions="$jsonOptions['calculation_methods'] ?? $calculationMethods->map(fn($item) => ['id' => $item, 'name' => $item])->toArray()"
                             updateEvent="set-filter-calculation-method"
                             changeEvent="filter-calculation-method-changed"
                             hideLabel="true" />
@@ -162,9 +162,10 @@
                                 id="create_category_kpilist"
                                 label="Category"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['categories'] ?? [
                                     ['id' => 'Company KPI', 'name' => 'KPI Company'],
-                                    ['id' => 'KPI Department', 'name' => 'KPI Department']                                ]"
+                                    ['id' => 'KPI Department', 'name' => 'KPI Department']
+                                ]"
                                 updateEvent="set-create-category-kpilist"
                                 hideLabel="true" />
                         </div>
@@ -181,7 +182,7 @@
                                 id="create_pillar_kpilist"
                                 label="Pillar"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['active_pillars'] ?? [
                                     ['id' => 'Safety', 'name' => 'Safety'],
                                     ['id' => 'Quality', 'name' => 'Quality'],
                                     ['id' => 'People', 'name' => 'People'],
@@ -200,7 +201,7 @@
                                 id="create_arrow_target_kpilist"
                                 label="Arrow Target"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['arrow_targets'] ?? [
                                     ['id' => 'Up', 'name' => 'Up'],
                                     ['id' => 'Down', 'name' => 'Down']
                                 ]"
@@ -210,7 +211,9 @@
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Target <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">
+                                Target <span id="create_target_required" class="text-red-500">*</span>
+                            </label>
                             <input type="text" name="target" id="create_target" required class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Enter target">
                         </div>
                         <div>
@@ -231,7 +234,7 @@
                                 id="create_result_kpilist"
                                 label="Result"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['results'] ?? [
                                     ['id' => 'Total', 'name' => 'Total'],
                                     ['id' => 'Average', 'name' => 'Average']
                                 ]"
@@ -255,11 +258,11 @@
                         </label>
                         <div id="create_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
                             <p class="text-xs text-slate-500 mb-2.5">Tentukan target per bulan. Bulan yang dikosongkan otomatis bernilai <span class="font-semibold text-slate-700">0</span>.</p>
-                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                                 @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
                                     <div>
-                                        <label class="block text-[11px] font-semibold text-slate-500 mb-1 text-center">{{ $m }}</label>
-                                        <input type="text" name="monthly_targets[{{ $m }}]" id="create_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 text-center">{{ $m }}</label>
+                                        <input type="text" name="monthly_targets[{{ $m }}]" id="create_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
                                     </div>
                                 @endforeach
                             </div>
@@ -273,7 +276,7 @@
                                 id="create_operator_kpilist"
                                 label="Operator"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['operators'] ?? [
                                     ['id' => '>=', 'name' => '>= (Greater than or equal to)'],
                                     ['id' => '<=', 'name' => '<= (Less than or equal to)'],
                                     ['id' => '=', 'name' => '= (Equal to)'],
@@ -290,7 +293,7 @@
                                 id="create_calculation_method_kpilist"
                                 label="Calculation Method"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['calculation_methods'] ?? [
                                     ['id' => 'Direct Actual (Input Actual Data)', 'name' => 'Direct Actual (Input Actual Data)'],
                                     ['id' => 'Custom (Using Formula Components)', 'name' => 'Custom (Using Formula Components)']
                                 ]"
@@ -305,7 +308,7 @@
                                 id="create_source_data_kpilist"
                                 label="Source Data"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['source_data'] ?? [
                                     ['id' => 'Manual', 'name' => 'Manual'],
                                     ['id' => 'Auto', 'name' => 'Auto']
                                 ]"
@@ -569,7 +572,7 @@
                                 id="edit_category_kpilist"
                                 label="Category"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['categories'] ?? [
                                     ['id' => 'Company KPI', 'name' => 'KPI Company'],
                                     ['id' => 'KPI Department', 'name' => 'KPI Department'],
                                     ['id' => 'Activity Plan', 'name' => 'Activity Plan']
@@ -590,7 +593,7 @@
                                 id="edit_pillar_kpilist"
                                 label="Pillar"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['active_pillars'] ?? [
                                     ['id' => 'Safety', 'name' => 'Safety'],
                                     ['id' => 'Quality', 'name' => 'Quality'],
                                     ['id' => 'People', 'name' => 'People'],
@@ -609,7 +612,7 @@
                                 id="edit_arrow_target_kpilist"
                                 label="Arrow Target"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['arrow_targets'] ?? [
                                     ['id' => 'Up', 'name' => 'Up'],
                                     ['id' => 'Down', 'name' => 'Down']
                                 ]"
@@ -619,7 +622,9 @@
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Target <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">
+                                Target <span id="edit_target_required" class="text-red-500">*</span>
+                            </label>
                             <input type="text" name="target" id="edit_target" required class="w-full px-4 py-[9px] border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm">
                         </div>
                         <div>
@@ -640,7 +645,7 @@
                                 id="edit_result_kpilist"
                                 label="Result"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['results'] ?? [
                                     ['id' => 'Total', 'name' => 'Total'],
                                     ['id' => 'Average', 'name' => 'Average']
                                 ]"
@@ -664,11 +669,11 @@
                         </label>
                         <div id="edit_monthly_targets_wrapper" class="hidden pt-2 border-t border-slate-200">
                             <p class="text-xs text-slate-500 mb-2.5">Tentukan target per bulan. Bulan yang dikosongkan otomatis bernilai <span class="font-semibold text-slate-700">0</span>.</p>
-                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                                 @foreach(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $m)
                                     <div>
-                                        <label class="block text-[11px] font-semibold text-slate-500 mb-1 text-center">{{ $m }}</label>
-                                        <input type="text" name="monthly_targets[{{ $m }}]" id="edit_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 text-center">{{ $m }}</label>
+                                        <input type="text" name="monthly_targets[{{ $m }}]" id="edit_monthly_{{ $m }}" placeholder="0" class="w-full text-center px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
                                     </div>
                                 @endforeach
                             </div>
@@ -682,7 +687,7 @@
                                 id="edit_operator_kpilist"
                                 label="Operator"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['operators'] ?? [
                                     ['id' => '>=', 'name' => '>= (Greater than or equal to)'],
                                     ['id' => '<=', 'name' => '<= (Less than or equal to)'],
                                     ['id' => '=', 'name' => '= (Equal to)'],
@@ -699,7 +704,7 @@
                                 id="edit_calculation_method_kpilist"
                                 label="Calculation Method"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['calculation_methods'] ?? [
                                     ['id' => 'Direct Actual (Input Actual Data)', 'name' => 'Direct Actual (Input Actual Data)'],
                                     ['id' => 'Custom (Using Formula Components)', 'name' => 'Custom (Using Formula Components)']
                                 ]"
@@ -714,7 +719,7 @@
                                 id="edit_source_data_kpilist"
                                 label="Source Data"
                                 required="true"
-                                :initialOptions="[
+                                :initialOptions="$jsonOptions['source_data'] ?? [
                                     ['id' => 'Manual', 'name' => 'Manual'],
                                     ['id' => 'Auto', 'name' => 'Auto']
                                 ]"
@@ -1178,11 +1183,25 @@
     function toggleCustomMonthlyTarget(prefix) {
         const checkbox = document.getElementById(`${prefix}_is_custom_monthly_target`);
         const wrapper = document.getElementById(`${prefix}_monthly_targets_wrapper`);
+        const targetInput = document.getElementById(`${prefix}_target`);
+        const targetRequiredStar = document.getElementById(`${prefix}_target_required`);
         if (!checkbox || !wrapper) return;
         if (checkbox.checked) {
             wrapper.classList.remove('hidden');
+            if (targetInput) {
+                targetInput.removeAttribute('required');
+            }
+            if (targetRequiredStar) {
+                targetRequiredStar.classList.add('hidden');
+            }
         } else {
             wrapper.classList.add('hidden');
+            if (targetInput) {
+                targetInput.setAttribute('required', 'required');
+            }
+            if (targetRequiredStar) {
+                targetRequiredStar.classList.remove('hidden');
+            }
         }
     }
 

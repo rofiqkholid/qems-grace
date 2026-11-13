@@ -1,0 +1,136 @@
+{
+  "pillars": {
+    "2026": [
+      {
+        "id": "Safety",
+        "name": "Safety"
+      },
+      {
+        "id": "Quality",
+        "name": "Quality"
+      },
+      {
+        "id": "People",
+        "name": "People"
+      },
+      {
+        "id": "Cost",
+        "name": "Cost"
+      },
+      {
+        "id": "Responsiveness",
+        "name": "Responsiveness"
+      },
+      {
+        "id": "Delivery",
+        "name": "Delivery"
+      },
+      {
+        "id": "Environment & Energy",
+        "name": "Environment & Energy"
+      }
+    ],
+    "2027": [
+      {
+        "id": "Safety, People & Organization",
+        "name": "Safety, People & Organization"
+      },
+      {
+        "id": "Asset & Technology",
+        "name": "Asset & Technology"
+      },
+      {
+        "id": "Quality Excellence",
+        "name": "Quality Excellence"
+      },
+      {
+        "id": "Delivery & Supply Chain",
+        "name": "Delivery & Supply Chain"
+      },
+      {
+        "id": "Operational Excellence",
+        "name": "Operational Excellence"
+      },
+      {
+        "id": "Financial Performance",
+        "name": "Financial Performance"
+      },
+      {
+        "id": "Growth & Sustainability",
+        "name": "Growth & Sustainability"
+      }
+    ]
+  },
+  "categories": [
+    {
+      "id": "Company KPI",
+      "name": "KPI Company"
+    },
+    {
+      "id": "KPI Department",
+      "name": "KPI Department"
+    }
+  ],
+  "operators": [
+    {
+      "id": ">=",
+      "name": ">= (Greater than or equal to)"
+    },
+    {
+      "id": "<=",
+      "name": "<= (Less than or equal to)"
+    },
+    {
+      "id": "=",
+      "name": "= (Equal to)"
+    },
+    {
+      "id": ">",
+      "name": "> (Greater than)"
+    },
+    {
+      "id": "<",
+      "name": "< (Less than)"
+    }
+  ],
+  "arrow_targets": [
+    {
+      "id": "Up",
+      "name": "Up"
+    },
+    {
+      "id": "Down",
+      "name": "Down"
+    }
+  ],
+  "results": [
+    {
+      "id": "Total",
+      "name": "Total"
+    },
+    {
+      "id": "Average",
+      "name": "Average"
+    }
+  ],
+  "calculation_methods": [
+    {
+      "id": "Direct Actual (Input Actual Data)",
+      "name": "Direct Actual (Input Actual Data)"
+    },
+    {
+      "id": "Custom (Using Formula Components)",
+      "name": "Custom (Using Formula Components)"
+    }
+  ],
+  "source_data": [
+    {
+      "id": "Manual",
+      "name": "Manual"
+    },
+    {
+      "id": "Auto",
+      "name": "Auto"
+    }
+  ]
+}

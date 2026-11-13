@@ -480,7 +480,23 @@ class KPICompanyController extends Controller
         $limit = 10;
         $offset = ($page - 1) * $limit;
 
-        $allStandardPillars = ['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
+        $jsonPath = resource_path('data/kpi-options.json');
+        $allStandardPillars = [];
+        if (file_exists($jsonPath)) {
+            $data = json_decode(file_get_contents($jsonPath), true);
+            $currentYear = date('Y');
+            $allPillarsGrouped = $data['pillars'] ?? [];
+            if (isset($allPillarsGrouped[$currentYear])) {
+                $allStandardPillars = collect($allPillarsGrouped[$currentYear])->pluck('name')->toArray();
+            } elseif (isset($allPillarsGrouped['2026'])) {
+                $allStandardPillars = collect($allPillarsGrouped['2026'])->pluck('name')->toArray();
+            } else {
+                $allStandardPillars = collect($allPillarsGrouped)->pluck('name')->toArray();
+            }
+        }
+        if (empty($allStandardPillars)) {
+            $allStandardPillars = ['Safety', 'Environment', 'Quality', 'People', 'Cost', 'Responsiveness', 'Delivery'];
+        }
 
         $filtered = array_values(array_filter($allStandardPillars, function($p) use ($search) {
             return empty($search) || stripos($p, $search) !== false;
