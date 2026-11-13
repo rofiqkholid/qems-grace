@@ -1954,6 +1954,25 @@ class MasterController extends Controller
         ];
         $request->validate($rules);
 
+        // Cek duplikasi berdasarkan No. KPI atau Nama KPI (Objective)
+        $trimmedNoKpi = trim($request->no_kpi);
+        $trimmedObjective = trim($request->objective);
+
+        $duplicate = DB::table('KPIList')
+            ->where(function ($q) use ($trimmedNoKpi, $trimmedObjective) {
+                $q->where('no_kpi', $trimmedNoKpi)
+                  ->orWhere('objective', $trimmedObjective);
+            })
+            ->first();
+
+        if ($duplicate) {
+            $duplicateField = (strcasecmp($duplicate->no_kpi, $trimmedNoKpi) === 0) ? "No. KPI '{$trimmedNoKpi}'" : "Nama KPI '{$trimmedObjective}'";
+            return response()->json([
+                'success' => false,
+                'message' => "Data tidak dapat disimpan karena {$duplicateField} sudah ada di dalam sistem."
+            ], 422);
+        }
+
         try {
             $isCustomMonthly = $request->boolean('is_custom_monthly_target');
             $monthlyTargets = null;
@@ -2067,6 +2086,26 @@ class MasterController extends Controller
             'result' => 'required|in:Total,Average',
         ];
         $request->validate($rules);
+
+        // Cek duplikasi saat update (kecuali record yang sedang diedit itu sendiri)
+        $trimmedNoKpi = trim($request->no_kpi);
+        $trimmedObjective = trim($request->objective);
+
+        $duplicate = DB::table('KPIList')
+            ->where('id', '!=', $request->id)
+            ->where(function ($q) use ($trimmedNoKpi, $trimmedObjective) {
+                $q->where('no_kpi', $trimmedNoKpi)
+                  ->orWhere('objective', $trimmedObjective);
+            })
+            ->first();
+
+        if ($duplicate) {
+            $duplicateField = (strcasecmp($duplicate->no_kpi, $trimmedNoKpi) === 0) ? "No. KPI '{$trimmedNoKpi}'" : "Nama KPI '{$trimmedObjective}'";
+            return response()->json([
+                'success' => false,
+                'message' => "Data tidak dapat disimpan karena {$duplicateField} sudah digunakan oleh data lain."
+            ], 422);
+        }
 
         try {
             $isCustomMonthly = $request->boolean('is_custom_monthly_target');
