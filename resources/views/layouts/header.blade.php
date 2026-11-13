@@ -19,7 +19,7 @@
                 <!-- Application Name -->
                 <div class="flex flex-col justify-center">
                     <span class="text-base sm:text-xl font-extrabold tracking-wider text-blue-600 leading-none">GRACE</span>
-                    <span class="hidden xl:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">Genba Report & Action for Corrective Execution</span>
+                    <span class="hidden xl:block text-[10px] text-slate-400 font-base whitespace-nowrap mt-0.5">General Report, Achievement Control and Evaluation</span>
                 </div>
 
                 <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
