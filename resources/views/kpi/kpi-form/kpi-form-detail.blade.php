@@ -816,17 +816,18 @@
                                             for (let idx = 0; idx < actualData.length; idx++) {
                                                 const val = actualData[idx];
                                                 if (val !== null && val !== undefined) {
+                                                    const curTarget = targetData[idx] !== undefined ? targetData[idx] : defaultTargetVal;
                                                     let isAchieved = false;
                                                     if (decodedOperator === '>=') {
-                                                        isAchieved = (val >= targetVal);
+                                                        isAchieved = (val >= curTarget);
                                                     } else if (decodedOperator === '<=') {
-                                                        isAchieved = (val <= targetVal);
+                                                        isAchieved = (val <= curTarget);
                                                     } else if (decodedOperator === '>') {
-                                                        isAchieved = (val > targetVal);
+                                                        isAchieved = (val > curTarget);
                                                     } else if (decodedOperator === '<') {
-                                                        isAchieved = (val < targetVal);
+                                                        isAchieved = (val < curTarget);
                                                     } else {
-                                                        isAchieved = (val == targetVal);
+                                                        isAchieved = (val == curTarget);
                                                     }
                                                     color = isAchieved ? '#22c55e' : '#FF4560';
                                                     break;
@@ -860,7 +861,8 @@
                             },
                             suggestedMax: (() => {
                                 const validVals = fullActualData.filter(v => v !== null && v !== undefined);
-                                const maxVal = validVals.length > 0 ? Math.max(...validVals, targetVal) : targetVal;
+                                const maxTarget = fullTargetData.length > 0 ? Math.max(...fullTargetData) : defaultTargetVal;
+                                const maxVal = validVals.length > 0 ? Math.max(...validVals, maxTarget) : maxTarget;
                                 return maxVal + (maxVal * 0.15 || 1);
                             })()
                         },
