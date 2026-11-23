@@ -74,6 +74,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/internal-audit/get-clause-titles', [InternalAuditController::class, 'getClauseTitles'])->name('internal_audit.get_clause_titles');
     Route::post('/internal-audit/detail/save-note', [InternalAuditController::class, 'saveDetailNote'])->name('internal_audit.detail.save_note');
 
+    // External Audit Routes (Placeholder)
+    Route::get('/external-audit', function () {
+        return view('genba-biq-intr.external-audit.external-audit');
+    })->name('external_audit');
+
     Route::get('/team', function () {
         return view('genba-biq-intr.setup.genba-team');
     })->name('genba-team');

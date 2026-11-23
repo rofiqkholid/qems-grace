@@ -262,7 +262,7 @@ class MenuSeeder extends Seeder
                 'group_id' => 9,
                 'sub_group_id' => 107,
                 'menu' => 'internal-audit-main',
-                'menu_name' => 'Internal Audit',
+                'menu_name' => 'INT & EXT Audit',
                 'icon' => '<span></span>'
             ],
             [
@@ -273,6 +273,16 @@ class MenuSeeder extends Seeder
                 'sub_group_id' => 107,
                 'menu' => 'internal-audit',
                 'menu_name' => 'Internal Audit Form',
+                'icon' => '<span></span>'
+            ],
+            [
+                'id' => 128,
+                'sequence_id' => 2,
+                'level_menu_id' => 3,
+                'group_id' => 9,
+                'sub_group_id' => 107,
+                'menu' => 'external-audit',
+                'menu_name' => 'External Audit Form',
                 'icon' => '<span></span>'
             ],
             [
