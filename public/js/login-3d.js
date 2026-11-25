@@ -400,7 +400,8 @@
 
     // Spanduk / Banner Kain Logo Summit Adyawinsa (diikat tali ke tiang/dinding)
     const logoLoader = new THREE.TextureLoader();
-    logoLoader.load('/image/sai_logo.png', (tex) => {
+    const logoUrl = window.SAI_LOGO_URL || '/image/sai_logo.png';
+    logoLoader.load(logoUrl, (tex) => {
         if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
         else tex.encoding = THREE.sRGBEncoding;
 

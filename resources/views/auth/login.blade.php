@@ -226,6 +226,9 @@
 </script>
 
 <!-- Three.js 3D Manufacturing Animation -->
+<script>
+    window.SAI_LOGO_URL = "{{ asset('image/sai_logo.png') }}";
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="{{ asset('js/login-3d.js') }}"></script>
 @endsection
