@@ -27,9 +27,9 @@
             GRACE
         </h1>
         <p class="text-xl font-semibold text-slate-700 mb-2">
-            Genba Report &amp; Action for Corrective Execution
+            General Report, Achievement Control and Evaluation
         </p>
-        <p class="text-sm font-bold tracking-[0.25em] text-sky-600 uppercase mb-8">
+        <p class="text-sm font-bold tracking-[0.25em] text-slate-700 uppercase mb-8">
             SEE. SOLVE. EVOLVE.
         </p>
 
@@ -61,18 +61,18 @@
         </div>
     </div>
 
-    <div class="relative z-10 w-full max-w-[440px] lg:mr-[60px]">
-        <!-- Login Card -->
-        <div class="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl shadow-sky-950/50 overflow-hidden">
+    <div class="relative z-10 w-full max-w-[400px] lg:max-w-[440px] mx-auto lg:mx-0 lg:mr-[60px] my-auto">
+        <!-- Login Card (Glassmorphism Transparent) -->
+        <div class="bg-white/35 md:bg-white/30 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl shadow-slate-900/10 overflow-hidden">
             <!-- Header -->
             <div class="bg-transparent text-center border-b border-white/20">
                 <div class="flex justify-center overflow-hidden py-1">
-                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[180px] w-auto mix-blend-multiply scale-110">
+                    <img src="{{ asset('image/sai_logo.png') }}" alt="SAI Logo" class="h-[120px] sm:h-[150px] lg:h-[180px] w-auto mix-blend-multiply scale-105 lg:scale-110">
                 </div>
             </div>
 
             <!-- Form -->
-            <div class="p-8">
+            <div class="p-6 sm:p-8">
                 @if ($errors->any())
                 <div id="error-box" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                     <div id="error-header" class="flex items-center gap-2 text-red-600">
