@@ -3,14 +3,67 @@
 @section('title', 'Login GRACE')
 
 @section('content')
-<style>#login-bg{background-image:url("{{ asset('image/login-bg.png') }}")}</style>
-<div id="login-bg" class="relative min-h-screen flex items-center justify-end p-4 lg:p-16 bg-cover lg:bg-[length:100%_100%] bg-right bg-no-repeat">
-    <!-- Premium overlay to soften background and enhance contrast -->
-    <div class="absolute inset-0 bg-slate-900/20"></div>
+<style>
+    #three-canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        display: block;
+    }
+    .grace-glow {
+        text-shadow: 0 4px 24px rgba(14, 165, 233, 0.25);
+    }
+</style>
 
-    <div class="relative z-10 w-full max-w-[460px] lg:mr-[100px]">
+<div id="login-bg" class="relative min-h-screen flex items-center justify-center lg:justify-between p-4 lg:p-16 overflow-hidden bg-gradient-to-br from-slate-100 via-sky-50 to-blue-100">
+    <!-- Three.js 3D Manufacturing Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Left Branding & Industry 4.0 Info (Desktop - Bottom Left) -->
+    <div class="relative z-10 hidden lg:flex lg:self-end flex-col max-w-xl pl-2 pb-2 text-slate-800 select-none">
+        <h1 class="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sky-700 to-blue-600 grace-glow mb-3">
+            GRACE
+        </h1>
+        <p class="text-xl font-semibold text-slate-700 mb-2">
+            Genba Report &amp; Action for Corrective Execution
+        </p>
+        <p class="text-sm font-bold tracking-[0.25em] text-sky-600 uppercase mb-8">
+            SEE. SOLVE. EVOLVE.
+        </p>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
+                <div class="w-9 h-9 rounded-xl bg-sky-500/15 text-sky-600 flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <p class="text-xs text-slate-700 font-medium leading-relaxed">
+                    Temukan &amp; Catat Setiap Temuan
+                </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-gears"></i>
+                </div>
+                <p class="text-xs text-slate-700 font-medium leading-relaxed">
+                    Lakukan Tindakan &amp; Selesaikan Akar Masalah
+                </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <p class="text-xs text-slate-700 font-medium leading-relaxed">
+                    Tingkatkan Proses Secara Berkelanjutan
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="relative z-10 w-full max-w-[440px] lg:mr-[60px]">
         <!-- Login Card -->
-        <div class="bg-white/30 backdrop-blur-sm rounded-2xl border border-white/30 overflow-hidden">
+        <div class="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl shadow-sky-950/50 overflow-hidden">
             <!-- Header -->
             <div class="bg-transparent text-center border-b border-white/20">
                 <div class="flex justify-center overflow-hidden py-1">
@@ -171,4 +224,8 @@
         });
     });
 </script>
+
+<!-- Three.js 3D Manufacturing Animation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{{ asset('js/login-3d.js') }}"></script>
 @endsection
