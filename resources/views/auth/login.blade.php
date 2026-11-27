@@ -4,63 +4,12 @@
 
 @section('content')
 <style>
-    #three-canvas {
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        display: block;
-    }
-    .grace-glow {
-        text-shadow: 0 4px 24px rgba(14, 165, 233, 0.25);
+    #login-bg {
+        background-image: url("{{ asset('image/login-bg-grace.jpg') }}");
     }
 </style>
 
-<div id="login-bg" class="relative min-h-screen flex items-center justify-center lg:justify-between p-4 lg:p-16 overflow-hidden bg-gradient-to-br from-slate-100 via-sky-50 to-blue-100">
-    <!-- Three.js 3D Manufacturing Canvas -->
-    <canvas id="three-canvas"></canvas>
-
-    <!-- Left Branding & Industry 4.0 Info (Desktop - Bottom Left) -->
-    <div class="relative z-10 hidden lg:flex lg:self-end flex-col max-w-xl pl-2 pb-2 text-slate-800 select-none">
-        <h1 class="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sky-700 to-blue-600 grace-glow mb-3">
-            GRACE
-        </h1>
-        <p class="text-xl font-semibold text-slate-700 mb-2">
-            General Report, Achievement Control and Evaluation
-        </p>
-        <p class="text-sm font-bold tracking-[0.25em] text-slate-700 uppercase mb-8">
-            SEE. SOLVE. EVOLVE.
-        </p>
-
-        <div class="grid grid-cols-3 gap-4">
-            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
-                <div class="w-9 h-9 rounded-xl bg-sky-500/15 text-sky-600 flex items-center justify-center mb-3">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </div>
-                <p class="text-xs text-slate-700 font-medium leading-relaxed">
-                    Temukan &amp; Catat Setiap Temuan
-                </p>
-            </div>
-            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
-                <div class="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center mb-3">
-                    <i class="fa-solid fa-gears"></i>
-                </div>
-                <p class="text-xs text-slate-700 font-medium leading-relaxed">
-                    Lakukan Tindakan &amp; Selesaikan Akar Masalah
-                </p>
-            </div>
-            <div class="p-4 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm backdrop-blur-md hover:bg-white/90 transition-colors">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center mb-3">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-                <p class="text-xs text-slate-700 font-medium leading-relaxed">
-                    Tingkatkan Proses Secara Berkelanjutan
-                </p>
-            </div>
-        </div>
-    </div>
-
+<div id="login-bg" class="relative min-h-screen flex items-center justify-center lg:justify-end p-4 lg:p-16 overflow-hidden bg-cover lg:bg-[length:100%_100%] bg-center bg-no-repeat">
     <div class="relative z-10 w-full max-w-[400px] lg:max-w-[440px] mx-auto lg:mx-0 lg:mr-[60px] my-auto">
         <!-- Login Card (Glassmorphism Transparent) -->
         <div class="bg-white/35 md:bg-white/30 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl shadow-slate-900/10 overflow-hidden">
@@ -145,7 +94,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-center text-sm text-slate-300 mt-6 drop-shadow">
+        <p class="text-center text-sm text-slate-600 mt-6">
             &copy; {{ date('Y') }} ICT - SAI. All rights reserved.
         </p>
     </div>
@@ -225,10 +174,4 @@
     });
 </script>
 
-<!-- Three.js 3D Manufacturing Animation -->
-<script>
-    window.SAI_LOGO_URL = "{{ asset('image/sai_logo.png') }}";
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="{{ asset('js/login-3d.js') }}"></script>
 @endsection
